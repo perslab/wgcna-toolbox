@@ -48,49 +48,47 @@ INFO_subsets_n_cells
 INFO_built_in_parameters
 
 kMEs / kMEs_PPI: One csv file per subsetName, saved to dir_tables, each with the following columns:
-  colors:       module assignment
-  genes:        gene name
-  kMEs:         *One column per module*. The signed kMEs for the gene to every module.
+* colors:       module assignment
+* genes:        gene name
+* kMEs:         *One column per module*. The signed kMEs for the gene to every module.
 
 pkMEs / pkMEs_PPI: One csv file per cell type, saved to dir_tables, each  with the following columns:
-  genes:        gene name
-  pkMEs:        the signed kME (gene expression correlation with the module 'eigengene', i.e. first PC)
+* genes:        gene name
+* pkMEs:        the signed kME (gene expression correlation with the module 'eigengene', i.e. first PC)
                 for the gene to its own module
 
 ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each with
-  module:       module colors
-  ensemble_IDs: ensemble gene IDs
+* module:       module colors
+* ensemble_IDs: ensemble gene IDs
 
 ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not mapped
 
 ############################### #ROBJECTS ##############################
 
 results: a list per cell type, saved to dir_RObjects, containing
-  metaData:   metadata for the subset
-  datExprFilter: expression matrix filtered at the consensusTOM step
-  geneTree:   output of hclust
-  cutree:     output of cutreeHybrid or cutreeDynamic
-  merged:     output of mergeCloseModules
-  colors:     colors assigning each gene to a module
-  ensembl_out: as for csv above
-  ensembl_PPI_out:
-              as for csv above
-  MEs:        module eigengenes
-  kMEs:       all module kMEs
-  pkMEs:      primary module kMEs
-  module_PPI:  database with null hypothesis PPI interactions and p-value for each module
+  
+1. datExprFilter: expression matrix filtered at the consensusTOM step
+2. metaData:   metadata for the subset
+3. geneTree:   output of hclust
+4. cutree:     output of cutreeHybrid or cutreeDynamic
+5. merged:     output of mergeCloseModules
+6. colors:     colors assigning each gene to a module
+7. ensembl_out: as for csv above
+8. ensembl_PPI_out: as for csv above
+9. MEs:        module eigengenes
+10. kMEs:       all module kMEs
+11. pkMEs:      primary module kMEs
+12. module_PPI:  database with null hypothesis PPI interactions and p-value for each module
               used to filter modules
-  colors_PPI: filtered colors
-  MEs_PPI:    filtered Module Eigengenes
-  kMEs_PPI:   filtered kMEs
-  pkMEs_PPI:  filtered principal kMEs
-  fitIndices: output of pickSoftThreshold
-  softPower:  power selected from options given to pickSoftThreshold based
+13. colors_PPI: filtered colors
+14. MEs_PPI:    filtered Module Eigengenes
+15. kMEs_PPI:   filtered kMEs
+16. pkMEs_PPI:  filtered principal kMEs
+17. fitIndices: output of pickSoftThreshold
+18. softPower:  power selected from options given to pickSoftThreshold based
               on scale-free topology fit
-  consTomDS:  consensus Topological Overlap Matrix after permuting data
-              and merging individual TOMs
-  clust_qual_params: if "compare_params"=TRUE, the parameters tested
-  cutree_params_final:
+19. clust_qual_params: if "compare_params"=TRUE, the parameters tested
+20. cutree_params_final:
               final parameters used for cutreeHybrid and mergeCloseModules
 
 ############################### /PLOTS #################################
