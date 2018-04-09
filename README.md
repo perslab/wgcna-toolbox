@@ -17,7 +17,7 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
  3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression,
       a fuzzy module membership score) for each gene-module pair.
  4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than
-      1.5 times the magnitude of the kME to their own module
+      1.25 times the magnitude of the kME to their own module (experimental feature)
  5. Filter module for PPI enrichment to retain significant modules.
  6. Export as Robjects and .csv
 
