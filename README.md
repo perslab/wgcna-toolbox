@@ -63,7 +63,7 @@ ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each
 
 ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not mapped
 
-############################### #ROBJECTS ##############################
+############################### /ROBJECTS ##############################
 
 results: a list per cell type, saved to dir_RObjects, containing
   
