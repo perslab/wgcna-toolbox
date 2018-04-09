@@ -11,15 +11,11 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
 
  1. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
  2. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
-      If compare_params == TRUE,
-        Plot the modules found with different parameters.
-        Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic.
- 3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression,
-      a fuzzy module membership score) for each gene-module pair.
- 4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than
-      1.25 times the magnitude of the kME to their own module (experimental feature)
- 5. Filter module for PPI enrichment to retain significant modules.
- 6. Export as Robjects and .csv
+      If compare_params == TRUE, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
+ 3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
+ 4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
+ 5. Filter modules for PPI enrichment.
+ 6. Export results as .RData and .csv
 
 ######################################################################
 ############################## USAGE #################################
@@ -41,16 +37,16 @@ Seurat object with cell type identities in the obj@ident slot
 
 ############################## /TABLES ###############################
 
-INFO_user_parameters
+INFO_user_parameters: Parameters provided by the user in the terminal
 
-INFO_subsets_n_cells
+INFO_subsets_n_cells: numbers of cells in each subset within the seurat objected provided
 
-INFO_built_in_parameters
+INFO_built_in_parameters: a subset of built-in parameters (sourced from a separate script)
 
 kMEs / kMEs_PPI: One csv file per subsetName, saved to dir_tables, each with the following columns:
 * colors:       module assignment
 * genes:        gene name
-* kMEs:         *One column per module*. The signed kMEs for the gene to every module.
+* kMEs:         The signed kMEs for the gene to every module, one column per module
 
 pkMEs / pkMEs_PPI: One csv file per cell type, saved to dir_tables, each  with the following columns:
 * genes:        gene name
