@@ -1,6 +1,37 @@
 # Title: Script to find robust WGCNA modules
 
 ######################################################################
+############################## USAGE #################################
+######################################################################
+
+# e.g.
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/robust_wgcna_pipeline_0.5.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n12n13-8/ --data_prefix campbell-n12n13-8 --compare_params FALSE --scale_data TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 20 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
+
+
+######################################################################
+################# TEST PARAMS FOR MANUAL RUNS ########################
+######################################################################
+
+# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n12n13.RData"
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n12n13-4/"
+# data_prefix = "tmp-campbell-n12n13-4"
+# compare_params = F
+# scale_data = T
+# genes_use = "PCA_5000"
+# corFnc = "cor"
+# networkType = "signed"
+# anti_cor_action = NULL
+# deepSplit = 3
+# moduleMergeCutHeight = 0.2
+# replace = T
+# nPermutations = 10
+# STRINGdb_species = 10090
+# ensembl_dataset = "mmusculus_gene_ensembl"
+# save_plots = T
+# plot_permuted = T
+# n_cores = 5
+
+######################################################################
 ########################### OptParse #################################
 ######################################################################
 
@@ -342,7 +373,7 @@ for (subsetName in names(subsets)) {
   tryCatch({
   
     #powers = c(c(1:10), seq(from = 12, to=20, by=2))
-    powers = c(1:12)
+    powers = c(1:20)
     
     sft = pickSoftThreshold(data=datExpr,
                             powerVector = powers,
