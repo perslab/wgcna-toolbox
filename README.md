@@ -15,7 +15,7 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
  3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
  4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
  5. Filter modules for PPI enrichment.
- 6. Export results as .RData and .csv
+ 6. Perform MAGMA GWAS analysis - outputs to /projects/jonatan/tmp-bmi-brain/
 
 ######################################################################
 ############################## USAGE #################################
@@ -94,3 +94,4 @@ results: a list per cell type, saved to dir_RObjects, containing
 * diffpermutedColors: if plot_permuted == T, the plot of the modules found in each permuted dataset
 * colors: the final colors before and after filtering for PPI enrichment
 * compareParams: if compare_params == T, colors found using each set of parameters
+* MAGMA outputs to /projects/jonatan/tmp-bmi-brain/figs
