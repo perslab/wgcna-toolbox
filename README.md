@@ -23,7 +23,7 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
 
 e.g.
 
-time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/robust_wgcna_pipeline.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --dir_project /projects/jonatan/wgcna/campbell/ --data_prefix campbell-neurons-1 --compare_params FALSE --scale_data FALSE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
+time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --dir_project /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --compare_params FALSE --scale_data FALSE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
 
 ######################################################################
 ############################### IN ###################################
