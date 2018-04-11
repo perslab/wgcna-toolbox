@@ -1131,27 +1131,21 @@ for (subsetName in names(subsets)) {
 
 message("Computing GWAS enrichment with MAGMA..")
 
-# disableWGCNAThreads()
-# 
-# cl <- makeCluster(n_cores, type = "FORK")
-# 
-# # Check the libraries are installed on all cores in cluster 
-# clusterEvalQ(cl, library(Matrix))
-# clusterEvalQ(cl, library(WGCNA))
-# clusterEvalQ(cl, library(reshape))
-# clusterEvalQ(cl, library(reshape2))
-# clusterEvalQ(cl, library(ggplot2))
-# clusterEvalQ(cl, library(parallel))
+disableWGCNAThreads()
+ 
+cl <- makeCluster(n_cores, type = "FORK")
 
-lapply(sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
+# Check the libraries are installed on all cores in cluster 
+clusterEvalQ(cl, library(Matrix))
+clusterEvalQ(cl, library(WGCNA))
+clusterEvalQ(cl, library(reshape))
+clusterEvalQ(cl, library(reshape2))
+clusterEvalQ(cl, library(ggplot2))
+clusterEvalQ(cl, library(parallel))
 
-# stopCluster(cl)
+parLapply(cl, sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
 
-##########################################################################
-######################### SAVE SESSION DATA ##############################
-##########################################################################
-
-#save.image(file=sprintf("%s%s_%s_rsession_complete.RData", dir_project, data_prefix, flag_date))
+stopCluster(cl)
 
 ##########################################################################
 ################################ FINISH ##################################
