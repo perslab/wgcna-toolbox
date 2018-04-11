@@ -6,7 +6,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 ### Overview
 
-Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
+Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset:
 
  1. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
  2. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
@@ -14,7 +14,7 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
  3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
  4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
  5. Filter modules for PPI enrichment.
- 6. Perform MAGMA GWAS analysis - outputs to /projects/jonatan/tmp-bmi-brain/
+ 6. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
 
 ### Usage
 
@@ -30,7 +30,7 @@ If clusters are small (<200 cells) grouping them together should produce better 
 
 ### Returns
 
-#### /tables 
+`/tables`
 
 INFO_user_parameters: Parameters provided by the user when running the script from terminal
 
@@ -54,7 +54,7 @@ ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each
 
 ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not mapped
 
-#### /RObjects 
+`/RObjects`
 
 results: a list per cell type, saved to dir_RObjects, containing
   
@@ -82,11 +82,11 @@ results: a list per cell type, saved to dir_RObjects, containing
 20. cutree_params_final:
               final parameters used for cutreeHybrid and mergeCloseModules
 
-#### /plots
+`/plots`
 
 * pickSoftThresholdSFTfit: pickSoftThreshold scale free topology plot
 * pickSoftThresholdMeanCon: pickSoftThreshold mean connectivity plot
 * diffpermutedColors: if plot_permuted == T, the plot of the modules found in each permuted dataset
 * colors: the final colors before and after filtering for PPI enrichment
 * compareParams: if compare_params == T, colors found using each set of parameters
-* MAGMA outputs to /projects/jonatan/tmp-bmi-brain/figs
+* MAGMA outputs to `/projects/jonatan/tmp-bmi-brain/figs`
