@@ -89,4 +89,7 @@ results: a list per cell type, saved to `dir_RObjects`, containing
 * diffpermutedColors: if plot_permuted == T, the plot of the modules found in each permuted dataset
 * colors: the final colors before and after filtering for PPI enrichment
 * compareParams: if compare_params == T, colors found using each set of parameters
-* MAGMA outputs to `/projects/jonatan/tmp-bmi-brain/figs`
+
+`/projects/jonatan/tmp-bmi-brain/`
+* MAGMA outputs 
+
