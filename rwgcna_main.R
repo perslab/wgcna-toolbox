@@ -1,5 +1,36 @@
 # Title: Script to find robust WGCNA modules
-# Author: Jon Thompson, Pers lab (jjt3f2188@gmail.com)
+
+######################################################################
+############################## USAGE #################################
+######################################################################
+
+# e.g.
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-1/ --data_prefix campbell-neurons-sub-1 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 10 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-14/ --data_prefix campbell-AgRP-nPC_Seurat_40 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 20 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted T --n_cores 5
+
+######################################################################
+################# TEST PARAMS FOR MANUAL RUNS ########################
+######################################################################
+
+# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n12n13.RData"
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n12n13-4/"
+# data_prefix = "tmp-campbell-n12n13-4"
+# compare_params = F
+# scale_data = F
+# genes_use = "PCA_5000"
+# corFnc = "cor"
+# networkType = "signed"
+# anti_cor_action = NULL
+# minClusterSize = 20
+# deepSplit = 2
+# moduleMergeCutHeight = 0.2
+# replace = T
+# nPermutations = 10
+# STRINGdb_species = 10090
+# ensembl_dataset = "mmusculus_gene_ensembl"
+# save_plots = T
+# plot_permuted = T
+# n_cores = 5
 
 ######################################################################
 ########################### OptParse #################################
@@ -157,6 +188,10 @@ if (!file.exists(dir_RObjects)) dir.create(dir_RObjects)
 
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
+if (!(sapply(c("all", "var.genes", "hvg", "PCA"), function(x) grepl(x, genes_use, ignore.case=T)) %>% any())) {
+  stop("genes_use must be one of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'")
+}
+
 if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearson's or 'bicor' for biweighted midcorrelation")
 
 if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid'")
@@ -210,7 +245,6 @@ subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
 
 
 names(subsets) <- sNames 
-
 
 ######################################################################
 ##################### SAVE PARAMETERS TO FILE ########################
@@ -267,6 +301,7 @@ write.csv(subsets_n_cells, file=sprintf("%s%s_INFO_subsets_n_cells_%s.csv", dir_
 
 for (subsetName in names(subsets)) {
   
+  message(paste0("Starting run on cell type ", subsetName))
   ######################################################################
   ################# PROCESS SEURAT SUBSET OBJECTS ######################
   ######################################################################
@@ -282,17 +317,18 @@ for (subsetName in names(subsets)) {
     seurat_obj_sub@data <- seurat_obj_sub@data[genes.use, ]
   }
   
-  vars.to.filter_regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(subsets[[subsetName]]@meta.data)]
-  
-  if (!all(vars.to.filter_regress %in% c("nUMI", "percent.mito"))) warning("One or more of nUMI and percent.mito not found in Seurat object meta data. This could affect results")
-  
-  seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.filter_regress, low.thresholds = c(200, -Inf), high.thresholds = c(5000, 0.2)) 
+  if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) {
+    vars.to.filter_regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)]
+    seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.filter_regress, low.thresholds = c(200, -Inf), high.thresholds = c(5000, 0.2)) 
+  } else {
+    warning("nUMI and percent.mito not found in Seurat object meta data")
+  }
   
   if (scale_data == T) {
     
     seurat_obj_sub <- ScaleData(object = seurat_obj_sub, 
-                                genes.use = NULL, # default: genes.use = all genes in @data
-                                vars.to.regress = vars.to.filter_regress, 
+                                #genes.use = NULL, # default: genes.use = all genes in @data
+                                vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
                                 model.use="linear",
                                 do.par=T,
                                 num.cores = n_cores,
@@ -303,7 +339,7 @@ for (subsetName in names(subsets)) {
     disableWGCNAThreads() # this may be necessary after parallelising ScaleData
   }
   
-  if (genes_use!= "all"){
+  if (genes_use != "all"){
     seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
                                         #mean.function = ExpMean,
                                         #dispersion.function = LogVMR,
@@ -315,7 +351,6 @@ for (subsetName in names(subsets)) {
     
     if (grepl("PCA", genes_use, ignore.case = T)) {
       seurat_obj_sub <- RunPCA(object = seurat_obj_sub,
-                               #pc.genes = seurat_obj_sub@var.genes,
                                pcs.compute = min(nPC_seurat, 
                                                  length(seurat_obj_sub@var.genes)-1, 
                                                  ncol(seurat_obj_sub@data)-1),
@@ -325,6 +360,9 @@ for (subsetName in names(subsets)) {
                                fastpath=fastpath)
       
     }
+    
+    message("Seurat processing done")
+    
   }
 
   ######################################################################
@@ -412,6 +450,9 @@ for (subsetName in names(subsets)) {
       dev.off()
     }
     
+    # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
+    # take smallest softPower; else take best fitting one
+    
     fitIndices <- as.data.frame(sft$fitIndices)
     fitIndices_filter <- fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T))
     if (sum(fitIndices_filter$SFT.R.sq >= 0.9) > 1) {
@@ -425,6 +466,8 @@ for (subsetName in names(subsets)) {
   ######################################################################
   ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
   ######################################################################
+  
+  message("Bootstrapping the data..")
   
   if (nPermutations > 0) {
     multiExpr <- bootstrap(datExpr=datExpr,
@@ -549,6 +592,8 @@ for (subsetName in names(subsets)) {
                         verbose=verbose,
                         indent = indent)
     
+    message("Topological Overlap Matrix done")
+  
     dissTOM <- 1-as.dist(TOM) # Convert proximity to distance
     
     goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
@@ -815,7 +860,7 @@ for (subsetName in names(subsets)) {
       
       MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
                              colors,
-                             excludeGrey = T)
+                             excludeGrey = F)
                              #softPower = softPower)
     }
   }
@@ -848,6 +893,8 @@ for (subsetName in names(subsets)) {
   }, error = function(c) {  write.csv("ERROR", file=sprintf("%s%s_%s_compute_kMEs_ERROR_%s.csv", dir_project, data_prefix, subsetName, flag_date), row.names = F)
     stop("Error while computing kMEs")})
   
+  message("kMEs done")
+  
   ######################################################################
   #################### REASSIGN GENES BASED ON KMEs ####################
   ######################################################################
@@ -869,7 +916,7 @@ for (subsetName in names(subsets)) {
         # Recompute Module Eigengenes, kME, pkME
         MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
                                colors,
-                               excludeGrey = T)
+                               excludeGrey = F)
                                #softPower = softPower)
         
         kMEs = signedKME(as.matrix(datExpr_filter),
@@ -896,6 +943,8 @@ for (subsetName in names(subsets)) {
   ######################################################################
   ######################### RUN PPI ENRICHMENT #########################
   ######################################################################
+  
+  message(paste0("Checking modules for Protein-Protein Interaction (PPI) enrichment via STRINGdb, adj p-value cut-off:", PPI_pval_threshold))
   
   # TODO : try ensembleIDs instead?
   # get indices for genes for which primary kMEs are over a set threshold to validate
@@ -954,7 +1003,7 @@ for (subsetName in names(subsets)) {
     ############### FILTER MODULES ON PPI ENRICHMENT  ####################
     ######################################################################
     if (!is.null(module_PPI)) {
-      unique_colors_PPI = unique_colors[module_PPI$'p-value' < 5e-2]
+      unique_colors_PPI = unique_colors[module_PPI$'p-value' < PPI_pval_threshold]
       genes_PPI_idx <- colors %in% unique_colors_PPI
       colors_PPI <- colors
       colors_PPI[!genes_PPI_idx] <- "grey"
@@ -966,7 +1015,7 @@ for (subsetName in names(subsets)) {
       if (sum(genes_PPI_idx)!=0) {
         MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
                                    colors_PPI,
-                                   excludeGrey = F)
+                                   excludeGrey = F) # can lead to errors
                                    #softPower = softPower)
         # recompute kMEs
         kMEs_PPI = signedKME(as.matrix(datExpr_filter),
@@ -984,6 +1033,9 @@ for (subsetName in names(subsets)) {
     } # end of if (!is.null(module_PPI)) 
   } # end of if (!is.null(STRINGdb_species)) 
   
+  message("Done checking modules for Protein-Protein Interaction (PPI) enrichment")
+  
+
   ######################################################################
   ######################### PLOT FINAL COLORS #########################
   ######################################################################
@@ -1132,10 +1184,10 @@ for (subsetName in names(subsets)) {
 message("Computing GWAS enrichment with MAGMA..")
 
 disableWGCNAThreads()
- 
+
 cl <- makeCluster(n_cores, type = "FORK")
 
-# Check the libraries are installed on all cores in cluster 
+# Check the libraries are installed on all cores in cluster
 clusterEvalQ(cl, library(Matrix))
 clusterEvalQ(cl, library(WGCNA))
 clusterEvalQ(cl, library(reshape))
@@ -1146,6 +1198,12 @@ clusterEvalQ(cl, library(parallel))
 parLapply(cl, sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
 
 stopCluster(cl)
+
+##########################################################################
+######################### SAVE SESSION DATA ##############################
+##########################################################################
+
+#save.image(file=sprintf("%s%s_%s_rsession_complete.RData", dir_project, data_prefix, flag_date))
 
 ##########################################################################
 ################################ FINISH ##################################
