@@ -36,7 +36,7 @@ Seurat object with cell type identities in the obj@ident slot
 ############################## OUT ###################################
 ######################################################################
 
-############################## /TABLES ###############################
+############################## /tables ###############################
 
 INFO_user_parameters: Parameters provided by the user when running the script from terminal
 
@@ -60,7 +60,7 @@ ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each
 
 ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not mapped
 
-############################### /ROBJECTS ##############################
+############################### /RObjects ##############################
 
 results: a list per cell type, saved to dir_RObjects, containing
   
@@ -88,7 +88,7 @@ results: a list per cell type, saved to dir_RObjects, containing
 20. cutree_params_final:
               final parameters used for cutreeHybrid and mergeCloseModules
 
-############################### /PLOTS #################################
+############################### /plots #################################
 
 * pickSoftThresholdSFTfit: pickSoftThreshold scale free topology plot
 * pickSoftThresholdMeanCon: pickSoftThreshold mean connectivity plot
