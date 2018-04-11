@@ -172,7 +172,7 @@ if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be i
 if (! (n_cores >= 0 & n_cores <= 50)) stop("n_cores must be in the range 0-50")
 
 # Load parameter values and utility functions
-source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/wgcna_params.R")
+source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
 source(file = "/projects/jonatan/functions-src/functions.R")
 
 
