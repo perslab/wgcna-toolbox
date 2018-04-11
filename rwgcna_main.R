@@ -1,34 +1,5 @@
 # Title: Script to find robust WGCNA modules
-
-######################################################################
-############################## USAGE #################################
-######################################################################
-
-# e.g.
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/robust_wgcna_pipeline_0.6.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-16/ --data_prefix campbell-AgRP-16 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
-
-######################################################################
-################# TEST PARAMS FOR MANUAL RUNS ########################
-######################################################################
-
-# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n12n13.RData"
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n12n13-4/"
-# data_prefix = "tmp-campbell-n12n13-4"
-# compare_params = F
-# scale_data = F
-# genes_use = "PCA_5000"
-# corFnc = "cor"
-# networkType = "signed"
-# anti_cor_action = NULL
-# deepSplit = 3
-# moduleMergeCutHeight = 0.2
-# replace = T
-# nPermutations = 10
-# STRINGdb_species = 10090
-# ensembl_dataset = "mmusculus_gene_ensembl"
-# save_plots = T
-# plot_permuted = T
-# n_cores = 5
+# Author: Jon Thompson, Pers lab (jjt3f2188@gmail.com)
 
 ######################################################################
 ########################### OptParse #################################
@@ -201,7 +172,7 @@ if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be i
 if (! (n_cores >= 0 & n_cores <= 50)) stop("n_cores must be in the range 0-50")
 
 # Load parameter values and utility functions
-source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/wgcna_params_0.6.R")
+source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/wgcna_params.R")
 source(file = "/projects/jonatan/functions-src/functions.R")
 
 
@@ -983,7 +954,7 @@ for (subsetName in names(subsets)) {
     ############### FILTER MODULES ON PPI ENRICHMENT  ####################
     ######################################################################
     if (!is.null(module_PPI)) {
-      unique_colors_PPI = unique_colors[module_PPI$'p-value' < 10e-2]
+      unique_colors_PPI = unique_colors[module_PPI$'p-value' < 5e-2]
       genes_PPI_idx <- colors %in% unique_colors_PPI
       colors_PPI <- colors
       colors_PPI[!genes_PPI_idx] <- "grey"
