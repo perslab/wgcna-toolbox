@@ -1,7 +1,8 @@
 # wgcna-toolbox
+
 Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
-robust_wgcna_pipeline
+Robust WGCNA pipeline
 
 ######################################################################
 ############################# OVERVIEW ###############################
