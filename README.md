@@ -10,9 +10,9 @@ Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset
 
  1. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
  2. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
-      If compare_params == TRUE, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
+      If `--compare_params TRUE`, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
  3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
- 4. If anti_cor_action = "kME_reassign", reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
+ 4. If `---anti_cor_action  kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
  5. Filter modules for PPI enrichment.
  6. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
 
@@ -48,7 +48,7 @@ pkMEs / pkMEs_PPI: One csv file per cell type, saved to dir_tables, each  with t
 * pkMEs:        the signed kME (gene expression correlation with the module 'eigengene', i.e. first PC)
                 for the gene to its own module
 
-ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each with
+ensembl_out / ensembl_PPI_out: one file per cell type, saved to `dir_tables`, each with
 * module:       module colors
 * ensemble_IDs: ensemble gene IDs
 
@@ -56,13 +56,13 @@ ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not ma
 
 `/RObjects`
 
-results: a list per cell type, saved to dir_RObjects, containing
+results: a list per cell type, saved to `dir_RObjects`, containing
   
-1. datExprFilter: expression matrix filtered at the consensusTOM step
+1. datExprFilter: expression matrix filtered at the `consensusTOM` step
 2. metaData:   metadata for the subset
-3. geneTree:   output of hclust
-4. cutree:     output of cutreeHybrid or cutreeDynamic
-5. merged:     output of mergeCloseModules
+3. geneTree:   output of `hclust`
+4. cutree:     output of `cutreeHybrid` or `cutreeDynamic`
+5. merged:     output of `mergeCloseModules`
 6. colors:     colors assigning each gene to a module
 7. ensembl_out: as for csv above
 8. ensembl_PPI_out: as for csv above
@@ -75,12 +75,12 @@ results: a list per cell type, saved to dir_RObjects, containing
 14. MEs_PPI:    filtered Module Eigengenes
 15. kMEs_PPI:   filtered kMEs
 16. pkMEs_PPI:  filtered principal kMEs
-17. fitIndices: output of pickSoftThreshold
-18. softPower:  power selected from options given to pickSoftThreshold based
+17. fitIndices: output of `pickSoftThreshold`
+18. softPower:  power selected from options given to `pickSoftThreshold` based
               on scale-free topology fit
-19. clust_qual_params: if "compare_params"=TRUE, the parameters tested
+19. clust_qual_params: if `--compare_params TRUE`, the parameters tested
 20. cutree_params_final:
-              final parameters used for cutreeHybrid and mergeCloseModules
+              final parameters used for `cutreeHybrid` and `mergeCloseModules`
 
 `/plots`
 
