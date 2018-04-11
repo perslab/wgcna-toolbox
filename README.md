@@ -2,11 +2,9 @@
 
 Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
-Robust WGCNA pipeline
+## Robust WGCNA pipeline
 
-######################################################################
-############################# OVERVIEW ###############################
-######################################################################
+### Overview
 
 Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
 
@@ -18,25 +16,21 @@ Finds 'robust' gene modules in each obj@ident class in a Seurat format dataset:
  5. Filter modules for PPI enrichment.
  6. Perform MAGMA GWAS analysis - outputs to /projects/jonatan/tmp-bmi-brain/
 
-######################################################################
-############################## USAGE #################################
-######################################################################
+### Usage
 
 e.g.
 
 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --dir_project /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --compare_params FALSE --scale_data FALSE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
 
-######################################################################
-############################### IN ###################################
-######################################################################
+### Args
 
 Seurat object with cell type identities in the obj@ident slot
 
-######################################################################
-############################## OUT ###################################
-######################################################################
+If clusters are small (<200 cells) grouping them together should produce better results.
 
-############################## /tables ###############################
+### Returns
+
+#### /tables 
 
 INFO_user_parameters: Parameters provided by the user when running the script from terminal
 
@@ -60,7 +54,7 @@ ensembl_out / ensembl_PPI_out: one file per cell type, saved to dir_tables, each
 
 ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not mapped
 
-############################### /RObjects ##############################
+#### /RObjects 
 
 results: a list per cell type, saved to dir_RObjects, containing
   
@@ -88,7 +82,7 @@ results: a list per cell type, saved to dir_RObjects, containing
 20. cutree_params_final:
               final parameters used for cutreeHybrid and mergeCloseModules
 
-############################### /plots #################################
+#### /plots
 
 * pickSoftThresholdSFTfit: pickSoftThreshold scale free topology plot
 * pickSoftThresholdMeanCon: pickSoftThreshold mean connectivity plot
