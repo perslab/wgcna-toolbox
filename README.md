@@ -25,10 +25,26 @@ e.g.
 
 ### Args
 
-Seurat object with cell type identities in the `obj@ident` slot
-
-If clusters are small (<200 cells) grouping them together should produce better results.
-
+* `data_path`: Path to Seurat object with cell type identities in the `obj@ident` slot stores as .RData
+* `dir_project`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables will be created if they do not exist. Defaults to the directory one level up from input data dir.
+* `data_prefix`: Dataset prefix for output files. Defaults to today's date.
+* `compare_params` = Compare many different cutreeHybrid parameters, plots different colorings and select best using module statistics. Experimental feature. Defaults to `FALSE`
+* `do.center`: Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out. Default to `TRUE`
+* `genes_use`: One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>' Defaults to `"PCA_5000"`
+* `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
+* `networkType``: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`. `"signed hybrid"` may be used together with `anti_cor_action == "kME_reassign"` to reassign genes to a new module if they are more anticorrelated with the module eigengene than they are positively correlated with their current module eigengene.
+* `anti_cor_action`: Optional. '"kME_reassign"' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with 'networkType == "signed hybrid"'
+* `minClusterSize`: Minimum genes needed to form a module, recommended range 5-25. Defaults to 15
+* `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes integer values 0-4, defaults to 2. Only applicable if `test_params == FALSE`
+* `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Recommended value range 0.1-0.2
+* `replace`: Sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time.
+* `nPermutations`: Number of times to permute the dataset, defaults to 100
+* `STRINGdb_species`: Species for which to retrieve protein data from STRINGdb to validate clusters. Defaults to 10090, which is mus musculus. To skip this step set to `NULL`
+* `ensembl_dataset`: Dataset for ensemblIDs for outputting colors for LD score regression. Defaults to `"mmusculus_gene_ensembl"`. To skip this step set to `NULL`
+* `save_plots`: Save plots? Defaults to `TRUE`
+* `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally intensive. Defaults to `FALSE`
+* `n_cores`: Number of cores to use for parallelization. Defaults to 5
+      
 ### Returns
 
 `/tables`
