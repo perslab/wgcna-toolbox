@@ -37,9 +37,9 @@ e.g.
 * `minClusterSize`: Minimum genes needed to form a module, recommended range 5-25. Defaults to 15
 * `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes integer values 0-4, defaults to 2. Only applicable if `test_params == FALSE`
 * `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Recommended value range 0.1-0.2
-* `replace`: Sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time.
+* `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
 * `nPermutations`: Number of times to permute the dataset, defaults to 100
-* `STRINGdb_species`: Species for which to retrieve protein data from STRINGdb to validate clusters. Defaults to 10090, which is mus musculus. To skip this step set to `NULL`
+* `STRINGdb_species`: Species for which to retrieve protein data from `STRINGdb` to validate clusters. Defaults to 10090, which is mus musculus. To skip this step set to `NULL`
 * `ensembl_dataset`: Dataset for ensemblIDs for outputting colors for LD score regression. Defaults to `"mmusculus_gene_ensembl"`. To skip this step set to `NULL`
 * `save_plots`: Save plots? Defaults to `TRUE`
 * `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally intensive. Defaults to `FALSE`
