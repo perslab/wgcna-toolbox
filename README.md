@@ -7,7 +7,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 ### Overview
 
 Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset:
-
+ 0. Do seurat pre-processing [workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
  1. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
  2. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
       If `--compare_params TRUE`, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
