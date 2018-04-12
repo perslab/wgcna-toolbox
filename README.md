@@ -30,9 +30,9 @@ e.g.
 * `data_prefix`: Dataset prefix for output files. Defaults to today's date.
 * `compare_params` = Compare many different cutreeHybrid parameters, plots different colorings and select best using module statistics. Experimental feature. Defaults to `FALSE`
 * `do.center`: Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out. Default to `TRUE`
-* `genes_use`: One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>' Defaults to `"PCA_5000"`
+* `genes_use`: One of `"all"`, `"var.genes`", "`hvg_ _number of highly variable genes_"`, `"PCA_ _number of high loading genes_"` Defaults to `"PCA_5000"`
 * `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
-* `networkType``: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`. `"signed hybrid"` may be used together with `anti_cor_action == "kME_reassign"` to reassign genes to a new module if they are more anticorrelated with the module eigengene than they are positively correlated with their current module eigengene.
+* `networkType`: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`. `"signed hybrid"` may be used together with `anti_cor_action == "kME_reassign"` to reassign genes to a new module if they are more anticorrelated with the module eigengene than they are positively correlated with their current module eigengene.
 * `anti_cor_action`: Optional. '"kME_reassign"' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with 'networkType == "signed hybrid"'
 * `minClusterSize`: Minimum genes needed to form a module, recommended range 5-25. Defaults to 15
 * `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes integer values 0-4, defaults to 2. Only applicable if `test_params == FALSE`
