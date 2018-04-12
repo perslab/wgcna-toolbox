@@ -7,14 +7,15 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 ### Overview
 
 Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset:
- 0. Do seurat pre-processing [workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
- 1. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
- 2. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
+
+1. Do seurat pre-processing [workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
+2. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
+3. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
       If `--compare_params TRUE`, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
- 3. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
- 4. If `---anti_cor_action  kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
- 5. Filter modules for PPI enrichment.
- 6. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
+4. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
+5. If `---anti_cor_action  kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
+6. Filter modules for PPI enrichment.
+7. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
 
 ### Usage
 
