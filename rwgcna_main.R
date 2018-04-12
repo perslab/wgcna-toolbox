@@ -5,18 +5,46 @@
 ######################################################################
 
 # e.g.
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-1/ --data_prefix campbell-neurons-sub-1 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 10 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-14/ --data_prefix campbell-AgRP-nPC_Seurat_40 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 20 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted T --n_cores 5
+
+
+# RUNNING 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-8/ --data_prefix campbell-neurons-sub-8 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-9/ --data_prefix campbell-neurons-sub-9 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-10/ --data_prefix campbell-neurons-sub-10 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-11/ --data_prefix campbell-neurons-sub-11 --compare_params FALSE --scale_data T --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-12/ --data_prefix campbell-neurons-sub-12 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType "signed hybrid" --anti_cor_action kME_reassign --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-13/ --data_prefix campbell-neurons-sub-13 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc bicor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-14/ --data_prefix campbell-neurons-sub-14 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-15/ --data_prefix campbell-neurons-sub-15 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-16/ --data_prefix campbell-neurons-sub-16 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-17/ --data_prefix campbell-neurons-sub-17 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 1 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-25/ --data_prefix campbell-neurons-sub-25 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType "signed hybrid" --anti_cor_action kME_reassign --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-26/ --data_prefix campbell-neurons-sub-26 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.25 --nPermutations 50 --replace F --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+
+
+# TODO
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-18/ --data_prefix campbell-neurons-sub-18 --compare_params FALSE --do.center F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 3 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-19/ --data_prefix campbell-neurons-sub-19 --compare_params FALSE --do.center F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 10 --deepSplit 3 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-20/ --data_prefix campbell-neurons-sub-20 --compare_params FALSE --do.center F --genes_use hvg_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-21/ --data_prefix campbell-neurons-sub-21 --compare_params FALSE --do.center F --genes_use PCA_10000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-22/ --data_prefix campbell-neurons-sub-22 --compare_params FALSE --do.center F --genes_use PCA_2500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-23/ --data_prefix campbell-neurons-sub-23 --compare_params FALSE --do.center F --genes_use all --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-24/ --data_prefix campbell-neurons-sub-24 --compare_params FALSE --do.center F --genes_use var.genes --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 50 --replace F --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
+
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-14/ --data_prefix campbell-AgRP-nPC_Seurat_40 --compare_params FALSE --scale_data F --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 20 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 2
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
 
-# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n12n13.RData"
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n12n13-4/"
-# data_prefix = "tmp-campbell-n12n13-4"
+# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-1"
+# data_prefix = "tmp-1"
 # compare_params = F
-# scale_data = F
+# do.center = T
 # genes_use = "PCA_5000"
 # corFnc = "cor"
 # networkType = "signed"
@@ -24,13 +52,13 @@
 # minClusterSize = 20
 # deepSplit = 2
 # moduleMergeCutHeight = 0.2
-# replace = T
-# nPermutations = 10
+# replace = F
+# nPermutations = 0
 # STRINGdb_species = 10090
 # ensembl_dataset = "mmusculus_gene_ensembl"
 # save_plots = T
-# plot_permuted = T
-# n_cores = 5
+# plot_permuted = F
+# n_cores = 2
 
 ######################################################################
 ########################### OptParse #################################
@@ -50,8 +78,8 @@ option_list <- list(
               help = "Dataset prefix for output files"),
   make_option("--compare_params", type="logical", default=FALSE, 
               help="Compare many different cutreeHybrid parameters and select best. If FALSE, uses recommended parameters."), 
-  make_option("--scale_data", type="logical", default=F,
-              help="Use scaled and centered data? In scaled data nUMI and mitochrondrial genes are regressed out"),
+  make_option("--do.center", type="logical", default=T,
+              help="Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out."),
   make_option("--genes_use", type="character", default="PCA_5000",
               help="One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'"), 
   make_option("--corFnc", type="character", default="cor",
@@ -59,7 +87,7 @@ option_list <- list(
   make_option("--networkType", type="character", default = "signed",
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); 'signed hybrid' sets negative correlations to zero."),
   make_option("--anti_cor_action", type="character", default=NULL, 
-              help = "Optional. 'kME_reassign' reassigns genes with a negative kME more than 1.5 the kME w.r.t. their own (primary) module. Should be used only with networkType 'signed hybrid'."),
+              help = "Optional. 'kME_reassign' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with networkType 'signed hybrid'."),
   make_option("--minClusterSize", type="integer", default=10L,
               help = "Minimum genes needed to form a module, recommended 5-25"),
   make_option("--deepSplit", type="integer", default=3L,
@@ -126,7 +154,7 @@ compare_params <- opt$compare_params
 #if (compare_params==T) message("Sorry, compare_params is disabled in the current version of the script")
 #compare_params <- F # Temporarily disable for bug testing TODO
 
-scale_data <- opt$scale_data
+do.center <- opt$do.center
 
 genes_use <- opt$genes_use
 
@@ -194,6 +222,8 @@ if (!(sapply(c("all", "var.genes", "hvg", "PCA"), function(x) grepl(x, genes_use
 
 if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearson's or 'bicor' for biweighted midcorrelation")
 
+if (corFnc == "bicor" & do.center == T) warning("Using bicor with centered data will ignore non-positive values when detecting correlations")
+
 if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid'")
 
 if (!minClusterSize %in% seq.int(from=5, to=100)) stop("minClusterSize must be an integer between 5 and 100")
@@ -254,7 +284,7 @@ userParams <- cbind(list("data_path" = data_path,
                          "dir_project" = dir_project,
                          "data_prefix" = data_prefix,
                          "compare_params" = compare_params,
-                         "scale_data" = scale_data,
+                         "do.center" = do.center,
                          "genes_use" = genes_use,
                          "corFnc" = corFnc,
                          "networkType" = networkType,
@@ -274,18 +304,15 @@ userParams <- cbind(list("data_path" = data_path,
 builtInParams <- cbind(list("minCoreKME" = minCoreKME,
                             "minKMEtoStay" = minKMEtoStay,
                             "consensusQuantile" = consensusQuantile,
-                            "nPermutations" = nPermutations,
                             "replace" = replace, 
                             "fraction" = fraction,
-                            "minClusterSize" = if (compare_params==T) "compare_params" else minClusterSize,
-                            "deepSplit" = if (compare_params==T) "compare_params" else deepSplit,  
                             "pamStage" =  if (compare_params==T) "compare_params" else pamStage,
                             "pamRespectsDendro" = if (compare_params==T) "compare_params" else pamRespectsDendro,
                             "hclustMethod" = hclustMethod,
                             "impute" = impute,
-                            "do.center" = do.center,
                             "nPC_seurat" = nPC_seurat,
-                            "TOMType" = TOMType))
+                            "TOMType" = TOMType,
+                            "PPI_pval_threshold" = PPI_pval_threshold))
 
 subsets_n_cells <- data.frame(subset = names(subsets), n_cells = as.numeric(table(seurat_obj@ident)))
 
@@ -324,22 +351,21 @@ for (subsetName in names(subsets)) {
     warning("nUMI and percent.mito not found in Seurat object meta data")
   }
   
-  if (scale_data == T) {
-    
-    seurat_obj_sub <- ScaleData(object = seurat_obj_sub, 
-                                #genes.use = NULL, # default: genes.use = all genes in @data
-                                vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
-                                model.use="linear",
-                                do.par=T,
-                                num.cores = n_cores,
-                                do.scale=T,
-                                do.center=do.center)
-    
-    #enableWGCNAThreads(nThreads = n_cores)  
-    disableWGCNAThreads() # this may be necessary after parallelising ScaleData
-  }
   
-  if (genes_use != "all"){
+  if (genes_use != "all"){ #if we do use all genes, we'll rune ScaleData below
+    
+    # Need to run ScaleData to get variable genes for PCA / hvg / var.genes
+    seurat_obj_sub <- ScaleData(object = seurat_obj_sub, 
+                                    #genes.use = NULL, # default: genes.use = all genes in @data
+                                  vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
+                                  model.use="linear",
+                                  do.par=T,
+                                  num.cores = n_cores,
+                                  do.scale=T,
+                                  do.center=T)
+        
+    disableWGCNAThreads() # this may be necessary after parallelising ScaleData
+  
     seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
                                         #mean.function = ExpMean,
                                         #dispersion.function = LogVMR,
@@ -360,46 +386,56 @@ for (subsetName in names(subsets)) {
                                fastpath=fastpath)
       
     }
-    
-    message("Seurat processing done")
-    
+ 
   }
 
-  ######################################################################
-  ######################### GET METADATA ###############################
-  ######################################################################
-  
+  # Store metadata
   metaData <- seurat_obj_sub@meta.data
   
-  ######################################################################
-  #################### SELECT DATA AND GENES TO USE ####################
-  ######################################################################
+  # Select genes
   tryCatch({
     
+    if (do.center == F | genes_use == "all") {
+      seurat_obj_sub <- ScaleData(object = seurat_obj_sub, 
+                                  #genes.use = NULL, # default: genes.use = all genes in @data
+                                  vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
+                                  model.use="linear",
+                                  do.par=T,
+                                  num.cores = n_cores,
+                                  do.scale=T,
+                                  do.center=do.center) 
+    }
+    
+    disableWGCNAThreads() # this may be necessary after parallelising ScaleData
+    
+    # Select a subset of the genes 
     if (genes_use == "all") {
-      input_data <- if (scale_data == TRUE) seurat_obj_sub@scale.data else seurat_obj_sub@data
+      input_data <- seurat_obj_sub@scale.data
     } else if (genes_use == "var.genes") {
-      input_data <- if (scale_data == TRUE) seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% seurat_obj_sub@var.genes,] else seurat_obj_sub@data[rownames(seurat_obj_sub@data) %in% seurat_obj_sub@var.genes,]
+      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% seurat_obj_sub@var.genes,] 
     } else if (grepl("PCA", genes_use, ignore.case = T)) {
       n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
       seurat_obj_sub <- ProjectPCA(seurat_obj_sub, do.print = F, pcs.print = NULL, pcs.store = nPC_seurat, genes.print = NULL, replace.pc=F, do.center=T)
       max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
       names_genes_use = names(sort(max_loads, decreasing=T)[1:n_genes])
-      input_data <- if (scale_data == TRUE) seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] else seurat_obj_sub@data[rownames(seurat_obj_sub@data) %in% names_genes_use,]
+      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
     } else if (grepl("hvg", genes_use, ignore.case = T)) {
       n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
       names_genes_use = rownames(seurat_obj_sub@hvg.info)[order(seurat_obj_sub@hvg.info$gene.dispersion.scaled, decreasing=T)][1:n_genes]
-      input_data <- if (scale_data == TRUE) seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] else seurat_obj_sub@data[rownames(seurat_obj_sub@data) %in% names_genes_use,]
+      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
     }
     
-    datExpr <- t(input_data) # WGCNA needs a dataframe with the genes in columns
+    # Format the data: WGCNA needs a dataframe with the genes in columns
+    datExpr <- t(input_data) 
     colnames(datExpr) <- rownames(input_data)
-    
+
     # clear memory
     rm(seurat_obj_sub) # clear memory
     rm(input_data) #clear memory
     gc()
- 
+  
+    message("Seurat processing done")
+    
   }, error = function(c) {write.csv("ERROR", file=sprintf("%s%s_%s_input_data_ERROR_%s.csv", dir_project, data_prefix, subsetName, flag_date), row.names = F)
     stop("Input data error")})
   
@@ -644,6 +680,7 @@ for (subsetName in names(subsets)) {
       permutedColors = parLapply(cl, colors_MEs, function(x) labels2colors(x$colors)) 
       
       stopCluster(cl)
+      
       disableWGCNAThreads() # might be necessary
       
       permutedLabels <- paste0("Permutation ", as.character(1:nPermutations)) 
@@ -858,10 +895,11 @@ for (subsetName in names(subsets)) {
       
       colors = labels2colors(merged$colors)
       
-      MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
-                             colors,
-                             excludeGrey = F)
-                             #softPower = softPower)
+      MEs = merged$newMEs
+      #MEs = mergedmoduleEigengenes(expr = as.matrix(datExpr_filter),
+                             #colors,
+                             #excludeGrey = F)
+
     }
   }
   
@@ -884,11 +922,16 @@ for (subsetName in names(subsets)) {
     kMEs = signedKME(as.matrix(datExpr_filter),
                      MEs$eigengenes,
                      corFnc = corFnc)
+    
     # Get primary module kMEs
     pkMEs <- vector(length=length(colors))
+    
     for (i in 1:length(colors)) {
       pkMEs[i] <- as.numeric(unlist(kMEs %>% dplyr::select(matches(colors[[i]]))))[[i]]
     }
+    
+    # Delete grey kMEs (we needed them for finding pkMEs though)
+    if (any(grepl("grey", kMEs))) kMEs$kMEgrey <- NULL
     
   }, error = function(c) {  write.csv("ERROR", file=sprintf("%s%s_%s_compute_kMEs_ERROR_%s.csv", dir_project, data_prefix, subsetName, flag_date), row.names = F)
     stop("Error while computing kMEs")})
@@ -899,10 +942,8 @@ for (subsetName in names(subsets)) {
   #################### REASSIGN GENES BASED ON KMEs ####################
   ######################################################################
   
-  tryCatch({
-    
-    if (anti_cor_action == "kME_reassign") {
-      
+  if (anti_cor_action == "kME_reassign") {
+    tryCatch({
       col_most_negkME = max.col(-1*kMEs) # indices of most negative kMEs
       rows_to_reassign <- logical(length=nrow(kMEs))
       
@@ -911,6 +952,7 @@ for (subsetName in names(subsets)) {
       }
       
       if (sum(rows_to_reassign) > 0) {
+        
         colors[rows_to_reassign] <- colors[col_most_negkME][rows_to_reassign]
         
         # Recompute Module Eigengenes, kME, pkME
@@ -923,17 +965,16 @@ for (subsetName in names(subsets)) {
                          MEs$eigengenes,
                          corFnc = corFnc)
         
-        
         pkMEs <- vector(length=length(colors))
+        
         for (i in 1:length(colors)) {
           pkMEs[i] <- as.numeric(unlist(kMEs %>% dplyr::select(matches(colors[[i]]))))[[i]]
         }
       }
-    }
-    
-  }, error = function(c) {
-    write.csv("ERROR", file=sprintf("%s%s_%s_kMEs_reassign_ERROR_%s.csv", dir_project, data_prefix, subsetName, flag_date), row.names = F)})
-  
+      message(paste0("Reassigned ", sum(rows_to_reassign), " genes to new modules based on a higher negative kME."))
+    }, error = function(c) {
+      write.csv("ERROR", file=sprintf("%s%s_%s_kMEs_reassign_ERROR_%s.csv", dir_project, data_prefix, subsetName, flag_date), row.names = F)})
+    } 
   ######################################################################
   ######################### NAME PKME VECTOR ###########################
   ######################################################################
@@ -952,6 +993,7 @@ for (subsetName in names(subsets)) {
   # the first PC
   
   module_PPI <- NULL
+  unique_colors_PPI <- NULL
   colors_PPI <- NULL
   MEs_PPI <- NULL
   kMEs_PPI <- NULL
@@ -1002,31 +1044,43 @@ for (subsetName in names(subsets)) {
     ######################################################################
     ############### FILTER MODULES ON PPI ENRICHMENT  ####################
     ######################################################################
+    
     if (!is.null(module_PPI)) {
+     
       unique_colors_PPI = unique_colors[module_PPI$'p-value' < PPI_pval_threshold]
       genes_PPI_idx <- colors %in% unique_colors_PPI
       colors_PPI <- colors
       colors_PPI[!genes_PPI_idx] <- "grey"
+      
       ######################################################################
       ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
       ######################################################################
+      
       # TODO better to filter
       # recompute Module Eigengenes
+      
       if (sum(genes_PPI_idx)!=0) {
+        
         MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
                                    colors_PPI,
-                                   excludeGrey = F) # can lead to errors
+                                   excludeGrey = F) # T leads to errors when finding pkMEs
                                    #softPower = softPower)
         # recompute kMEs
         kMEs_PPI = signedKME(as.matrix(datExpr_filter),
                              MEs_PPI$eigengenes,
                              corFnc = corFnc)
+        
         # recompute primary kMEs
         pkMEs_PPI <- vector(length=length(colors_PPI))
         for (i in 1:length(colors_PPI)) {
           pkMEs_PPI[i] <- as.numeric(unlist(kMEs_PPI %>% dplyr::select(matches(colors_PPI[[i]]))))[[i]]
         }
         names(pkMEs_PPI) <- names(colors_PPI)
+        
+        # Delete the grey kME from the kMEs (although keeping it in the pkMEs)
+        # Delete grey kMEs (we needed them for finding pkMEs though)
+        if (any(grepl("grey", kMEs_PPI))) kMEs_PPI$kMEgrey <- NULL
+        
       } else {
         write.csv("WARNING" , file=sprintf("%s%s_%s_WARNING_sum_genes_PPI_0_%s.csv", dir_project, data_prefix, subsetName, flag_date))
       }
@@ -1185,19 +1239,20 @@ message("Computing GWAS enrichment with MAGMA..")
 
 disableWGCNAThreads()
 
-cl <- makeCluster(n_cores, type = "FORK")
+#cl <- makeCluster(n_cores, type = "FORK")
 
 # Check the libraries are installed on all cores in cluster
-clusterEvalQ(cl, library(Matrix))
-clusterEvalQ(cl, library(WGCNA))
-clusterEvalQ(cl, library(reshape))
-clusterEvalQ(cl, library(reshape2))
-clusterEvalQ(cl, library(ggplot2))
-clusterEvalQ(cl, library(parallel))
+# clusterEvalQ(cl, library(Matrix))
+# clusterEvalQ(cl, library(WGCNA))
+# clusterEvalQ(cl, library(reshape))
+# clusterEvalQ(cl, library(reshape2))
+# clusterEvalQ(cl, library(ggplot2))
+# clusterEvalQ(cl, library(parallel))
 
-parLapply(cl, sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
+#parLapply(cl, sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
+lapply(sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
 
-stopCluster(cl)
+#stopCluster(cl)
 
 ##########################################################################
 ######################### SAVE SESSION DATA ##############################
