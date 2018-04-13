@@ -73,7 +73,7 @@ ensembleID_proportion_not_mapped / PPI: a file whose title gives the prop not ma
 
 `/RObjects`
 
-results: a list per cell type, saved to `dir_RObjects`, containing
+session image for each cell type, saved to `dir_RObjects`, containing amongst others
   
 1. datExprFilter: expression matrix filtered at the `consensusTOM` step
 2. metaData:   metadata for the subset
