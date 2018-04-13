@@ -13,7 +13,7 @@ Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset
 3. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
       If `--compare_params TRUE`, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
 4. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
-5. If `---anti_cor_action  kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
+5. If `anti_cor_action == kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
 6. Filter modules for PPI enrichment.
 7. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
 
