@@ -8,17 +8,19 @@
 
 
 # RUNNING 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_dev.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-19/ --data_prefix campbell-neurons-sub-19 --compare_params FALSE --do.center FALSE --genes_use PCA_5000 --corFnc bicor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 25 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 15
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_dev.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-29/ --data_prefix campbell-neurons-sub-29 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc bicor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_dev.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-s-sub-33/ --data_prefix campbell-s-sub-33 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 6
 
 # TODO
-# 
+
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
 
 # data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-5/"
-# data_prefix = "tmp-5"
+# meta.data_ID <- NULL
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-1/"
+# data_prefix = "tmp-1"
 # compare_params = F
 # do.center = T
 # genes_use = "PCA_5000"
@@ -28,13 +30,13 @@
 # minClusterSize = 20
 # deepSplit = 2
 # moduleMergeCutHeight = 0.2
-# replace = F
+# replace = T
 # nPermutations = 0
 # STRINGdb_species = 10090
 # ensembl_dataset = "mmusculus_gene_ensembl"
 # save_plots = T
 # plot_permuted = F
-# n_cores = 4
+# n_cores = 5
 
 ######################################################################
 ########################### OptParse #################################
@@ -48,6 +50,8 @@ option_list <- list(
   
   make_option("--data_path", type="character",
               help = "Provide full path to Rdata input file with Seurat object"),
+  make_option("--meta.data_ID", type="character",
+              help = "Specify the name of a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
   make_option("--dir_project", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
   make_option("--data_prefix", type="character", default=paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_rWGCNA_run"),
@@ -95,12 +99,13 @@ option_list <- list(
 suppressMessages(library(dplyr))
 suppressMessages(library(Matrix))
 suppressMessages(library(Seurat))
+suppressMessages(library(parallel))
 suppressMessages(library(WGCNA))
 suppressMessages(library(STRINGdb))
-suppressMessages(library(reshape))
-suppressMessages(library(reshape2))
-suppressMessages(library(ggplot2))
-suppressMessages(library(parallel))
+# suppressMessages(library(reshape))
+# suppressMessages(library(reshape2))
+# suppressMessages(library(ggplot2))
+
 #suppressMessages(library(biomaRt))
 
 message("Libraries loaded")
@@ -115,6 +120,8 @@ message("Libraries loaded")
 opt <- parse_args(OptionParser(option_list=option_list))
 
 data_path <- opt$data_path 
+
+meta.data_ID <- opt$meta.data_ID
 
 dir_project <- opt$dir_project
 
@@ -194,7 +201,7 @@ if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearso
 
 if (corFnc == "bicor" & do.center == T) warning("Using bicor with centered data will ignore non-positive values when detecting correlations")
 
-if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid'")
+if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid' (not 'signed_hybrid')")
 
 if (!minClusterSize %in% seq.int(from=5, to=100)) stop("minClusterSize must be an integer between 5 and 100")
 
@@ -217,10 +224,8 @@ if (!is.null(ensembl_dataset)) {
 
 if (nPermutations < 1) plot_permuted <- F 
 
-# Set MAGMA variable values 
-study_label = data_prefix
+# Set MAGMA variable values
 file_suffix = if (!is.null(STRINGdb_species)) "kMEs_PPI" else "kMEs"
-output_label = flag_date
 
 ######################################################################
 ################# LOAD AND SUBSET SEURAT OBJECT ######################
@@ -230,6 +235,13 @@ message("Loading and subsetting seurat object..")
 
 seurat_obj <- load_obj(data_path)
 
+if (!is.null(meta.data_ID)) {
+  if (!any(grepl(meta.data_ID, names(seurat_obj@meta.data), ignore.case = T))) { 
+    stop(sprintf("meta.data_ID not found in Seurat object at %s", data_path)) } else {
+      seurat_obj <- SetAllIdent(seurat_obj, id = meta.data_ID)
+    }
+  }
+
 sNames <- names(table(seurat_obj@ident))
 
 subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
@@ -237,7 +249,6 @@ subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
                                                  do.scale = F, 
                                                  do.center = F,
                                                  subset.raw = T))
-
 names(subsets) <- sNames 
 
 for (subsetName in sNames) {
@@ -361,13 +372,55 @@ parRWGCNA = function(sNames) {
                                pcs.compute = min(nPC_seurat, 
                                                  length(seurat_obj_sub@var.genes)-1, 
                                                  ncol(seurat_obj_sub@data)-1),
+                               weight.by.var = F,
                                do.print = F,
                                seed.use = randomSeed,
                                maxit = maxit,
                                fastpath=fastpath)
       
+      # WORK IN PROGRESS
+      # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
+      
+      # seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
+      #                             num.pc = nPC_seurat,
+      #                             num.replicate = 100,
+      #                             display.progress = FALSE,
+      #                             do.par = F)#,
+      #                             #num.cores = 10)
+      # 
+      # score.thresh = 1e-5
+      # 
+      # pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value
+      # pAll <- pAll[, 1:nPC_seurat, drop = FALSE]
+      # pAll <- as.data.frame(pAll)
+      # pAll$Contig <- rownames(x = pAll)
+      # pAll.l <- melt(data = pAll, id.vars = "Contig")
+      # colnames(x = pAll.l) <- c("Contig", "PC", "Value")
+      # 
+      # score.df <- NULL
+      # 
+      # for (i in (1:nPC_seurat)) {
+      #   pc.score <- suppressWarnings(prop.test( # test if there ais
+      #     x = c(length(x = which(x = pAll[, i] <= score.thresh)), floor(x = nrow(x = pAll) * score.thresh)),
+      #     n = c(nrow(pAll), nrow(pAll)))$p.val)
+      #   if (length(x = which(x = pAll[, i] <= score.thresh)) == 0) {
+      #     pc.score <- 1
+      #   }
+      #   if (is.null(x = score.df)) {
+      #     score.df <- data.frame(PC = paste0("PC", i), Score = pc.score)
+      #   } else {
+      #     score.df <- rbind(score.df, data.frame(PC = paste0("PC",i), Score = pc.score))
+      #   }
+      # }
+      # 
+      # PC_select <- score.df %>% filter(Score < score.thresh) %>% select(PC)
+      # 
     }
- 
+    
+    
+    
+
+    
   }
 
   # Store metadata
@@ -903,8 +956,11 @@ parRWGCNA = function(sNames) {
       
       if (sum(rows_to_reassign) > 0) {
         
+        old_pkMEs = pkMEs[rows_to_reassign]
+          
+        old_colors <- colors[rows_to_reassign]
         colors[rows_to_reassign] <- colors[col_most_negkME][rows_to_reassign]
-        
+   
         # Recompute Module Eigengenes, kME, pkME
         MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
                                colors,
@@ -917,14 +973,18 @@ parRWGCNA = function(sNames) {
         
         pkMEs <- vector(length=length(colors))
         
+
         for (i in 1:length(colors)) {
           pkMEs[i] <- as.numeric(unlist(kMEs %>% dplyr::select(matches(colors[[i]]))))[[i]]
         }
+        
+        reassigned = data.frame(gene=rownames(colors[rows_to_reassign]), old_module = old_colors, new_module = colors[rows_to_reassign], old_pkME = old_pkMEs, new_pkME = pkMEs[rows_to_reassign], row.names = NULL)
+        write.csv(reassigned, file=sprintf("%s%s_%s_genes_kME_reassigned_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names = F)
+        
       }
-      message(paste0("Reassigned ", sum(rows_to_reassign), " genes to new modules based on a higher negative kME."))
     }, error = function(c) {
-      write.csv("ERROR", file=sprintf("%s%s_%s_kMEs_reassign_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)})
-    } 
+    write.csv("ERROR", file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)})
+  } 
   ######################################################################
   ######################### NAME PKME VECTOR ###########################
   ######################################################################
@@ -1122,151 +1182,38 @@ parRWGCNA = function(sNames) {
     save.image(file=sprintf("%s%s_%s_rsession_%s.RData", dir_RObjects, data_prefix, sNames, flag_date))
     
   }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_save_results_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F))
-
-  ##########################################################################
-  ################################## MAGMA #################################
-  ##########################################################################
-  
-  file_sep = ','
-
-  project_path = "/projects/jonatan/tmp-bmi-brain/"
-  magma_gwas_path = paste(project_path,"data/magma/",sep="/")
-  figs_path = paste(project_path,"figs/",sep="/")
-  mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz"
-  mapping_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/Mus_musculus.GRCm38.90.gene_name_version2ensembl.txt.gz"
-  mapping_mm_synonyms_filepath = "/data/genetic-mapping/ncbi/Mus_musculus.gene_info_symbol2ensembl.gz"
-  mapping_hs_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/gene_annotation.hsapiens_mmusculus_unique_orthologs.GRCh37.ens_v91.txt.gz"
-  
-  # Load WGCNA results
-  log_not_mapped_filepath = paste0(project_path,"log/",output_label,"_magma_wgcna_not_mapped_",study_label,"_",sNames,".tab")
-  modulekME = read.csv(file=sprintf("%s%s_%s_%s_%s.csv", dir_tables, study_label, sNames, file_suffix, output_label), row.names=1)#, check.names = FALSE, sep = file_sep)
-  
-  # Load MAGMA genes and remap to Ensembl gene IDs
-  d = dir(path=magma_gwas_path, pattern="[.]genes.out", recursive = T)
-  gwas = vector(mode="list")
-  for(i in 1:length(d)) {
-    gwas[[i]] = read.table(paste(magma_gwas_path, d[[i]],sep=""),head=T, check.names = FALSE)
-  }
-  names(gwas) = gsub(".genes.out", "", d)
-  
-  # Match and replace with ENSG 
-  #genes = union(gwas[[1]]$GENE, gwas[[2]]$GENE)
-  #for(i in 3:length(gwas)) genes = union(genes, gwas[[i]]$GENE)
-  
-  # Remapping from human Entrez to human Ensembl gene IDs
-  mapping_hs_entrez2ensembl = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T)
-  for(i in 1:length(gwas)) {
-    idx = match(gwas[[i]]$GENE, mapping_hs_entrez2ensembl$entrezgene)
-    mapping = data.frame(entrez=gwas[[i]]$GENE, ensembl=mapping_hs_entrez2ensembl$ensembl_gene_id[idx])
-    gwas[[i]]$gene_name = mapping$ensembl
-  }
-  
-  # Remapping the WGCNA data to human ensembl IDs (using synonyms)
-  # Step 1: direct mapping
-  mapping_direct = read.table(gzfile(mapping_mm_filepath),sep="\t",header=T)
-  mapping = data.frame(symbol=row.names(modulekME), ensembl.mouse=mapping_direct$ensembl_gene_id[ match(row.names(modulekME), mapping_direct$gene_name_optimal) ])
-  
-  # Step 2: map remaing using synonyms
-  mapping_synonyms = read.csv(gzfile(mapping_mm_synonyms_filepath),sep="\t",header=T)
-  mapping$ensembl.mouse[ which(is.na(mapping$ensembl.mouse)) ] = mapping_synonyms$ensembl[ match( mapping$symbol[which(is.na(mapping$ensembl.mouse)) ] ,mapping_synonyms$symbol) ]
-  
-  # Step 3: orthology mapping
-  #mart = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
-  #mapping_mm_orthologs <- getBM(attributes = c("ensembl_gene_id","hsapiens_homolog_ensembl_gene"), mart=mart)
-  mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T)
-  mapping$ensembl.human = mapping_orthology$ensembl_gene_id[ match(mapping$ensembl.mouse,mapping_orthology$mmusculus_homolog_ensembl_gene) ]
-  #mapping$ensembl.human[mapping$ensembl.human == ""] = NA
-  df_not_mapped = mapping[is.na(mapping$ensembl.human),]
-  write.table(df_not_mapped,log_not_mapped_filepath,quote=F,sep="\t",row.names=F)
-  modulekME$symbol = mapping$symbol
-  modulekME$ensembl = mapping$ensembl.human
-  modulekME = na.omit(modulekME)
-  tmp = within(modulekME, rm("symbol","ensembl"))
-  
-  # Average duplicated gene IDs
-  modulekME_ens <-aggregate(tmp, by=list(modulekME$ensembl),FUN=mean, na.rm=TRUE)
-  rownames(modulekME_ens) = modulekME_ens$Group.1
-  modulekME_ens = within(modulekME_ens, rm("Group.1"))
-  
-  # Calculate spearman's correlation between gene module membership and GWAS gene significance
-  colors = colnames(modulekME_ens)
-  table.kme.cor.p = table.kme.cor.r<- matrix(NA,nrow=length(unique(colors)),ncol=length(gwas))
-  rownames(table.kme.cor.r) = rownames(table.kme.cor.p) = unique(colors)
-  colnames(table.kme.cor.r) = colnames(table.kme.cor.p) = names(gwas) 
-  
-  for(m in unique(colors)) {
-    for(i in 1:length(gwas)) {
-      #col = paste("kME", m, sep="")
-      col = m
-      genes = intersect(rownames(modulekME_ens),gwas[[i]]$gene_name)
-      x = -log10(gwas[[i]]$P[match(genes, gwas[[i]]$gene_name)])
-      y = modulekME_ens[match(genes,rownames(modulekME_ens)), col]
-      cor = cor.test(x,y,method="spearman", exact=F)
-      table.kme.cor.r[m,i] = cor$estimate
-      table.kme.cor.p[m,i] = cor$p.value
-    }
-  }
-  
-  table.kme.cor.p.fdr = p.adjust(table.kme.cor.p, method="fdr")
-  dim(table.kme.cor.p.fdr) = dim(table.kme.cor.p);  dimnames(table.kme.cor.p.fdr) = dimnames(table.kme.cor.p)
-  
-  d = -log10(table.kme.cor.p.fdr) * sign(table.kme.cor.r) 
-  #pdf("SampleGraph.pdf",width=7,height=5)
-  #sizeGrWindow(9,7)
-  #par(mfrow = c(2,2))
-  #par(mar = c(4, 5, 4, 6));
-  labeledHeatmap(d,textMatrix = signif(table.kme.cor.r,1), xLabels = colnames(d), yLabels = rownames(d),invertColors = T, colors = blueWhiteRed(1000), main="GWAS - kME correlation", cex.text = 0.6)
-  #dev.off()
-  
-  #dat = as.data.frame(table.kme.cor.p.fdr*sign(table.kme.cor.r))[c("tan","blue","yellow","purple","turquoise","green","greenyellow","salmon"),]
-  dat = as.data.frame(table.kme.cor.p.fdr*sign(table.kme.cor.r))
-  dat[dat<0]=1 #Only look for positive enrichment
-  dat = -log10(dat)
-  dat$module = gsub("kME","",rownames(dat))
-  #dat$module = gsub("ME","",rownames(dat))
-  dat2 = melt(dat)
-  dat2$variable=as.character(dat2$variable)
-  
-  #p=ggplot(melt(dat),aes(x=variable,y=value,fill=colors)) + 
-  p=ggplot(melt(dat),aes(x=variable,y=value,fill="blue")) + 
-    geom_bar(stat="identity",position=position_dodge(),color="black") +
-    scale_fill_manual(values=sort(unique(dat2$module)))+ theme_classic() +
-    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
-    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
-  
-  p=ggplot(melt(dat),aes(x=variable,y=value,fill=module)) + 
-    geom_bar(stat="identity",position=position_dodge(),color="black") +
-    scale_fill_manual(values=sort(unique(dat2$module)))+ theme_classic() +
-    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
-    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
-  
-  ggsave(p, filename = paste0(figs_path,"/",output_label,"_wgcna_magma_", file_suffix,"_", study_label,"_",sNames,".pdf") ,width=45,height=12)
-  
 }
-
-
+  
 ##########################################################################
-######################## RUN THE PARALLEL LOOP ###########################
+######################## RUN THE WGCNA LOOP ##############################
 ##########################################################################
-
-disableWGCNAThreads()
 
 cl <- makeCluster(n_cores, type = "FORK")
 
 # Check the libraries are installed on all cores in cluster
 clusterEvalQ(cl, library(Matrix))
-clusterEvalQ(cl, library(WGCNA))
 clusterEvalQ(cl, library(dplyr))
 clusterEvalQ(cl, library(Seurat))
+clusterEvalQ(cl, library(WGCNA))
 clusterEvalQ(cl, library(STRINGdb))
+
+message("Running WGCNA")
+parLapply(cl, sNames, parRWGCNA)
+stopCluster(cl)
+
+##########################################################################
+######################## RUN THE MAGMA LOOP ##############################
+##########################################################################
+
+message("WGCNA all done, running MAGMA..")
+
+cl <- makeCluster(n_cores, type = "FORK")
+
 clusterEvalQ(cl, library(reshape))
 clusterEvalQ(cl, library(reshape2))
 clusterEvalQ(cl, library(ggplot2))
 
-message("Running WGCNA and MAGMA..")
-
-parLapply(cl, sNames, parRWGCNA)
-#lapply(sNames, function(x) parMagmaWGCNA(x, study_label=study_label, file_suffix=file_suffix, output_label=output_label))
+parLapply(cl, sNames, parMagma(data_prefix=data_prefix, file_suffix=file_suffix, flag_date=flag_date))
 
 stopCluster(cl)
 
