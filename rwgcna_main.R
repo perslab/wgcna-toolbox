@@ -10,7 +10,7 @@
 # RUNNING 
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-2/ --data_prefix campbell-neurons-sub-2 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 8
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-s-sub-33/ --data_prefix campbell-s-sub-33 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-5/ --data_prefix tmp-5 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-7/ --data_prefix tmp-7 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 5 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted T --n_cores 5
 
 # TODO
 
@@ -19,8 +19,8 @@
 ######################################################################
 
 # data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-3/"
-# data_prefix = "tmp-3"
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-6/"
+# data_prefix = "tmp-6"
 # compare_params = F
 # do.center = T
 # genes_use = "PCA_5000"
@@ -35,7 +35,7 @@
 # STRINGdb_species = 10090
 # ensembl_dataset = "mmusculus_gene_ensembl"
 # save_plots = T
-# plot_permuted = F
+# plot_permuted = T
 # n_cores = 5
 
 ######################################################################
@@ -632,7 +632,7 @@ parRWGCNA = function(sNames) {
         
     # blockwiseConsensusModules has filtered out some genes when creating the consensus TOM.
     # We need to only work with these from here on
-    goodGenesTOM_idx <- consensus0$goodSamplesAndGenes$goodGenes
+    goodGenesTOM_idx <- as.logical(consensus0$goodSamplesAndGenes$goodGenes)
     datExpr_filter <- datExpr[,goodGenesTOM_idx] # keep only the genes kept by consensusTOM
     
     # Load the consensus TOM matrix 
@@ -697,10 +697,10 @@ parRWGCNA = function(sNames) {
       dissTOMs <- lapply(indiv_TOMs, function(x) 1-as.dist(x)) # Convert permuted TOMs to distance matrices
       geneTrees <- lapply(dissTOMs, function(x) hclust(d=x, method=hclustMethod)) # Do hierarchical clustering 
       # cut out modules in each gene tree
-      cutrees <- mapply(function(x,y) cutreeHybrid(dendro=x, cutHeight = NULL, minClusterSize = minClusterSize, distM=as.matrix(y), deepSplit=deepSplit,pamStage=pamStage, pamRespectsDendro=pamRespectsDendro), geneTrees, dissTOMs, SIMPLIFY=F, .scheduling="dynamic") 
+      cutrees <- mapply(function(x,y) cutreeHybrid(dendro = x, distM = as.matrix(y), cutHeight = NULL, minClusterSize = minClusterSize, deepSplit = deepSplit, pamStage = pamStage, pamRespectsDendro = pamRespectsDendro), geneTrees, dissTOMs, SIMPLIFY=F) 
   
       # merge modules with correlated eigengenes
-      colors_MEs <- mapply(function(x,y) mergeCloseModules(exprData=as.matrix(x$data)[,goodGenesTOM_idx], colors = y$labels, cutHeight=moduleMergeCutHeight), multiExpr, cutrees, .scheduling="dynamic") # Merge modules whose eigengenes are highly correlated
+      colors_MEs <- mapply(function(x,y) mergeCloseModules(exprData = as.matrix(x$data)[,goodGenesTOM_idx], colors = y$labels, cutHeight=moduleMergeCutHeight), multiExpr, cutrees, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
       
       permutedColors = lapply(colors_MEs, function(x) labels2colors(x$colors)) 
  
