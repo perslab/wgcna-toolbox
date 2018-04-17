@@ -8,8 +8,9 @@
 
 
 # RUNNING 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_dev.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-29/ --data_prefix campbell-neurons-sub-29 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc bicor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_dev.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-s-sub-33/ --data_prefix campbell-s-sub-33 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-2/ --data_prefix campbell-neurons-sub-2 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 8
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-s-sub-33/ --data_prefix campbell-s-sub-33 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-5/ --data_prefix tmp-5 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5
 
 # TODO
 
@@ -18,9 +19,8 @@
 ######################################################################
 
 # data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
-# meta.data_ID <- NULL
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-1/"
-# data_prefix = "tmp-1"
+# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-3/"
+# data_prefix = "tmp-3"
 # compare_params = F
 # do.center = T
 # genes_use = "PCA_5000"
@@ -50,7 +50,7 @@ option_list <- list(
   
   make_option("--data_path", type="character",
               help = "Provide full path to Rdata input file with Seurat object"),
-  make_option("--meta.data_ID", type="character",
+  make_option("--meta.data_ID", type="character", default=NULL,
               help = "Specify the name of a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
   make_option("--dir_project", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
@@ -353,7 +353,7 @@ parRWGCNA = function(sNames) {
                                     #genes.use = NULL, # default: genes.use = all genes in @data
                                   vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
                                   model.use="linear",
-                                  do.par=F, #T,
+                                  do.par=F,#T, #T,
                                   #num.cores = n_cores,
                                   do.scale=T,
                                   do.center=T)
@@ -379,6 +379,7 @@ parRWGCNA = function(sNames) {
                                fastpath=fastpath)
       
       # WORK IN PROGRESS
+      # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
       # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
       
       # seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
@@ -1199,6 +1200,7 @@ clusterEvalQ(cl, library(STRINGdb))
 
 message("Running WGCNA")
 parLapply(cl, sNames, parRWGCNA)
+
 stopCluster(cl)
 
 ##########################################################################
@@ -1209,11 +1211,14 @@ message("WGCNA all done, running MAGMA..")
 
 cl <- makeCluster(n_cores, type = "FORK")
 
+clusterEvalQ(cl, library(Matrix))
+clusterEvalQ(cl, library(plyr))
+clusterEvalQ(cl, library(WGCNA))
 clusterEvalQ(cl, library(reshape))
 clusterEvalQ(cl, library(reshape2))
 clusterEvalQ(cl, library(ggplot2))
 
-parLapply(cl, sNames, parMagma(data_prefix=data_prefix, file_suffix=file_suffix, flag_date=flag_date))
+parLapply(cl, sNames, function(x) parMagma(sNames = x, data_prefix=data_prefix, dir_tables=dir_tables, file_suffix=file_suffix, flag_date=flag_date))
 
 stopCluster(cl)
 
