@@ -1,1 +1,128 @@
+# Change log
+
+## v1.2 - 2018-04-19
+
+### Changed
+* to compare parameters, allow user to input vectors as default for cutreeHybrid parameters. Adapted user input checks accordingly. The script is now built to get multiple parameters without a conditional flow distinguishing betwen a single or multiple sets of parameters. The script is much simplified.
+* In compare_params, use number of genes assigned to non-grey modules after filtering for Protein-Protein-Interaction fdr p-value as statistic to choose best parameters
+* Reverted back to RunPCA weight.by.var = F. I guess it also affects the gene loadings a lot - to be tested
+* increase scale free topology powers to 1:30
+*MEs now consistently holds merged$MEGs - so we have to extract the eigengenes with MEs$eigengenes
+* delete grey kMEs in each set in list_kMEs in compare_params loop 
+* if (length(unique(cutree$labels)) > 1) { ...
+* Set nPC_seurat to 75
+* Moved plot_permuted below the compare_params part
+* kME_reassign is now done in a function
+* extract_and_name_colors now done in a function
+* parMagma: outputs to same folder as WGCNA project; aligned output names
+* parMagma: loops over subdirectories within magma_gwas_dir and does separate analysis on each
+*parMagma: commented out labeledHeatmap
+* plot file names now have flag_date at the end
+* renamed all data path variables
+* Moved input data checks to their own section
+
+### Added
+* min.cells user parameter for filtering genes
+* if file.exists... to remove seurat subsets
+* log_dir
+
+### Removed
+* tryCatch() around compare_modules (too big)
+* names(pkMEs_PPI) <- names(colors_PPI)
+* names(pkMEs) <- names(colors)      
+* save_plots parameter
+* Removed PC significance JackStraw test for selecting genes based on loadings - doesn't produce better results
+
+## Fixed
+* Removed FilterCells step - in Campbell AgRP neurons, max genes 5000 was removing half of the neurons, from 2233 to 1274. Likely had enormous impact on results. softPower indices were very much affected.
+* bootstrap(replace=T) returns the original dataset plus the desired number of permutated sets rather than the desired number minus one.  In if (plot_permuted == T) chunk, fixed indiv_TOMS <- lapply ... which was also off by one.
+*  for (j in 1:length(list_MEs)) { : nested loop used same index 'j' as outer - now k
+* in matchLabels, extraLabels = standardColors()
+
+## v1.1 - 2018-04-17
+
+### Fixed
+* plot_permuted loop: fixed mapply (removed inappropriate schedule argument)
+* coerce goodGenesTOM_idx to logical (was character)
+
+
+## v1.0 - 2018-04-17
+
+###  Fixed
+* MAGMA parallel loop call now loads Matrix and also gets explicit arguments. Tested and works
+
+## v0.9 - 2018-04-16
+
+### Added
+* For kME_reassign, save csv file with list of genes moved,  respective modules and pkMEs
+* Allow user to specify meta.data_ID to use for subsetting Seurat object
+
+### Fixed
+* Made MAGMA a separate parallel loop to reduce concurrent libraries loaded onto each cluster in parallel processing to avoid crashing worker sessions
+
+##v0.8 - 2018-04-13
+
+### Changed
+* Set kME_reassign_threshold in params to 1.5 (conservative)
+* In the for loop the full list of subsets is now loaded into and removed from memory in each iteration. Slower but much more memory efficient.
+* save.image for each iteration rather than an (unwieldy) list of objects
+* reintroduced parLapply in MAGMA
+* parallelised the whole script since it is now much more memory efficient than before
+
+### Fixed
+* kMEs$kMEgrey <- NULL would use tab completion to set kMEs$kMEgrey60 to NULL. Hence changed to kMEs[['kMEgrey']] <- NULL
+* STRINGdb loop is now robust (tryCatch within for loop)
+
+## v0.7 - 2018-04-12
+
+### Added
+* More messages throughout
+* Check genes_use argument
+* remove grey module kMEs from output
+  
+### changed
+* Declare `PPI_pval_threshold` in `rwgcna_params.R`
+* reverted MAGMA step to lapply to reduce risk of errors (seems unnecessary)
+* Rather than choosing scale_data or not, now choose do.center or not (for bicor). Data is in either case scaled and nUMI and percent.mito regressed out.
+* moduleEigengenes(...excludegrey = T)
+
+### Removed
+* Redundant parameters minModuleSize, deepSplit and nPermutations from built in parameters csv file
+
+### Fixed 
+* conditional flow around FilterCells and ScaleData
+* removed conditional around ScaleData which would skip the step if scale_data = F. Scale data used for PCA which we use to select genes. Hence if we skip data scaling on the subset, it would actually just use the scaled data already in the seurat_object which would lead to poor PCA and selection of top loading genes - or code failure.
+* set do.center = T always to avoid messing up PCA calculations. Instead make bicor == T -> scale_data <- F
+* removed grey module from kMEs and kMEs_PPI
+
+## v0.6 - 2018-04-10
+
+### Added
+* filter out genes with few cells
+* filter cells with mito > 0.2
+* do not filter for ribo
+
+### Changed
+* scale.data = F
+* Seurat: if (scale_data == T) scale, regress out
+* Seurat: if (genes_use != "all") ..find variable genes, runPCA
+ * FindVariableGenes
+ * delete mean.function = ExpMean,
+ * delete dispersion.function = LogVMR,
+    RunPCA
+        Increase nPC_Seurat from 40 to 100 (for RunPCA() )
+        seed.use = randomSeed __instead of default value of 42__
+        Set fastpath = FALSE
+        Set maxit = 300 
+    findSoftThreshold
+        powers: max softPower values to check up from 12 to 20
+    moduleEigengenes 
+        excludeGrey = T
+        #softpower = softPower
+        The power used in soft-thresholding the adjacency matrix. Only used when the hubgene approximation is necessary because the principal component calculation failed. It must be non-negative. The default value should only be changed if there is a clear indication that it leads to incorrect results.
+    consensusTOM
+        delete checkPower = checkPower - __This was not defined?__
+    Move wgcna_params.R to same folder
+    
+__beginning of change log__
 
