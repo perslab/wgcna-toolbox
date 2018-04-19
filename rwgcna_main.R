@@ -1081,25 +1081,24 @@ stopCluster(cl)
 
 message("WGCNA all done, running MAGMA..")
 
-cl <- makeCluster(n_cores, type = "FORK")
+#cl <- makeCluster(n_cores, type = "FORK")
 
-clusterEvalQ(cl, library(Matrix))
-clusterEvalQ(cl, library(plyr))
-clusterEvalQ(cl, library(WGCNA))
-clusterEvalQ(cl, library(reshape))
-clusterEvalQ(cl, library(reshape2))
-clusterEvalQ(cl, library(ggplot2))
+#clusterEvalQ(cl, library(Matrix))
+#clusterEvalQ(cl, library(plyr))
+#clusterEvalQ(cl, library(WGCNA))
+#clusterEvalQ(cl, library(reshape))
+#clusterEvalQ(cl, library(reshape2))
+#clusterEvalQ(cl, library(ggplot2))
 
-parLapply(cl, sNames, function(x) parMagma(subsetName = x, 
-                                           project_dir = project_dir, 
-                                           plots_dir = plots_dir, 
-                                           tables_dir = tables_dir, 
-                                           log_dir = log_dir, 
-                                           magma_gwas_dir = magma_gwas_dir, 
-                                           data_prefix = data_prefix, 
-                                           tables_dir = tables_dir, 
-                                           file_suffix = file_suffix, 
-                                           flag_date = flag_date))
+#parLapply(cl, sNames, function(x) parMagma(subsetName = x, 
+#                                   project_dir = project_dir, 
+#                                   plots_dir = plots_dir, 
+#                                   log_dir = log_dir,
+#                                   tables_dir = tables_dir,
+#                                   magma_gwas_dir = magma_gwas_dir, 
+#                                   data_prefix = data_prefix, 
+#                                   file_suffix = file_suffix, 
+#                                   flag_date = flag_date))
 
 lapply(sNames, function(x) parMagma(subsetName = x, 
                                    project_dir = project_dir, 
@@ -1111,7 +1110,7 @@ lapply(sNames, function(x) parMagma(subsetName = x,
                                    file_suffix = file_suffix, 
                                    flag_date = flag_date))
 
-stopCluster(cl)
+#stopCluster(cl)
 
 ##########################################################################
 ################################ FINISH ##################################
