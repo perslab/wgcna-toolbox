@@ -6,35 +6,32 @@
 
 # e.g.
 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-14/ --magma_gwas_path /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix tmp-15 --meta.data_ID NULL --min.cells 5 --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20,0.25)" --nPermutations 10 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
 
-# RUNNING 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-2/ --data_prefix campbell-neurons-sub-2 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 15 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 8
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-s-sub-33/ --data_prefix campbell-s-sub-33 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --dir_project /projects/jonatan/tmp-rwgcna-tests/tmp-7/ --data_prefix tmp-7 --compare_params FALSE --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.20 --nPermutations 5 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted T --n_cores 5
-
-# TODO
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_id.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-9/ --magma_gwas_path "/projects/jonatan/tmp-bmi-brain/data/magma/" --data_prefix tmp-9 --meta.data_ID NULL --min.cells 5 --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2)" --pamStage "c(TRUE,FALSE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 10 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 10
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
 
-# data_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
-# dir_project = "/projects/jonatan/tmp-rwgcna-tests/tmp-6/"
-# data_prefix = "tmp-6"
-# compare_params = F
+# seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData"
+# project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-16/"
+# magma_gwas_path = "/projects/jonatan/tmp-bmi-brain/data/magma/"
+# data_prefix = "tmp-16"
+# meta.data_ID = NULL
 # do.center = T
 # genes_use = "PCA_5000"
 # corFnc = "cor"
 # networkType = "signed"
-# anti_cor_action = NULL
-# minClusterSize = 20
-# deepSplit = 2
-# moduleMergeCutHeight = 0.2
+# anti_cor_action = "kME_reassign"
+# minClusterSize = c(20)
+# deepSplit = c(1,2)
+# pamStage = c(TRUE)
+# moduleMergeCutHeight = c(0.2)
 # replace = T
-# nPermutations = 0
+# nPermutations = 2
 # STRINGdb_species = 10090
 # ensembl_dataset = "mmusculus_gene_ensembl"
-# save_plots = T
 # plot_permuted = T
 # n_cores = 5
 
@@ -44,46 +41,46 @@
 
 suppressMessages(library(optparse))
 
-# specify our desired options in a list
-
 option_list <- list(
   
-  make_option("--data_path", type="character",
+  make_option("--seurat_path", type="character",
               help = "Provide full path to Rdata input file with Seurat object"),
+  make_option("--project_dir", type="character", default=NULL,
+              help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
+  make_option("--magma_gwas_dir", type="character", default = '/projects/jonatan/tmp-bmi-brain/data/magma/',
+              help = "MAGMA input GWAS data directory as a character, defaults to '/projects/jonatan/tmp-bmi-brain/data/magma/'"),
   make_option("--meta.data_ID", type="character", default=NULL,
               help = "Specify the name of a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
-  make_option("--dir_project", type="character", default=NULL,
-              help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
   make_option("--data_prefix", type="character", default=paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_rWGCNA_run"),
               help = "Dataset prefix for output files"),
-  make_option("--compare_params", type="logical", default=FALSE, 
-              help="Compare many different cutreeHybrid parameters and select best. If FALSE, uses recommended parameters."), 
+  make_option("--min.cells", type="integer", default=5L,
+              help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5."),
   make_option("--do.center", type="logical", default=T,
               help="Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out."),
   make_option("--genes_use", type="character", default="PCA_5000",
-              help="One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'"), 
+              help="One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of genes with high loading on at least one PC>'"), 
   make_option("--corFnc", type="character", default="cor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function."), 
   make_option("--networkType", type="character", default = "signed",
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); 'signed hybrid' sets negative correlations to zero."),
   make_option("--anti_cor_action", type="character", default=NULL, 
               help = "Optional. 'kME_reassign' reassigns genes with a negative kME more than 1.5 the kME w.r.t. their own (primary) module. Should be used only with networkType 'signed hybrid'."),
-  make_option("--minClusterSize", type="integer", default=15L,
-              help = "Minimum genes needed to form a module, recommended 5-25"),
-  make_option("--deepSplit", type="integer", default=3L,
-              help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes integer values 0-4, defaults to 3. Only applicable if test_params == F"),
-  make_option("--moduleMergeCutHeight", type="double", default=0.2,
-              help = "Cut-off level for the variable (1-correlation) for merging eigengenes. Recommended value range 0.1-0.2."),
+  make_option("--minClusterSize", type="character", default="c(15L)",
+              help = "Minimum genes needed to form a module, recommended 5-25. Takes a character with a vector of integer values to try, defaults to 'c(15L)'."),
+  make_option("--deepSplit", type="character", default="c(3L)",
+              help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector of integer values between 0-4 to try, defaults to 'c(3L)'"),
+  make_option("--moduleMergeCutHeight", type="character", default="c(0.2)",
+              help = "Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)'. Defaults to 'c(0.2)'"),
+  make_option("--pamStage", type="character", default="c(TRUE)",
+              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', default 'c(TRUE)'"),
   make_option("--nPermutations", type="integer", default=100L,
               help = "Number of times to permute the dataset, defaults to 100"),
   make_option("--replace", type="logical", default=TRUE,
               help = "Sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time."),
   make_option("--STRINGdb_species", type="integer", default="10090",
-              help = "Optional: species for which to retrieve protein data from STRINGdb to validate clusters. 10090 is mus musculus"),
+              help = "Optional: species for which to retrieve protein data from STRINGdb to validate clusters. 10090 is mouse(mus musculus), 9606 is human"),
   make_option("--ensembl_dataset", type="character", default="mmusculus_gene_ensembl",
               help = "Optional. Dataset for outputting colors with ensembl gene IDs for LD score regression."),
-  make_option("--save_plots", type="logical", default=TRUE,
-              help="Save plots?"),
   make_option("--plot_permuted", type="logical", default=FALSE,
               help="Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling."),
   make_option("--n_cores", type="integer", default=5,
@@ -102,8 +99,8 @@ suppressMessages(library(Seurat))
 suppressMessages(library(parallel))
 suppressMessages(library(WGCNA))
 suppressMessages(library(STRINGdb))
-# suppressMessages(library(reshape))
-# suppressMessages(library(reshape2))
+suppressMessages(library(reshape))
+suppressMessages(library(reshape2))
 # suppressMessages(library(ggplot2))
 
 #suppressMessages(library(biomaRt))
@@ -119,17 +116,17 @@ message("Libraries loaded")
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
-data_path <- opt$data_path 
+seurat_path <- opt$seurat_path 
 
-meta.data_ID <- opt$meta.data_ID
+project_dir <- opt$project_dir
 
-dir_project <- opt$dir_project
+magma_gwas_dir <- opt$magma_gwas_dir 
 
 data_prefix <- opt$data_prefix 
 
-compare_params <- opt$compare_params
-#if (compare_params==T) message("Sorry, compare_params is disabled in the current version of the script")
-#compare_params <- F # Temporarily disable for bug testing TODO
+meta.data_ID <- opt$meta.data_ID
+
+min.cells <- opt$min.cells
 
 do.center <- opt$do.center
 
@@ -141,11 +138,13 @@ networkType <- opt$networkType
 
 anti_cor_action <- opt$anti_cor_action
 
-minClusterSize <- opt$minClusterSize 
+minClusterSize <- eval(parse(text=opt$minClusterSize))
 
-deepSplit <- opt$deepSplit
+deepSplit <- eval(parse(text=opt$deepSplit))
 
-moduleMergeCutHeight <- opt$moduleMergeCutHeight 
+moduleMergeCutHeight <- eval(parse(text=opt$moduleMergeCutHeight))
+
+pamStage <- eval(parse(text=opt$pamStage))
 
 nPermutations <- opt$nPermutations
 
@@ -155,8 +154,6 @@ STRINGdb_species <- opt$STRINGdb_species
 
 ensembl_dataset <- opt$ensembl_dataset
 
-save_plots <- opt$save_plots
-
 plot_permuted <- opt$plot_permuted
 
 n_cores <- opt$n_cores  
@@ -165,58 +162,40 @@ n_cores <- opt$n_cores
 ############################## CONSTANTS #############################
 ######################################################################
 
-if (!file.exists(data_path)) stop("Input data path not found")
+if (!file.exists(seurat_path)) stop("Input data path not found")
 
 # if no output directory provided, use the dir one level above that of the input file.
 
-if (is.null(dir_project)) {
-  pos <- tail(gregexpr("/", data_path)[[1]],2)[1]
-  dir_project = substr(data_path, 1, pos)
+if (is.null(project_dir)) {
+  pos <- tail(gregexpr("/", seurat_path)[[1]],2)[1]
+  project_dir = substr(seurat_path, 1, pos)
 }
 
 # if specified output directory doesn't exist, create it 
-if (!file.exists(dir_project)) {
-  dir.create(dir_project) 
+if (!file.exists(project_dir)) {
+  dir.create(project_dir) 
   message("Project directory not found, new one created")
 }
 
+plots_dir = paste0(project_dir,"plots/")
+if (!file.exists(plots_dir)) dir.create(plots_dir) 
+
+tables_dir = paste0(project_dir,"tables/")
+if (!file.exists(tables_dir)) dir.create(tables_dir)
+
+RObjects_dir = paste0(project_dir,"RObjects/")
+if (!file.exists(RObjects_dir)) dir.create(RObjects_dir)
+
+log_dir = paste0(project_dir,"log/")
+if (!file.exists(log_dir)) dir.create(log_dir)
+
 saveIndividualTOMs = plot_permuted
 
-dir_plots = paste0(dir_project,"plots/")
-if (!file.exists(dir_plots)) dir.create(dir_plots) 
-
-dir_tables = paste0(dir_project,"tables/")
-if (!file.exists(dir_tables)) dir.create(dir_tables)
-
-dir_RObjects = paste0(dir_project,"RObjects/")
-if (!file.exists(dir_RObjects)) dir.create(dir_RObjects)
-
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
-
-if (!(sapply(c("all", "var.genes", "hvg", "PCA"), function(x) grepl(x, genes_use, ignore.case=T)) %>% any())) {
-  stop("genes_use must be one of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'")
-}
-
-if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearson's or 'bicor' for biweighted midcorrelation")
-
-if (corFnc == "bicor" & do.center == T) warning("Using bicor with centered data will ignore non-positive values when detecting correlations")
-
-if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid' (not 'signed_hybrid')")
-
-if (!minClusterSize %in% seq.int(from=5, to=100)) stop("minClusterSize must be an integer between 5 and 100")
-
-if (!deepSplit %in% c(0L, 1L, 2L, 3L, 4L)) stop("deepSplit must be an integer between 0 and 4")
-
-if (! (moduleMergeCutHeight > 0 & moduleMergeCutHeight < 0.5)) stop("moduleMergeCutHeight must be between 0 and 1, recommended range is between 0.1 and 0.2")
-  
-if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be in the range 0-100")
-
-if (! (n_cores >= 0 & n_cores <= 50)) stop("n_cores must be in the range 0-50")
 
 # Load parameter values and utility functions
 source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
 source(file = "/projects/jonatan/functions-src/functions.R")
-
 
 if (!is.null(ensembl_dataset)) {
   perslabMusEnsembl <- read.delim("/projects/jonatan/wgcna-src/rwgcna-pipeline/Mus_musculus.GRCm38.90.gene_name_version2ensembl.txt.gz")
@@ -228,16 +207,47 @@ if (nPermutations < 1) plot_permuted <- F
 file_suffix = if (!is.null(STRINGdb_species)) "kMEs_PPI" else "kMEs"
 
 ######################################################################
+############################ CHECK INPUT #############################
+######################################################################
+
+if (min.cells < 0) stop("min.cells must be a non-negative integer") 
+if (min.cells > 10 | min.cells < 3) warning("Recommended values for min.cells are between 3 and 10")
+
+if (!(sapply(c("all", "var.genes", "hvg", "PCA"), function(x) grepl(x, genes_use, ignore.case=T)) %>% any())) {
+  stop("genes_use must be one of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'")
+}
+
+if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearson's or 'bicor' for biweighted midcorrelation")
+
+if (corFnc == "bicor" & do.center == T) warning("Using bicor with centered data will ignore non-positive values when detecting correlations")
+
+if (!networkType %in% c('signed', 'unsigned', 'signed hybrid')) stop("networkType must be one of 'signed', 'unsigned' or 'signed hybrid' (not 'signed_hybrid')")
+
+if (length(c(minClusterSize, deepSplit, pamStage, moduleMergeCutHeight))>4) warning("Comparing different parameters increases processing time")
+
+if (min(minClusterSize) < 5) stop("minClusterSize must be a vector of integers over 5")
+
+if (max(deepSplit) > 4 | min(deepSplit) < 0) stop("deepSplit must be a vector of integers between 0 and 4")
+
+if (min(moduleMergeCutHeight) < 0 | max(moduleMergeCutHeight) > 1) stop("moduleMergeCutHeight must be a vector of doubles between 0 and 1, recommended range is between 0.1 and 0.2")
+  
+if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be in the range 0-100")
+
+if (plot_permuted == T) warning("plotting modules on permuted datasets increases processing time")
+
+if (! (n_cores >= 0 & n_cores <= 100)) stop("n_cores must be in the range 0-100")
+
+######################################################################
 ################# LOAD AND SUBSET SEURAT OBJECT ######################
 ######################################################################
 
 message("Loading and subsetting seurat object..")
 
-seurat_obj <- load_obj(data_path)
+seurat_obj <- load_obj(seurat_path)
 
 if (!is.null(meta.data_ID)) {
   if (!any(grepl(meta.data_ID, names(seurat_obj@meta.data), ignore.case = T))) { 
-    stop(sprintf("meta.data_ID not found in Seurat object at %s", data_path)) } else {
+    stop(sprintf("meta.data_ID not found in Seurat object at %s", seurat_path)) } else {
       seurat_obj <- SetAllIdent(seurat_obj, id = meta.data_ID)
     }
   }
@@ -253,7 +263,7 @@ names(subsets) <- sNames
 
 for (subsetName in sNames) {
   seurat_obj_sub <- subsets[[subsetName]]
-  save(seurat_obj_sub, file=sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", dir_RObjects, data_prefix, subsetName, flag_date))
+  save(seurat_obj_sub, file=sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", RObjects_dir, data_prefix, subsetName, flag_date))
 }
 
 rm(subsets)
@@ -269,10 +279,12 @@ subsets_n_cells <- data.frame(subset = sNames, n_cells = as.numeric(table(seurat
 # Free up memory
 rm(seurat_obj)
 
-userParams <- cbind(list("data_path" = data_path,
-                         "dir_project" = dir_project,
+userParams <- cbind(list("seurat_path" = seurat_path,
+                         "project_dir" = project_dir,
+                         "magma_gwas_dir" = magma_gwas_dir,
                          "data_prefix" = data_prefix,
-                         "compare_params" = compare_params,
+                         "meta.data_ID" = meta.data_ID,
+                         "min.cells" = min.cells,
                          "do.center" = do.center,
                          "genes_use" = genes_use,
                          "corFnc" = corFnc,
@@ -280,34 +292,29 @@ userParams <- cbind(list("data_path" = data_path,
                          "anti_cor_action" = anti_cor_action,
                          "minClusterSize" = minClusterSize,
                          "deepSplit" = deepSplit,
+                         "pamStage" = pamStage,
                          "moduleMergeCutHeight" = moduleMergeCutHeight,
                          "nPermutations" = nPermutations,
                          "replace" = replace,
                          "STRINGdb_species" = STRINGdb_species,
                          "ensembl_dataset" = ensembl_dataset,
-                         "save_plots" = save_plots,
                          "plot_permuted" = plot_permuted,
                          "n_cores" = n_cores))
-
 
 builtInParams <- cbind(list("minCoreKME" = minCoreKME,
                             "minKMEtoStay" = minKMEtoStay,
                             "consensusQuantile" = consensusQuantile,
-                            "replace" = replace, 
                             "fraction" = fraction,
-                            "pamStage" =  if (compare_params==T) "compare_params" else pamStage,
-                            "pamRespectsDendro" = if (compare_params==T) "compare_params" else pamRespectsDendro,
                             "hclustMethod" = hclustMethod,
                             "impute" = impute,
                             "nPC_seurat" = nPC_seurat,
                             "TOMType" = TOMType,
                             "PPI_pval_threshold" = PPI_pval_threshold))
 
-
 # Save run params to file
-write.csv(userParams, file=sprintf("%s%s_INFO_user_parameters_%s.csv", dir_tables, data_prefix, flag_date))
-write.csv(builtInParams, file=sprintf("%s%s_INFO_built_in_parameters_%s.csv", dir_tables, data_prefix, flag_date))
-write.csv(subsets_n_cells, file=sprintf("%s%s_INFO_subsets_n_cells_%s.csv", dir_tables, data_prefix, flag_date), row.names=F)
+write.csv(userParams, file=sprintf("%s%s_INFO_user_parameters_%s.csv", tables_dir, data_prefix, flag_date))
+write.csv(builtInParams, file=sprintf("%s%s_INFO_built_in_parameters_%s.csv", tables_dir, data_prefix, flag_date))
+write.csv(subsets_n_cells, file=sprintf("%s%s_INFO_subsets_n_cells_%s.csv", tables_dir, data_prefix, flag_date), row.names=F)
 
 # clear up
 rm(userParams)
@@ -323,12 +330,18 @@ parRWGCNA = function(sNames) {
   disableWGCNAThreads() # to avoid nested parallelisation
   
   # retrieve subset from disk and delete it afterwards
-  seurat_obj_sub <- load_obj(sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", dir_RObjects, data_prefix, sNames, flag_date))
-  file.remove(sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", dir_RObjects, data_prefix, sNames, flag_date))
-              
+  seurat_obj_sub <- load_obj(sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
+  
+  if (file.exists(sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))) {
+    invisible(file.remove(sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", RObjects_dir, data_prefix, sNames, flag_date)))
+  }
+  
   ######################################################################
   ################# PROCESS SEURAT SUBSET OBJECT #######################
   ######################################################################
+  
+  # Store metadata
+  metaData <- seurat_obj_sub@meta.data
   
   # Filter out genes expressed in few cells
   if (min.cells > 0) {
@@ -340,7 +353,7 @@ parRWGCNA = function(sNames) {
   
   if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) {
     vars.to.filter_regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)]
-    seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.filter_regress, low.thresholds = c(200, -Inf), high.thresholds = c(5000, 0.2)) 
+    #seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.filter_regress, low.thresholds = c(200, -Inf), high.thresholds = c(5000, 0.2)) 
   } else {
     warning("nUMI and percent.mito not found in Seurat object meta data")
   }
@@ -353,32 +366,29 @@ parRWGCNA = function(sNames) {
                                     #genes.use = NULL, # default: genes.use = all genes in @data
                                   vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.filter_regress else NULL, 
                                   model.use="linear",
-                                  do.par=F,#T, #T,
+                                  do.par=F,#F,#T, #T,
                                   #num.cores = n_cores,
                                   do.scale=T,
                                   do.center=T)
         
     seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
-                                        #mean.function = ExpMean,
-                                        #dispersion.function = LogVMR,
                                         x.low.cutoff = 0.0125,
                                         x.high.cutoff = 3,
                                         y.cutoff = 0.5, 
                                         do.plot=F)
-    
     
     if (grepl("PCA", genes_use, ignore.case = T)) {
       seurat_obj_sub <- RunPCA(object = seurat_obj_sub,
                                pcs.compute = min(nPC_seurat, 
                                                  length(seurat_obj_sub@var.genes)-1, 
                                                  ncol(seurat_obj_sub@data)-1),
-                               weight.by.var = F,
+                               weight.by.var = F,#T,#F,
                                do.print = F,
                                seed.use = randomSeed,
                                maxit = maxit,
                                fastpath=fastpath)
       
-      # WORK IN PROGRESS
+      # Select significant PCs using empirical p-value based on JackStraw resampling
       # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
       # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
       
@@ -386,10 +396,10 @@ parRWGCNA = function(sNames) {
       #                             num.pc = nPC_seurat,
       #                             num.replicate = 100,
       #                             display.progress = FALSE,
-      #                             do.par = F)#,
+      #                             do.par = F)#T,
       #                             #num.cores = 10)
       # 
-      # score.thresh = 1e-5
+      # score.thresh = (5e-2)/nPC_seurat # TODO: Is this a suitable multiple testing adjustment 
       # 
       # pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value
       # pAll <- pAll[, 1:nPC_seurat, drop = FALSE]
@@ -413,20 +423,15 @@ parRWGCNA = function(sNames) {
       #     score.df <- rbind(score.df, data.frame(PC = paste0("PC",i), Score = pc.score))
       #   }
       # }
-      # 
-      # PC_select <- score.df %>% filter(Score < score.thresh) %>% select(PC)
-      # 
-    }
-    
-    
-    
+      # #PC_select <- score.df %>% filter(Score < score.thresh) %>% select(PC)
+      # PC_select_idx <- which(score.df$Score < score.thresh)
 
-    
+      # Only keep gene loadings of significant PCs
+      
+    }
+
   }
 
-  # Store metadata
-  metaData <- seurat_obj_sub@meta.data
-  
   # Select genes
 
   if (do.center == F | genes_use == "all") {
@@ -449,6 +454,7 @@ parRWGCNA = function(sNames) {
     } else if (grepl("PCA", genes_use, ignore.case = T)) {
       n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
       seurat_obj_sub <- ProjectPCA(seurat_obj_sub, do.print = F, pcs.print = NULL, pcs.store = nPC_seurat, genes.print = NULL, replace.pc=F, do.center=T)
+      #seurat_obj_sub@dr$pca@gene.loadings.full <- seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]
       max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
       names_genes_use = names(sort(max_loads, decreasing=T)[1:n_genes])
       input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
@@ -457,17 +463,17 @@ parRWGCNA = function(sNames) {
       names_genes_use = rownames(seurat_obj_sub@hvg.info)[order(seurat_obj_sub@hvg.info$gene.dispersion.scaled, decreasing=T)][1:n_genes]
       input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
     }
-  }, error = function(c) {write.csv("ERROR", file=sprintf("%s%s_%s_input_data_selection_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)
+  }, error = function(c) {write.csv("ERROR", file=sprintf("%s%s_%s_input_data_selection_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
     stop("Input data error")})
   
-    # Format the data: WGCNA needs a dataframe with the genes in columns
-    datExpr <- t(input_data) 
-    colnames(datExpr) <- rownames(input_data)
+  # Format the data: WGCNA needs a dataframe with the genes in columns
+  datExpr <- t(input_data) 
+  colnames(datExpr) <- rownames(input_data)
 
-    # clear memory
-    rm(seurat_obj_sub) # clear memory
-    rm(input_data) #clear memory
-    gc()
+  # clear memory
+  rm(seurat_obj_sub) # clear memory
+  rm(input_data) #clear memory
+  gc()
 
 
   ######################################################################
@@ -479,8 +485,8 @@ parRWGCNA = function(sNames) {
   tryCatch({
   
     disableWGCNAThreads()
-    #powers = c(c(1:10), seq(from = 12, to=20, by=2))
-    powers = c(1:20)
+    
+    powers = c(1:30)
 
     sft = pickSoftThreshold(data=datExpr,
                             powerVector = powers,
@@ -490,33 +496,30 @@ parRWGCNA = function(sNames) {
                             networkType = networkType,
                             verbose = verbose)
     
-    if (save_plots==TRUE) {
-      
-      pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", dir_plots, data_prefix, sNames, flag_date),width=10,height=5)
-      #par(mfrow = c(1,2));
-      cex1 = 0.9;
-      # Scale-free topology fit index as a function of the soft-thresholding power
-      plot(sft$fitIndices[,1],
-           -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-           xlab="Soft Threshold (power)",
-           ylab="Scale Free Topology Model Fit,signed R^2",
-           type="n",
-           main = paste("Scale independence"));
-      text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-           labels=powers,cex=cex1,col="red");
-      # this line corresponds to using an R^2 cut-off of 0.9
-      abline(h=0.90,col="red")
-      dev.off()
-      # Mean connectivity as a function of the soft-thresholding power
-      pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", dir_plots, data_prefix, sNames, flag_date),width=10,height=5)
-      plot(sft$fitIndices[,1], sft$fitIndices[,5],
-           xlab="Soft Threshold (power)",
-           ylab="Mean Connectivity",
-           type="n",
-           main = paste("Mean connectivity"))
-      text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
-      dev.off()
-    }
+    pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=10,height=5)
+    #par(mfrow = c(1,2));
+    cex1 = 0.9;
+    # Scale-free topology fit index as a function of the soft-thresholding power
+    plot(sft$fitIndices[,1],
+         -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+         xlab="Soft Threshold (power)",
+         ylab="Scale Free Topology Model Fit,signed R^2",
+         type="n",
+         main = paste("Scale independence"));
+    text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+         labels=powers,cex=cex1,col="red");
+    # this line corresponds to using an R^2 cut-off of 0.9
+    abline(h=0.90,col="red")
+    dev.off()
+    # Mean connectivity as a function of the soft-thresholding power
+    pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=10,height=5)
+    plot(sft$fitIndices[,1], sft$fitIndices[,5],
+         xlab="Soft Threshold (power)",
+         ylab="Mean Connectivity",
+         type="n",
+         main = paste("Mean connectivity"))
+    text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+    dev.off()
     
     # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
     # take smallest softPower; else take best fitting one
@@ -529,7 +532,7 @@ parRWGCNA = function(sNames) {
       softPower <- (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,]
     }
   }, error = function(c) {
-    write.csv("ERROR", file=sprintf("%s%s_%s_pickSoftThreshold_ERROR_set_to_8_as_default_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)})
+    write.csv("ERROR", file=sprintf("%s%s_%s_pickSoftThreshold_ERROR_set_to_8_as_default_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)})
   
   ######################################################################
   ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
@@ -548,7 +551,7 @@ parRWGCNA = function(sNames) {
     
     # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
     
-    setwd(dir_RObjects)
+    setwd(RObjects_dir)
     
     ######################################################################
     ####################### FIND CONSENSUS TOM ###########################
@@ -624,7 +627,7 @@ parRWGCNA = function(sNames) {
       # Internal handling of TOMs
       useDiskCache = T,
       #chunkSize = NULL, # automatic
-      cacheDir = dir_RObjects,
+      cacheDir = RObjects_dir,
       cacheBase = ".blockConsModsCache",
       #nThreads = n_cores,
       verbose = verbose,
@@ -636,7 +639,7 @@ parRWGCNA = function(sNames) {
     datExpr_filter <- datExpr[,goodGenesTOM_idx] # keep only the genes kept by consensusTOM
     
     # Load the consensus TOM matrix 
-    suppressMessages(load(sprintf("%s%s_consensusTOM-block.1.RData", dir_RObjects, sNames))) # Load the consensus TOM generated by blockwiseConsensusModules
+    suppressMessages(load(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, sNames))) # Load the consensus TOM generated by blockwiseConsensusModules
     
     dissTOM <- 1-as.dist(consTomDS) # Convert proximity to distance
     
@@ -683,439 +686,306 @@ parRWGCNA = function(sNames) {
                      method=hclustMethod) # Set up the dendrogram ready for cutting
   
   ######################################################################
-  ########################### PLOT_PERMUTED ############################
-  ######################################################################
-  
-
-  tryCatch({
-    
-    if (plot_permuted == T) {
-      
-      # NOTE: Alternatively use sampledBlockwiseModules() - see /projects/jonatan/wgcna-src/180228_robust_wgcna_module_detection.Rmd
-
-      indiv_TOMs <- lapply(1:nPermutations, function(x) load_obj(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", dir_RObjects, sNames, x, 1))) # retrieve permuted dataset TOMs from disk
-      dissTOMs <- lapply(indiv_TOMs, function(x) 1-as.dist(x)) # Convert permuted TOMs to distance matrices
-      geneTrees <- lapply(dissTOMs, function(x) hclust(d=x, method=hclustMethod)) # Do hierarchical clustering 
-      # cut out modules in each gene tree
-      cutrees <- mapply(function(x,y) cutreeHybrid(dendro = x, distM = as.matrix(y), cutHeight = NULL, minClusterSize = minClusterSize, deepSplit = deepSplit, pamStage = pamStage, pamRespectsDendro = pamRespectsDendro), geneTrees, dissTOMs, SIMPLIFY=F) 
-  
-      # merge modules with correlated eigengenes
-      colors_MEs <- mapply(function(x,y) mergeCloseModules(exprData = as.matrix(x$data)[,goodGenesTOM_idx], colors = y$labels, cutHeight=moduleMergeCutHeight), multiExpr, cutrees, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
-      
-      permutedColors = lapply(colors_MEs, function(x) labels2colors(x$colors)) 
- 
-      permutedLabels <- paste0("Permutation ", as.character(1:nPermutations)) 
- 
-      # Free up memory
-      rm(indiv_TOMs)
-      rm(dissTOMs)
-      rm(colors_MEs)
-      # plot permuted dataset modules later when we have the consensus modules
-    }
-  }, error = function(c) { write.csv("ERROR", file=sprintf("%s%s_%s_plot_permuted_ERROR_%s.csv", dir_project, data_prefix, flag_date, sNames, flag_date), row.names = F)
-    stop("Error while computing modules on permuted datasets")})
-  
-  if (nPermutations>0) rm(multiExpr)
-  
-  # Delete individual TOMs produced by consensusTOMs / blockwiseConsensusModules from disk
-  for (i in 1:nPermutations) {
-    if (file.exists(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", dir_RObjects, sNames, i, 1))) {
-      file.remove(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", dir_RObjects, sNames, i, 1))
-    }
-  }
-  
-  ######################################################################
   ########################### CUTREEHYBRID #############################
   ######################################################################
+
+  # Iterate over different combinations of parameters
+  # Parallelised version of the for loop used in Gandal et al 2018 to test different cluster params
+  dims = sapply(list(minClusterSize, deepSplit, pamStage, moduleMergeCutHeight), length) # list of number of values per parameter
+  n_combs <- prod(dims) # Total number of combinations of parameter values
+  comb_list = vector("list", length = n_combs)
   
-  # Call cutreeHybrid to cut out modules
-  
-  if (compare_params == T) {
-    # Iterate over different combinations of parameters
-    # Parallelised version of the for loop used in Gandal et al 2018 to test different cluster params
-    
-    minModSizeVals = c(10,20) # No reason to go higher as we can later merge close modules
-    deepSplitVals =  c(2:4)
-    pamVals = c(TRUE,FALSE) # sets both pamState and pamRespectsDendro
-    dthreshVals = c(0.1, 0.2) # What distance of eigengene correlation to merge modules
-    
-    dims = sapply(list(minModSizeVals, deepSplitVals, pamVals, dthreshVals), length) # list of number of values per parameter
-    n_combs <- prod(dims) # Total number of combinations of parameter values
-    comb_list = vector("list", length = n_combs)
-    
-    k=1
-    for (minModSize in 1:dims[1]) {
-      for (ds in 1:dims[2]) { # Gandal et al 2018 use c(50,100, 200)
-        for (pam in 1:dims[3]) {
-          for (dthresh in 1:dims[4]) {
-            comb_list[[k]] <- c(minModSizeVals[minModSize],deepSplitVals[ds], pamVals[pam], dthreshVals[dthresh])
-            k = k+1
-          }
+  k=1
+  for (minModSize in 1:dims[1]) {
+    for (ds in 1:dims[2]) { # Gandal et al 2018 use c(50,100, 200)
+      for (pam in 1:dims[3]) {
+        for (dthresh in 1:dims[4]) {
+          comb_list[[k]] <- c(minClusterSize[minModSize],deepSplit[ds], pamStage[pam], moduleMergeCutHeight[dthresh])
+          k = k+1
         }
       }
     }
-    
-    cutrees <- lapply(comb_list, parCutreeHybrid) # Cut out different color assignments in the dendrogran
-    
-    colors_MEs <- mapply(parMergeCloseModules, cutrees, comb_list, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
-    listColors = lapply(colors_MEs, function(x) x[[1]]) # Merged colors
-    MEs = lapply(colors_MEs, function(x) x[[2]]) # Merged color eigengenes
-
-    #if (save_plots == TRUE) {
-    labels <- lapply(comb_list, parLabel) # Labels for plot
-    
-    ######################################################################
-    ######### EVALUATE AND SELECT FINAL CLUSTERING PARAMETERS ############
-    ######################################################################
-    
-    # Use module preservation statistics to identify the best set of clustering parameters
-    # See sections 4-6 in Langfelder,...,Horvath_2011_Is My Network Module Preserved and Reproducible_S1
-    
-    n_combs <- length(listColors)
-    n_modules <- sapply(listColors, FUN = function(x) length(unique(x)), simplify=T) # get the number of modules for each set of params
-    min_modules <- quantile(n_modules, 0.66, na.rm=T) # Choose quantile as cut-off to continue only with parameters that found a higher number of modules
-    idx_quantile <- n_modules >= min_modules
-    
-    if (save_plots == TRUE) {
-      pdf(sprintf("%s%s_%s_%s_diffParams_n_modules.pdf", dir_plots, data_prefix, sNames, flag_date), width=10, height=5)
-      plot(1:n_combs, n_modules, xlab = "Parameter setting", main="Number of modules found for different parameters")
-      abline(h=min_modules)
-      dev.off()
-    }
-    
-    listDatExpr <- list("data"=datExpr_filter)
-    names(listColors[idx_quantile]) <- labels[idx_quantile]
-    
-    tryCatch({
-      
-    clust_qual_stats <- wrapModulePreservation(listDatExpr = listDatExpr,
-                                               listColors = listColors[idx_quantile],
-                                               #labels = labels, # not needed since listColors has names
-                                               dataIsExpr = dataIsExpr,
-                                               networkType = networkType,
-                                               corFnc = corFnc,
-                                               corOptions = corOptions,
-                                               # We actually just want to get quality stats on the reference network,
-                                               # but the function requires testNetworks..
-                                               nPermutations = nPermutations,
-                                               includekMEallInSummary = includekMEallInSummary,
-                                               restrictSummaryForGeneralNetworks = restrictSummaryForGeneralNetworks,
-                                               calculateQvalue = calculateQvalue,
-                                               randomSeed = randomSeed,
-                                               maxGoldModuleSize = maxGoldModuleSize,
-                                               maxModuleSize = maxModuleSize,
-                                               quickCor = quickCor,
-                                               ccTupletSize = ccTupletSize,
-                                               #calculateCor.kIMall = calculateCor.kIMall,
-                                               calculateClusterCoeff = calculateClusterCoeff,
-                                               useInterpolation = useInterpolation,
-                                               checkData = checkData,
-                                               #greyName = greyName,
-                                               savePermutedStatistics = savePermutedStatistics,
-                                               loadPermutedStatistics = loadPermutedStatistics,
-                                               permutedStatisticsFile = permutedStatisticsFile,
-                                               plotInterpolation = plotInterpolation,
-                                               interpolationPlotFile = interpolationPlotFile,
-                                               discardInvalidOutput = discardInvalidOutput,
-                                               parallelCalculation = parallelCalculation,
-                                               verbose = verbose,
-                                               indent = indent)
-    
-    # A statistic for evaluating the quality of a cluster/module assignment is the
-    # proportion of variance in the expression of the genes that the cluster's first
-    # principal component or 'eigengene' accounts for.
-    # Here, for each set of parameters, we find the median module statistic value for each set of
-    # parameters to rank the sets and pick a single set of parameters
-    
-    medianPropVarExpl <- numeric(length(listColors[idx_quantile]))
-    for (i in 1:length(clust_qual_stats$quality$observed)[idx_quantile]) {
-      medianPropVarExpl[i] <- median(clust_qual_stats$quality$observed[[i]]$'inColumnsAlsoPresentIn.test'$propVarExplained.qual, na.rm = T)
-    }
-    
-    # Order the module assignments by the statistic above
-    listColors_order <- listColors[idx_quantile][order(medianPropVarExpl, decreasing=T)]
-    labels_order <- labels[idx_quantile][order(medianPropVarExpl, decreasing=T)]
-    MEs_order <- MEs[idx_quantile][order(medianPropVarExpl, decreasing=T)]
-    # plot the module assignments but only those in the selected quantile of number of modules,
-    # and ranked by the mean proportion of variance within a module that the module eigengene explains
-    
-    
-    diffParamsColors_order = matrix(0, ncol(datExpr_filter), n_combs)
-    diffParamsColors_order[, 1] = listColors_order[[1]] # use the best colors as 'reference'
-    
-    for (r in 2:(n_combs))
-    {
-      diffParamsColors_order[, r] = matchLabels(source = listColors_order[[r-1]], # traverse gene colour assignments
-                                              reference = diffParamsColors_order[, 1],
-                                              pThreshold = 5e-2,
-                                              na.rm = TRUE,
-                                              extraLabels = paste0("Extra_", 0:100)) # labels for modules in source that cannot be matched to any modules in reference
-    }
-    
-    pdf(sprintf("%s%s_%s_%s_diffParamsColors_ordered.pdf", dir_plots, data_prefix, sNames, flag_date),width=8,height=12)
-    plotDendroAndColors(geneTree, 
-                        labels2colors(diffParamsColors_order),
-                        #matrix(unlist(permutedColors_final), ncol = length(permutedLabels_final), byrow = F), 
-                        groupLabels=labels_order, 
-                        addGuide= TRUE, 
-                        dendroLabels=FALSE, 
-                        main="Modules with diff. params ranked by the ME prop. var. expl.", 
-                        cex.colorLabels=0.5)
-    dev.off()
+  }
   
-    # Select a set of preferred colors and add them as the first column to be shown at the top of the figure
+  list_cutrees <- lapply(comb_list, function(x) parCutreeHybrid(comb=x, geneTree=geneTree, dissTOM = dissTOM)) # Cut out different color assignments in the dendrogran
+  
+  list_merged <- mapply(function(x,y) parMergeCloseModules(cutree=x,comb=y, datExpr_filter=datExpr_filter), list_cutrees, comb_list, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
+  
+  list_MEs = lapply(list_merged, function(x) x$MEGs) # list of merged color eigengenes
+  
+  labels <- lapply(comb_list, function(x) parLabel(comb=x)) # list of labels for plot
+  
+  # Get the colors and put them in a list
+  list_colors = lapply(list_merged, function(x) extract_and_name_colors(merged=x, datExpr_filter=datExpr_filter)) # list of merged colors
+  
+  if (length(list_colors)>1) {
+    # Match colors between iterations by reference to the set of colors with the highest number of unique colors
+    max_colors_idx = which.max(lapply(list_MEs, function(x) length(x$eigengenes)))
+  
+    diffParams_colors = matrix(0, nrow=ncol(datExpr_filter), ncol=n_combs)
+    diffParams_colors[, max_colors_idx] = list_colors[[max_colors_idx]] # use the set of colors with the highest number of modules as 'reference'
+  
+    for (j in (1:n_combs)[-max_colors_idx]) {
+      diffParams_colors[,j] <- matchLabels(source = list_colors[[j]], # traverse gene colour assignments
+                              reference = diffParams_colors[,max_colors_idx],
+                              pThreshold = 5e-2,
+                              na.rm = TRUE,
+                              extraLabels = standardColors())#paste0("Extra_", 0:500)) # labels for modules in source that cannot be matched to any modules in reference
+  
+    }
     
-    colors <- listColors_order[[1]]
-    labels <- labels_order[[1]]
-    MEs <- MEs_order[[1]]
-    cutree_params_final = as.list(comb_list[idx_quantile][order(medianPropVarExpl,decreasing = T)][[1]]) # TODO CHECK THIS
-    names(cutree_params_final) = c("minClusterSize", "deepSplit","pamStage", "cutHeight")
+    # Split the matrix of matched colors back into a list 
+    list_colors_matched <- split(diffParams_colors, rep(1:ncol(diffParams_colors), each = nrow(diffParams_colors))) 
     
-    }, error = function(c) { write.csv("ERROR", file=sprintf("%s%s_%s_clust_qual_stats_ERROR_%s.csv", dir_project, data_prefix, flag_date, sNames, flag_date), row.names = F)
-      stop("Error while computing clustering quality statistics")})
+  } else {
+    diffParams_colors <- NULL
+    list_colors_matched <- list_colors
+  }  
     
+  names(list_colors_matched) <- labels
+  
+  for (j in 1:length(list_colors_matched)) {
+    names(list_colors_matched[[j]]) <- colnames(datExpr_filter)
+  }
+  
+  # Compute kMEs and pkMEs for each set of colors corresponding to distinct parameters
+  list_kMEs <- vector(mode="list", length=length(list_MEs))
+  list_pkMEs <- vector(mode="list", length=length(list_MEs))
+  
+  for (j in 1:length(list_MEs)) {
+    # Rename eigengene columns according to new color names adopted above 
+    names(list_MEs[[j]]$eigengenes) <- paste0("ME",sort(names(table(list_colors_matched[j])), decreasing = F))
     
-    # (compare_params == T) chunk finished
+    # get kMEs for each set of eigengenes
+    list_kMEs[[j]] = signedKME(as.matrix(datExpr_filter),
+                     list_MEs[[j]]$eigengenes,
+                     outputColumnName="",
+                     corFnc = corFnc)
     
-  } else if (compare_params == F) { # Use given set of parameters
+    # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
+    pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
     
-    cutree <- cutreeHybrid(dendro = geneTree,
-                           cutHeight = NULL,
-                           minClusterSize = minClusterSize,
-                           distM = as.matrix(dissTOM),
-                           deepSplit = deepSplit,
-                           pamStage = pamStage,
-                           pamRespectsDendro = pamRespectsDendro) # Cut out different color assignments in the dendrogran
+    # Loop over every gene and get its pkME
+    for (i in 1:length(pkMEs)) {
+      #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
+      pkMEs[i] <- list_kMEs[[j]][list_colors_matched[[j]][i]][i,]
+    }
     
-    if (length(unique(cutree$labels)) == 1) {
-      
-      write.csv("ERROR", file=sprintf("%s%s_%s_stop_no_modules_found_%s.csv", dir_project, data_prefix, sNames, flag_date))
-      stop("No modules found")
-      
-    } else {  
-      
-      merged = mergeCloseModules(exprData = as.matrix(datExpr_filter),
-                                 colors = cutree$labels,
-                                 cutHeight = moduleMergeCutHeight)
-      
-      colors = labels2colors(merged$colors)
-      
-      #MEs = merged$newMEs
-      MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
-                             colors,
-                             excludeGrey = F)
-
+    list_pkMEs[[j]] <- pkMEs 
+    
+    # Delete grey kMEs
+    for (k in 1:length(list_kMEs)) {
+      if (any(grepl("grey", colnames(list_kMEs[[k]])))) list_kMEs[[k]][['grey']] <- NULL
     }
   }
   
-  ######################################################################
-  ######################################################################
-  ######################################################################
-  
-  names(colors) <- colnames(datExpr_filter)
-  
-  # Clear up
-  rm(dissTOM)
-  gc()
-  
-  
-  ######################################################################
-  ######################## COMPUTE MODULE KMEs #########################
-  ######################################################################
-  
-  tryCatch({
-    # All module kMEs
-    kMEs = signedKME(as.matrix(datExpr_filter),
-                     MEs$eigengenes,
-                     corFnc = corFnc)
-    
-    # Get primary module kMEs
-    pkMEs <- vector(length=length(colors))
-    
-    for (i in 1:length(colors)) {
-      pkMEs[i] <- as.numeric(unlist(kMEs %>% dplyr::select(matches(colors[[i]]))))[[i]]
-    }
-    
-    # Delete grey kMEs 
-    if (any(grepl("kMEgrey", colnames(kMEs)))) kMEs[['kMEgrey']] <- NULL
-
-  }, error = function(c) {  write.csv("ERROR", file=sprintf("%s%s_%s_compute_kMEs_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)
-    stop("Error while computing kMEs")})
-
   ######################################################################
   #################### REASSIGN GENES BASED ON KMEs ####################
   ######################################################################
   
   if (anti_cor_action == "kME_reassign") {
+    
+    list_list_kME_reassign_in <- list(list_MEs, list_kMEs, list_pkMEs, list_colors)
+    
     tryCatch({
-      col_most_negkME = max.col(-1*kMEs) # indices of most negative kMEs
-      rows_to_reassign <- logical(length=nrow(kMEs))
+      list_kME_reassign_out <- lapply(1:length(list_kMEs), 
+                                      FUN= function(i) kME_reassign_fnc(MEs = list_list_kME_reassign_in[[1]][[i]],
+                                                                        kMEs = list_list_kME_reassign_in[[2]][[i]], 
+                                                                        pkMEs = list_list_kME_reassign_in[[3]][[i]], 
+                                                                        kME_reassign_threshold = kME_reassign_threshold, 
+                                                                        colors = list_list_kME_reassign_in[[4]][[i]], 
+                                                                        datExpr_filter = datExpr_filter, 
+                                                                        corFnc = corFnc))
       
-      for (i in nrow(kMEs)) {
-        rows_to_reassign[i] <- kMEs[i, col_most_negkME[i]] < -kME_reassign_threshold*(pkMEs[i])
-      }
+      list_colors = lapply(list_kME_reassign_out, function(x) x$colors)
+      list_MEs = lapply(list_kME_reassign_out, function(x) x$MEs)
+      list_kMEs = lapply(list_kME_reassign_out, function(x) x$kMEs)
+      list_pkMEs = lapply(list_kME_reassign_out, function(x) x$pkMEs)
+      list_reassigned = lapply(list_kME_reassign_out, function(x) x$reassigned)
       
-      if (sum(rows_to_reassign) > 0) {
-        
-        old_pkMEs = pkMEs[rows_to_reassign]
-          
-        old_colors <- colors[rows_to_reassign]
-        colors[rows_to_reassign] <- colors[col_most_negkME][rows_to_reassign]
-   
-        # Recompute Module Eigengenes, kME, pkME
-        MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
-                               colors,
-                               excludeGrey = F)
-                               #softPower = softPower)
-        
-        kMEs = signedKME(as.matrix(datExpr_filter),
-                         MEs$eigengenes,
-                         corFnc = corFnc)
-        
-        pkMEs <- vector(length=length(colors))
-        
-
-        for (i in 1:length(colors)) {
-          pkMEs[i] <- as.numeric(unlist(kMEs %>% dplyr::select(matches(colors[[i]]))))[[i]]
-        }
-        
-        reassigned = data.frame(gene=rownames(colors[rows_to_reassign]), old_module = old_colors, new_module = colors[rows_to_reassign], old_pkME = old_pkMEs, new_pkME = pkMEs[rows_to_reassign], row.names = NULL)
-        write.csv(reassigned, file=sprintf("%s%s_%s_genes_kME_reassigned_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names = F)
-        
-      }
     }, error = function(c) {
-    write.csv("ERROR", file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F)})
-  } 
-  ######################################################################
-  ######################### NAME PKME VECTOR ###########################
-  ######################################################################
-  
-  names(pkMEs) <- names(colors) 
-  
-  ######################################################################
-  ######################### RUN PPI ENRICHMENT #########################
-  ######################################################################
-  
-  message(paste0("Checking modules for Protein-Protein Interaction (PPI) enrichment via STRINGdb, adj p-value cut-off: ", PPI_pval_threshold))
-  
-  # TODO : try ensembleIDs instead?
-  # get indices for genes for which primary kMEs are over a set threshold to validate
-  # them with Protein-Protein Interaction database. Set it low since kME depends only on
-  # the first PC
-  
-  module_PPI <- NULL
-  unique_colors <- NULL
-  unique_colors_PPI <- NULL
-  colors_PPI <- NULL
-  idx_pkME_ok <- NULL
-  MEs_PPI <- NULL
-  kMEs_PPI <- NULL
-  pkMEs_PPI <- NULL 
-  
-  if (!is.null(STRINGdb_species)) {
-      
-    idx_pkME_ok <- abs(pkMEs) > 0.2
-    unique_colors <- unique(colors[idx_pkME_ok])
-    string_db <- STRINGdb$new(version="10", species = STRINGdb_species, score_threshold=0, input_directory="") # Default: 10090 (Mus musculus)
-    module_PPI <- sapply(unique_colors, function(x) PPI_for_par(x, unique_colors = unique_colors, idx_pkME_ok = idx_pkME_ok, colors = colors, string_db = string_db), simplify=T) %>% t()
-    module_PPI <- as.data.frame(module_PPI, row.names = unique_colors)
+      write.csv("ERROR", file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
+    })
     
-    ######################################################################
-    ############### FILTER MODULES ON PPI ENRICHMENT  ####################
-    ######################################################################
+    # Free up memory
+    rm(list_kME_reassign_out)
     
-    if (!is.null(module_PPI)) {
-     
-      unique_colors_PPI = unique_colors[module_PPI$'p-value' < PPI_pval_threshold]
-      genes_PPI_idx <- colors %in% unique_colors_PPI
-      colors_PPI <- colors
-      colors_PPI[!genes_PPI_idx] <- "grey"
-      
-      ######################################################################
-      ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
-      ######################################################################
-      
-      # TODO better to filter
-      # recompute Module Eigengenes
-      
-      if (sum(genes_PPI_idx)!=0) {
-        
-        MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
-                                   colors_PPI,
-                                   excludeGrey = F) # T leads to errors when finding pkMEs
-                                   #softPower = softPower)
-        # recompute kMEs
-        kMEs_PPI = signedKME(as.matrix(datExpr_filter),
-                             MEs_PPI$eigengenes,
-                             corFnc = corFnc)
-        
-        # recompute primary kMEs
-        pkMEs_PPI <- vector(length=length(colors_PPI))
-        for (i in 1:length(colors_PPI)) {
-          pkMEs_PPI[i] <- as.numeric(unlist(kMEs_PPI %>% dplyr::select(matches(colors_PPI[[i]]))))[[i]]
-        }
-        
-        names(pkMEs_PPI) <- names(colors_PPI)
-        
-        # Delete grey kME (needed it for pkME step though)
-        if (any(grepl("kMEgrey", colnames(kMEs_PPI)))) kMEs_PPI[['kMEgrey']] <- NULL
-        
-      } else {
-        write.csv("WARNING" , file=sprintf("%s%s_%s_WARNING_sum_genes_PPI_0_%s.csv", dir_project, data_prefix, sNames, flag_date))
-      }
-    } # end of if (!is.null(module_PPI)) 
-  } # end of if (!is.null(STRINGdb_species)) 
+  }
   
-
+  names(list_pkMEs) <- labels
+  
+  ######################################################################
+  #################### CHECK MODULES FOR PPI ENRICHMENT ################
+  ######################################################################
+  
+  list_colors_PPI <- mapply(function(x,y) PPI_for_par_outer(pkMEs = x,
+                                                            colors = y,
+                                                            STRINGdb_species = STRINGdb_species,
+                                                            PPI_pval_threshold = PPI_pval_threshold,
+                                                            project_dir = project_dir, 
+                                                            data_prefix = data_prefix, 
+                                                            subsetName = sNames, 
+                                                            flag_date = flag_date),
+                            list_pkMEs,
+                            list_colors_matched,
+                            SIMPLIFY = F)
+  
+  # If we have more than one set of colourings, count the number of assigned genes per set and rank the sets by it
+  
+  if (length(list_colors_PPI) > 1) {
+    
+    n_grey <- sapply(list_colors_PPI, function(x) sum(x=="grey"), simplify=T)
+    
+    list_colors_PPI_order <- list_colors_PPI[order(n_grey, decreasing=F)]
+    labels_order <- labels[order(n_grey, decreasing=F)]
+    MEs_order <- list_MEs[order(n_grey, decreasing=F)]
+    
+    pdf(sprintf("%s%s_%s_diffParams_colors_PPI_ordered_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=6+length(list_colors_PPI)/2)
+    plotDendroAndColors(geneTree, 
+                        #labels2colors(list_colors_PPI_order),
+                        #matrix(unlist(list_colors_PPI_order), ncol = length(list_colors_PPI_order), byrow = F), 
+                        diffParams_colors,
+                        groupLabels=labels_order, 
+                        addGuide= TRUE, 
+                        dendroLabels=FALSE, 
+                        main="Diff. params modules, PPI enriched, ranked by n assigned genes.", 
+                        cex.colorLabels=0.5)
+    dev.off()
+    
+    # Select a set of preferred colors and add them as the first column to be shown at the top of the figure
+    colors <- list_colors_matched[order(n_grey, decreasing=F)][[1]]
+    colors_PPI <- list_colors_PPI_order[[1]]
+    labels <- labels_order[[1]]
+    MEs <- MEs_order[[1]]
+    cutree_params_final = as.list(comb_list[order(n_grey,decreasing = F)][[1]]) 
+ 
+  } else {
+    colors <- list_colors[[1]]
+    colors_PPI <- list_colors_PPI[[1]]
+    labels = labels[[1]]
+    MEs = list_MEs[[1]]
+    cutree_params_final = as.list(comb_list[[1]])
+  }
+  
+  names(cutree_params_final) = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
+  
+  ######################################################################
+  ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
+  ######################################################################
+  
+  # TODO better to filter
+  # recompute Module Eigengenes
+  
+  if (unique(colors_PPI)!=1) {
+    
+    MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
+                               colors_PPI,
+                               excludeGrey = F) # T leads to errors when finding pkMEs
+    #softPower = softPower)
+    # recompute kMEs
+    kMEs_PPI = signedKME(as.matrix(datExpr_filter),
+                         MEs_PPI$eigengenes,
+                         outputColumnName = "",
+                         corFnc = corFnc)
+    
+    # recompute primary kMEs
+    pkMEs_PPI <- vector(length=length(colors_PPI))
+    
+    for (i in 1:length(colors_PPI)) {
+      pkMEs_PPI[i] <- kMEs_PPI[colors_PPI[i]][i,]#as.numeric(unlist(kMEs_PPI %>% dplyr::select(matches(colors_PPI[[i]]))))[[i]]
+    }
+    
+    #names(pkMEs_PPI) <- names(colors_PPI) # don't use them or write then to csv..
+    
+    # Delete grey kME (needed it for pkME step though)
+    if (any(grepl("grey", colnames(kMEs_PPI)))) kMEs_PPI[['grey']] <- NULL 
+    
+  } else {
+    write.csv("WARNING" , file=sprintf("%s%s_%s_WARNING_sum_genes_PPI_0_%s.csv", project_dir, data_prefix, sNames, flag_date))
+  }
+  
+  
   ######################################################################
   ######################### PLOT FINAL COLORS #########################
   ######################################################################
   
   tryCatch({
-    all_colors = if (!is.null(STRINGdb_species) & !is.null(module_PPI)) cbind(colors, colors_PPI) else colors
     
-    if (save_plots==T) {
-      pdf(sprintf("%s%s_%s_%s_colors.pdf", dir_plots, data_prefix, sNames, flag_date),width=10,height=5)
-      plotDendroAndColors(geneTree,
+    all_colors = if (!is.null(STRINGdb_species) & !is.null(colors_PPI)) cbind(colors, colors_PPI) else colors
+    labels[[2]] <- "PPI"
+    
+    pdf(sprintf("%s%s_%s_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=10,height=5)
+    plotDendroAndColors(geneTree,
                           all_colors,
-                          groupLabels = if (compare_params==T) labels else NULL,
+                          groupLabels = if (!is.null(compare_params)) labels else NULL,
                           addGuide=T,
                           dendroLabels=F,
                           main="Final colors",
                           cex.colorLabels=0.3)
-      dev.off()
+    dev.off()
       
-      if (plot_permuted==T) {  
-        
-        # Align the module coloring schemes 
-        
-        permutedColors_final = matrix(0, ncol(datExpr_filter), nPermutations + 1)
-        permutedColors_final[, 1] = colors # use the consensus colors as 'reference'
-        
-        for (r in 2:(nPermutations+1))
-        {
-          permutedColors_final[, r] = matchLabels(source = permutedColors[[r-1]], # traverse gene colour assignments
-                                    reference = permutedColors_final[, 1],
-                                    pThreshold = 5e-2,
-                                    na.rm = TRUE,
-                                    extraLabels = paste0("Extra_", 0:100)) # labels for modules in source that cannot be matched to any modules in reference
+    if (plot_permuted==T) {  
+      
+      # NOTE: Alternatively use sampledBlockwiseModules() - see /projects/jonatan/wgcna-src/180228_robust_wgcna_module_detection.Rmd
+      bootstrap_seq <- if (replace==T) 1:(nPermutations+1) else 1:nPermutations
+      
+      bootstrap_indiv_TOMs <- lapply(bootstrap_seq, function(x) load_obj(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", RObjects_dir, sNames, x, 1))) # retrieve permuted dataset TOMs from disk
+      
+      # Delete individual TOMs from disk
+      for (i in bootstrap_seq) {
+        if (file.exists(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", RObjects_dir, sNames, i, 1))) {
+          file.remove(sprintf("%s%s_individualTOM-Set%s-Block%s.RData", RObjects_dir, sNames, i, 1))
         }
-
-        permutedLabels_final <- c("Final colors", permutedLabels)
-
-        pdf(sprintf("%s%s_%s_%s_diffpermutedColors.pdf", dir_plots, data_prefix, sNames, flag_date),width=8,height=8)
-        plotDendroAndColors(geneTree, 
-                            labels2colors(permutedColors_final),
-                            #matrix(unlist(permutedColors_final), ncol = length(permutedLabels_final), byrow = F), 
-                            groupLabels=permutedLabels_final, 
-                            addGuide= TRUE, 
-                            dendroLabels=FALSE, 
-                            main="Modules: final and on resampled data", 
-                            cex.colorLabels=0.5)
-        dev.off()
       }
+      
+      bootstrap_dissTOMs <- lapply(bootstrap_indiv_TOMs, function(x) 1-as.dist(x)) # Convert permuted TOMs to distance matrices
+      
+      bootstrap_geneTrees <- lapply(bootstrap_dissTOMs, function(x) hclust(d=x, method=hclustMethod)) # Do hierarchical clustering 
+      
+      # cut out modules in each gene tree
+      bootstrap_cutrees <- mapply(function(x,y) cutreeHybrid(dendro = x, distM = as.matrix(y), cutHeight = NULL, minClusterSize = cutree_params_final$minClusterSize, deepSplit = cutree_params_final$deepSplit, pamStage = cutree_params_final$pamStage, pamRespectsDendro = cutree_params_final$pamStage), bootstrap_geneTrees, bootstrap_dissTOMs, SIMPLIFY=F) 
+      
+      # merge modules with correlated eigengenes
+      bootstrap_merged <- mapply(function(x,y) mergeCloseModules(exprData = as.matrix(x$data)[,goodGenesTOM_idx], colors = y$labels, cutHeight=cutree_params_final$moduleMergeCutHeight), multiExpr, bootstrap_cutrees, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
+      
+      bootstrap_colors = lapply(bootstrap_merged, function(x) labels2colors(x$colors)) 
+      
+      bootstrap_labels <- c("Original data", paste0("Permutation ", as.character(bootstrap_seq)[-max(bootstrap_seq)]))
+      
+      # Free up memory
+      rm(bootstrap_indiv_TOMs)
+      rm(bootstrap_dissTOMs)
+      
+      # Align the module coloring schemes 
+      bootstrap_colors_final = matrix(0, ncol(datExpr_filter), nPermutations + 1)
+      bootstrap_colors_final[, 1] = colors # use the consensus colors as 'reference'
+      
+      for (r in 2:(nPermutations+1))
+      {
+        bootstrap_colors_final[, r] = matchLabels(source = bootstrap_colors[[r-1]], # traverse gene colour assignments
+                                  reference = bootstrap_colors_final[, 1],
+                                  pThreshold = 5e-2,
+                                  na.rm = TRUE,
+                                  extraLabels = standardColors())# paste0("Extra_", 0:100)) # labels for modules in source that cannot be matched to any modules in reference
+      }
+
+      bootstrap_labels_final <- c("Consensus", bootstrap_labels)
+
+      pdf(sprintf("%s%s_%s_diffbootstrap_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=8)
+      plotDendroAndColors(geneTree, 
+                          labels2colors(bootstrap_colors_final),
+                          #matrix(unlist(bootstrap_colors_final), ncol = length(bootstrap_labels_final), byrow = F), 
+                          groupLabels=bootstrap_labels_final, 
+                          addGuide= TRUE, 
+                          dendroLabels=FALSE, 
+                          main="Modules: consensus and on each resampling", 
+                          cex.colorLabels=0.5)
+      dev.off()
     }
-  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_plot_colors_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F))
+  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_plot_colors_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F))
+  
+  # clear up
+  if (nPermutations>0) rm(multiExpr)
   
   #rm(datExpr_filter)
   ######################################################################
@@ -1128,17 +998,19 @@ parRWGCNA = function(sNames) {
   ensembl_PPI_out <- NULL
   
   tryCatch({
+    
     if (!is.null(ensembl_dataset)) {
       ensembl_IDs <- perslabMusEnsembl$ensembl_gene_id[match(names(colors), perslabMusEnsembl$gene_name_optimal)] 
       ensembl_out <- data.frame(module_name = colors, ensembl_ID = ensembl_IDs, row.names = NULL)
       prop_not_map <- paste0("EnsemblID_proportion_not_mapped:_", signif(as.double(sum(is.na(ensembl_IDs))) / as.double(1e-10+length(ensembl_IDs)),2))
-      write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", dir_tables, data_prefix, sNames, prop_not_map, flag_date))
+      write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, sNames, prop_not_map, flag_date))
+      
       if (!is.null(colors_PPI)) {
         colors_PPI_noGrey <- colors_PPI[colors_PPI != grey]
         ensembl_PPI_IDs <- perslabMusEnsembl$ensembl_gene_id[match(names(colors_PPI_noGrey), perslabMusEnsembl$gene_name_optimal)] 
         ensembl_PPI_out <- data.frame(module_name_PPI = colors_PPI_noGrey, ensembl_ID = ensembl_PPI_IDs, row.names = NULL) 
         prop_not_map_PPI <- paste0("EnsemblID_PPI_proportion_not_mapped:_", signif(as.double(sum(is.na(ensembl_PPI_IDs))) / as.double(1e-10+length(ensembl_PPI_IDs)),2))
-        write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", dir_tables, data_prefix, sNames, prop_not_map_PPI, flag_date))
+        write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, sNames, prop_not_map_PPI, flag_date))
       }
     }
     # ensembl <- useMart("ensembl", dataset=ensembl_dataset) 
@@ -1151,7 +1023,7 @@ parRWGCNA = function(sNames) {
     # }
     
     
-  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_ensemblID_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F))
+  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_ensemblID_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F))
 
   ######################################################################
   ################### SAVE RUN OBJECTS, RESULTS AND PARAMS #############
@@ -1164,25 +1036,25 @@ parRWGCNA = function(sNames) {
     pkMEs <- cbind(colors=colors, genes=names(colors), pkMEs = pkMEs)
     
     # save kMEs and kMEs primary to file
-    write.csv(kMEs, file=sprintf("%s%s_%s_kMEs_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names=F)
-    write.csv(pkMEs, file=sprintf("%s%s_%s_pkMEs_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names = F)
+    write.csv(kMEs, file=sprintf("%s%s_%s_kMEs_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names=F)
+    write.csv(pkMEs, file=sprintf("%s%s_%s_pkMEs_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names = F)
     
     if (!is.null(kMEs_PPI)) {
       kMEs_PPI <- cbind(genes=names(colors_PPI), kMEs_PPI) 
       pkMEs_PPI <- data.frame(colors_PPI = colors_PPI, genes = names(colors_PPI), pkMEs_PPI = pkMEs_PPI) 
-      write.csv(kMEs_PPI, file=sprintf("%s%s_%s_kMEs_PPI_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names=F)
-      write.csv(pkMEs_PPI, file=sprintf("%s%s_%s_pkMEs_PPI_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names=F)
+      write.csv(kMEs_PPI, file=sprintf("%s%s_%s_kMEs_PPI_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names=F)
+      write.csv(pkMEs_PPI, file=sprintf("%s%s_%s_pkMEs_PPI_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names=F)
     }
     
     # ensembl IDs for LD score regression
     if (!is.null(ensembl_out)) {
-      write.csv(ensembl_out, file=sprintf("%s%s_%s_ensembl_out_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names=F)
-      if (!is.null(ensembl_PPI_out)) write.csv(ensembl_PPI_out, file=sprintf("%s%s_%s_ensembl_PPI_out_%s.csv", dir_tables, data_prefix, sNames, flag_date), row.names=F)
+      write.csv(ensembl_out, file=sprintf("%s%s_%s_ensembl_out_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names=F)
+      if (!is.null(ensembl_PPI_out)) write.csv(ensembl_PPI_out, file=sprintf("%s%s_%s_ensembl_PPI_out_%s.csv", tables_dir, data_prefix, sNames, flag_date), row.names=F)
     }   
 
-    save.image(file=sprintf("%s%s_%s_rsession_%s.RData", dir_RObjects, data_prefix, sNames, flag_date))
+    save.image(file=sprintf("%s%s_%s_rsession_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
     
-  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_save_results_ERROR_%s.csv", dir_project, data_prefix, sNames, flag_date), row.names = F))
+  }, error = function(c) write.csv("ERROR", file=sprintf("%s%s_%s_save_results_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F))
 }
   
 ##########################################################################
@@ -1218,7 +1090,26 @@ clusterEvalQ(cl, library(reshape))
 clusterEvalQ(cl, library(reshape2))
 clusterEvalQ(cl, library(ggplot2))
 
-parLapply(cl, sNames, function(x) parMagma(sNames = x, data_prefix=data_prefix, dir_tables=dir_tables, file_suffix=file_suffix, flag_date=flag_date))
+parLapply(cl, sNames, function(x) parMagma(subsetName = x, 
+                                           project_dir = project_dir, 
+                                           plots_dir = plots_dir, 
+                                           tables_dir = tables_dir, 
+                                           log_dir = log_dir, 
+                                           magma_gwas_dir = magma_gwas_dir, 
+                                           data_prefix = data_prefix, 
+                                           tables_dir = tables_dir, 
+                                           file_suffix = file_suffix, 
+                                           flag_date = flag_date))
+
+lapply(sNames, function(x) parMagma(subsetName = x, 
+                                   project_dir = project_dir, 
+                                   plots_dir = plots_dir, 
+                                   log_dir = log_dir,
+                                   tables_dir = tables_dir,
+                                   magma_gwas_dir = magma_gwas_dir, 
+                                   data_prefix = data_prefix, 
+                                   file_suffix = file_suffix, 
+                                   flag_date = flag_date))
 
 stopCluster(cl)
 
