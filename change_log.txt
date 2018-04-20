@@ -1,5 +1,22 @@
 # Change log
 
+## v1.4 - 2018-04-20
+
+### Changed
+* Reintroduced cell filtering based on mito
+* Set nPC_seurat, i.e. PCs to calculate, from 75 to 200
+* Increased RunPCA maxit parameter for IRLBA from 300 to 1000
+* Edit_180420_2 set jackstraw num.replicate from 100 to 1000 (as recommended in Seurat tutorial)
+* EDIT_180420_3: if genes_use == "PCA", select genes that load significantly on significant PCs
+* EDIT_180420_5: remove hvg option - since hvg just ranks all genes, it only makes sense if we set a number cutoff (and its probably not a good way to pick genes)
+Rename plot labels to plot_labels
+* Do MAGMA for modules also w/o PPI enrichment filtering
+
+### Fixed 
+* kME reassign: make sure old_colors declared before if statement
+* Rather than nPC_seurat, use npc.compute (the actual number of PCs computed by RunPCA, given the size of the matrix) downstream. Could lead to problems if nPC_seurat > pcs.compute
+* parMagma: renamed dir_tables tables_dir
+
 ## v1.3 - 2018-04-20
 
 ### fixed
