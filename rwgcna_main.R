@@ -6,37 +6,44 @@
 
 # e.g.
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-5/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-5 --min.cells 5 --do.center TRUE --genes_use PCA_7500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE,FALSE)" --moduleMergeCutHeight "c(0.20,0.25)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-6 --min.cells 5 --do.center TRUE --genes_use PCA_7500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-2 --min.cells 5 --do.center TRUE --genes_use PCA_7500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_filter.RData --project_dir /projects/jonatan/tmp-epilepsy/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-1 --meta.data_ID res.0.6 --min.cells 5 --do.center TRUE --genes_use PCA_7500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 100 --replace T --STRINGdb_species 9606 --plot_permuted F --n_cores 3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_cell_ontology_sub_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-2 --min.cells 5 --do.center TRUE --genes_use PCA_7500 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 13
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-5/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-5 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE,FALSE)" --moduleMergeCutHeight "c(0.20,0.25)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-6 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-2 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_filter.RData --project_dir /projects/jonatan/tmp-epilepsy/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-1 --meta.data_ID res.0.6 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 100 --replace T --STRINGdb_species 9606 --plot_permuted F --n_cores 3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_cell_ontology_sub_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-2 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 13
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
 
-# seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData"
-# project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-17/"
-# magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/"
-# data_prefix = "tmp-17"
-# meta.data_ID = NULL
-# min.cells = 5
-# do.center = T
-# genes_use = "PCA_5000"
-# corFnc = "cor"
-# networkType = "signed"
-# anti_cor_action = NULL
-# minClusterSize = c(20)
-# deepSplit = c(1,2)
-# pamStage = c(TRUE)
-# moduleMergeCutHeight = c(0.2)
-# replace = T
-# nPermutations = 2
-# STRINGdb_species = 10090
-# ensembl_dataset = "mmusculus_gene_ensembl"
-# plot_permuted = T
-# n_cores = 5
+if (FALSE) { 
+  seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData"
+  project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell-s-1/"
+  magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/"
+  data_prefix = "campbell-s-1"
+  meta.data_ID = NULL
+  min.cells = 5
+  do.center = T
+  
+  # EDIT_180420_1 #
+  #genes_use = "PCA_5000"
+  genes_use = "PCA"
+  #
+  
+  corFnc = "cor"
+  networkType = "signed"
+  anti_cor_action = NULL
+  minClusterSize = c(20)
+  deepSplit = c(1,2)
+  pamStage = c(TRUE)
+  moduleMergeCutHeight = c(0.2)
+  replace = T
+  nPermutations = 2
+  STRINGdb_species = 10090
+  ensembl_dataset = "mmusculus_gene_ensembl"
+  plot_permuted = T
+  n_cores = 5
+}
 
 ######################################################################
 ########################### OptParse #################################
@@ -60,8 +67,18 @@ option_list <- list(
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5."),
   make_option("--do.center", type="logical", default=T,
               help="Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out."),
-  make_option("--genes_use", type="character", default="PCA_5000",
-              help="One of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of genes with high loading on at least one PC>'"), 
+  # EDIT_180420_1
+  # Remove number of genes
+  # make_option("--genes_use", type="character", default="PCA_5000",
+  #             help="One of 'all', 'var.genes', 'hvg', or 'PCA' for genes with significant loading on at least one PC. Defaults to PC"), 
+  # make_option("--genes_use", type="character", default="PCA",
+  #             help="One of 'all', 'var.genes', 'hvg' for highly variable genes, or 'PCA' for genes with significant loading on at least one significant PC. Defaults to 'PCA'"), 
+  # 
+  # EDIT_180420_5 #
+  # Delete hvg option
+  make_option("--genes_use", type="character", default="PCA",
+              help="One of 'all', 'var.genes' or 'PCA' for genes with significant loading on at least one significant PC. Defaults to 'PCA'"), 
+  #################
   make_option("--corFnc", type="character", default="cor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function."), 
   make_option("--networkType", type="character", default = "signed",
@@ -206,9 +223,6 @@ if (!is.null(ensembl_dataset)) {
 
 if (nPermutations < 1) plot_permuted <- F 
 
-# Set MAGMA variable values
-file_suffix = if (!is.null(STRINGdb_species)) "kMEs_PPI" else "kMEs"
-
 ######################################################################
 ############################ CHECK INPUT #############################
 ######################################################################
@@ -217,7 +231,19 @@ if (min.cells < 0) stop("min.cells must be a non-negative integer")
 if (min.cells > 10 | min.cells < 3) warning("Recommended values for min.cells are between 3 and 10")
 
 if (!(sapply(c("all", "var.genes", "hvg", "PCA"), function(x) grepl(x, genes_use, ignore.case=T)) %>% any())) {
-  stop("genes_use must be one of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'")
+  # EDIT_180420_1 #
+  # Remove gene number
+  # stop("genes_use must be one of 'all', 'var.genes', 'hvg_<number of highly variable genes>', 'PCA_<number of high loading genes>'")
+  #
+  # stop("genes_use must be one of 'all', 'var.genes', 'hvg', 'PCA'")
+  #
+  #################
+  # EDIT_180420_5 #
+  # Delete hvg option
+  # 
+  # stop("genes_use must be one of 'all', 'var.genes', 'hvg', 'PCA'")
+  stop("genes_use must be one of 'all', 'var.genes' or 'PCA'")
+  
 }
 
 if (!corFnc %in% c("cor", "bicor")) stop("corFnc must be one of 'cor' for Pearson's or 'bicor' for biweighted midcorrelation")
@@ -361,7 +387,7 @@ parRWGCNA = function(sNames) {
   
   if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) {
     vars.to.regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)]
-    #seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.regress, low.thresholds = c(200, -Inf), high.thresholds = c(5000, 0.2)) 
+    seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.regress, low.thresholds = c(200, -Inf), high.thresholds = c(Inf, 0.2)) 
   } else {
     warning("nUMI and percent.mito not found in Seurat object meta data")
   }
@@ -378,18 +404,32 @@ parRWGCNA = function(sNames) {
                                   #num.cores = n_cores,
                                   do.scale=T,
                                   do.center=T)
-        
-    seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
-                                        x.low.cutoff = 0.0125,
-                                        x.high.cutoff = 3,
-                                        y.cutoff = 0.5, 
-                                        do.plot=F)
+    # EDIT_180420_3 #
+    # Moved down since we use all genes for PCA
+    # seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
+    #                                     x.low.cutoff = 0.0125,
+    #                                     x.high.cutoff = 3,
+    #                                     y.cutoff = 0.5, 
+    #                                     do.plot=F)
+    ############
     
     if (grepl("PCA", genes_use, ignore.case = T)) {
+      
+      pcs.compute = min(nPC_seurat, 
+                        # EDIT_180420_3
+                        # Need to save pcs.compute as a variable for downstream, since its value might differ from nPC_seurat 
+                        #length(seurat_obj_sub@var.genes)-1, 
+                        nrow(seurat_obj_sub@data)-1, 
+                        ##########################
+                        
+                        ncol(seurat_obj_sub@data)-1)
+      
       seurat_obj_sub <- RunPCA(object = seurat_obj_sub,
-                               pcs.compute = min(nPC_seurat, 
-                                                 length(seurat_obj_sub@var.genes)-1, 
-                                                 ncol(seurat_obj_sub@data)-1),
+                               # EDIT_180420_3
+                               # Added in order to get jackstraw significance for all genes. Default is var.genes
+                               pc.genes = rownames(seurat_obj_sub@data),
+                               ######
+                               pcs.compute = pcs.compute,
                                weight.by.var = F,#T,#F,
                                do.print = F,
                                seed.use = randomSeed,
@@ -400,49 +440,56 @@ parRWGCNA = function(sNames) {
       # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
       # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
       
-      # seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
-      #                             num.pc = nPC_seurat,
-      #                             num.replicate = 100,
-      #                             display.progress = FALSE,
-      #                             do.par = F)#T,
-      #                             #num.cores = 10)
-      # 
-      # score.thresh = (5e-2)/nPC_seurat # TODO: Is this a suitable multiple testing adjustment
-      # 
-      # pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value
-      # pAll <- pAll[, 1:nPC_seurat, drop = FALSE]
-      # pAll <- as.data.frame(pAll)
-      # pAll$Contig <- rownames(x = pAll)
-      # pAll.l <- melt(data = pAll, id.vars = "Contig")
-      # colnames(x = pAll.l) <- c("Contig", "PC", "Value")
-      # 
-      # score.df <- NULL
-      # 
-      # for (i in (1:nPC_seurat)) {
-      #   pc.score <- suppressWarnings(prop.test( # test if there ais
-      #     x = c(length(x = which(x = pAll[, i] <= score.thresh)), floor(x = nrow(x = pAll) * score.thresh)),
-      #     n = c(nrow(pAll), nrow(pAll)))$p.val)
-      #   if (length(x = which(x = pAll[, i] <= score.thresh)) == 0) {
-      #     pc.score <- 1
-      #   }
-      #   if (is.null(x = score.df)) {
-      #     score.df <- data.frame(PC = paste0("PC", i), Score = pc.score)
-      #   } else {
-      #     score.df <- rbind(score.df, data.frame(PC = paste0("PC",i), Score = pc.score))
-      #   }
-      # }
-      # 
-      # PC_select_idx <- which(score.df$Score < score.thresh)
-      # 
+      seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
+                                  num.pc = pcs.compute,
+                                  # Edit_180420_2 #
+                                  #num.replicate = 100,
+                                  num.replicate = 1000, #50
+                                  #####
+                                  display.progress = FALSE,
+                                  do.par = F)#T,
+                                  #num.cores = 15)
+
+      score.thresh = (5e-2)/pcs.compute # TODO: Is this a suitable multiple testing adjustment
+
+      pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value
+      pAll <- pAll[, 1:pcs.compute, drop = FALSE]
+      pAll <- as.data.frame(pAll)
+      pAll$Contig <- rownames(x = pAll)
+      pAll.l <- melt(data = pAll, id.vars = "Contig")
+      colnames(x = pAll.l) <- c("Contig", "PC", "Value")
+
+      score.df <- NULL
+
+      for (i in (1:pcs.compute)) {
+        pc.score <- suppressWarnings(prop.test( 
+          x = c(length(x = which(x = pAll[, i] <= score.thresh)), floor(x = nrow(x = pAll) * score.thresh)),
+          n = c(nrow(pAll), nrow(pAll)))$p.val)
+        if (length(x = which(x = pAll[, i] <= score.thresh)) == 0) {
+          pc.score <- 1
+        }
+        if (is.null(x = score.df)) {
+          score.df <- data.frame(PC = paste0("PC", i), Score = pc.score)
+        } else {
+          score.df <- rbind(score.df, data.frame(PC = paste0("PC",i), Score = pc.score))
+        }
+      }
+
+      PC_select_idx <- which(score.df$Score < score.thresh)
+      
     }
 
   }
-
+  
+  # checkpoint for changing the script
+  if (FALSE) {
+    save.image(file=sprintf("%s%s_%s_checkpoint_1.1_JackStraw_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
+  }
+  
   # Select genes
 
   if (do.center == F | genes_use == "all") {
     seurat_obj_sub <- ScaleData(object = seurat_obj_sub, 
-                                #genes.use = NULL, # default: genes.use = all genes in @data
                                 vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.regress else NULL, 
                                 model.use="linear",
                                 do.par=F,#T,
@@ -455,20 +502,45 @@ parRWGCNA = function(sNames) {
     # Select a subset of the genes 
     if (genes_use == "all") {
       input_data <- seurat_obj_sub@scale.data
-    } else if (genes_use == "var.genes") {
+    
+      } else if (genes_use == "var.genes") {
+      # EDIT_180420_3 #
+      # Added - since we don't do it for PCA anymore
+      seurat_obj_sub <- FindVariableGenes(object = seurat_obj_sub,
+                                          x.low.cutoff = 0.0125,
+                                          x.high.cutoff = 3,
+                                          y.cutoff = 0.5, 
+                                          do.plot=F)
+      ########
+      
       input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% seurat_obj_sub@var.genes,] 
+      
     } else if (grepl("PCA", genes_use, ignore.case = T)) {
-      n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
-      seurat_obj_sub <- ProjectPCA(seurat_obj_sub, do.print = F, pcs.print = NULL, pcs.store = nPC_seurat, genes.print = NULL, replace.pc=F, do.center=T)
-      #seurat_obj_sub@dr$pca@gene.loadings.full <- seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]
-      max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
-      names_genes_use = names(sort(max_loads, decreasing=T)[1:n_genes])
-      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
-    } else if (grepl("hvg", genes_use, ignore.case = T)) {
-      n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
-      names_genes_use = rownames(seurat_obj_sub@hvg.info)[order(seurat_obj_sub@hvg.info$gene.dispersion.scaled, decreasing=T)][1:n_genes]
-      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
+      
+      ##### EDIT 180420_1 #########
+      # Changing selection to as to pick significant loading genes on significant PCs
+      
+      # n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
+      # seurat_obj_sub <- ProjectPCA(seurat_obj_sub, do.print = F, pcs.print = NULL, pcs.store = pcs.compute, genes.print = NULL, replace.pc=F, do.center=T)
+      # #seurat_obj_sub@dr$pca@gene.loadings.full <- seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]
+      # max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
+      # names_genes_use = names(sort(max_loads, decreasing=T)[1:n_genes])
+      # input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
+      pAll[,pcs.compute+1] <- NULL # remove the column of gene names
+      row_min <- apply(pAll, MARGIN = 1, FUN = function(x) min(x))
+      names_genes_use <- rownames(pAll)[row_min < score.thresh]
+      input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,]
     }
+      ##############################
+      # EDIT_180420_5 #
+      # DELETED
+      #   else if (grepl("hvg", genes_use, ignore.case = T)) {
+      #   n_genes <- as.numeric(gsub("[^0-9]", "", genes_use))
+      #   names_genes_use = rownames(seurat_obj_sub@hvg.info)[order(seurat_obj_sub@hvg.info$gene.dispersion.scaled, decreasing=T)][1:n_genes]
+      #   input_data <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] 
+      #   
+      # }
+      ########
   }, error = function(c) {
     save.image(file=sprintf("%s%s_%s_input_data_selection_ERROR_%s.Rdata", project_dir, data_prefix, sNames, flag_date))  
     #write.csv("ERROR", file=sprintf("%s%s_%s_input_data_selection_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
@@ -732,7 +804,11 @@ parRWGCNA = function(sNames) {
   
   list_MEs = lapply(list_merged, function(x) x$MEGs) # list of merged color eigengenes
   
-  labels <- lapply(comb_list, function(x) parLabel(comb=x)) # list of labels for plot
+  # EDIT_180420_6
+  # change name to disambiguate. Also in functions.R
+  #labels <- lapply(comb_list, function(x) parLabel(comb=x)) # list of labels for plot
+  plot_labels <- lapply(comb_list, function(x) parPlotLabel(comb=x)) # list of labels for plot
+  ########
   
   # Get the colors and put them in a list
   list_colors = lapply(list_merged, function(x) extract_and_name_colors(merged=x, datExpr_filter=datExpr_filter)) # list of merged colors
@@ -760,8 +836,10 @@ parRWGCNA = function(sNames) {
     diffParams_colors <- NULL
     list_colors_matched <- list_colors
   }  
-    
-  names(list_colors_matched) <- labels
+  # EDIT_20180420_6
+  #names(list_colors_matched) <- labels
+  names(list_colors_matched) <- plot_labels
+  #
   
   for (j in 1:length(list_colors_matched)) {
     names(list_colors_matched[[j]]) <- colnames(datExpr_filter)
@@ -841,9 +919,11 @@ parRWGCNA = function(sNames) {
     rm(list_kME_reassign_out)
     
   }
-  
-  names(list_pkMEs) <- labels
+  # EDIT_20180420_6
+  #names(list_pkMEs) <- labels
 
+  names(list_pkMEs) <- plot_labels
+  ###
   
   # checkpoint for testing the script
   if (FALSE) {
@@ -870,14 +950,19 @@ parRWGCNA = function(sNames) {
   # If we have more than one set of colourings, count the number of assigned genes per set and rank the sets by it
   if (length(list_colors_PPI)>1)    {
     n_grey <- sapply(list_colors_PPI, function(x) sum(x=="grey"), simplify=T)
-
-    labels_order <- labels[order(n_grey, decreasing=F)]
+    # EDIT_20180420_6
+    #labels_order <- labels[order(n_grey, decreasing=F)]
+    plot_labels_order <- plot_labels[order(n_grey, decreasing=F)]
+    ###
     MEs_order <- list_MEs[order(n_grey, decreasing=F)]
     kMEs_order <- list_kMEs[order(n_grey, decreasing=F)]
     pkMEs_order <- list_pkMEs[order(n_grey, decreasing=F)]
     list_reassigned_order <- list_reassigned[order(n_grey, decreasing=F)]
     list_colors_PPI_order <- list_colors_PPI[order(n_grey, decreasing=F)]
   
+    
+    
+    
     diffParams_colors_PPI_order = matrix(unlist(list_colors_PPI_order), nrow=ncol(datExpr_filter), ncol=n_combs)
   
     pdf(sprintf("%s%s_%s_diffParams_colors_PPI_order_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=6+length(list_colors_PPI) %/% 2)
@@ -885,17 +970,19 @@ parRWGCNA = function(sNames) {
                       #labels2colors(list_colors_PPI_order),
                       #matrix(unlist(list_colors_PPI_order), ncol = length(list_colors_PPI_order), byrow = F), 
                       diffParams_colors_PPI_order,
-                      groupLabels=labels_order, 
+                      groupLabels=plot_labels_order, 
                       addGuide= TRUE, 
                       dendroLabels=FALSE, 
                       main="Diff. params modules, PPI enriched, ranked by n assigned genes.", 
                       cex.colorLabels=0.5)
     dev.off()
     
-    # Select a set of preferred colors and add them as the first column to be shown at the top of the figure
-    colors <- list_colors_matched[order(n_grey, decreasing=F)][[1]]
+    # Select a set of preferred colors filtered for PPI enrichment and add them as the first column to be shown at the top of the figure
     colors_PPI <- list_colors_PPI_order[[1]]
-    label <- labels_order[[1]]
+
+    # Select corresponding set of colors and parameter sets obtained prior to the PPI enrichment filtering
+    colors <- list_colors_matched[order(n_grey, decreasing=F)][[1]] 
+    plot_label <- plot_labels_order[[1]]
     MEs <- MEs_order[[1]]
     kMEs <- kMEs_order[[1]]
     pkMEs <- pkMEs_order[[1]]
@@ -904,9 +991,12 @@ parRWGCNA = function(sNames) {
 
   } else if (length(list_colors_PPI)==1) {
   
-    colors <- list_colors_matched[[1]]
+    # Just extract the single PPI set of colors
     colors_PPI <- list_colors_PPI[[1]]
-    label = labels[[1]]
+    
+    # Extract the single colors and parameter sets obtained prior to the PPI enrichment filtering
+    plot_label = plot_labels[[1]]
+    colors <- list_colors_matched[[1]]
     MEs = list_MEs[[1]]
     kMEs = list_kMEs[[1]]
     pkMEs = list_pkMEs[[1]]
@@ -923,7 +1013,7 @@ parRWGCNA = function(sNames) {
   }
   
   # clear up  
-  rm(labels, list_MEs, list_kMEs, list_pkMEs, list_reassigned, list_colors_PPI)
+  rm(list_colors_matched, plot_labels, list_MEs, list_kMEs, list_pkMEs, list_reassigned, list_colors_PPI)
   
   ######################################################################
   ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
@@ -977,7 +1067,7 @@ parRWGCNA = function(sNames) {
     pdf(sprintf("%s%s_%s_final_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=5)
     plotDendroAndColors(geneTree,
                           all_colors,
-                          groupLabels = c(label, "PPI enriched"),
+                          groupLabels = c(plot_label, "PPI enriched"),
                           addGuide=T,
                           dendroLabels=F,
                           main="Final colors",
@@ -1010,7 +1100,7 @@ parRWGCNA = function(sNames) {
       
       bootstrap_colors = lapply(bootstrap_merged, function(x) labels2colors(x$colors)) 
       
-      bootstrap_labels <- c("Original data", paste0("Permutation ", as.character(bootstrap_seq)[-max(bootstrap_seq)]))
+      bootstrap_plot_labels <- c("Original data", paste0("Permutation ", as.character(bootstrap_seq)[-max(bootstrap_seq)]))
       
       # Free up memory
       rm(bootstrap_indiv_TOMs)
@@ -1029,13 +1119,13 @@ parRWGCNA = function(sNames) {
                                   extraLabels = standardColors())# paste0("Extra_", 0:100)) # labels for modules in source that cannot be matched to any modules in reference
       }
 
-      bootstrap_labels_final <- c("Consensus", bootstrap_labels)
+      bootstrap_plot_labels_final <- c("Consensus", bootstrap_plot_labels)
 
       pdf(sprintf("%s%s_%s_diffbootstrap_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=8)
       plotDendroAndColors(geneTree, 
                           labels2colors(bootstrap_colors_final),
-                          #matrix(unlist(bootstrap_colors_final), ncol = length(bootstrap_labels_final), byrow = F), 
-                          groupLabels=bootstrap_labels_final, 
+                          #matrix(unlist(bootstrap_colors_final), ncol = length(bootstrap_plot_labels_final), byrow = F), 
+                          groupLabels=bootstrap_plot_labels_final, 
                           addGuide= TRUE, 
                           dendroLabels=FALSE, 
                           main="Modules: consensus and on each resampling", 
@@ -1174,6 +1264,13 @@ message("WGCNA all done, running MAGMA..")
 #                                            file_suffix = file_suffix,
 #                                            flag_date = flag_date))
 
+# Set MAGMA variable values
+
+# EDIT_180420_7
+# Moved from parameter section
+# Do MAGMA analysis for modules both before and after PPI enrichment testing
+file_suffix = "kMEs"
+
 lapply(sNames, function(x) parMagma(subsetName = x,
                                    project_dir = project_dir,
                                    plots_dir = plots_dir,
@@ -1183,6 +1280,20 @@ lapply(sNames, function(x) parMagma(subsetName = x,
                                    data_prefix = data_prefix,
                                    file_suffix = file_suffix,
                                    flag_date = flag_date))
+
+if (!is.null(STRINGdb_species)) {
+  file_suffix = "kMEs_PPI"
+  lapply(sNames, function(x) parMagma(subsetName = x,
+                                      project_dir = project_dir,
+                                      plots_dir = plots_dir,
+                                      log_dir = log_dir,
+                                      tables_dir = tables_dir,
+                                      magma_gwas_dir = magma_gwas_dir,
+                                      data_prefix = data_prefix,
+                                      file_suffix = file_suffix,
+                                      flag_date = flag_date))
+}
+###
 
 #stopCluster(cl)
 
