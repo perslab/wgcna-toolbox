@@ -1,5 +1,16 @@
 # Change log
 
+## v1.3 - 2018-04-20
+
+### fixed
+* Plotting error due to giving wrong arguments
+* for plotting colors: use matrix rather than as.matrix
+* corrected references to list_colors instead of list_colors_matched
+
+### Added
+* For testing changes: added save.image checkpoints 
+* tryCatch now saves session image to file in case of error
+
 ## v1.2 - 2018-04-19
 
 ### Changed
