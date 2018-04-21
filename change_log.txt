@@ -1,5 +1,15 @@
 # Change log
 
+## v1.5 - 2018-04-21
+
+### Changed
+* EDIT_180421_3  num.replicate for JackStraw is now a user parameter
+
+### Fixed
+* EDIT_180420_8 in FilterCells: 'subset.names', 'low.thresholds', and 'high.thresholds' must all have the same length 
+* EDIT_180421_1 removed ~~list_reassigned~~
+* EDIT_180421_2 rm(list_list_kME_reassign_in, )
+
 ## v1.4 - 2018-04-20
 
 ### Changed
