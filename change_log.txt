@@ -1,5 +1,15 @@
 # Change log
 
+## v1.6 - 2018-04-21
+
+### Changed
+* Updated readme.txt
+*  EDIT_180421_5 if (anti_cor_action == "kME_reassign")  - not just if(!is.null(anti_cor_action
+* wrapped magma script call in invisible()
+
+### Fixed
+* "kME_reassign_fnc: color**s**
+
 ## v1.5 - 2018-04-21
 
 ### Changed
