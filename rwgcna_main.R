@@ -6,11 +6,15 @@
 
 # e.g.
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-5/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-5 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE,FALSE)" --moduleMergeCutHeight "c(0.20,0.25)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-sub-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-sub-6 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted T --n_cores 5
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-2 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_filter.RData --project_dir /projects/jonatan/tmp-epilepsy/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-1 --meta.data_ID res.0.6 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 100 --replace T --STRINGdb_species 9606 --plot_permuted F --n_cores 3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_cell_ontology_sub_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-2 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 13
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-4 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 8
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed  --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 5
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_filter.RData --project_dir /projects/jonatan/tmp-epilepsy/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed  --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 100 --replace T --STRINGdb_species 9606 --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-1 --min.cells 3 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-2 --min.cells 3 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-3/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-3 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
+
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
@@ -93,8 +97,13 @@ option_list <- list(
               help = "Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)'. Defaults to 'c(0.2)'"),
   make_option("--pamStage", type="character", default="c(TRUE)",
               help = "cutreeHybrid. Perform additional Partition Around Medroids step? Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', default 'c(TRUE)'"),
+  # EDIT_180421_3
+  ## added
+  make_option("--num.replicate", type="integer", default=500L,
+              help = "Number of times to resample to make null distributions for empirical significance tests in JackStraw and other functions. Integer, defaults to 500."),
+  ###
   make_option("--nPermutations", type="integer", default=100L,
-              help = "Number of times to permute the dataset, defaults to 100"),
+              help = "Number of times to resample the dataset, defaults to 100"),
   make_option("--replace", type="logical", default=TRUE,
               help = "Sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time."),
   make_option("--STRINGdb_species", type="integer", default="10090",
@@ -165,6 +174,10 @@ deepSplit <- eval(parse(text=opt$deepSplit))
 moduleMergeCutHeight <- eval(parse(text=opt$moduleMergeCutHeight))
 
 pamStage <- eval(parse(text=opt$pamStage))
+
+# EDIT_180421_3
+num.replicate <- opt$num.replicate
+###
 
 nPermutations <- opt$nPermutations
 
@@ -259,8 +272,15 @@ if (min(minClusterSize) < 5) stop("minClusterSize must be a vector of integers o
 if (max(deepSplit) > 4 | min(deepSplit) < 0) stop("deepSplit must be a vector of integers between 0 and 4")
 
 if (min(moduleMergeCutHeight) < 0 | max(moduleMergeCutHeight) > 1) stop("moduleMergeCutHeight must be a vector of doubles between 0 and 1, recommended range is between 0.1 and 0.2")
-  
-if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be in the range 0-100")
+
+# EDIT_180421_3
+if (! (num.replicate >= 1)) stop("num.replicate must be 1 or higher")
+###
+
+# EDIT_180421_4
+#if (! (nPermutations >= 0 & nPermutations <= 100)) stop("nPermutations must be in the range 0-100")
+if (! (nPermutations >= 0)) stop("nPermutations must be non-negative")
+###
 
 if (plot_permuted == T) warning("plotting modules on permuted datasets increases processing time")
 
@@ -305,9 +325,6 @@ message("Seurat object loaded and subsetted")
 
 subsets_n_cells <- data.frame(subset = sNames, n_cells = as.numeric(table(seurat_obj@ident)))
 
-# Free up memory
-rm(seurat_obj)
-
 userParams <- cbind(list("seurat_path" = seurat_path,
                          "project_dir" = project_dir,
                          "magma_gwas_dir" = magma_gwas_dir,
@@ -323,6 +340,9 @@ userParams <- cbind(list("seurat_path" = seurat_path,
                          "deepSplit" = deepSplit,
                          "pamStage" = pamStage,
                          "moduleMergeCutHeight" = moduleMergeCutHeight,
+                         # EDIT_180421_3
+                         "num.replicate" = num.replicate,
+                         ###
                          "nPermutations" = nPermutations,
                          "replace" = replace,
                          "STRINGdb_species" = STRINGdb_species,
@@ -354,6 +374,7 @@ if (FALSE) {
 rm(userParams)
 rm(builtInParams)
 rm(subsets_n_cells)
+rm(seurat_obj)
 
 ######################################################################
 ############# DEFINE THE FUNCTION FOR PARALLEL EXECUTION #############
@@ -386,8 +407,16 @@ parRWGCNA = function(sNames) {
   }
   
   if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) {
-    vars.to.regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)]
-    seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.regress, low.thresholds = c(200, -Inf), high.thresholds = c(Inf, 0.2)) 
+    # EDIT_180420_8
+    # fix bug: 'subset.names', 'low.thresholds', and 'high.thresholds' must all have the same length 
+    #vars.to.regress = c("nUMI", "percent.mito")[c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)]
+    #seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.regress, low.thresholds = c(200, -Inf), high.thresholds = c(Inf, 0.2)) 
+    
+    idx = c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data)
+    vars.to.regress = c("nUMI", "percent.mito")[idx]
+
+    seurat_obj_sub <- FilterCells(object = seurat_obj_sub, subset.names = vars.to.regress, low.thresholds = c(200,-Inf)[idx], high.thresholds = c(Inf, 0.2)[idx]) 
+    
   } else {
     warning("nUMI and percent.mito not found in Seurat object meta data")
   }
@@ -442,9 +471,10 @@ parRWGCNA = function(sNames) {
       
       seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
                                   num.pc = pcs.compute,
-                                  # Edit_180420_2 #
-                                  #num.replicate = 100,
-                                  num.replicate = 1000, #50
+                                  # Edit_180421_3 #
+                                  # Make num.replicate a user parameter (also for correlating modules)
+                                  #num.replicate = 200,
+                                  num.replicate = num.replicate, #50
                                   #####
                                   display.progress = FALSE,
                                   do.par = F)#T,
@@ -916,7 +946,9 @@ parRWGCNA = function(sNames) {
     })
     
     # Free up memory
-    rm(list_kME_reassign_out)
+    # EDIT_180421_2
+    #rm(list_kME_reassign_out)
+    rm(list_list_kME_reassign_in, list_kME_reassign_out)
     
   }
   # EDIT_20180420_6
@@ -957,7 +989,8 @@ parRWGCNA = function(sNames) {
     MEs_order <- list_MEs[order(n_grey, decreasing=F)]
     kMEs_order <- list_kMEs[order(n_grey, decreasing=F)]
     pkMEs_order <- list_pkMEs[order(n_grey, decreasing=F)]
-    list_reassigned_order <- list_reassigned[order(n_grey, decreasing=F)]
+    # EDIT_180421_1
+    #list_reassigned_order <- list_reassigned[order(n_grey, decreasing=F)]
     list_colors_PPI_order <- list_colors_PPI[order(n_grey, decreasing=F)]
   
     
@@ -965,7 +998,7 @@ parRWGCNA = function(sNames) {
     
     diffParams_colors_PPI_order = matrix(unlist(list_colors_PPI_order), nrow=ncol(datExpr_filter), ncol=n_combs)
   
-    pdf(sprintf("%s%s_%s_diffParams_colors_PPI_order_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=6+length(list_colors_PPI) %/% 2)
+    pdf(sprintf("%s%s_%s_diffParams_colors_PPI_order_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=6+length(list_colors_PPI) %/% 2)
     plotDendroAndColors(geneTree, 
                       #labels2colors(list_colors_PPI_order),
                       #matrix(unlist(list_colors_PPI_order), ncol = length(list_colors_PPI_order), byrow = F), 
@@ -1013,7 +1046,7 @@ parRWGCNA = function(sNames) {
   }
   
   # clear up  
-  rm(list_colors_matched, plot_labels, list_MEs, list_kMEs, list_pkMEs, list_reassigned, list_colors_PPI)
+  rm(list_colors_matched, plot_labels, list_MEs, list_kMEs, list_pkMEs, list_colors_PPI)
   
   ######################################################################
   ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
@@ -1064,7 +1097,7 @@ parRWGCNA = function(sNames) {
     
     all_colors = if (!is.null(STRINGdb_species) & !is.null(colors_PPI)) cbind(colors, colors_PPI) else colors
    
-    pdf(sprintf("%s%s_%s_final_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=5)
+    pdf(sprintf("%s%s_%s_final_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=5)
     plotDendroAndColors(geneTree,
                           all_colors,
                           groupLabels = c(plot_label, "PPI enriched"),
@@ -1121,7 +1154,7 @@ parRWGCNA = function(sNames) {
 
       bootstrap_plot_labels_final <- c("Consensus", bootstrap_plot_labels)
 
-      pdf(sprintf("%s%s_%s_diffbootstrap_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=8,height=8)
+      pdf(sprintf("%s%s_%s_diffbootstrap_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=8)
       plotDendroAndColors(geneTree, 
                           labels2colors(bootstrap_colors_final),
                           #matrix(unlist(bootstrap_colors_final), ncol = length(bootstrap_plot_labels_final), byrow = F), 
