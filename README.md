@@ -6,43 +6,44 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 ### Overview
 
-Finds 'robust' gene modules in each `obj@ident` class in a Seurat format dataset:
+Finds 'robust' gene modules in a Seurat format dataset:
 
 1. Do seurat pre-processing [workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
 2. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
 3. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
-      If `--compare_params TRUE`, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on a module quality statistic (experimental).
+      If the user has given vectors of cutreeHybrid and mergeCloseModules parameters, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on the number of genes that are assigned to modules after checking the modules for Protein-Protein Interaction (PPI) enrichment via STRINGdb.
 4. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
-5. If `anti_cor_action == kME_reassign`, reassign genes with a negative kME to another module more than 1.25 times the magnitude of the kME to their own module.
-6. Filter modules for PPI enrichment.
-7. Perform MAGMA GWAS analysis - outputs to `/projects/jonatan/tmp-bmi-brain/`
+5. Use MAGMA GWAS statistics to assign FDR significance scores to the modules.
 
 ### Usage
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --data_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --dir_project /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --compare_params FALSE --scale_data FALSE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize 20 --deepSplit 2 --moduleMergeCutHeight 0.2 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --project dir /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2,3)" --moduleMergeCutHeight "c(0.2)" --num.replicate 500 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5`
 
 ### Args
 
-* `data_path`: Path to Seurat object with cell type identities in the `obj@ident` slot stores as .RData
-* `dir_project`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables will be created if they do not exist. Defaults to the directory one level up from input data dir.
+* `seurat_path`: Path to Seurat object, preferably with some QC based on nUMI and percent.mito
+* `project_dir`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables and log will be created if they do not exist. Defaults to the directory one level up from input data dir.
+* `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `data_prefix`: Dataset prefix for output files. Defaults to today's date.
-* `compare_params` = Compare many different cutreeHybrid parameters, plots different colorings and select best using module statistics. Experimental feature. Defaults to `FALSE`
+* `meta.data_ID`: Specify the name of a `seurat@meta.data$...` column to use for subsetting the Seurat object. If NULL (default) uses the `@ident` slot.
+* `min.cells`: What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5. 
 * `do.center`: Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out. Default to `TRUE`
-* `genes_use`: One of `"all"`, `"var.genes`", "`hvg_ _number of highly variable genes_"`, `"PCA_ _number of high loading genes_"` Defaults to `"PCA_5000"`
+* `genes_use`: One of `"all"`, `"var.genes"` for seurat var.genes, or `"PCA"` for genes that load significantly on at least one significant PC. Defaults to `"PCA"`
 * `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
 * `networkType`: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`. `"signed hybrid"` may be used together with `anti_cor_action == "kME_reassign"` to reassign genes to a new module if they are more anticorrelated with the module eigengene than they are positively correlated with their current module eigengene.
 * `anti_cor_action`: Optional. '"kME_reassign"' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with 'networkType == "signed hybrid"'
-* `minClusterSize`: Minimum genes needed to form a module, recommended range 5-25. Defaults to 15
-* `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes integer values 0-4, defaults to 2. Only applicable if `test_params == FALSE`
-* `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Recommended value range 0.1-0.2
-* `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
+* `minClusterSize`: Minimum genes needed to form a module. Takes a vector with one or more values, given as a string, e.g. `"c(15,20)"`. Recommended range 5-25. Defaults to `"c(15)"`
+* `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes a vector with one or more values, given as a string, e.g. `"c(2,3)"`. Takes integer values 0-4, defaults to `"c(2)"`. 
+* `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a vector with one or more values, given as a string, e.g. `"c(0.20, 0.25)"`. Recommended value range 0.05-0.25
+* `pamStage`: For `cutreeHybrid`. Perform additional Partition Around Medroids step? Takes a vector with one or two values, given as a string, e.g. `"c(TRUE,FALSE)"`, default `"c(TRUE)"`
+* `num.replicate`: Number of times to resample to make null distributions for empirical significance tests in `JackStraw` and other contexts. Integer, defaults to 500.
 * `nPermutations`: Number of times to permute the dataset, defaults to 100
+* `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
 * `STRINGdb_species`: Species for which to retrieve protein data from `STRINGdb` to validate clusters. Defaults to 10090, which is mus musculus. To skip this step set to `NULL`
-* `ensembl_dataset`: Dataset for ensemblIDs for outputting colors for LD score regression. Defaults to `"mmusculus_gene_ensembl"`. To skip this step set to `NULL`
-* `save_plots`: Save plots? Defaults to `TRUE`
-* `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally intensive. Defaults to `FALSE`
+* `ensembl_dataset`: Dataset for ensemblIDs for outputting colors for LD score regression. Defaults to `NULL`
+* `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally expensive. Defaults to `FALSE`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5
       
 ### Returns
@@ -104,9 +105,8 @@ session image for each cell type, saved to `dir_RObjects`, containing amongst ot
 * pickSoftThresholdSFTfit: pickSoftThreshold scale free topology plot
 * pickSoftThresholdMeanCon: pickSoftThreshold mean connectivity plot
 * diffpermutedColors: if plot_permuted == T, the plot of the modules found in each permuted dataset
-* colors: the final colors before and after filtering for PPI enrichment
-* compareParams: if compare_params == T, colors found using each set of parameters
-
+* diffParams_colors_PPI_order: if the user gave several sets of parameters, a plot of the modules, ordered by the number of assigned genes after PPI enrichment test.
+* final_colors: the final module assignment before and after PPI enrichment test
 `/projects/jonatan/tmp-bmi-brain/`
 * MAGMA outputs 
 
