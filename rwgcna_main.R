@@ -5,15 +5,16 @@
 ######################################################################
 
 # e.g.
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n05_to_n10-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n05_to_n10-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
+
 
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 5
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-4 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 8
 
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed  --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 5
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_filter.RData --project_dir /projects/jonatan/tmp-epilepsy/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-1 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed  --minClusterSize "c(10,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 100 --replace T --STRINGdb_species 9606 --plot_permuted F --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-1 --min.cells 3 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-1 --min.cells 3 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 0 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 11
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-2 --min.cells 3 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15,20)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_sub_min20cell_tissues.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-3/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-3 --min.cells 5 --do.center TRUE --genes_use PCA --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --nPermutations 50 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --plot_permuted F --n_cores 6
 
 
 ######################################################################
@@ -22,9 +23,9 @@
 
 if (FALSE) { 
   seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData"
-  project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell-s-1/"
+  project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell-s-2/"
   magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/"
-  data_prefix = "campbell-s-1"
+  data_prefix = "campbell-s-2"
   meta.data_ID = NULL
   min.cells = 5
   do.center = T
@@ -37,11 +38,12 @@ if (FALSE) {
   corFnc = "cor"
   networkType = "signed"
   anti_cor_action = NULL
-  minClusterSize = c(20)
-  deepSplit = c(1,2)
+  minClusterSize = c(15)
+  deepSplit = c(2,3)
   pamStage = c(TRUE)
   moduleMergeCutHeight = c(0.2)
   replace = T
+  num.replicate = 100
   nPermutations = 2
   STRINGdb_species = 10090
   ensembl_dataset = "mmusculus_gene_ensembl"
@@ -63,10 +65,10 @@ option_list <- list(
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
   make_option("--magma_gwas_dir", type="character", default = '/projects/jonatan/tmp-bmi-brain/data/magma/',
               help = "MAGMA input GWAS data directory as a character, defaults to '/projects/jonatan/tmp-bmi-brain/data/magma/'"),
-  make_option("--meta.data_ID", type="character", default=NULL,
-              help = "Specify the name of a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
   make_option("--data_prefix", type="character", default=paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_rWGCNA_run"),
               help = "Dataset prefix for output files"),
+  make_option("--meta.data_ID", type="character", default=NULL,
+              help = "Specify the name of a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
   make_option("--min.cells", type="integer", default=5L,
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5."),
   make_option("--do.center", type="logical", default=T,
@@ -126,13 +128,11 @@ suppressMessages(library(dplyr))
 suppressMessages(library(Matrix))
 suppressMessages(library(Seurat))
 suppressMessages(library(parallel))
-suppressMessages(library(WGCNA))
-suppressMessages(library(STRINGdb))
+suppressMessages(library(WGCNA)) 
+suppressMessages(library(STRINGdb)) 
 suppressMessages(library(reshape))
 suppressMessages(library(reshape2))
-# suppressMessages(library(ggplot2))
 
-#suppressMessages(library(biomaRt))
 
 message("Libraries loaded")
 
@@ -315,8 +315,6 @@ for (subsetName in sNames) {
   save(seurat_obj_sub, file=sprintf("%s%s_%s_seurat_subset_tmp_%s.RData", RObjects_dir, data_prefix, subsetName, flag_date))
 }
 
-rm(subsets)
-
 message("Seurat object loaded and subsetted")
 
 ######################################################################
@@ -371,10 +369,13 @@ if (FALSE) {
 }
 
 # clear up
-rm(userParams)
-rm(builtInParams)
-rm(subsets_n_cells)
-rm(seurat_obj)
+# EDIT_180422_1
+rm(userParams, builtInParams, subsets_n_cells, seurat_obj, subsets)
+###
+
+# EDIT_180421_9
+invisible(gc())
+###
 
 ######################################################################
 ############# DEFINE THE FUNCTION FOR PARALLEL EXECUTION #############
@@ -429,7 +430,7 @@ parRWGCNA = function(sNames) {
                                     #genes.use = NULL, # default: genes.use = all genes in @data
                                   vars.to.regress = if (any(c("nUMI", "percent.mito") %in% names(seurat_obj_sub@meta.data))) vars.to.regress else NULL, 
                                   model.use="linear",
-                                  do.par=F, #T,
+                                  do.par=F,#T
                                   #num.cores = n_cores,
                                   do.scale=T,
                                   do.center=T)
@@ -477,7 +478,7 @@ parRWGCNA = function(sNames) {
                                   num.replicate = num.replicate, #50
                                   #####
                                   display.progress = FALSE,
-                                  do.par = F)#T,
+                                  do.par = F)#,#T,#T,
                                   #num.cores = 15)
 
       score.thresh = (5e-2)/pcs.compute # TODO: Is this a suitable multiple testing adjustment
@@ -511,10 +512,6 @@ parRWGCNA = function(sNames) {
 
   }
   
-  # checkpoint for changing the script
-  if (FALSE) {
-    save.image(file=sprintf("%s%s_%s_checkpoint_1.1_JackStraw_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
-  }
   
   # Select genes
 
@@ -900,8 +897,10 @@ parRWGCNA = function(sNames) {
                      corFnc = corFnc)
     
     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
-    pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
-    
+    # EDIT_180421_8
+    #pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
+    pkMEs <- vector(mode="numeric",length=length(list_colors_matched[[1]]))
+    ###
     # Loop over every gene and get its pkME
     for (i in 1:length(pkMEs)) {
       #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
@@ -921,39 +920,41 @@ parRWGCNA = function(sNames) {
   ######################################################################
   
   if (!is.null(anti_cor_action)) {
-    
-    list_list_kME_reassign_in <- list(list_MEs, list_kMEs, list_pkMEs, list_colors_matched)
-    
-    tryCatch({
-      list_kME_reassign_out <- lapply(1:length(list_kMEs), 
-                                      FUN= function(i) kME_reassign_fnc(MEs = list_list_kME_reassign_in[[1]][[i]],
-                                                                        kMEs = list_list_kME_reassign_in[[2]][[i]], 
-                                                                        pkMEs = list_list_kME_reassign_in[[3]][[i]], 
-                                                                        kME_reassign_threshold = kME_reassign_threshold, 
-                                                                        colors = list_list_kME_reassign_in[[4]][[i]], 
-                                                                        datExpr_filter = datExpr_filter, 
-                                                                        corFnc = corFnc))
+    # EDIT_180421_5
+    if (anti_cor_action == "kME_reassign") {
+    ###
+      list_list_kME_reassign_in <- list(list_MEs, list_kMEs, list_pkMEs, list_colors_matched)
       
-      list_colors_matched = lapply(list_kME_reassign_out, function(x) x$colors)
-      list_MEs = lapply(list_kME_reassign_out, function(x) x$MEs)
-      list_kMEs = lapply(list_kME_reassign_out, function(x) x$kMEs)
-      list_pkMEs = lapply(list_kME_reassign_out, function(x) x$pkMEs)
-      list_reassigned = lapply(list_kME_reassign_out, function(x) x$reassigned)
+      tryCatch({
+        list_kME_reassign_out <- lapply(1:length(list_kMEs), 
+                                        FUN= function(i) kME_reassign_fnc(MEs = list_list_kME_reassign_in[[1]][[i]],
+                                                                          kMEs = list_list_kME_reassign_in[[2]][[i]], 
+                                                                          pkMEs = list_list_kME_reassign_in[[3]][[i]], 
+                                                                          kME_reassign_threshold = kME_reassign_threshold, 
+                                                                          colors = list_list_kME_reassign_in[[4]][[i]], 
+                                                                          datExpr_filter = datExpr_filter, 
+                                                                          corFnc = corFnc))
+        
+        list_colors_matched = lapply(list_kME_reassign_out, function(x) x$colors)
+        list_MEs = lapply(list_kME_reassign_out, function(x) x$MEs)
+        list_kMEs = lapply(list_kME_reassign_out, function(x) x$kMEs)
+        list_pkMEs = lapply(list_kME_reassign_out, function(x) x$pkMEs)
+        list_reassigned = lapply(list_kME_reassign_out, function(x) x$reassigned)
+        
+      }, error = function(c) {
+        save.image(file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.RData", project_dir, data_prefix, sNames, flag_date))
+        #write.csv("ERROR", file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
+      })
       
-    }, error = function(c) {
-      save.image(file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.RData", project_dir, data_prefix, sNames, flag_date))
-      #write.csv("ERROR", file=sprintf("%s%s_%s_kME_reassign_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
-    })
-    
-    # Free up memory
-    # EDIT_180421_2
-    #rm(list_kME_reassign_out)
-    rm(list_list_kME_reassign_in, list_kME_reassign_out)
-    
+      # Free up memory
+      # EDIT_180421_2
+      #rm(list_kME_reassign_out)
+      rm(list_list_kME_reassign_in, list_kME_reassign_out)
+      # EDIT_180421_5
+    }
   }
   # EDIT_20180420_6
   #names(list_pkMEs) <- labels
-
   names(list_pkMEs) <- plot_labels
   ###
   
@@ -966,128 +967,150 @@ parRWGCNA = function(sNames) {
   #################### CHECK MODULES FOR PPI ENRICHMENT ################
   ######################################################################
   
-  #if (!is.null(STRINGdb_species)) {
-  list_colors_PPI <- mapply(function(x,y) PPI_for_par_outer(pkMEs = x,
-                                                            colors = y,
-                                                            STRINGdb_species = STRINGdb_species,
-                                                            PPI_pval_threshold = PPI_pval_threshold,
-                                                            project_dir = project_dir, 
-                                                            data_prefix = data_prefix, 
-                                                            subsetName = sNames, 
-                                                            flag_date = flag_date),
-                            list_pkMEs,
-                            list_colors_matched,
-                            SIMPLIFY = F)
-  
-  # If we have more than one set of colourings, count the number of assigned genes per set and rank the sets by it
-  if (length(list_colors_PPI)>1)    {
+  # EDIT_180421_7
+  if (!is.null(STRINGdb_species)) {
+  ###  
+    list_colors_PPI <- mapply(function(x,y) PPI_for_par_outer(pkMEs = x,
+                                                              colors = y,
+                                                              STRINGdb_species = STRINGdb_species,
+                                                              PPI_pval_threshold = PPI_pval_threshold,
+                                                              project_dir = project_dir, 
+                                                              data_prefix = data_prefix, 
+                                                              subsetName = sNames, 
+                                                              flag_date = flag_date),
+                              list_pkMEs,
+                              list_colors_matched,
+                              SIMPLIFY = F)
+    # EDIT_180421_7
     n_grey <- sapply(list_colors_PPI, function(x) sum(x=="grey"), simplify=T)
-    # EDIT_20180420_6
-    #labels_order <- labels[order(n_grey, decreasing=F)]
-    plot_labels_order <- plot_labels[order(n_grey, decreasing=F)]
+    ### 
+    
+    # If we have more than one set of colourings, count the number of assigned genes per set and rank the sets by it
+    # EDIT_180421_7
+    if (length(list_colors_PPI)>1 & !all(n_grey == ncol(datExpr_filter)))    {
     ###
-    MEs_order <- list_MEs[order(n_grey, decreasing=F)]
-    kMEs_order <- list_kMEs[order(n_grey, decreasing=F)]
-    pkMEs_order <- list_pkMEs[order(n_grey, decreasing=F)]
-    # EDIT_180421_1
-    #list_reassigned_order <- list_reassigned[order(n_grey, decreasing=F)]
-    list_colors_PPI_order <- list_colors_PPI[order(n_grey, decreasing=F)]
-  
+      
+      # EDIT_180421_7
+      #n_grey <- sapply(list_colors_PPI, function(x) sum(x=="grey"), simplify=T)
+      ###
+        
+      # EDIT_180420_6
+      #labels_order <- labels[order(n_grey, decreasing=F)]
+      plot_labels_order <- plot_labels[order(n_grey, decreasing=F)]
+      ###
+      MEs_order <- list_MEs[order(n_grey, decreasing=F)]
+      kMEs_order <- list_kMEs[order(n_grey, decreasing=F)]
+      pkMEs_order <- list_pkMEs[order(n_grey, decreasing=F)]
+      # EDIT_180421_1
+      #list_reassigned_order <- list_reassigned[order(n_grey, decreasing=F)]
+      list_colors_PPI_order <- list_colors_PPI[order(n_grey, decreasing=F)]
     
+      
+      
+      
+      diffParams_colors_PPI_order = matrix(unlist(list_colors_PPI_order), nrow=ncol(datExpr_filter), ncol=n_combs)
     
-    
-    diffParams_colors_PPI_order = matrix(unlist(list_colors_PPI_order), nrow=ncol(datExpr_filter), ncol=n_combs)
+      pdf(sprintf("%s%s_%s_diffParams_colors_PPI_order_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=6+length(list_colors_PPI) %/% 2)
+      plotDendroAndColors(geneTree, 
+                        #labels2colors(list_colors_PPI_order),
+                        #matrix(unlist(list_colors_PPI_order), ncol = length(list_colors_PPI_order), byrow = F), 
+                        diffParams_colors_PPI_order,
+                        groupLabels=plot_labels_order, 
+                        addGuide= TRUE, 
+                        dendroLabels=FALSE, 
+                        main="Diff. params modules, PPI enriched, ranked by n assigned genes.", 
+                        cex.colorLabels=0.5)
+      dev.off()
+      
+      # Select a set of preferred colors filtered for PPI enrichment and add them as the first column to be shown at the top of the figure
+      colors_PPI <- list_colors_PPI_order[[1]]
   
-    pdf(sprintf("%s%s_%s_diffParams_colors_PPI_order_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=6+length(list_colors_PPI) %/% 2)
-    plotDendroAndColors(geneTree, 
-                      #labels2colors(list_colors_PPI_order),
-                      #matrix(unlist(list_colors_PPI_order), ncol = length(list_colors_PPI_order), byrow = F), 
-                      diffParams_colors_PPI_order,
-                      groupLabels=plot_labels_order, 
-                      addGuide= TRUE, 
-                      dendroLabels=FALSE, 
-                      main="Diff. params modules, PPI enriched, ranked by n assigned genes.", 
-                      cex.colorLabels=0.5)
-    dev.off()
-    
-    # Select a set of preferred colors filtered for PPI enrichment and add them as the first column to be shown at the top of the figure
-    colors_PPI <- list_colors_PPI_order[[1]]
-
-    # Select corresponding set of colors and parameter sets obtained prior to the PPI enrichment filtering
-    colors <- list_colors_matched[order(n_grey, decreasing=F)][[1]] 
-    plot_label <- plot_labels_order[[1]]
-    MEs <- MEs_order[[1]]
-    kMEs <- kMEs_order[[1]]
-    pkMEs <- pkMEs_order[[1]]
-    
-    cutree_params_final = as.list(comb_list[order(n_grey,decreasing = F)][[1]]) 
-
-  } else if (length(list_colors_PPI)==1) {
-  
-    # Just extract the single PPI set of colors
-    colors_PPI <- list_colors_PPI[[1]]
-    
-    # Extract the single colors and parameter sets obtained prior to the PPI enrichment filtering
-    plot_label = plot_labels[[1]]
-    colors <- list_colors_matched[[1]]
-    MEs = list_MEs[[1]]
-    kMEs = list_kMEs[[1]]
-    pkMEs = list_pkMEs[[1]]
-    
-    cutree_params_final = as.list(comb_list[[1]])
-  }
-  
-  names(cutree_params_final) = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
-  
-  
-  # checkpoint for testing the script
-  if (FALSE) {
-    save.image(file=sprintf("%s%s_%s_checkpoint_6_PPI_enrichment_test_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
-  }
-  
-  # clear up  
-  rm(list_colors_matched, plot_labels, list_MEs, list_kMEs, list_pkMEs, list_colors_PPI)
-  
-  ######################################################################
-  ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
-  ######################################################################
-  
-  # TODO better to filter
-  # recompute Module Eigengenes
-  
-  if (length(unique(colors_PPI)) != 1) {
-    
-    MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
-                               colors_PPI,
-                               excludeGrey = F) # T leads to errors when finding pkMEs
-    #softPower = softPower)
-    # recompute kMEs
-    kMEs_PPI = signedKME(as.matrix(datExpr_filter),
-                         MEs_PPI$eigengenes,
-                         outputColumnName = "",
-                         corFnc = corFnc)
-    
-    # recompute primary kMEs
-    pkMEs_PPI <- vector(length=length(colors_PPI))
-    
-    for (i in 1:length(colors_PPI)) {
-      pkMEs_PPI[i] <- kMEs_PPI[colors_PPI[i]][i,]#as.numeric(unlist(kMEs_PPI %>% dplyr::select(matches(colors_PPI[[i]]))))[[i]]
+      # Select corresponding set of colors and parameter sets obtained prior to the PPI enrichment filtering
+      colors <- list_colors_matched[order(n_grey, decreasing=F)][[1]] 
+      plot_label <- plot_labels_order[[1]]
+      MEs <- MEs_order[[1]]
+      kMEs <- kMEs_order[[1]]
+      pkMEs <- pkMEs_order[[1]]
+      
+      cutree_params_final = as.list(comb_list[order(n_grey,decreasing = F)][[1]]) 
+    # EDIT_180421_7
+    } else if (length(list_colors_PPI)==1 | all(n_grey == ncol(datExpr_filter))) {
+    ###
+      # Just extract the single PPI set of colors
+      colors_PPI <- list_colors_PPI[[1]]
+      
+      # Extract the single colors and parameter sets obtained prior to the PPI enrichment filtering
+      plot_label = plot_labels[[1]]
+      colors <- list_colors_matched[[1]]
+      MEs = list_MEs[[1]]
+      kMEs = list_kMEs[[1]]
+      pkMEs = list_pkMEs[[1]]
+      
+      cutree_params_final = as.list(comb_list[[1]])
     }
     
-    #names(pkMEs_PPI) <- names(colors_PPI) # don't use them or write then to csv..
+    names(cutree_params_final) = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
     
-    # Delete grey kME (needed it for pkME step though)
-    if (any(grepl("grey", colnames(kMEs_PPI)))) kMEs_PPI[['grey']] <- NULL 
     
-  } else {
-    write.csv("WARNING" , file=sprintf("%s%s_%s_WARNING_sum_genes_PPI_0_%s.csv", project_dir, data_prefix, sNames, flag_date))
-  }
-  
-  
-  # checkpoint for testing the script
-  if (FALSE) {
-    save.image(file=sprintf("%s%s_%s_checkpoint_7_recompute_MEs_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
-  }
+    # checkpoint for testing the script
+    if (FALSE) {
+      save.image(file=sprintf("%s%s_%s_checkpoint_6_PPI_enrichment_test_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
+    }
+    
+    # clear up  
+    rm(list_colors_matched, plot_labels, list_MEs, list_kMEs, list_pkMEs, list_colors_PPI)
+    
+    ######################################################################
+    ############# RECOMPUTE MEs, kMEs, pkMEs AFTER PPI FILTER ############
+    ######################################################################
+    
+    # TODO better to filter
+    # recompute Module Eigengenes
+    
+    # EDIT_180421_7
+    #if (length(unique(colors_PPI)) != 1) {
+    if (length(names(table(colors_PPI))) != 1) {
+    ###  
+      MEs_PPI = moduleEigengenes(expr = as.matrix(datExpr_filter),
+                                 colors_PPI,
+                                 excludeGrey = F) # T leads to errors when finding pkMEs
+      #softPower = softPower)
+      # recompute kMEs
+      kMEs_PPI = signedKME(as.matrix(datExpr_filter),
+                           MEs_PPI$eigengenes,
+                           outputColumnName = "",
+                           corFnc = corFnc)
+      
+      # recompute primary kMEs
+      pkMEs_PPI <- vector(length=length(colors_PPI))
+      
+      for (i in 1:length(colors_PPI)) {
+        pkMEs_PPI[i] <- kMEs_PPI[colors_PPI[i]][i,]#as.numeric(unlist(kMEs_PPI %>% dplyr::select(matches(colors_PPI[[i]]))))[[i]]
+      }
+      
+      #names(pkMEs_PPI) <- names(colors_PPI) # don't use them or write then to csv..
+      
+      # Delete grey kME (needed it for pkME step though)
+      if (any(grepl("grey", colnames(kMEs_PPI)))) kMEs_PPI[['grey']] <- NULL 
+      
+    } else {
+      write.csv("WARNING" , file=sprintf("%s%s_%s_WARNING_sum_genes_PPI_0_%s.csv", project_dir, data_prefix, sNames, flag_date))
+      # EDIT_180421_7
+      
+      MEs_PPI <- NULL
+      kMEs_PPI <- NULL
+      pkMEs_PPI <- NULL
+      
+    }
+    
+    
+    # checkpoint for testing the script
+    if (FALSE) {
+      save.image(file=sprintf("%s%s_%s_checkpoint_7_recompute_MEs_done_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
+    }
+  # EDIT_180421_7
+  } # end of if(!is.null(STRINGdb_species) {})  
+  ###
   
   ######################################################################
   ######################### PLOT FINAL COLORS #########################
@@ -1095,7 +1118,7 @@ parRWGCNA = function(sNames) {
   
   tryCatch({
     
-    all_colors = if (!is.null(STRINGdb_species) & !is.null(colors_PPI)) cbind(colors, colors_PPI) else colors
+    all_colors = if (!is.null(STRINGdb_species) & !is.null(kMEs_PPI)) cbind(colors, colors_PPI) else colors
    
     pdf(sprintf("%s%s_%s_final_colors_%s.pdf", plots_dir, data_prefix, sNames, flag_date),width=9,height=5)
     plotDendroAndColors(geneTree,
@@ -1196,13 +1219,24 @@ parRWGCNA = function(sNames) {
       prop_not_map <- paste0("EnsemblID_proportion_not_mapped:_", signif(as.double(sum(is.na(ensembl_IDs))) / as.double(1e-10+length(ensembl_IDs)),2))
       write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, sNames, prop_not_map, flag_date))
       
-      if (!is.null(colors_PPI)) {
+      # EDIT_180412_7
+      #if (!is.null(colors_PPI)) {
+      if (!is.null(kMEs_PPI)) {
+      
+      ###
         colors_PPI_noGrey <- colors_PPI[colors_PPI != grey]
         ensembl_PPI_IDs <- perslabMusEnsembl$ensembl_gene_id[match(names(colors_PPI_noGrey), perslabMusEnsembl$gene_name_optimal)] 
         ensembl_PPI_out <- data.frame(module_name_PPI = colors_PPI_noGrey, ensembl_ID = ensembl_PPI_IDs, row.names = NULL) 
         prop_not_map_PPI <- paste0("EnsemblID_PPI_proportion_not_mapped:_", signif(as.double(sum(is.na(ensembl_PPI_IDs))) / as.double(1e-10+length(ensembl_PPI_IDs)),2))
         write.csv("", file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, sNames, prop_not_map_PPI, flag_date))
+      # EDIT_180421_7
+      #} 
+      } else {
+        ensembl_PPI_out <- NULL
+        prop_not_map_PPI <- NULL
       }
+      ##
+      
     }
     # ensembl <- useMart("ensembl", dataset=ensembl_dataset) 
     # ensembl_query <- getBM(attributes = c("external_gene_name", "ensembl_gene_id"), mart = ensembl)
@@ -1246,28 +1280,37 @@ parRWGCNA = function(sNames) {
     }   
 
     save.image(file=sprintf("%s%s_%s_rsession_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
-    
+        
   }, error = function(c) {
     save.image(file=sprintf("%s%s_%s_save_results_ERROR_%s.RData", RObjects_dir, data_prefix, sNames, flag_date))
     
     #write.csv("ERROR", file=sprintf("%s%s_%s_save_results_ERROR_%s.csv", project_dir, data_prefix, sNames, flag_date), row.names = F)
     })
+# EDIT_180421_9
+rm(list=ls())
+gc()
+###
   }
   
 ##########################################################################
 ######################## RUN THE WGCNA LOOP ##############################
 ##########################################################################
 
-cl <- makeCluster(n_cores, type = "FORK")
+# EDIT_180421_10
+#cl <- makeCluster(n_cores, type = "FORK")
+cl <- makeCluster(min(n_cores, detectCores()-1), type = "FORK", useXDR = F, outfile = paste0(project_dir, "parallelout.txt"))
+###
 
 # Check the libraries are installed on all cores in cluster
-clusterEvalQ(cl, library(Matrix))
-clusterEvalQ(cl, library(dplyr))
-clusterEvalQ(cl, library(Seurat))
-clusterEvalQ(cl, library(WGCNA))
-clusterEvalQ(cl, library(STRINGdb))
-
+# EDIT_180421_11
+# clusterEvalQ(cl, library(Matrix))
+# clusterEvalQ(cl, library(dplyr))
+# clusterEvalQ(cl, library(Seurat))
+# clusterEvalQ(cl, library(WGCNA))
+# clusterEvalQ(cl, library(STRINGdb))
+###
 message("Running WGCNA")
+
 parLapply(cl, sNames, parRWGCNA)
 
 stopCluster(cl)
@@ -1276,7 +1319,7 @@ stopCluster(cl)
 ######################## RUN THE MAGMA LOOP ##############################
 ##########################################################################
 
-message("WGCNA all done, running MAGMA..")
+message("WGCNA done, running MAGMA..")
 
 # cl <- makeCluster(n_cores, type = "FORK")
 # 
@@ -1304,7 +1347,7 @@ message("WGCNA all done, running MAGMA..")
 # Do MAGMA analysis for modules both before and after PPI enrichment testing
 file_suffix = "kMEs"
 
-lapply(sNames, function(x) parMagma(subsetName = x,
+invisible(lapply(sNames, function(x) parMagma(subsetName = x,
                                    project_dir = project_dir,
                                    plots_dir = plots_dir,
                                    log_dir = log_dir,
@@ -1312,11 +1355,11 @@ lapply(sNames, function(x) parMagma(subsetName = x,
                                    magma_gwas_dir = magma_gwas_dir,
                                    data_prefix = data_prefix,
                                    file_suffix = file_suffix,
-                                   flag_date = flag_date))
+                                   flag_date = flag_date)))
 
 if (!is.null(STRINGdb_species)) {
   file_suffix = "kMEs_PPI"
-  lapply(sNames, function(x) parMagma(subsetName = x,
+  invisible(lapply(sNames, function(x) parMagma(subsetName = x,
                                       project_dir = project_dir,
                                       plots_dir = plots_dir,
                                       log_dir = log_dir,
@@ -1324,7 +1367,7 @@ if (!is.null(STRINGdb_species)) {
                                       magma_gwas_dir = magma_gwas_dir,
                                       data_prefix = data_prefix,
                                       file_suffix = file_suffix,
-                                      flag_date = flag_date))
+                                      flag_date = flag_date)))
 }
 ###
 
