@@ -1,5 +1,8 @@
 # Change log
 
+## Unreleased
+
+
 ## v1.6 - 2018-04-21
 
 ### Changed
