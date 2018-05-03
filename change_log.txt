@@ -1,7 +1,41 @@
 # Change log
 
-## Unreleased
+## v1.7 - 2018-05-03
 
+### fixed
+* EDIT_180421_7: changed control flow to catch cases where there are no PPI enriched modules (ensemblID was possibly producing an error by trying to print out a csv that didn't exist)
+* EDIT_180421_8: fixed invalid length argument when diffParams_colors is NULL
+    ~~pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))~~
+    pkMEs <- vector(mode="numeric",length=length(list_colors_matched[[1]]))
+* In RunPCA, set pcs.compute = min(nPC_seurat, nrow(seurat_obj_sub@data) %/% 2, ncol(seurat_obj_sub@data) %/% 2), rather than nrow-1, ncol-2, to avoid that IRLBA fails to converge or getting warnings that we are computing too large a proportion of singular components. If tryCatch catches a warning (from IRLBA) it calls RunPCA again with half the number of PCs to compute, fastpath = f, and maxit * 2.
+ * If any subsets failed to produce modules, make an error log 
+* Remove tryCatch in functions used in parallelisation as they may(?) cause problems
+* Filtergenes seems to have been returning the original object! Fixed. 
+* Filter out cells with >7000 genes (Seurat PBMC tutorial sets this at 5000); do not filter on UMI (previously removed cells with < 200 UMI)
+* do regress out ribo 
+* Major bug fix: remove the early mapping from symbol to Ensembl, while keeping symbols for unmapped genes. It led to a very confusing bug when the MAGMA part tried to map them again but only managed those that failed originally - apparently succeeding with some, however, leading to jumbled results.
+
+### changed
+* Comprehensive re-write of the parallelisation structure
+* maps gene symbols to ensembl at the beginning rather than after finding modules; for unmapped genes, keeps the symbol
+* EDIT 180421_9: added more rm() and gc()
+* EDIT_180421_10: cl <- makeCluster(min(n_cores, detectCores()-1), type = "FORK")
+* EDIT_180421_12 made sure that load_obj creates a new environment that does not inherit objects from the current one, and that the function removes everything from env afterwards
+* makeCluster(outfile-..)
+* JackStraw pcs.compute = ncol(seurat_obj_sub@dr$pca@gene.loadings))
+  * Due to a bug in Jackstraw (https://github.com/satijalab/seurat/issues/277) use genes with high loading on a significant PC rather than genes with a significant loading on a significant PC. 
+* EDIT 180428_1 : don't delete grey kME and kIM until preparing for output. This avoids confusion
+* moved filterCellsScaleData into  the main script separated into the individual functions
+* renamed wrapFilterGenes to just FilterGenes since there is no original function called that
+
+### Added
+* homo sapiens ensembl gene mapping
+* EDIT 180425_1 MAGMA script now writes out csv as well as plots
+* script now saves four session images as 'checkpoints' to resume in case of a crash
+* Option to plot correlations between module cell embeddings and metadata - if factor, between each level
+* plot kME-kIM correlations within each sub dataset - diagnostic plot to compare 
+* plot kME - kME and kIM-kIM correlations across subsets
+* 'resume' option starts computations from one of several checkpoints (e.g. in case the script failed or the user aborted)
 
 ## v1.6 - 2018-04-21
 
