@@ -14,12 +14,13 @@ Finds 'robust' gene modules in a Seurat format dataset:
       If the user has given vectors of cutreeHybrid and mergeCloseModules parameters, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on the number of genes that are assigned to modules after checking the modules for Protein-Protein Interaction (PPI) enrichment via STRINGdb.
 4. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
 5. Use MAGMA GWAS statistics to assign FDR significance scores to the modules.
+6. Adding further functionality..
 
 ### Usage
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --project dir /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --do.center TRUE --genes_use PCA_5000 --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2,3)" --moduleMergeCutHeight "c(0.2)" --num.replicate 500 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons.RData --project dir /projects/jonatan/wgcna/campbell-neurons-1/ --data_prefix campbell-neurons-1 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --anti_cor_action NULL --minClusterSize "c(15,20)" --deepSplit "c(2,3)" --moduleMergeCutHeight "c(0.2)" --num.replicate 500 --nPermutations 100 --replace T --STRINGdb_species 10090 --ensembl_dataset mmusculus_gene_ensembl --save_plots TRUE --plot_permuted F --n_cores 5`
 
 ### Args
 
@@ -31,14 +32,15 @@ e.g.
 * `min.cells`: What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5. 
 * `do.center`: Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out. Default to `TRUE`
 * `genes_use`: One of `"all"`, `"var.genes"` for seurat var.genes, or `"PCA"` for genes that load significantly on at least one significant PC. Defaults to `"PCA"`
+* `pca_genes`: If `genes_use` == `"PCA"`, use `var.genes` or `all` genes to perform PCA to select genes based on PC loadings? If `num.replicate` is zero, select 5000 genes loading highly on the top PCs for downstream analysis. If non-zero, use JackStraw to identify significant PCs. If using `all` genes for the PCA, select significant genes based on the JackStraw; otherwise just use loadings.
 * `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
 * `networkType`: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`. `"signed hybrid"` may be used together with `anti_cor_action == "kME_reassign"` to reassign genes to a new module if they are more anticorrelated with the module eigengene than they are positively correlated with their current module eigengene.
-* `anti_cor_action`: Optional. '"kME_reassign"' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with 'networkType == "signed hybrid"'
+~~* `anti_cor_action`: Optional. '"kME_reassign"' reassigns genes with a negative kME more than 1.25 the kME w.r.t. their own (primary) module. Should be used only with 'networkType == "signed hybrid"'~~
 * `minClusterSize`: Minimum genes needed to form a module. Takes a vector with one or more values, given as a string, e.g. `"c(15,20)"`. Recommended range 5-25. Defaults to `"c(15)"`
 * `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes a vector with one or more values, given as a string, e.g. `"c(2,3)"`. Takes integer values 0-4, defaults to `"c(2)"`. 
 * `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a vector with one or more values, given as a string, e.g. `"c(0.20, 0.25)"`. Recommended value range 0.05-0.25
 * `pamStage`: For `cutreeHybrid`. Perform additional Partition Around Medroids step? Takes a vector with one or two values, given as a string, e.g. `"c(TRUE,FALSE)"`, default `"c(TRUE)"`
-* `num.replicate`: Number of times to resample to make null distributions for empirical significance tests in `JackStraw` and other contexts. Integer, defaults to 500.
+* `num.replicate`: Number of times to resample to make null distributions for empirical significance tests in `JackStraw` (see `pca_genes` above). Integer, defaults to 500.
 * `nPermutations`: Number of times to permute the dataset, defaults to 100
 * `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
 * `STRINGdb_species`: Species for which to retrieve protein data from `STRINGdb` to validate clusters. Defaults to 10090, which is mus musculus. To skip this step set to `NULL`
