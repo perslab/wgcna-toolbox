@@ -1,12 +1,5 @@
 # Title: Secondary script to set up WGCNA parameters
 # Author: Jonatan Thompson, Pers Lab
-# Date: April 2018
-
-
-# #Change log
-# ## v1.2 unreleased
-# ### changed
-# * deleted referenced to save_plots parameters which was removed in main script
 
 ############################## ADJACENCY #############################
 
@@ -404,7 +397,7 @@ parallelCalculation = FALSE  # Note that parallel calculations are turned off by
 
 #min.cells = 5 # Filter out genes with few cells 
 #do.center = if (corFnc == "bicor") FALSE else TRUE # for ScaleData() # update: just used scale_data==F
-nPC_seurat = 200 # for RunPCA() and ProjectPCA
+nPC_seurat = 120 # for RunPCA() and ProjectPCA
 maxit = 1000 # for RunPCA() IRLBA package - default is 1000 https://cran.r-project.org/web/packages/irlba/irlba.pdf
 fastpath = F # for RunPCA()
 
