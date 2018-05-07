@@ -1,5 +1,13 @@
 # Change log
 
+## v1.8_dev1 - 2018-05-07
+
+### added
+* 4 checkpoints for saving session image - not only in case of tryCatch error (as this often did not work if the error occurred within a parallelised function or something like that
+
+### fixed
+* Remove FilterCells as it is inappropriate for deep sequenced data - should already have been done (deployed)
+
 ## v1.7 - 2018-05-03
 
 ### fixed
