@@ -1,5 +1,22 @@
 # Change log
 
+## v1.8_dev2 - 2018-05-10
+
+### added
+* We now use MAGMA as a filtering step to prioritise modules for downstream analysis
+
+### changed
+* Rather than give ensemble_database and STRINGdb_species, user now just passes argument 'organism' 
+* Convert to ensembl id using both optimal mapping and synonyms, rather than doing so in MAGMA script. Save log of unmapped and duplicate genes removed in the process.
+* Output table with gene symbols, ensembl id and color
+* Removed 'if (!(is.null(STRINGdb_species))...
+* renamed num.replicate to jackstraw.num.replicate and nPermutations to TOM.num.replicate for clarity and consistency
+* Setting prop.freq, i..e how much of the dataset to permute in Jackstraw, to max(0.012, 4/length(seurat_obj_sub@var.genes)) # to ensure we have at least 5 samples, but not overdoing it
+* When plotting, first try to remove full stops from any unplottable colors before replacing colors with unassigned colors from colors()
+* Cleared up commented out code from main and functions scripts
+* Moved plotting to functions script (work in progress)
+* made names more informative:  _logical_notAllGrey and from _filter to _ok
+  
 ## v1.8_dev1 - 2018-05-07
 
 ### added
