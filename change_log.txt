@@ -1,5 +1,21 @@
 # Change log
 
+## v1.8_dev3 - 18-05-23
+
+### added
+* Added complex heatmap: cell / eigengene expression 
+* Added eigengene - metadata correlations
+* Added eigengene-eigengene correlation across all cell clusters
+
+### changed
+* Removing 'final' from names
+* Simplify: after plotting the color assignments only process PPI modules downstream
+* moved checkpoint 3 and 4 so 4 is after MAGMA step
+* MAGMA function plots all GWAS, all modules as well as only BMI modules on BMI gwas
+* output a table with cell cluster, module, gene ensembl, gene hgnc
+* only output BMI enriched kME/kIM to csv
+* do not output mapping table
+
 ## v1.8_dev2 - 2018-05-10
 
 ### added
