@@ -5,20 +5,28 @@
 ######################################################################
 
 # e.g.
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12
-#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-2 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 300 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12
+# CURRENT 180515
+# TEST v1.8_dev3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-11/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n01_to_n04-11 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-1/ --meta.data_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12 --resume checkpoint_2
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-1/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 21 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 14 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-21/ --meta.data_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-AgRP-21 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4 --resume checkpoint_3
 
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-4 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism hsapiens --plot_permuted F --n_cores 10
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-10/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n01_to_n04-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n05_to_n10-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n05_to_n10-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-8/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-8 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 7
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-AgRP-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 14 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev2.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 11 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --meta.data_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 20 --resume checkpoint_3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-10/ --meta.data_corr_col 'c("percent.mito", "percent.ribo")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 14 --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_so2.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-5/ --meta.data_corr_col 'c("dataset", "percent.mito", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism hsapiens --plot_permuted F --n_cores 10
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 21 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-2 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 300 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 14 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-4 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism hsapiens --plot_permuted F --n_cores 10
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-10/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n01_to_n04-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n05_to_n10-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n05_to_n10-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-AgRP-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 14 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev3.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 11 --resume checkpoint_4
   
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
@@ -40,7 +48,7 @@ if (FALSE) {
   corFnc = "cor"
   networkType = "signed"
   anti_cor_action = NULL
-  minClusterSize = c(20)
+  hminClusterSize = c(20)
   deepSplit = c(2)
   pamStage = c(TRUE)
   moduleMergeCutHeight = c(0.2)
@@ -133,13 +141,13 @@ suppressPackageStartupMessages(library(Matrix))
 suppressPackageStartupMessages(library(Seurat))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(WGCNA)) 
-suppressPackageStartupMessages(library(STRINGdb)) 
-suppressPackageStartupMessages(library(gProfileR))
+#suppressPackageStartupMessages(library(STRINGdb)) 
+suppressPackageStartupMessages(library(liger))
 suppressPackageStartupMessages(library(reshape))
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(corrplot))
-suppressPackageStartupMessages(library(pheatmap))
 suppressPackageStartupMessages(library(RColorBrewer))
+suppressPackageStartupMessages(library(qusage))
 
 #suppressPackageStartupMessages(library(data.table))
 
@@ -248,29 +256,14 @@ saveIndividualTOMs = plot_permuted
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 # Load parameter values and utility functions
-source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev2.R")
-source(file = "/projects/jonatan/functions-src/functions_v1.8_dev2.R")
+source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev3.R")
+source(file = "/projects/jonatan/functions-src/functions_v1.8_dev3.R")
 
-# 180507_v1.8_dev2
-# if (!is.null(ensembl_dataset)) if (ensembl_dataset == "hsapiens_gene_ensembl") {
-#   perslabEnsembl <- read.delim("/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz")
-# } else if (ensembl_dataset == "mmusculus_gene_ensembl") {
-#   perslabEnsembl <- read.delim("/projects/jonatan/wgcna-src/rwgcna-pipeline/Mus_musculus.GRCm38.90.gene_name_version2ensembl.txt.gz") 
-# }
-
-# Gprofiler
-# if (!is.null(ensembl_dataset)) {
-#     if (ensembl_dataset == "hsapiens_gene_ensembl") {
-#     organism = "hsapiens" 
-#   } else if (ensembl_dataset == "mmusculus_gene_ensembl") {
-#     organism = "mmusculus"
-#   } else {
-#     organism = NULL
-#   }
-# } else if (is.null(ensembl_dataset)) {
-#   organism <- NULL
-# }
-### /180507_v1.8_dev2
+if (organism == "mmusculus") {
+  # source: South Dakota State University 
+  # http://ge-lab.org/gskb/
+  mm_geneset_path <- "/projects/jonatan/genesets/mGSKB_Ensembl.gmt"
+} 
 
 if (TOM.num.replicate < 1) plot_permuted <- F 
   
@@ -374,10 +367,13 @@ if (is.null(resume)) {
       # Filter out unmapped and duplicate genes from Seurat object
       seurat_obj@data <- seurat_obj@data[!is.na(mapping$ensembl) & !idx_duplicate_genes,]
       seurat_obj@raw.data <- seurat_obj@raw.data[!is.na(mapping$ensembl) & !idx_duplicate_genes,]
-      
+
       # rename Seurat object rows where mapping was successful to ensembl ID
       rownames(seurat_obj@data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       rownames(seurat_obj@raw.data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
+      
+      # Save ensembl seurat object for later use
+      save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
       
     }
   } else if (any(grepl("ENSG", rownames(seurat_obj@data)))) {
@@ -388,63 +384,21 @@ if (is.null(resume)) {
     message("mus musculus ensembl id gene names detected, skipping remapping from hgnc to ensembl")
     organism <- "mmusculus"
   }
-
-  ### / 180507 v1.8_dev2
-
-  ### 180503_v1.7
-  # Better to do this later so we can run MAGMA on the original
-  # if (!is.null(organism)) {
-  #   ######################################################################
-  #   ######################### MAP to ENSEMBL IDs #########################
-  #   ######################################################################
   
-  #   # The whole dataset
-  #   all_genes_ensembl_IDs <- perslabEnsembl$ensembl_gene_id[match(all_genes, perslabEnsembl$gene_name_optimal)]
-  #   # Where the mapping failed, revert to the previous name
-  #   all_genes_IDs_mix <- ifelse(is.na(all_genes_ensembl_IDs), yes = all_genes, no = all_genes_ensembl_IDs)
-  #   # Each subset
-  #   list_ensembl_IDs <- lapply(list_datExpr, function(x) perslabEnsembl$ensembl_gene_id[match(colnames(x), perslabEnsembl$gene_name_optimal)]) 
-  #   list_idx_mapped <- lapply(list_ensembl_IDs, function(x) !is.na(x))
-  #   list_prop_not_map <- lapply(list_idx_mapped, function(x) signif(as.double(sum(!x)) / as.double(1e-10+length(x)),2))
-  #   # Where the mapping failed, revert to the previous name
-  #   list_ensembl_IDs_mix <- mapply(FUN = function(x,y) ifelse(is.na(x), yes = colnames(y), no = x), x=list_ensembl_IDs, y=list_datExpr, SIMPLIFY=F)
-  # 
-  #   # Rename the expression matrix colmns
-  #   list_datExpr <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2),  x=list_datExpr,  y=list_ensembl_IDs_mix, SIMPLIFY=F)
-  # }
-  
-
-  
-  ### 20180503_v1.8_dev1
-  # Not a good idea to filter cells
-  # 
-  # if (any(c("nGene", "percent.mito") %in% colnames(seurat_obj@meta.data))) {
-  #   
-  #   seurat_obj <- FilterCells(object = seurat_obj,
-  #                            subset.names = c("nGene", "percent.mito")[c("nGene", "percent.mito") %in% colnames(seurat_obj@meta.data)],
-  #                            low.thresholds = c(200,-Inf)[c("nGene", "percent.mito") %in% colnames(seurat_obj@meta.data)],
-  #                            high.thresholds = c(7500, 0.2)[c("nGene", "percent.mito") %in% colnames(seurat_obj@meta.data)])
-  # }
-  ###
-  # if (!is.null(meta.data_subset_col)) {
-  #   if (!any(grepl(meta.data_subset_col, names(seurat_obj@meta.data), ignore.case = T))) {
-  #     stop(sprintf("meta.data_subset_col not found in Seurat object at %s", seurat_path)) } else {
-  #       seurat_obj <- SetAllIdent(seurat_obj, id = meta.data_subset_col)
-  #     }
-  #   }
-  
+  # Use imputed data if user opted to do so 
   if (is.null(seurat_obj@imputed) | any(dim(seurat_obj@imputed)) == FALSE) use.imputed <- F
   if (use.imputed==T) seurat_obj@data <- seurat_obj@imputed
   
+  # Subset the seurat object
+  if (!is.null(meta.data_subset_col)) {
+    seurat_obj <- SetAllIdent(object = seurat_obj,id = meta.data_subset_col)
+  }
   sNames <- names(table(seurat_obj@ident))
   
   all_genes <- rownames(seurat_obj@data)
   
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
-  
   if (!is.null(meta.data_corr_col)) {
-    #meta.data_corr_col_numeric <- character()
-    #for (column in meta.data_corr_col) {
     if (all(sapply(meta.data_corr_col, function(x) !is.null(seurat_obj@meta.data[[x]])))) {
       meta.data <- SeuratFactorToIndicator(obj = seurat_obj,
                                             meta.colnames = meta.data_corr_col)
@@ -453,20 +407,8 @@ if (is.null(resume)) {
       meta.data <- NULL
     }
   }
-    #if (!is.null(seurat_obj@meta.data[[column]])) if (class(seurat_obj@meta.data[[column]]) %in% c("character", "factor")) {
-  
-      
-        #meta.data_corr_col_numeric <- c(meta.data_corr_col_numeric,levels(seurat_obj@meta.data[[column]]))
-    # } else if (class(seurat_obj@meta.data[[column]]) %in% c("integer", "numeric")) {
-    #     meta.data_corr_col_numeric <- c(meta.data_corr_col_numeric,column)
-    #   }
-    # }
-    # Take the updated meta data columns from the seurat object (so we can remove it)
-    #meta.data <- sapply(meta.data_corr_col_numeric, function(x) seurat_obj@meta.data[[x]], simplify = T)
-  
-  #}
-  
-  
+
+  # Subset the seurat object
   subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
                                                    ident.use = x, 
                                                    do.scale = F, 
@@ -534,13 +476,6 @@ if (is.null(resume)) {
   
   ### 180502_v1.7_1
   subsets <- lapply(subsets, function(x) FilterGenes(x, min.cells = min.cells))
-  
-  ### 180503_v1.8_dev1
-  # subsets <- lapply(subsets, function(x) FilterCells(object = x,
-  #                                                    subset.names = subset.names,
-  #                                                    low.thresholds = c(200,-Inf),
-  #                                                    high.thresholds = c(7500, 0.2)))
-  # Moved up to do Filtering on whole seurat object in one go, and added if statement
 
   vars.to.regress = c("nUMI", "percent.mito", "percent.ribo")[c("nUMI", "percent.mito", "percent.ribo") %in% names(seurat_obj@meta.data)]
 
@@ -551,21 +486,7 @@ if (is.null(resume)) {
                                                   num.cores = min(n_cores, detectCores()-1),
                                                   do.scale=T,
                                                   do.center=do.center))
-  ###
-  
-  
-  ### 180502_v1.7_2
-  # subsets <- lapply(subsets, wrapFilterCellsScaleData)
-  # subsets <- lapply(subsets, function(x) wrapFilterCellsScaleData(x, 
-  #                                                                 n_cores = n_cores, 
-  #                                                                 do.center=do.center)) 
-  
-  ### 180504_v2.7_4
-  # subsets <- lapply(subsets, function(x) FindVariableGenes(object = x,
-  #                                                          # x.low.cutoff = 0.0125,
-  #                                                          # x.high.cutoff = 3,
-  #                                                          # y.cutoff = 0.5,
-  #                                                          do.plot=F))
+
   subsets <- lapply(subsets, function(x) FindVariableGenes(object = x,
                                                            x.low.cutoff = 0.0125,
                                                            x.high.cutoff = 8,
@@ -582,10 +503,7 @@ if (is.null(resume)) {
     start_time <- Sys.time()
   
     cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "log_parPCA.txt"))
-    ### EDIT_180501_1
-    #subsets <- parLapply(cl, subsets, function(x) parPCA(x, nPC_seurat = nPC_seurat)) # if use.imputed=T the @imputed slot has been copied to @data
-    #subsets <- parLapply(cl, subsets, function(x) parPCAfull(x, nPC_seurat = nPC_seurat)) # if use.imputed=T the @imputed slot has been copied to @data
-    
+
     tryCatch({
       subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
                                                            pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
@@ -630,10 +548,7 @@ if (is.null(resume)) {
   } 
   
   # Clear up
-  ### 180503 v1.7
-  #rm(perslabEnsembl, subsets, userParams, builtInParams, subsets_n_cells, seurat_obj)
   rm(subsets, userParams, builtInParams, subsets_n_cells, seurat_obj)
-  ###
   invisible(gc())
   
   # Save or load session image 
@@ -641,13 +556,17 @@ if (is.null(resume)) {
   # just in case, since JackStraw is slow
   save.image(file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix))
   
+  # TODO: unload packages
+  
+  
 } else if (!is.null(resume)) {
   
   if (resume == "checkpoint_1") {
     
     load((file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev2.R")
-    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev2.R")
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev3.R")
+    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev3.R")
+    TOM.num.replicate=0
   }
   
 }
@@ -658,13 +577,6 @@ if (resume == "checkpoint_1") {
   ####### PICK SOFT THRESHOLD POWER FOR ADJACENCY MATRIX ###############
   ######################################################################
   message("Computing soft threshold powers to maximise the fit of a scale free topology to the adjacency matrix")
-    
-  ### 180503 v1.7
-    # invisible(gc())
-    # cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_sft_for_par.txt"))
-    # list_softPower <- clusterMap(cl, function(x,y) sft_for_par(datExpr=x, subsetName=y), list_datExpr, sNames, SIMPLIFY=F)
-    # stopCluster(cl)
-    # invisible(gc())
   
     list_softPower <- mapply(function(x,y) sft_for_par(datExpr=x, subsetName=y), list_datExpr, sNames, SIMPLIFY=F)
   
@@ -767,9 +679,6 @@ if (resume == "checkpoint_1") {
       invisible(gc())
       
       list_datExpr_gg <- list_datExpr
-      ### 180503 v1.7
-      #list_idx_mapped_gg <- list_idx_mapped
-      ###
   }
   
   message("Done computing the consensus Topological Overlap Matrix")
@@ -783,8 +692,8 @@ if (resume == "checkpoint_1") {
 } else if (!is.null(resume)) {
   if (resume == "checkpoint_2") {
     load((file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev2.R")
-    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev2.R")
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev3.R")
+    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev3.R")
   }
 }
 
@@ -793,6 +702,11 @@ if (resume == "checkpoint_2") {
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
   ######################################################################
+  # in:
+  #   consTomDS (from disk!)
+  #
+  # out:
+  #   list_geneTree
   
   # Convert TOM to distance matrix
   list_dissTOM <- lapply(sNames, dissTOM_for_par)
@@ -808,7 +722,19 @@ if (resume == "checkpoint_2") {
   ######################################################################
   ######################### CUT OUT MODULES ############################
   ######################################################################
-  
+  # in:
+  #   list_dissTOM
+  #   list_geneTree
+  #
+  # out:
+  #   list_list_plot_label_ok 
+  #   list_list_MEs_ok 
+  #   list_list_colors_ok 
+  #   sNames_ok 
+  #   list_datExpr_ok 
+  #   list_geneTree_ok
+  #   list_dissTOM_ok 
+
   message("Computing modules on the Topological Overlap Matrix")
   
   dims = sapply(list(minClusterSize, deepSplit, pamStage, moduleMergeCutHeight), length) # list of number of values per parameter
@@ -850,12 +776,10 @@ if (resume == "checkpoint_2") {
   # Make a copy for each subset
   list_list_plot_label <- list()
   list_list_plot_label <- lapply(sNames, function(x) list_list_plot_label$x = list_plot_label)
-  
   names(list_list_plot_label) = sNames
   
   # Extract the Module Eigengenes from the list returned by mergeCloseModules
   list_list_MEs <- lapply(list_list_merged, parGetMEs) # nested lapply
-  
   names(list_list_MEs) = sNames
   
   # Extract the colors from the list returned by mergeCloseModules
@@ -863,11 +787,10 @@ if (resume == "checkpoint_2") {
   names(list_list_colors) <- sNames
   
   # Test if for a given vector all the genes are grey
-  
   # count the grey
   list_vec_n_grey <- lapply(list_list_colors, count_grey_in_list_of_vec)
   
-  # For any parameter setting, does the number of genes assigned to grey correspond to the length of the vector of assignments? If not, we're ok.
+  # For any parameter setting, does the number of genes assigned to grey correspond to the length of the vector of assignments? If not, it's ok.
   list_logical_params_ok <- mapply(function(x,y) as.logical(mapply(function(a,b) a!=length(b), a=x, b=y, SIMPLIFY=F)), x=list_vec_n_grey, y=list_list_colors, SIMPLIFY=F)
   logical_subsets_ok <- sapply(list_logical_params_ok, any, simplify = T)
   
@@ -897,99 +820,109 @@ if (resume == "checkpoint_2") {
   }
   
   # clear up
-  ### 180503 v1.7
   rm(list_datExpr, list_list_cutree, list_list_MEs, list_datExpr_gg, list_geneTree, list_list_plot_label, list_dissTOM)#, list_idx_mapped_gg)
-  ###
   invisible(gc())
     
   ######################################################################
   ###################### compute kMEs & pkMEs ##########################
   ######################################################################
+  # in:
+  #   list_list_MEs_ok
+  #   list_datExpr_ok
+  #
+  # out:
+  #   list_list_kMEs
+  #   list_list_pkMEs
   
-  message("Computing kMEs: connection (correlation) between each gene and each module 'eigengene', the primary principal component of a module's gene expression")
+  message("Computing kMEs: correlation between each gene and each module 'eigengene'")
+ 
   # Compute kMEs
   invisible(gc())
   cl <- makeCluster(spec=n_cores, type = "FORK", outfile = paste0(log_dir, "log_parkMEs_parPkMEs.txt"))
-  list_list_kMEs_ok <- clusterMap(cl, function(x,y) parkMEs(list_MEs=x, datExpr=y), x=list_list_MEs_ok, y=list_datExpr_ok, SIMPLIFY = F)
+  list_list_kMEs <- clusterMap(cl, function(x,y) parkMEs(list_MEs=x, datExpr=y), x=list_list_MEs_ok, y=list_datExpr_ok, SIMPLIFY = F)
+  
   # Extract the primary kMEs - i.e. those of each gene w.r.t. the module to which it belongs
-  list_list_pkMEs_ok <- clusterMap(cl, function(x,y) parPkMEs(list_kMEs=x, list_colors=y), x=list_list_kMEs_ok, y=list_list_colors_ok, SIMPLIFY = F)
+  # We use these to filter genes that we submit to STRINGdb 
+  list_list_pkMEs <- clusterMap(cl, function(x,y) parPkMEs(list_kMEs=x, list_colors=y), x=list_list_kMEs, y=list_list_colors_ok, SIMPLIFY = F)
   stopCluster(cl)
   invisible(gc())
+  
+  list_list_pkMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_pkMEs, y=list_list_plot_label_ok, SIMPLIFY=F)
+  names(list_list_pkMEs) <- sNames_ok
   
   ######################################################################
   ########################## compute kIMs ##############################
   ######################################################################
+  # in:
+  #   list_dissTOM_ok
+  #   list_list_colors_ok
+  #
+  # out:
+  #   list_list_kIMs
   
-  message("Computing normalised Intra-module connectivity, kIM: each gene's degree with respect to each module")
-  
-  invisible(gc())
-  
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kIMs.txt"))
-  
-  list_list_kIMs_ok <- clusterMap(cl, function(x,y) lapply(y, function(z) kIM_eachMod_norm(dissTOM = x, 
-                                                                                colors = z,
-                                                                                genes = names(z))),
-                       x = list_dissTOM_ok,
-                       y = list_list_colors_ok, 
-                       SIMPLIFY=F)
-  
-  stopCluster(cl)
-  invisible(gc())
-  
-  
+  # message("Computing normalised Intra-module connectivity, kIM: each gene's degree with respect to each module")
+  # 
+  # invisible(gc())
+  # 
+  # cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kIMs.txt"))
+  # 
+  # list_list_kIMs <- clusterMap(cl, function(x,y) lapply(y, function(z) kIM_eachMod_norm(dissTOM = x, 
+  #                                                                               colors = z,
+  #                                                                               genes = names(z))),
+  #                      x = list_dissTOM_ok,
+  #                      y = list_list_colors_ok, 
+  #                      SIMPLIFY=F)
+  # 
+  # stopCluster(cl)
+  # invisible(gc())
+
   ######################################################################
   ############## Match colors between parameter settings ###############
   ######################################################################
+  # in:
+  #   list_list_colors_ok
+  #   list_list_MEs_ok
+  #   list_list_kMEs
+  #   list_list_kIMs
+  #
+  # out:
+  #   list_list_colors_ok_matched
+  #   list_list_MEs_ok_matched
+  #   list_list_kMEs_matched
+  #   list_list_kIMs_matched
   
   message("Matching module color labels between parameter settings")
-  
-  ### 180508_v1.8_dev2
-  
-  # colors_unassigned = colors()
-  # 
-  # colors_assigned <- unlist(lapply(list_list_colors_ok_matched, function(x) lapply(x, function(y) unique(y))) , recursive = T, use.names=F)
-  # colors_unassigned <- setdiff(colors_unassigned, colors_assigned)
 
   # Align / match the colors so similar modules found with different sets of parameters have the same name
   invisible(gc())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parMatchColors.txt"))
   list_list_colors_ok_matched <- parLapply(cl, list_list_colors_ok, parMatchColors)
   stopCluster(cl)
+  invisible(gc())
   
+  # Rename highest level list entries (cell clusters)
   names(list_list_colors_ok_matched) = sNames_ok
+  
   # Name each entry of the vectors of color assignments with the corresponding genes
   list_list_colors_ok_matched <- mapply(function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names=colnames(y), dimension = NULL)), x=list_list_colors_ok_matched, y=list_datExpr_ok, SIMPLIFY=F)
   
-  #TODO
+  ### no need to match MEs, kMEs and kIMs as within each cell cluster we just need pkMEs for PPI, then
+  # we remove all but one parameter set anyway
+  #
   # Rename the eigengenes according to the matched color scheme - nope, not necessary since we won't be using them
-  list_list_MEs_ok_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x$eigengenes, given_names= sort(names(table(y))), dimension = 2), x=a, y=b, SIMPLIFY=F), a= list_list_MEs_ok, b = list_list_colors_ok_matched, SIMPLIFY=F)
-  
+  #list_list_MEs_ok_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x$eigengenes, given_names= sort(names(table(y))), dimension = 2), x=a, y=b, SIMPLIFY=F), a= list_list_MEs_ok, b = list_list_colors_ok_matched, SIMPLIFY=F)
   # Rename the columns of the kMEs and kIMs according to the matched color scheme
-  list_list_kMEs_ok_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x, given_names = sort(names(table(y))), dimension = 2), x = a, y = b, SIMPLIFY=F), a = list_list_kMEs_ok, b = list_list_colors_ok_matched, SIMPLIFY=F)
-  list_list_kIMs_ok_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x, given_names = sort(names(table(y))), dimension = 2), x = a, y = b, SIMPLIFY=F), a = list_list_kIMs_ok, b = list_list_colors_ok_matched, SIMPLIFY=F)
+  #list_list_kMEs_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x, given_names = sort(names(table(y))), dimension = 2), x = a, y = b, SIMPLIFY=F), a = list_list_kMEs, b = list_list_colors_ok_matched, SIMPLIFY=F)
+  #list_list_kIMs_matched <- mapply(function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x, given_names = sort(names(table(y))), dimension = 2), x = a, y = b, SIMPLIFY=F), a = list_list_kIMs, b = list_list_colors_ok_matched, SIMPLIFY=F)
+  # Rename the nested list entries
+  #list_list_kMEs_matched <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kMEs_matched, y=list_list_plot_label_ok, SIMPLIFY=F)
+  #list_list_kIMs_matched <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kIMs_matched, y=list_list_plot_label_ok, SIMPLIFY=F)
 
-  ### EDIT_180428_1
-  # # Delete grey kMEs and grey kIMs
-  # list_list_kMEs_ok_matched_noGrey <- lapply(list_list_kMEs_ok_matched, deleteGrey)
-  # list_list_kIMs_ok_matched_noGrey <- lapply(list_list_kIMs_ok_matched, deleteGrey)
-  ###
+  # Rename the upper level list entries, i.e. the nested lists
+  #names(list_list_kMEs_matched) <- sNames_ok
+  #names(list_list_kIMs_matched) <- sNames_ok
   
-  ### EDIT_180428_1
-  # Name
-  # names(list_list_kMEs_ok_matched_noGrey) <- sNames_ok
-  # list_list_kMEs_ok_matched_noGrey <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kMEs_ok_matched_noGrey, y=list_list_plot_label_ok, SIMPLIFY=F)
-  # names(list_list_kIMs_ok_matched_noGrey) <- sNames_ok
-  # list_list_kIMs_ok_matched_noGrey <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kIMs_ok_matched_noGrey, y=list_list_plot_label_ok, SIMPLIFY=F)
-  names(list_list_kMEs_ok_matched) <- sNames_ok
-  list_list_kMEs_ok_matched <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kMEs_ok_matched, y=list_list_plot_label_ok, SIMPLIFY=F)
-  names(list_list_kIMs_ok_matched) <- sNames_ok
-  list_list_kIMs_ok_matched <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_kIMs_ok_matched, y=list_list_plot_label_ok, SIMPLIFY=F)
-  ###
-  
-  # Name primary (p-) kMEs
-  names(list_list_pkMEs_ok) <- sNames_ok
-  list_list_pkMEs_ok <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_pkMEs_ok, y=list_list_plot_label_ok, SIMPLIFY=F)
-  
+  # No need to rename the pkME modules since we don't query or display them, the values are all that matters
   
   # clear up 
   rm(list_list_colors_ok)
@@ -998,11 +931,19 @@ if (resume == "checkpoint_2") {
   ######################################################################
   #################### CHECK MODULES FOR PPI ENRICHMENT ################
   ######################################################################
+  # in:
+  #   list_list_colors_ok_matched
+  #   list_list_pkMEs
+  #
+  # out:
+  #   list_list_colors_ok_matched_PPI
   
   message("Checking modules for significant Protein-Protein Interactions through STRINGdb")
 
   invisible(gc())
+  
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_PPI_outer_for_vec.txt"))
+  
   list_list_colors_PPI <- clusterMap(cl, function(a,b) mapply(function(x,y) PPI_outer_for_vec(colors = x,
                                                                                               pkMEs = y,
                                                                                               STRINGdb_species = STRINGdb_species, 
@@ -1012,253 +953,482 @@ if (resume == "checkpoint_2") {
                                                                                               flag_date = flag_date), 
                                                               x = a, y = b, SIMPLIFY=F), 
                                      a = list_list_colors_ok_matched, 
-                                     b = list_list_pkMEs_ok, 
+                                     b = list_list_pkMEs, 
                                      SIMPLIFY=F)
   stopCluster(cl)
   invisible(gc())
-
-  ######################################################################
-  ########### ORDER PARAMETER SETS BY PPI ENRICHMENT ###################
-  ######################################################################
   
+  # assign the gene names to the color vectors
+  # list_list_colors_PPI <- lapply(list_list_colors_PPI, function(a) mapply(function(x,y) name_for_vec(to_be_named = x, given_names = colnames(y), dimension = NULL), 
+  #                           x = a, 
+  #                           y = list_datExpr_ok, 
+  #                           SIMPLIFY=F))
+  list_list_colors_PPI <- mapply(function(x,y) lapply(x, function(a) name_for_vec(to_be_named = a, given_names = colnames(y), dimension = NULL)), 
+                                                                          x = list_list_colors_PPI, 
+                                                                          y = list_datExpr_ok, 
+                                                                          SIMPLIFY=F)
+  ######################################################################
+  ########### ORDER PARAMETER SETS BY PPI ENRICHMENT AND PLOT ##########
+  ######################################################################
+  # in:
+  #   list_list_colors_ok_matched
+  #   list_list_colors_ok_matched_PPI
+  #   list_list_MEs_ok_matched
+  #   list_list_kMEs_matched
+  #   list_list_pkMEs
+  #   list_list_kIMs_matched
+  #   list_list_plot_label_ok
+  #   
+  # out:
+  #   list_list_colors_ok_matched_PPI_order
+  #   list_list_plot_label_ok_order
+  #   list_list_colors_ok_matched_order
+  #   list_list_MEs_ok_matched_order
+  #   list_list_kMEs_matched_order
+  #   list_list_pkMEs_order
+  #   list_list_kIMs_matched_order
+  #   plots of pre-PPI ranked colorings
+  #   plots of post-PPI ranked colorings
+
   message("Selecting parameters with the highest number of genes assigned to modules significantly enriched for Protein-Protein Interactions")
     
   # Count how many genes were assigned to grey under each parametrisation and order the parametrisations
-  list_vec_n_grey <- lapply(list_list_colors_PPI, count_grey_in_list_of_vec)
-  
-  #list_logical_params_ok <- mapply(function(x,y) as.logical(mapply(function(a,b) which(a!=length(b)), a=x, b=y, SIMPLIFY=F)), x=list_vec_n_grey, y=list_list_colors_matched, SIMPLIFY=F)
-  ### 180509_v1.8_dev2
-  list_idx_PPI_ok <- mapply(function(x,y) as.logical(mapply(function(a,b) a!=length(b), a=x, b=y, SIMPLIFY=F)), x=list_vec_n_grey, y=list_list_colors_PPI, SIMPLIFY=F)
-  subsets_PPI_ok <- sapply(list_logical_params_ok, any, simplify = T) # convert to a vector, but good to have the list as well (for now)
-  sNames_ok_PPI <- as.character(na.omit(sNames_ok[subsets_PPI_ok]))
-  
+  list_PPI_vec_n_grey <- lapply(list_list_colors_PPI, count_grey_in_list_of_vec)
+
   # Order all the outputs by how many genes were assigned to a (non-grey) module
-  list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_plot_label_ok_order) = sNames_ok
+  list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  list_list_colors_ok_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_ok_matched , y = list_PPI_vec_n_grey, SIMPLIFY = F )
+  # list_list_MEs_ok_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_MEs_ok_matched, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  # list_list_kMEs_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kMEs_matched, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  # list_list_kIMs_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kIMs_matched, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  # list_list_pkMEs_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x  = list_list_pkMEs, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   
-  list_list_colors_ok_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_ok_matched , y = list_vec_n_grey, SIMPLIFY = F )
-  names(list_list_colors_ok_matched_order) = sNames_ok
+  # # Name upper level list entries (cell clusters)
+  # for (obj in list(list_list_plot_label_ok_order, 
+  #                  list_list_colors_ok_matched_order, 
+  #                  list_list_MEs_ok_matched_order, 
+  #                  list_list_kMEs_matched_order,
+  #                  list_list_kIMs_matched_order,
+  #                  list_list_pkMEs_order,
+  #                  list_list_colors_ok_matched_PPI_order)) {
+  #   names(obj) <- sNames_ok
+  # }
   
-  list_list_MEs_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x =  list_list_MEs_ok, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_MEs_ok_order) = sNames_ok
-  
-  ### EDIT_180428_1
-  # list_list_kMEs_ok_matched_noGrey_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kMEs_ok_matched_noGrey, y = list_vec_n_grey, SIMPLIFY=F)
-  # names(list_list_kMEs_ok_matched_noGrey_order) = sNames_ok
-  # list_list_kIMs_ok_matched_noGrey_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kIMs_ok_matched_noGrey, y = list_vec_n_grey, SIMPLIFY=F)
-  # names(list_list_kIMs_ok_matched_noGrey_order) = sNames_ok
-  list_list_kMEs_ok_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kMEs_ok_matched, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_kMEs_ok_matched_order) = sNames_ok
-  list_list_kIMs_ok_matched_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x = list_list_kIMs_ok_matched, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_kIMs_ok_matched_order) = sNames_ok
-  
-  ###
-  list_list_pkMEs_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)],  x  = list_list_pkMEs_ok, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_pkMEs_ok_order) = sNames_ok
-  
-  list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_vec_n_grey, SIMPLIFY=F)
-  names(list_list_colors_PPI_order) = sNames_ok
+  ######################################################################
+  ############## PLOT THE RANKED MODULE ASSIGNMENTS ####################
+  ######################################################################
 
-  ### EDIT_180430 remove any '.' from color names to avoid plotting error:
-  # Error in rect(xl, yb, xr, yt, col = as.character(C[, j]), border = as.character(C[,  :  invalid color name 'darkorange.1' 
-  # list_list_colors_ok_matched_order <- lapply(list_list_colors_ok_matched_order, function(x) lapply(x, function(y) gsub(pattern="\\.", replacement="", y)))
-  # list_list_colors_PPI_order <- lapply(list_list_colors_PPI_order, function(x) lapply(x, function(y) gsub(pattern="\\.", replacement="", y)))
-  ###
-  
-  # For each subset, plot the ranked colorings
-  # Pre-PPI test
+  # Pre-PPI 
   invisible(mapply(function(x,y) parPlotDiffParams(list_colors=x, subsetName=y), x=list_list_colors_ok_matched_order, y=sNames_ok, SIMPLIFY = F))
-  # Post-PPI test
+  # Post-PPI 
   invisible(mapply(function(x,y) parPlotDiffParams_PPI(list_colors=x, subsetName=y), x=list_list_colors_PPI_order, y=sNames_ok, SIMPLIFY = F))
-
+  
   ######################################################################
   ##### FOR EACH SUBSET SELECT PARAMETERS WITH BEST PPI ENRICHMENT #####
   ######################################################################
-
-  # In each subset, select PPI enriched colors for the best parametrisation. 
-  # Eliminate a layer of nesting.
+  
+  # Eliminate a layer of nesting by selecting only the best parametrisation per celltype
   list_plot_label_final <- lapply(list_list_plot_label_ok_order, function(x) x[[1]])
+  list_colors_PPI <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
+  list_colors <- lapply(list_list_colors_ok_matched_order, function(x) x[[1]])
+  # list_MEs <- lapply(list_list_MEs_ok_order, function(x) x[[1]])
+  # list_kMEs <- lapply(list_list_kMEs_matched_order, function(x) x[[1]])
+  # list_kIMs <- lapply(list_list_kIMs_matched_order, function(x) x[[1]])
+  
+  # Name by cell clusters
   names(list_plot_label_final) <- sNames_ok
-  
-  list_colors_PPI_final <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
-  list_colors_PPI_final <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = colnames(y), dimension = NULL), 
-                                  x = list_colors_PPI_final, 
-                                  y = list_datExpr_ok, 
-                                  SIMPLIFY=F)
+  names(list_colors_PPI) <- sNames_ok
+  names(list_colors) <- sNames_ok
+  # names(list_MEs) <- sNames_ok
+  # names(list_kMEs) <- sNames_ok
+  # names(list_kIMs) <- sNames_ok  
 
-  names(list_colors_PPI_final) <- sNames_ok
-  
-  # Also select corresponding colors, MEs, kMEs, kIMs, pkMEs for module assignment 
-  # prior to PPI enrichment test
-  # !! Note that we keep the grey color assignments in each of the list_colors_final vectors
-  # but not the corresponding values for list_kMEs_final (noGrey)!!
-  
-  list_colors_final <- lapply(list_list_colors_ok_matched_order, function(x) x[[1]])
-  names(list_colors_final) <- sNames_ok
-  
-  list_MEs_final <- lapply(list_list_MEs_ok_order, function(x) x[[1]])
-  names(list_MEs_final) <- sNames_ok
-  
-  ### EDIT 180428_1
-  # list_kMEs_final <- lapply(list_list_kMEs_ok_matched_noGrey_order, function(x) x[[1]])
-  # names(list_kMEs_final) <- sNames_ok
-  # list_kIMs_final <- lapply(list_list_kIMs_ok_matched_noGrey_order, function(x) x[[1]])
-  # names(list_kIMs_final) <- sNames_ok  
-  
-  list_kMEs <- lapply(list_list_kMEs_ok_matched_order, function(x) x[[1]])
-  names(list_kMEs) <- sNames_ok
-  list_kIMs <- lapply(list_list_kIMs_ok_matched_order, function(x) x[[1]])
-  names(list_kIMs) <- sNames_ok  
+  # Name the kME and KIM rows 
+  # list_kMEs <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs, y=list_colors, SIMPLIFY=F)
+  # list_kIMs <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs, y=list_colors, SIMPLIFY=F)
 
-  # Name the rows
-  # list_kMEs_final <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs_final, y=list_colors_final, SIMPLIFY=F)
-  # list_kIMs_final <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs_final, y=list_colors_final, SIMPLIFY=F)
-  list_kMEs <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs, y=list_colors_final, SIMPLIFY=F)
-  list_kIMs <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs, y=list_colors_final, SIMPLIFY=F)
-  
-  #list_pkMEs_final <- lapply(list_list_pkMEs_ok_order, function(x) x[[1]])
-  #names(list_pkMEs_final) <- sNames_ok
-  
-  ###
-  
+  # Make list of list of final parameters
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
-  list_list_cutree_params_final <- lapply(list_vec_n_grey, function(x) comb_list[order(x,decreasing = F)][[1]])
+  list_list_cutree_params_final <- lapply(list_PPI_vec_n_grey, function(x) comb_list[order(x,decreasing = F)][[1]])
   list_list_cutree_params_final <- lapply(list_list_cutree_params_final, function(x) name_for_vec(to_be_named = x, given_names = param_names, dimension = NULL)) 
+  
+  ######################################################################
+  ######### PLOT FINAL MODULE ASSIGNMENT PRE- & POST-PPI FILTER ########
+  ######################################################################
+  
+  message("Plotting")
 
+  list_colors_both = mapply(FUN=cbind, list_colors, list_colors_PPI, SIMPLIFY = F)
+  names(list_colors_both) = sNames_ok
+  invisible(lapply(sNames_ok, plotFinalColors))
+  
+  ######################################################################
+  ################### DELETE PPI RUNS WITH ONLY GREY ###################
+  ######################################################################
+  # in:
+  #   list_colors_PPI
+  #   list_datExpr_ok
+  #   sNames_ok
+  #
+  # out:
+  #   list_colors_PPI_ok
+  #   list_datExpr_PPI_ok
+  #   sNames_PPI_ok
+  
+  PPI_vec_n_grey <- count_grey_in_list_of_vec(list_colors_PPI)
+  
+  # For any parameter setting, does the number of genes assigned to grey correspond to the length of the vector of assignments? If not, it's ok.
+  logical_subsets_PPI_ok <- as.logical(mapply(function(x,y) x != length(y), x = PPI_vec_n_grey, y = list_colors_PPI, SIMPLIFY = F))
+  
+  sNames_PPI_ok <- sNames_ok[logical_subsets_PPI_ok]
+  list_colors_PPI_ok <- list_colors_PPI[logical_subsets_PPI_ok]
+  list_datExpr_PPI_ok <- list_datExpr_ok[logical_subsets_PPI_ok]
+  list_dissTOM_PPI_ok <- list_dissTOM_ok[logical_subsets_PPI_ok]
   
   ######################################################################
   ########## RECOMPUTE MEs, kMEs, kIMs, pkMEs AFTER PPI FILTER #########
   ######################################################################
+  # in:
+  #   list_colors_PPI_ok
+  #   list_datExpr_PPI_ok
+  #   list_dissTOM_PPI_ok
+  #
+  # out:
+  #   list_MEs_PPI
+  #   list_kMEs_PPI
+  #   list_kIMs_PPI
   
   message("Re-computing kME, primary kMEs and kIMs after filtering modules for significant Protein-Protein Interactions")
   
   invisible(gc())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_pkMEs_PPI.txt"))
-  
-  # Here we exclude Grey?  ### 180509_v1.8_dev2 no, do it manually below
-  list_MEs_PPI_final <- clusterMap(cl, function(x,y) moduleEigengenes(expr=as.data.frame(x,col.names=col.names(x)),
+
+  list_MEs_PPI <- clusterMap(cl, function(x,y) moduleEigengenes(expr=as.data.frame(x,col.names=col.names(x)),
                                                                       colors=y,
-                                                                      excludeGrey=F), 
-                                   x= list_datExpr_ok, 
-                                   y= list_colors_PPI_final, 
+                                                                      excludeGrey=T), 
+                                   x = list_datExpr_PPI_ok, 
+                                   y = list_colors_PPI_ok, 
                                    SIMPLIFY = F)
   
   #names(list_MEs_PPI_final) <- sNames_ok
   list_kMEs_PPI <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
                       y$eigengenes,
                       outputColumnName = "",
-                      corFnc = corFnc), x=list_datExpr_ok, y=list_MEs_PPI_final)
+                      corFnc = corFnc), 
+                      x=list_datExpr_PPI_ok, 
+                      y=list_MEs_PPI)
  
   list_kIMs_PPI <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM=x, colors=y, genes=names(y)),
-                              x = list_dissTOM_ok,
-                              y = list_colors_PPI_final,
+                              x = list_dissTOM_PPI_ok,
+                              y = list_colors_PPI_ok,
                               SIMPLIFY=F)
+  
+  #list_kIMs_PPI <- deleteGrey(list_kIMs_PPI)
   
   stopCluster(cl)
   invisible(gc())
-  ### EDIT_180428_1
-  # Give row names to kME and kIM vectors
-  # list_kMEs_PPI_final <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs_PPI, y=list_colors_PPI_final, SIMPLIFY=F)
-  # list_kIMs_PPI_final <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs_PPI, y=list_colors_PPI_final, SIMPLIFY=F)
-  # 
-  # list_kIMs_PPI_final <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = colnames(y), dimension = 2),
-  #                               x = list_kIMs_PPI_final,
-  #                               y = list_kMEs_PPI_final, SIMPLIFY=F)
-  list_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs_PPI, y=list_colors_PPI_final, SIMPLIFY=F)
-  list_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs_PPI, y=list_colors_PPI_final, SIMPLIFY=F)
-  # Give kIM columns names of kMEs
-  list_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = colnames(y), dimension = 2),
-                                x = list_kIMs_PPI,
-                                y = list_kMEs_PPI, SIMPLIFY=F)
-  ###
+  
+  # Name 
+  list_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs_PPI, y=list_colors_PPI_ok, SIMPLIFY=F)
+  list_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs_PPI, y=list_colors_PPI_ok, SIMPLIFY=F)
+
+    
   # clear memory
-  rm(list_dissTOM_ok, list_list_plot_label_ok_order, list_list_colors_PPI_order, list_list_colors_ok_matched_order,
-     list_list_MEs_ok_order, list_list_kMEs_ok_matched_order, list_list_kIMs_ok_matched_order, list_list_pkMEs_ok_order)
+  rm(list_dissTOM_PPI_ok, 
+     list_list_plot_label_ok_order, 
+     list_list_colors_PPI_order)
   invisible(gc()) 
   
+  ###180509_v1.8_dev2
+  # There should be no need since we have excludeGrey = T. 
+  # But it may be necessary because there are definitely still grey modules
+  list_kMEs_PPI_ok <- deleteGrey(list_kMEs_PPI) %>% Filter(f=length)
+  list_kIMs_PPI_ok <- deleteGrey(list_kIMs_PPI) %>% Filter(f=length)
+
+  ### 180515 v1.8_dev3 
+  ### only output BMI module kMEs
+  #list_kMEs_PPI_ok <- lapply(list_kMEs_PPI_ok, function(x) cbind(genes=rownames(x), x))
+  #list_kIMs_PPI_ok <- lapply(list_kIMs_PPI_ok, function(x) cbind(genes=rownames(x), x))
+  #rownames(list_kMEs_PPI_out) <- NULL
+  #rownames(list_kIMs_PPI_out) <- NULL
+  
+  #list_mapping_PPI_out <- lapply(list_colors_PPI_ok, function(x) data.frame(module = x, ensembl_ID = names(x), hgnc_symbol = mapping$symbol[match(names(x), mapping$ensembl)], row.names = NULL))
+
+  #invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kMEs_PPI_out, sNames_PPI_ok, SIMPLIFY = F))
+  #invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kIMs_PPI_out, sNames_PPI_ok, SIMPLIFY = F))
+  
+  #invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_mapping_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_mapping_PPI_out, sNames_PPI_ok, SIMPLIFY = F))
+
   # checkpoint
   resume = "checkpoint_3"
-  
   message("Reached checkpoint 3, saving session image")
-  
   save.image(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
-
+  
+  # Delete consensus TOMs from disk
+  for (subsetName in sNames) {
+    if (file.exists(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))) {
+      file.remove(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))
+    }
+  }
   
 } else if (resume == "checkpoint_3") {
   load(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
   # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev2.R")
-  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev2.R")
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev3.R")
+  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev3.R")
 }  
 
 if (resume == "checkpoint_3") {
 
-  ######################################################################
-  ######################### FORMAT TABLE OUTPUTS #######################
-  ######################################################################
+  ##########################################################################
+  #################### COMPUTE MAGMA GWAS ENRICHMENT #######################
+  ##########################################################################
+  list_kMEs_PPI_ok <- deleteGrey(list_kMEs_PPI) %>% Filter(f=length)
+  list_kIMs_PPI_ok <- deleteGrey(list_kIMs_PPI) %>% Filter(f=length)
   
-  ### 180509_v1.8_dev2
-  #There should be no need
-  list_kMEs_noGrey <- deleteGrey(list_kMEs)
-  list_kIMs_noGrey <- deleteGrey(list_kIMs)
+  message("Scoring PPI enriched modules for enrichment with genes linked by GWAS to phenotypes of interest")
+    
+  file_suffix = "kMEs_PPI"    
   
-  # Reformat results for writing to csv
-  ### REV_180428: Changed suffix from _out to _final
-  list_kMEs_out <- lapply(list_kMEs_noGrey, function(x) cbind(genes=rownames(x), x))
-  list_kIMs_out <- lapply(list_kIMs_noGrey, function(x) cbind(genes=rownames(x), x))
-  #list_kMEs_out <- lapply(list_kMEs, function(x) cbind(genes=rownames(x), x))
-  #list_kIMs_out <- lapply(list_kIMs, function(x) cbind(genes=rownames(x), x))
+  #list_dat_BMI <- magma_par(subsetNames = sNames_PPI_ok,
+  list_dat_BMI <- magma_par(subsetNames = names(list_kMEs_PPI_ok),                         
+                            list_kMEs = list_kMEs_PPI_ok,
+                            project_dir = project_dir,
+                            plots_dir = plots_dir,
+                            log_dir = log_dir,
+                            tables_dir = tables_dir,
+                            magma_gwas_dir = magma_gwas_dir,
+                            data_prefix = data_prefix,
+                            file_suffix = file_suffix,
+                            flag_date = flag_date,
+                            organism = organism)
   
+  if (is.null(list_dat_BMI)) stop("No modules enriched for BMI")
 
-  ###180509_v1.8_dev2
-  # There should be no need since we have excludeGrey = T. But it may be necessary because there are definitely still grey modules
-  ### 180607_v1.8_dev2
-  #if (!is.null(STRINGdb_species)) {
-  ### REV_180428: Changed suffix from _out to _final
-  list_kMEs_PPI_noGrey <- deleteGrey(list_kMEs_PPI)
-  list_kIMs_PPI_noGrey <- deleteGrey(list_kIMs_PPI)
-  
-  list_kMEs_PPI_out <- lapply(list_kMEs_PPI_noGrey, function(x) cbind(genes=rownames(x), x))
-  list_kIMs_PPI_out <- lapply(list_kIMs_PPI_noGrey, function(x) cbind(genes=rownames(x), x))
-  #list_kMEs_PPI_out <- lapply(list_kMEs_PPI, function(x) cbind(genes=rownames(x), x))
-  #list_kIMs_PPI_out <- lapply(list_kIMs_PPI, function(x) cbind(genes=rownames(x), x))
-  
-#}###
-  ###180509_v1.8_dev2
-  # 180508_v1.8_dev2
-  # mapping = data.frame(symbol=row.names(seurat_obj@data), ensembl = mapping_direct$ensembl_gene_id[ match(row.names(seurat_obj@data), mapping_direct$hgcn_symbol) ])
-  list_mapping_out <- lapply(list_colors_final, function(x) data.frame(module = x, ensembl_ID = names(x), hgnc_symbol = mapping$symbol[match(names(x), mapping$ensembl)], row.names = NULL))
-  list_mapping_PPI_out <- lapply(list_colors_PPI_final, function(x) data.frame(module = x, ensembl_ID = names(x), hgnc_symbol = mapping$symbol[match(names(x), mapping$ensembl)], row.names = NULL))
+  dat_BMI_fdr <-  list_dat_BMI[["fdr"]]
+  dat_BMI_corrCoef <-  list_dat_BMI[["corrCoef"]]
 
-  ###
+  # get a new vector of names of cell clusters with BMI enrichment
+  modRegExpr <- ""
+  for (i in 1:length(unique(unlist(list_colors_PPI_ok)))) {
+    if (i<length(unique(unlist(list_colors_PPI_ok)))) {
+        suffix <- "|"
+    } else if (i == length(unique(unlist(list_colors_PPI_ok)))) {
+      suffix <- ""
+    }
+    modRegExpr <- paste0(modRegExpr, unique(unlist(list_colors_PPI_ok))[i], suffix)
+  }
   
-  # clear memory
-  ### 180508_v1.8_dev2
-  ### Keep these kMEs for later
-  #rm(list_kMEs_noGrey, list_kIMs_noGrey, list_kMEs_PPI_noGrey, list_kIMs_PPI_noGrey)
+  sNames_BMI <- unique(gsub(paste0(modRegExpr), "", dat_BMI_fdr$module))
+  sNames_BMI <- gsub("_$", "", sNames_BMI)
+  
+  ### 180515 v1.8_dev3
+  # rather make a data frame
+  #~~Prepare nested lists of BMI-enriched module genes in both ensembl and HGNC symbol~~
+  # Prepare 'melted' dataframe with modules and genes in ensembl and symbol
+  ### 
+  
+  list_modules_BMI <- vector(mode="list", length=length(sNames_BMI))
+  names(list_modules_BMI) <- sNames_BMI
+
+  for (name in sNames_BMI) {
+    idx <- grep(pattern = paste0(name, "_.*"), x = dat_BMI_fdr$module)
+    list_modules_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", dat_BMI_fdr$module[j]), simplify = T)
+    #sNames_BMI[j] <- sNames_PPI_ok[j]
+  }
+
+  list_colors_BMI <- list_colors_PPI_ok[names(list_colors_PPI_ok) %in% sNames_BMI]
+  
+  # Prepare nested lists of module genes
+  list_list_module_BMI_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_BMI, b=list_modules_BMI, SIMPLIFY=F)
+  list_list_module_BMI_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_BMI_genes, y=list_modules_BMI)
+
+  ######################################################################
+  ########## PLOT CELL EXPRESSION ON MODULES HEAT MAP ##################
+  ######################################################################
+  
+  # Output heatmap pdf and return nested lists of genes of BMI-enriched modules
+  eigen_mat <- eigenPlotAllSamples(RObjects_dir = RObjects_dir,
+                                   list_list_module_BMI_genes = list_list_module_BMI_genes,
+                                   list_colors_BMI = list_colors_BMI, 
+                                   list_modules_BMI = list_modules_BMI,
+                                   dat_BMI_fdr = dat_BMI_fdr,
+                                   dat_BMI_corrCoef = dat_BMI_corrCoef,
+                                   n_cores = n_cores,
+                                   plots_dir = plots_dir, 
+                                   data_prefix = data_prefix, 
+                                   flag_date = flag_date)
+
+  ##########################################################################
+  ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
+  ##########################################################################
+  
+  list_list_module_BMI_genes_hgnc <- lapply(list_list_module_BMI_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+  list_list_module_BMI_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_BMI_genes_hgnc, y=list_modules_BMI)
+  
+  # Prepare module genes dataframe
+  cell_cluster <- rep(sNames_BMI, unlist(sapply(list_list_module_BMI_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
+  module <- unlist(sapply(list_list_module_BMI_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
+  ensembl <- unlist(list_list_module_BMI_genes, recursive = T, use.names = F)
+  hgnc <- unlist(list_list_module_BMI_genes_hgnc, recursive=T, use.names=F)
+  
+  df_BMI_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, row.names = NULL)
+  
+  # Also filter kME lists
+  # upper level
+  list_kMEs_BMI <- list_kMEs_PPI_ok[names(list_kMEs_PPI_ok) %in% sNames_BMI]
+  list_kIMs_BMI <- list_kIMs_PPI_ok[names(list_kIMs_PPI_ok) %in% sNames_BMI]
+  # nested level
+  list_kMEs_BMI <- mapply(function(x,y) x[names(x) %in% names(y)], x=list_kMEs_BMI, y=list_list_module_BMI_genes, SIMPLIFY=F)
+  list_kIMs_BMI <- mapply(function(x,y) x[names(x) %in% names(y)], x=list_kIMs_BMI, y=list_list_module_BMI_genes, SIMPLIFY=F)
+  
+  
+  ######################################################################
+  ############# DO GENE SET ENRICHMENT ANALYSIS (GSEA) #################
+  ######################################################################
+  
+  # read in gene set information
+  
+  if (organism == "mmusculus") {
+    gene.sets <- read.gmt(mm_geneset_path)
+  } else if (organism == "hsapiens") {
+    data("org.Hs.GO2Symbol.list")
+    gene.sets <- org.Hs.GO2Symbol.list
+  }
+  
+  ### 180522 can't install dependencies for clusterProfiler  
+  
+  list_list_kMEs_BMI <- lapply(list_kMEs_BMI, function(x) as.list(x))
+  list_list_kMEs_BMI <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
+                               a = list_list_kMEs_BMI,
+                               b = list_kMEs_BMI,
+                               SIMPLIFY = F)
+  
+  # list_list_gsea <- list()
+  # for (i in 1:length(list_list_kMEs_BMI)) {
+  #   list_list_gsea
+  #   for (j in 1:length(list_list_kMEs_BMI[[i]])) {
+  #     
+  #     list_list_gsea <- gsea(values = list_list_kMEs_BMI[[i]][[j]], mc.cores=1, plot=T)
+  #   }
+  # }
+  
+  gene.sets.select <- gene.sets[grepl("^GO_|REACTOME|KEGG",  names(gene.sets))]
+  
   invisible(gc())
-
-  
-  ######################################################################
-  ########################## SAVE TABLES ###############################
-  ######################################################################
-  
-  # save kMEs and kMIs primary to file
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kMEs_out, sNames_ok, SIMPLIFY = F))
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kIMs_out, sNames_ok, SIMPLIFY = F))
-  
-  ### 180607_v1.8_dev2
-  #list_pkMEs_PPI_final <- mapply(function(x,y) data.frame(colors_PPI_final = x, genes = names(x), pkMEs_PPI = y), list_colors_PPI_final, list_pkMEs_PPI_final, SIMPLIFY = F)
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kMEs_PPI_out, sNames_ok, SIMPLIFY = F))
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kIMs_PPI_out, sNames_ok, SIMPLIFY = F))
-  #}
-
-  ### 180507_v1.8_dev2
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_mapping_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_mapping_out, sNames_ok, SIMPLIFY = F))
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_mapping_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_mapping_PPI_out, sNames_ok, SIMPLIFY = F))
-  ###
-
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "log_GSEA.txt"))
+  list_list_gsea <- parLapply(cl, list_list_kMEs_BMI, function(x) lapply(x, function(y) iterative.bulk.gsea(values=y, 
+                                                                                                            set.list=gene.sets.select)))
+  stopCluster(cl)
   invisible(gc())
+  
+  names(list_list_gsea) <- names(list_list_kMEs_BMI)
+  
+  signif.threshold <- 5e-2 / length(gene.sets.select)
+  
+  list_list_gsea_signif <- lapply(list_list_gsea, function(x) lapply(x, function(y) y[y$p.val<signif.threshold,])) 
+  
+  # TODO: Output in a single table?
+  save(list_list_gsea_signif, sprintf("%s%s_list_list_gsea_signif_%s.RData",dir_RObjects, data_prefix, flag_date))
+
+  ##########################################################################
+  ##################### COMPUTE MODULE-MODULE CORRELATIONS #################
+  ##########################################################################
+  
+  if (length(list_modules_BMI) > 1) {
+    
+    corr_eigengenes <- WGCNA::cor(x=eigen_mat, method=c("pearson"), verbose=verbose)
+    
+    # plot
+    pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "BMI-enriched module eigengenes", flag_date),width=ncol(eigen_mat) %/% 3,height=ncol(eigen_mat) %/% 3)
+    corrplot(corr = corr_eigengenes, 
+             method = "color",
+             diag = F,
+             is.corr=T,
+             title=sprintf("%s %s corr across subsets", data_prefix, "BMI-enriched module eigengenes"),#,
+             order = "hclust",
+             hclust.method = hclustMethod)
+    
+    invisible(dev.off())
+    
+    if (FALSE) {
+      
+      ##########################################################################
+      #####################  MERGE CORRELATED MODULES ##########################
+      ##########################################################################
+      
+      # TODO: first verify that merging makes biological sense 
+      
+      # Identify highly correlated modules
+      corr_eigengenes_lt <- corr_eigengenes
+      corr_eigengenes_lt[!lower.tri(corr_eigengenes, diag = F)] <- NA
+      idx_toMerge <- which(corr_eigengenes_lt>(1-moduleMergeCutHeight), arr.ind = T)
+      
+      
+      # Merge highly correlated modules
+      
+      modules_merged <- dat_BMI_fdr$module
+      list_modules_BMI_merged <- list_modules_BMI # this is a nested version of the above list
+      list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
+      list_colors_BMI_merged <- list_colors_BMI
+      
+      if (nrow(idx_toMerge) > 0) {
+        
+        for (i in 1:nrow(idx_toMerge)) {
+          
+          message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(corr_eigengenes[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
+          subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+          module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+          subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+          module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+          
+          list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
+          
+          list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
+          
+          
+          list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
+          
+          modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
+          modules_merged[idx_toMerge[i,1]] <- NA
+          
+        }
+        
+        modules_merged <- modules_merged[!is.na(modules_merged)]
+        
+        # get a new vector of names of cell clusters with BMI enrichment after merging
+        sNames_BMI <- unique(gsub("_.*", "", modules_merged))
+        
+        # Transform the vector of modules into a nested list, as before
+        list_modules_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
+        names(list_modules_BMI) <- sNames_BMI
+        
+        for (name in sNames_BMI_merged) {
+          idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
+          list_modules_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
+        }
+      }
+    }
+  }
+  
+  
+  ##########################################################################
+  ############ SAVE GENE LISTS AND KMEs FOR BMI-ENRICHED MODULES ###########
+  ##########################################################################
+  
+  # output module gene df 
+  invisible(write.csv(df_BMI_module_genes, file = sprintf("%s%s_BMI_modules_genes_%s.csv",tables_dir, data_prefix, flag_date), row.names = F))
+  
+  # Prepare dfs with a gene column followed by kMEs / kIMs
+  list_kMEs_BMI_out <- lapply(list_kMEs_BMI, function(x) cbind(genes=rownames(x), x))
+  list_kIMs_BMI_out <- lapply(list_kIMs_BMI, function(x) cbind(genes=rownames(x), x))
+  rownames(list_kMEs_BMI_out) <- NULL
+  rownames(list_kIMs_BMI_out) <- NULL
+  
+  # output kMEs and kIMs for BMI enriched modules
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_BMI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kMEs_BMI_out, sNames_BMI, SIMPLIFY = F))
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_BMI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F), list_kIMs_BMI_out, sNames_BMI, SIMPLIFY = F))
   
   ### 180504_v1.8_dev1
   resume = "checkpoint_4"
@@ -1268,585 +1438,497 @@ if (resume == "checkpoint_3") {
 } else if (resume == "checkpoint_4") {
   load(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
   # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev2.R")
-  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev2.R")
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev3.R")
+  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev3.R")
 }  
 ###
 
 ######################################################################
-################### PLOT FINAL MODULE ASSIGNMENT #####################
+############### PLOT EIGENGENE - METADATA CORRELATION ################
 ######################################################################
 
-message("Plotting")
-
-### 180607_v1.8_dev2
-#if (!is.null(STRINGdb_species)) {
-list_colors_final_both = mapply(FUN=cbind, list_colors_final, list_colors_PPI_final, SIMPLIFY = F)
-names(list_colors_final_both) = sNames_ok
-invisible(lapply(sNames_ok, plotFinalColors))
-
-# } else if (is.null(STRINGdb_species)) {
-#   list_colors_final_both = list_colors_final
-#   names(list_colors_final_both) = sNames_ok
-#   invisible(lapply(sNames_ok, plotFinalColors))
-# }
-
-##########################################################################
-#################### COMPUTE MAGMA GWAS ENRICHMENT #######################
-##########################################################################
-
-message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
-
-file_suffix = "kMEs"
-cl <- makeCluster(n_cores, type = "FORK", 
-                  outfile = paste0(log_dir, "log_MAGMA.txt"))
-### 180607_v1.8_dev2
-list_modules_gwas <- parLapply(cl, sNames_ok, function(x) tryCatch({magma_for_par(subsetName = x,
-                                                                 project_dir = project_dir,
-                                                                 plots_dir = plots_dir,
-                                                                 log_dir = log_dir,
-                                                                 tables_dir = tables_dir,
-                                                                 magma_gwas_dir = magma_gwas_dir,
-                                                                 data_prefix = data_prefix,
-                                                                 file_suffix = file_suffix,
-                                                                 flag_date = flag_date,
-                                                                 organism = organism)}, 
-                                                                 error=function(x) {
-                                                                   out <- NULL 
-                                                                   message(sprintf("MAGMA script with kMEs failed: %s", x))
-                                                                   return(out)})) 
-
-names(list_modules_gwas) = sNames_ok
-###
-
-stopCluster(cl)
-invisible(gc())
-
-### 180607_v1.8_dev2
-#if (!is.null(STRINGdb_species)) {
-  
-file_suffix = "kMEs_PPI"
-cl <- makeCluster(n_cores, type = "FORK", 
-                  outfile = paste0(log_dir, "log_MAGMA_PPI.txt"))
-
-### 180607_v1.8_dev2
-list_modules_PPI_gwas <- parLapply(cl, sNames_ok_PPI, function(x) tryCatch({magma_for_par(subsetName = x,
-                                                                 project_dir = project_dir,
-                                                                 plots_dir = plots_dir,
-                                                                 log_dir = log_dir,
-                                                                 tables_dir = tables_dir,
-                                                                 magma_gwas_dir = magma_gwas_dir,
-                                                                 data_prefix = data_prefix,
-                                                                 file_suffix = file_suffix,
-                                                                 flag_date = flag_date,
-                                                                 organism = organism)}, 
-                                                                 error = function(x) { 
-                                                                 out <- NULL
-                                                                 message(sprintf("MAGMA script with kMEs_PPI failed: %s", x))
-                                                                 return(out)}))
-names(list_modules_PPI_gwas) = sNames_ok_PPI
-
-### 
-stopCluster(cl)
-invisible(gc())
-#}
-
-### 18508_v1.8_dev2
-# Get rid of runs w/o any enriched modules
-
-list_modules_gwas <- list_modules_gwas %>% Filter(f=length)
-list_modules_PPI_gwas <- list_modules_PPI_gwas %>% Filter(f=length)
-
-sNames_gwas <- sNames_ok[sNames_ok %in% names(list_modules_gwas)]
-sNames_PPI_gwas <- sNames_ok_PPI[sNames_ok %in% names(list_modules_PPI_gwas)]
-
-# Filter first to get rid of cell types without any PPI enriched modules, secondly for GWAS
-list_colors_final_gwas <- list_colors_final[sNames_ok %in% names(list_modules_gwas)]
-list_colors_PPI_final_gwas <- list_colors_PPI_final[names(list_colors_PPI_final) %in% sNames_ok_PPI][sNames_ok_PPI %in% names(list_modules_PPI_gwas)]
-
-# Also filter kME list
-list_kMEs_PPI_noGrey_gwas <- list_kMEs_PPI_noGrey[names(list_kMEs_PPI_noGrey) %in% sNames_ok_PPI][sNames_ok_PPI %in% names(list_modules_PPI_gwas)]
-
-######################################################################
-######################### GET GO TERMS ###############################
-######################################################################
-
-
-### TODO: put this in a function
-#if (!is.null(list_modules_PPI_gwas)) if (length(list_modules_PPI_gwas)>0) {
-#out <- GO_for_par(args)
-#} 
-
-######################################################################
-############# DO GENE SET ENRICHMENT ANALYSIS (GSEA) #################
-######################################################################
-
-### TODO: can't install packages atm 
-### TODO: put this in a function
-
-#if (!is.null(list_modules_PPI_gwas)) if (length(list_modules_PPI_gwas)>0) {
-#out <- GSEA_for_par(args)
-#} 
-
-######################################################################
-########## PLOT CELL EXPRESSION ON MODULES HEAT MAP ##################
-######################################################################
-
-# TODO
-#eigenPlotAllSamples()
-
-######################################################################
-############################# OTHER PLOTS ############################
-######################################################################
-
-if (FALSE) {  # TODO
-  
-  ######################################################################
-  ############# PLOT kME - kIM CORRELATIONS WITHIN CELLTYPES ###########
-  ######################################################################
-  # This is a diagnostic plot to see whether kIMs are highly correlated with kMEs as expected
-  
-  list_corr_kMEs_kIMs <- mapply(function(x,y) cor(x,y), x=list_kMEs, y=list_kIMs, SIMPLIFY=F)
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kME-kIM", 
-                                                  subsetName=y, 
-                                                  diag=T,
-                                                  is.corr = T), 
-                   x=list_corr_kMEs_kIMs, y=sNames_ok, SIMPLIFY=F))
-
-  list_corr_kMEs_kIMs_PPI <- mapply(function(x,y) cor(x,y), x=list_kMEs_PPI, y=list_kIMs_PPI, SIMPLIFY=F)
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kME-kIM_PPI", 
-                                                  subsetName=y, 
-                                                  diag=T,
-                                                  is.corr = T), 
-                   x=list_corr_kMEs_kIMs_PPI, y=sNames_ok, SIMPLIFY=F))
-  #}
-  ######################################################################
-  ######## PLOT kME-kME & kIM-kIM CORRELATIONS WITHIN CELLTYPES ########
-  ######################################################################
-  
-  list_corr_kMEs_kMEs <- lapply(list_kMEs, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
-  list_corr_kIMs_kIMs <- lapply(list_kIMs, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
-  
-  # EDIT_180429_4
-  # The names screw up the plots
-  # # name the correlation matrix columns
-  # list_corr_kMEs_kMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
-  #                               x = list_corr_kMEs_kMEs,
-  #                               y = list_kMEs, SIMPLIFY=F)
-  # list_corr_kIMs_kIMs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
-  #                               x = list_corr_kIMs_kIMs,
-  #                               y = list_kIMs, SIMPLIFY=F)
-  # 
-  # # name the correlation matrix rows
-  # list_corr_kMEs_kMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
-  #                               x = list_corr_kMEs_kMEs,
-  #                               y = list_kMEs, SIMPLIFY=F)
-  # list_corr_kIMs_kIMs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
-  #                               x = list_corr_kIMs_kIMs,
-  #                               y = list_kIMs, SIMPLIFY=F)
-  
+if (!is.null(meta.data)) {
+  # compute metadata correlations with eigengene embeddings
+  # arrange meta.data rows to match eigenvector embeddings
+  meta.data <- meta.data[match(rownames(meta.data), rownames(eigen_mat)),]
+  eigen_meta.data_corr <- WGCNA::cor(x=meta.data, y=eigen_mat, method = c("pearson"), verbose = 0)
   # plot
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kME-kME", 
-                                                  subsetName=y, 
-                                                  diag=F,
-                                                  is.corr=T,
-                                                  order = "hclust",
-                                                  hclust.method = hclustMethod), 
-                   x=list_corr_kMEs_kMEs, y=sNames_ok, SIMPLIFY=F))
-  
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kIM-kIM", 
-                                                  subsetName=y, 
-                                                  diag=F,
-                                                  is.corr=T,
-                                                  order = "hclust",
-                                                  hclust.method = hclustMethod), 
-                   x=list_corr_kIMs_kIMs, y=sNames_ok, SIMPLIFY=F))
-
-  ### 180607_v1.8_dev2
-  #if (!is.null(STRINGdb_species)){
-  list_corr_kMEs_kMEs_PPI <- lapply(list_kMEs_PPI, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
-  list_corr_kIMs_kIMs_PPI <- lapply(list_kIMs_PPI, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
-  
-  # Name the correlation matrix columns
-  # list_corr_kMEs_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
-  #                                   x = list_corr_kMEs_kMEs_PPI,
-  #                                   y = list_kMEs_PPI, SIMPLIFY=F)
-  # list_corr_kIMs_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
-  #                                   x = list_corr_kIMs_kIMs_PPI,
-  #                                   y = list_kIMs_PPI, SIMPLIFY=F)
-  # 
-  # # Name the correlation matrix rows
-  # list_corr_kMEs_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
-  #                                   x = list_corr_kMEs_kMEs_PPI,
-  #                                   y = list_kMEs_PPI, SIMPLIFY=F)
-  # list_corr_kIMs_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
-  #                                   x = list_corr_kIMs_kIMs_PPI,
-  #                                   y = list_kIMs_PPI, SIMPLIFY=F)
-  # 
-  # plot
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kME-kME_PPI", 
-                                                  subsetName=y, 
-                                                  diag=F,
-                                                  is.corr=T,
-                                                  order = "hclust",
-                                                  hclust.method = hclustMethod), 
-                   x=list_corr_kMEs_kMEs_PPI, y=sNames_ok, SIMPLIFY=F))
-  
-  invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
-                                                  vectorNames = "kIM-kIM_PPI", 
-                                                  subsetName=y, 
-                                                  diag=F,
-                                                  is.corr=T,
-                                                  order = "hclust",
-                                                  hclust.method = hclustMethod), 
-                   x=list_corr_kIMs_kIMs_PPI, y=sNames_ok, SIMPLIFY=F))
-  #}
-
-  ######################################################################
-  ######################### LOAD FULL DATA #############################
-  ######################################################################
-  
-  #datExpr_full <- t(load_obj(seurat_path)@data)
-  seurat_obj <- load_obj(seurat_path)
-  datExpr_full <- t(seurat_obj@data)
-  ######################################################################
-  ####### PLOT kME-kME and kIM-kIM correlation across all subsets ######
-  ######################################################################
-
-  # Include all genes in kMEs / kIMs with value 0 if they were not included in the subset analysis
-  ### 180503_v1.7
-  # need to use original names
-  # list_kMEs_all_genes <- lapply(list_kMEs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
-  # list_kIMs_all_genes <- lapply(list_kIMs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
-  list_kMEs_all_genes <- lapply(list_kMEs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
-  list_kIMs_all_genes <- lapply(list_kIMs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
-  ###
-  
-  # Bind all celltype module kMEs / kIMs in single dataframes
-  
-  for (i in 1:length(list_kMEs_all_genes)) {
-    if (i == 1) {
-      kMEs_across_subsets <- list_kMEs_all_genes[[i]] 
-    } else { kMEs_across_subsets <- cbind(kMEs_across_subsets,list_kMEs_all_genes[[i]])
-    }
-  }
-  
-  for (i in 1:length(list_kIMs_all_genes)) {
-    if (i == 1) {
-      kIMs_across_subsets <- list_kIMs_all_genes[[i]] 
-    } else { kIMs_across_subsets <- cbind(kIMs_across_subsets,list_kIMs_all_genes[[i]])
-    }
-  }
-  #kMEs_across_subsets <- cbind(eval(parse(text=sprintf("c(%s)", paste0("list_kMEs_all_genes[[", 1:length(list_kMEs_all_genes), "]]")))))
-  #kIMs_across_subsets <- cbind(eval(parse(text='c(paste0("list_kIMs_all_genes[[", 1:length(list_kIMs_all_genes), "]]"))')))
-
-  # name the dataframes and matrices so as to distinguish modules from different subsets   
-  prefixes = unlist(mapply(function(x,y) rep(x = x, times= ncol(y)), x=sNames_ok, y= list_kMEs_all_genes, SIMPLIFY=T)) # same for kME and kIM
-
-  colnames(kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
-  colnames(kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
-  
-  # correlation matrices
-  corr_kMEs_across_subsets <- WGCNA::cor(as.matrix(kMEs_across_subsets), method="spearman", verbose = verbose)
-  corr_kIMs_across_subsets <- WGCNA::cor(as.matrix(kIMs_across_subsets), method="spearman", verbose = verbose)
-  
-  # Name the matrices
-  # rownames(corr_kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
-  # rownames(corr_kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
-  # 
-  # colnames(corr_kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
-  # colnames(corr_kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
-  # 
-  # Include all genes in kIMs with value 0 if they were not included in the subset analysis
-  # Bind all celltype module kMEs in a single dataframe
-  # name the dataframe and matrix so as to distinguish subsets 
-  
-  # plot
-  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kME-kME", flag_date))#,width=ncol(kMEs_across_subsets) %/% 4,height=ncol(kMEs_across_subsets) %/% 4)
-  corrplot(corr = corr_kMEs_across_subsets, 
-           method = "color",
-           is.corr=T,
-           title=sprintf("%s %s corr across subsets", data_prefix, "kME-kME"),
-           #addCoef.col = F,
-           number.digits = NULL)
-  
-  invisible(dev.off())
-  
- # plot
-  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kIM-kIM", flag_date),width=ncol(kIMs_across_subsets) %/% 4,height=ncol(kIMs_across_subsets) %/% 4)
-  corrplot(corr = corr_kIMs_across_subsets, 
+  pdf(sprintf("%s%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, flag_date))
+  corrplot(corr = eigen_meta.data_corr,
            add = F,
            method = "color",
            is.corr=T,
            #order = "hclust",
            #hclust.method = hclustMethod,
-           title=sprintf("%s %s corr across subsets", data_prefix, "kIM-kIM"),
+           title=sprintf("%s eigenvector - meta.data correlations", data_prefix),
            #addCoef.col = F,
            number.digits = NULL)
-  
   invisible(dev.off())
-  
-  ### 180607_v1.8_dev2
-  #if (!is.null(STRINGdb_species)){
-  #### 180503_v1.7
-  # Include all genes in kMEs / kIMs with value 0 if they were not included in the subset analysis
-  # list_kMEs_PPI_all_genes <- lapply(list_kMEs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
-  # list_kIMs_PPI_all_genes <- lapply(list_kIMs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
-  list_kMEs_PPI_all_genes <- lapply(list_kMEs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
-  list_kIMs_PPI_all_genes <- lapply(list_kIMs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
-  
-  ###
-  
-  # Bind all celltype module kMEs / kIMs in single dataframes
-  
-  for (i in 1:length(list_kMEs_PPI_all_genes)) {
-    if (i == 1) {
-      kMEs_PPI_across_subsets <- list_kMEs_PPI_all_genes[[i]] 
-    } else { kMEs_PPI_across_subsets <- cbind(kMEs_PPI_across_subsets,list_kMEs_PPI_all_genes[[i]])
-    }
-  }
-  
-  for (i in 1:length(list_kIMs_PPI_all_genes)) {
-    if (i == 1) {
-      kIMs_PPI_across_subsets <- list_kIMs_PPI_all_genes[[i]] 
-    } else { kIMs_PPI_across_subsets <- cbind(kIMs_PPI_across_subsets,list_kIMs_PPI_all_genes[[i]])
-    }
-  }
-  
-  # Bind all celltype module kMEs / kIMs in single dataframes
-  # kMEs_PPI_across_subsets <- cbind(eval(parse(text=c(paste0("list_kMEs_PPI_all_subsets[[", 1:length(list_kMEs_PPI_all_genes), "]]")))))
-  # kMEs_PPI_across_subsets <- cbind(eval(parse(text=c(paste0("list_kMEs_PPI_all_subsets[[", 1:length(list_kMEs_PPI_all_genes), "]]")))))
-  # 
-  # name the dataframes and matrices so as to distinguish modules from different subsets   
-  prefixes = unlist(mapply(function(x,y) rep(x = x, times= ncol(y)), x=sNames_ok, y= list_kMEs_PPI_all_genes, SIMPLIFY=T)) # same for kME and kIM
-  
-  colnames(kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  colnames(kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  
-  # correlation matrices
-  corr_kMEs_PPI_across_subsets <- WGCNA::cor(as.matrix(kMEs_PPI_across_subsets), method="spearman", verbose=verbose)
-  corr_kMEs_PPI_across_subsets <- WGCNA::cor(as.matrix(kMEs_PPI_across_subsets), method="spearman", verbose=verbose)
-  
-  # Name the matrices
-  # rownames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  # rownames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  # 
-  # colnames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  # colnames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-  # 
-  # Include all genes in kIMs with value 0 if they were not included in the subset analysis
-  # Bind all celltype module kMEs in a single dataframe
-  # name the dataframe and matrix so as to distinguish subsets 
-  
-  # plot
-  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kME-kME_PPI", flag_date),width=ncol(kMEs_PPI_across_subsets) %/% 4,height=ncol(kMEs_PPI_across_subsets) %/% 4)
-  corrplot(corr = corr_kMEs_PPI_across_subsets, 
-           method = "color",
-           is.corr=T,
-           title=sprintf("%s %s corr across subsets", data_prefix, "kME-kME (PPI)"))#,
-           #order = "hclust",
-           #hclust.method = hclustMethod)
-  
-  invisible(dev.off())
-  
-  # plot
-  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kIM-kIM_PPI", flag_date),width=ncol(kMEs_PPI_across_subsets) %/% 4,height=ncol(kMEs_PPI_across_subsets) %/% 4)
-  corrplot(corr = corr_kMEs_PPI_across_subsets, 
-           method = "color",
-           is.corr=T,
-           title=sprintf("%s %s corr across subsets", data_prefix, "kIM-kIM (PPI)"))#,
-           #order = "hclust",
-           #hclust.method = hclustMethod)
-  
-  invisible(dev.off())
-  #}
-  ######################################################################
-  ########### PLOT KME - & KIM - METADATA CORRELATIONS #################
-  ######################################################################
-  
-  if (!is.null(meta.data)) {
-    
-    # Compute cell embedding
-    cell_embeddings_kME <- datExpr_full %*% as.matrix(kMEs_across_subsets) # cell x gene %*% gene x module -> cell x module 
-    cell_embeddings_kIM <- datExpr_full %*% as.matrix(kIMs_across_subsets) # cell x gene %*% gene x module -> cell x module 
-    
-    # correlation matrices 
-    corr_kME_meta.data <- WGCNA::cor(x=cell_embeddings_kME, y=meta.data, method="spearman", verbose=verbose)
-    corr_kIM_meta.data <- WGCNA::cor(x=cell_embeddings_kME, y=meta.data, method="spearman", verbose=verbose)
-    
-    # name the matrices
-    # rownames(corr_kME_meta.data) = meta.data_corr_col_numeric
-    # rownames(corr_kIM_meta.data) = meta.data_corr_col_numeric
-    # 
-    # colnames(corr_kME_meta.data) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
-    # colnames(corr_kIM_meta.data) = paste(prefixes, colnames(kIMs_PPI_across_subsets), sep="_")
-    
-    # plot
-    pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kME_embeddings", flag_date),width=ncol(meta.data) %/% 4,height=ncol(kMEs_across_subsets) %/% 4)
-    corrplot(corr = corr_kME_meta.data, 
-             method = "color",
-             is.corr=T,
-             title=sprintf("%s corr: module %s with metadata", data_prefix, "kME embeddings"))#,
-             #order = "hclust",
-             #hclust.method = hclustMethod)
-    
-    dev.off()
-    
-    pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kIM_embeddings", flag_date),width=ncol(meta.data) %/% 4,height=ncol(kIMs_across_subsets) %/% 4)
-    corrplot(corr = corr_kIM_meta.data, 
-             method = "color",
-             is.corr=T,
-             title=sprintf("%s corr: module %s with metadata", data_prefix, "kIM embeddings"))#,
-             #order = "hclust",
-             #hclust.method = hclustMethod)
-    
-    dev.off()
-    
-    ### 180607_v1.8_dev2
-    #if (!is.null(STRINGdb_species)) {
+}
 
-    # Compute cell embedding
-    cell_embeddings_kMEs_PPI <- datExpr_full %*% as.matrix(kMEs_PPIs_across_subsets) # cell x gene %*% gene x module -> cell x module 
-    cell_embeddings_kIMs_PPI <- datExpr_full %*% as.matrix(kIMs_PPIs_across_subsets) # cell x gene %*% gene x module -> cell x module 
-    
-    # correlation matrices 
-    corr_kMEs_PPI_meta.data <- WGCNA::cor(x=cell_embeddings_kMEs_PPI, y=meta.data, method="spearman", verbose=verbose)
-    corr_kIMs_PPI_meta.data <- WGCNA::cor(x=cell_embeddings_kMEs_PPI, y=meta.data, method="spearman", verbose=verbose)
-    
-    # name the matrices
-    # rownames(corr_kMEs_PPI_meta.data) = meta.data_corr_col_numeric
-    # rownames(corr_kIMs_PPI_meta.data) = meta.data_corr_col_numeric
-    # 
-    # colnames(corr_kMEs_PPI_meta.data) = paste(prefixes, colnames(kMEs_PPIs_PPI_across_subsets), sep="_")
-    # colnames(corr_kIMs_PPI_meta.data) = paste(prefixes, colnames(kIMs_PPI_across_subsets), sep="_")
-    # 
-    # plot
-    pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kMEs_PPI_embeddings", flag_date),width = max(4, ncol(meta.data) %/% 4), height = ncol(kMEs_PPIs_across_subsets) %/% 4)
-    corrplot(corr = corr_kMEs_PPI_meta.data, 
-             method = "color",
-             is.corr=T,
-             title=sprintf("%s corr: module %s with metadata", data_prefix, "kMEs_PPI embeddings"))#,
-             #order = "hclust",
-             #hclust.method = hclustMethod)
-    
-    dev.off()
-    
-    pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kIMs_PPI_embeddings", flag_date),width = max(4, ncol(meta.data) %/% 4), height = ncol(kIMs_PPIs_across_subsets) %/% 4)
-    corrplot(corr = corr_kIMs_PPI_meta.data, 
-             method = "color",
-             is.corr=T,
-             title=sprintf("%s corr: module %s with metadata", data_prefix, "kIMs_PPI embeddings"))#,
-             #order = "hclust",
-             #hclust.method = hclustMethod)
-    
-    dev.off()
-    #}
-  } # end of is(!is.null(meta.data))
+######################################################################
+############# PLOT kME - kIM CORRELATIONS ############################
+######################################################################
+# This is a diagnostic plot to see whether kIMs are highly correlated with kMEs as expected
+
+### 180516 v1.8_dev3 
+# Not really so useful divided into celltypes. better to do across celltypes
+
+# list_corr_kMEs_kIMs <- mapply(function(x,y) cor(x,y), x=list_kMEs, y=list_kIMs, SIMPLIFY=F)
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "kME-kIM", 
+#                                                 subsetName=y, 
+#                                                 diag=T,
+#                                                 is.corr = T), 
+#                  x=list_corr_kMEs_kIMs, y=sNames_ok, SIMPLIFY=F))
+###
+
+# list_corr_kMEs_kIMs_BMI <- mapply(function(x,y) cor(x,y), x=list_kMEs_BMI, y=list_kIMs_BMI, SIMPLIFY=F)
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "module kME-kIM (BMI enriched)", 
+#                                                 subsetName=y, 
+#                                                 diag=T,
+#                                                 is.corr = T), 
+#                  x=list_corr_kMEs_kIMs_PPI, y=sNames_BMI, SIMPLIFY=F))
+# #}
+
+######################################################################
+######## PLOT kME-kME & kIM-kIM CORRELATIONS WITHIN CELLTYPES ########
+######################################################################
   
-  ######################################################################
-  ##### PLOT CELL EXPRESSION ON MODULES WITH HIGH GWAS SIGNIFICANCE ####
-  ######################################################################
+# list_corr_kMEs_kMEs <- lapply(list_kMEs, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
+# list_corr_kIMs_kIMs <- lapply(list_kIMs, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
+# 
+# EDIT_180429_4
+# The names screw up the plots
+# # name the correlation matrix columns
+# list_corr_kMEs_kMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
+#                               x = list_corr_kMEs_kMEs,
+#                               y = list_kMEs, SIMPLIFY=F)
+# list_corr_kIMs_kIMs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
+#                               x = list_corr_kIMs_kIMs,
+#                               y = list_kIMs, SIMPLIFY=F)
+# 
+# # name the correlation matrix rows
+# list_corr_kMEs_kMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
+#                               x = list_corr_kMEs_kMEs,
+#                               y = list_kMEs, SIMPLIFY=F)
+# list_corr_kIMs_kIMs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
+#                               x = list_corr_kIMs_kIMs,
+#                               y = list_kIMs, SIMPLIFY=F)
+
+# plot
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "kME-kME", 
+#                                                 subsetName=y, 
+#                                                 diag=F,
+#                                                 is.corr=T,
+#                                                 order = "hclust",
+#                                                 hclust.method = hclustMethod), 
+#                  x=list_corr_kMEs_kMEs, y=sNames_ok, SIMPLIFY=F))
+# 
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "kIM-kIM", 
+#                                                 subsetName=y, 
+#                                                 diag=F,
+#                                                 is.corr=T,
+#                                                 order = "hclust",
+#                                                 hclust.method = hclustMethod), 
+#                  x=list_corr_kIMs_kIMs, y=sNames_ok, SIMPLIFY=F))
+
+### 180607_v1.8_dev2
+#if (!is.null(STRINGdb_species)){
+# list_corr_kMEs_kMEs_PPI <- lapply(list_kMEs_PPI, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
+# list_corr_kIMs_kIMs_PPI <- lapply(list_kIMs_PPI, function(x) WGCNA::cor(x,x, method="spearman", verbose=verbose))
+# 
+# Name the correlation matrix columns
+# list_corr_kMEs_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
+#                                   x = list_corr_kMEs_kMEs_PPI,
+#                                   y = list_kMEs_PPI, SIMPLIFY=F)
+# list_corr_kIMs_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = 2), 
+#                                   x = list_corr_kIMs_kIMs_PPI,
+#                                   y = list_kIMs_PPI, SIMPLIFY=F)
+# 
+# # Name the correlation matrix rows
+# list_corr_kMEs_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
+#                                   x = list_corr_kMEs_kMEs_PPI,
+#                                   y = list_kMEs_PPI, SIMPLIFY=F)
+# list_corr_kIMs_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1), 
+#                                   x = list_corr_kIMs_kIMs_PPI,
+#                                   y = list_kIMs_PPI, SIMPLIFY=F)
+# 
+# plot
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "kME-kME_PPI", 
+#                                                 subsetName=y, 
+#                                                 diag=F,
+#                                                 is.corr=T,
+#                                                 order = "hclust",
+#                                                 hclust.method = hclustMethod), 
+#                  x=list_corr_kMEs_kMEs_PPI, y=sNames_ok, SIMPLIFY=F))
+
+# invisible(mapply(function(x,y) plotCorr_for_par(corrMatrix=x, 
+#                                                 vectorNames = "kIM-kIM_PPI", 
+#                                                 subsetName=y, 
+#                                                 diag=F,
+#                                                 is.corr=T,
+#                                                 order = "hclust",
+#                                                 hclust.method = hclustMethod), 
+#                  x=list_corr_kIMs_kIMs_PPI, y=sNames_ok, SIMPLIFY=F))
+#}
+
+######################################################################
+######################### LOAD FULL DATA #############################
+######################################################################
   
-  gwas_sub_dirs = list.dirs(path = magma_gwas_dir, full.names = FALSE, recursive = FALSE)
+#datExpr_full <- t(load_obj(seurat_path)@data)
+#seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+
+#datExpr_full <- t(seurat_obj@data)
+
+######################################################################
+####### PLOT kME-kME and kIM-kIM correlation across all subsets ######
+######################################################################
+
+# Include all genes in kMEs / kIMs with value 0 if they were not included in the subset analysis
+### 180503_v1.7
+# need to use original names
+# list_kMEs_all_genes <- lapply(list_kMEs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
+# list_kIMs_all_genes <- lapply(list_kIMs, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
+# ###
+
+# Bind all celltype module kMEs / kIMs in single dataframes
+
+# for (i in 1:length(list_kMEs_all_genes)) {
+#   if (i == 1) {
+#     kMEs_across_subsets <- list_kMEs_all_genes[[i]] 
+#   } else { kMEs_across_subsets <- cbind(kMEs_across_subsets,list_kMEs_all_genes[[i]])
+#   }
+# }
+
+# for (i in 1:length(list_kIMs_all_genes)) {
+#   if (i == 1) {
+#     kIMs_across_subsets <- list_kIMs_all_genes[[i]] 
+#   } else { kIMs_across_subsets <- cbind(kIMs_across_subsets,list_kIMs_all_genes[[i]])
+#   }
+# }
+#kMEs_across_subsets <- cbind(eval(parse(text=sprintf("c(%s)", paste0("list_kMEs_all_genes[[", 1:length(list_kMEs_all_genes), "]]")))))
+#kIMs_across_subsets <- cbind(eval(parse(text='c(paste0("list_kIMs_all_genes[[", 1:length(list_kIMs_all_genes), "]]"))')))
+
+# name the dataframes and matrices so as to distinguish modules from different subsets   
+#prefixes = unlist(mapply(function(x,y) rep(x = x, times= ncol(y)), x=sNames_ok, y= list_kMEs_all_genes, SIMPLIFY=T)) # same for kME and kIM
+
+#colnames(kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
+#colnames(kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
+
+# correlation matrices
+#corr_kMEs_across_subsets <- WGCNA::cor(as.matrix(kMEs_across_subsets), method="spearman", verbose = verbose)
+#corr_kIMs_across_subsets <- WGCNA::cor(as.matrix(kIMs_across_subsets), method="spearman", verbose = verbose)
+
+# Name the matrices
+# rownames(corr_kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
+# rownames(corr_kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
+# 
+# colnames(corr_kMEs_across_subsets) = paste(prefixes, colnames(kMEs_across_subsets), sep="_")
+# colnames(corr_kIMs_across_subsets) = paste(prefixes, colnames(kIMs_across_subsets), sep="_")
+# 
+# Include all genes in kIMs with value 0 if they were not included in the subset analysis
+# Bind all celltype module kMEs in a single dataframe
+# name the dataframe and matrix so as to distinguish subsets 
   
-  file_suffix = "kMEs"
-  # upper level list of subsets, nested list with tables for each GWAS repo
-  list_list_magma_tables <- lapply(sNames_ok, function(x) lapply(gwas_sub_dirs, function(y) load_obj(f=paste0(tables_dir, data_prefix,"_", x, "_", file_suffix, "_magma_GWAS_", y, "_", flag_date, ".csv"))))
-  list_list_idx_signif_modules <- lapply(list_list_magma_tables, function(x) lapply(x, function(y) x[x[,max.col(x[,-which(colnames(x)=="module")])] > -log10(5^-2),][["module"]]))
-  list_MAGMA_signif_modules <- sapply(list_list_idx_signif_modules, function(x) unique(unlist(x)))
+# plot
+#  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kME-kME", flag_date))#,width=ncol(kMEs_across_subsets) %/% 4,height=ncol(kMEs_across_subsets) %/% 4)
+#  corrplot(corr = corr_kMEs_across_subsets, 
+#           method = "color",
+#           is.corr=T,
+#           title=sprintf("%s %s corr across subsets", data_prefix, "kME-kME"),
+#           #addCoef.col = F,
+#           number.digits = NULL)
+#  
+#  invisible(dev.off())
+#  
+# # plot
+#  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kIM-kIM", flag_date),width=ncol(kIMs_across_subsets) %/% 4,height=ncol(kIMs_across_subsets) %/% 4)
+#  corrplot(corr = corr_kIMs_across_subsets, 
+#           add = F,
+#           method = "color",
+#           is.corr=T,
+#           #order = "hclust",
+#           #hclust.method = hclustMethod,
+#           title=sprintf("%s %s corr across subsets", data_prefix, "kIM-kIM"),
+#           #addCoef.col = F,
+#           number.digits = NULL)
+#  
+#  invisible(dev.off())
+
+### 180607_v1.8_dev2
+#if (!is.null(STRINGdb_species)){
+#### 180503_v1.7
+# Include all genes in kMEs / kIMs with value 0 if they were not included in the subset analysis
+# list_kMEs_PPI_all_genes <- lapply(list_kMEs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
+# list_kIMs_PPI_all_genes <- lapply(list_kIMs_PPI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes_IDs_mix))
+# list_kMEs_BMI_all_genes <- lapply(list_kMEs_BMI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
+# list_kIMs_BMI_all_genes <- lapply(list_kIMs_BMI, function(x) get_kMEs_all_genes(kMEs=x, all_genes=all_genes))
+
+###
+
+# Bind all celltype module kMEs / kIMs in single dataframes
+
+# for (i in 1:length(list_kMEs_BMI_all_genes)) {
+#   if (i == 1) {
+#     kMEs_BMI_across_subsets <- list_kMEs_BMI_all_genes[[i]] 
+#   } else { kMEs_BMI_across_subsets <- cbind(kMEs_BMI_across_subsets,list_kMEs_BMI_all_genes[[i]])
+#   }
+# }
   
-  # Compute cell embeddings
-  list_cell_embeddings_kME_MAGMA <- lapply(list_MAGMA_signif_modules, function(x) as.matrix(kMEs_across_subsets[,colnames(kMEs_across_subsets) %in% x]) %*% t(datExpr_full)) # module x gene %*% gene x cell -> module x cell
+# for (i in 1:length(list_kIMs_BMI_all_genes)) {
+#   if (i == 1) {
+#     kIMs_BMI_across_subsets <- list_kIMs_BMI_all_genes[[i]] 
+#   } else { kIMs_BMI_across_subsets <- cbind(kIMs_BMI_across_subsets,list_kIMs_BMI_all_genes[[i]])
+#   }
+# }
   
-  # name the matrix
-  #colnames
-  # list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = rownames(datExpr_full), dimension = 2)) # cell names
-  # #rownames
-  # list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = paste(prefixes, colnames(x), sep="_"), dimension = 1))
-  
-  # group the columns of the embeddings matrix by cell type (@ident)
-  celltypes_idx <- integer(0)
-  for (celltype in names(table(seurat_obj@ident))) {
-    celltypes_idx <- c(celltypes_idx, which(seurat_obj@ident == celltype)) 
-  }
-  
-  list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) x[,celltypes_idx]) 
-  
-  # plot
-  for (i in 1:length(gwas_sub_dirs)) {
-    pheatmap(mat = list_cell_embeddings_kME_MAGMA[[i]], 
-             color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
-             kmeans_k = NA,
-             breaks = NA, 
-             cluster_rows = F,
-             cluster_cols = F,
-             #clustering_method = hclustMethod,
-             show_rownames = T,
-             show_colnames = F,
-             main = sprintf("%s_%s_%s_%s", data_prefix, "module_embeddings_MAGMA", gwas_sub_dirs[i], flag_date),
-             filename=sprintf("%s%s_%s_%s_%s.pdf", plots_dir, data_prefix, "module_embeddings_MAGMA", gwas_sub_dirs[i], flag_date),
-             width = 10,
-             height = length(list_MAGMA_signif_modules) %/% 4,
-             silent = T)
-  }
-  
-  ### 180607_v1.8_dev2
-  #if (!is.null(STRINGdb_species)) {
-    
-  file_suffix = "kMEs_PPI"
-  # upper level list of subsets, nested list with tables for each GWAS repo
-  list_list_PPI_magma_tables <- lapply(sNames_ok, function(x) lapply(gwas_sub_dirs, function(y) load_obj(file=paste0(tables_dir, data_prefix,"_", x, "_", file_suffix, "_magma_GWAS_", y, "_", flag_date, ".csv"))))
-  list_list_idx_PPI_signif_modules <- lapply(list_list_PPI_magma_tables, function(x) lapply(x, function(y) x[x[,max.col(x[,-which(colnames(x)=="module")])] > -log10(5^-2),][["module"]]))
-  list_PPI_MAGMA_signif_modules <- sapply(list_list_idx_PPI_signif_modules, function(x) unique(unlist(x)))
-  
-  # Compute cell embeddings
-  list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_PPI_MAGMA_signif_modules, function(x) as.matrix(kMEs_PPI_across_subsets[,colnames(kMEs_PPI_across_subsets) %in% x]) %*% t(datExpr_full)) # module x gene %*% gene x cell -> module x cell
-  
-  # name the matrix
-  #colnames
-  # list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = rownames(datExpr_full), dimension = 2)) #cell names
-  # #rownames
-  # list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = paste(prefixes, colnames(x), sep="_"), dimension = 1))
-   
-  # group the columns of the embeddings matrix by cell type (@ident)
-  
-  list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) x[,celltypes_idx]) 
-  
-  for (i in 1:length(gwas_sub_dirs)) {
-    # plot
-    pheatmap(mat = list_cell_embeddings_kME_PPI_MAGMA[[i]], 
-             color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
-             kmeans_k = NA,
-             breaks = NA, 
-             cluster_rows = F,
-             cluster_cols = F,
-             #clustering_method = hclustMethod,
-             show_rownames = T,
-             show_colnames = F,
-             main = sprintf("%s_%s_%s_%s", data_prefix, "module_embeddings_PPI_MAGMA", gwas_sub_dirs[i], flag_date),
-             filename=sprintf("%s%s_%s_%s_%s.pdf", plots_dir, data_prefix, "module_embeddings_PPI_MAGMA", gwas_sub_dirs[i], flag_date),
-             width = 10,
-             height = length(list_MAGMA_signif_modules) %/% 4,
-             silent = T)
-  }
+# Bind all celltype module kMEs / kIMs in single dataframes
+# kMEs_PPI_across_subsets <- cbind(eval(parse(text=c(paste0("list_kMEs_PPI_all_subsets[[", 1:length(list_kMEs_PPI_all_genes), "]]")))))
+# kMEs_PPI_across_subsets <- cbind(eval(parse(text=c(paste0("list_kMEs_PPI_all_subsets[[", 1:length(list_kMEs_PPI_all_genes), "]]")))))
+# 
+# name the dataframes and matrices so as to distinguish modules from different subsets   
+# prefixes = unlist(mapply(function(x,y) rep(x = x, times= ncol(y)), x=sNames_BMI, y= list_kMEs_BMI_all_genes, SIMPLIFY=T)) # same for kME and kIM
+# 
+# colnames(kMEs_BMI_across_subsets) = paste(prefixes, colnames(kMEs_BMI_across_subsets), sep="_")
+# colnames(kMEs_BMI_across_subsets) = paste(prefixes, colnames(kMEs_BMI_across_subsets), sep="_")
+# 
+# correlation matrices
+#corr_kMEs_BMI_across_subsets <- WGCNA::cor(as.matrix(kMEs_BMI_across_subsets), method="spearman", verbose=verbose)
+#corr_kMEs_BMI_across_subsets <- WGCNA::cor(as.matrix(kMEs_BMI_across_subsets), method="spearman", verbose=verbose)
+
+
+# Name the matrices
+# rownames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
+# rownames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
+# 
+# colnames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
+# colnames(corr_kMEs_PPI_across_subsets) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
+# 
+# Include all genes in kIMs with value 0 if they were not included in the subset analysis
+# Bind all celltype module kMEs in a single dataframe
+# name the dataframe and matrix so as to distinguish subsets 
+#   
+
+### 180617 Moved up so we can merge correlated modules
+# corr_eigengenes_BMI_across_subsets <- WGCNA::cor(x=eigen_mat, method=c("pearson"), verbose=verbose)
+# 
+# # plot
+# pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "BMI-enriched module eigengenes", flag_date),width=ncol(eigen_mat) %/% 3,height=ncol(eigen_mat) %/% 3)
+# corrplot(corr = corr_eigengenes_BMI_across_subsets, 
+#          method = "color",
+#          diag = F,
+#          is.corr=T,
+#          title=sprintf("%s %s corr across subsets", data_prefix, "BMI-enriched module eigengenes"),#,
+#          order = "hclust",
+#          hclust.method = hclustMethod)
+# 
+# invisible(dev.off())
+###
+
+# plot
+# pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "kIM-kIM_BMI", flag_date),width=ncol(kMEs_BMI_across_subsets) %/% 4,height=ncol(kMEs_BMI_across_subsets) %/% 4)
+# corrplot(corr = corr_kMEs_BMI_across_subsets, 
+#          method = "color",
+#          is.corr=T,
+#          title=sprintf("%s %s corr across subsets", data_prefix, "module kIM-kIM (BMI enriched)"))#,
+#          #order = "hclust",
+#          #hclust.method = hclustMethod)
+# 
+# invisible(dev.off())
+#}
+
+######################################################################
+########### PLOT KME - & KIM - METADATA CORRELATIONS #################
+######################################################################
+
+# if (!is.null(meta.data)) {
+#   
+#   # Compute cell embedding
+#   cell_embeddings_kME <- datExpr_full %*% as.matrix(kMEs_across_subsets) # cell x gene %*% gene x module -> cell x module 
+#   cell_embeddings_kIM <- datExpr_full %*% as.matrix(kIMs_across_subsets) # cell x gene %*% gene x module -> cell x module 
+#   
+#   # correlation matrices 
+#   corr_kME_meta.data <- WGCNA::cor(x=cell_embeddings_kME, y=meta.data, method="spearman", verbose=verbose)
+#   corr_kIM_meta.data <- WGCNA::cor(x=cell_embeddings_kME, y=meta.data, method="spearman", verbose=verbose)
+#   
+#   # name the matrices
+#   # rownames(corr_kME_meta.data) = meta.data_corr_col_numeric
+#   # rownames(corr_kIM_meta.data) = meta.data_corr_col_numeric
+#   # 
+#   # colnames(corr_kME_meta.data) = paste(prefixes, colnames(kMEs_PPI_across_subsets), sep="_")
+#   # colnames(corr_kIM_meta.data) = paste(prefixes, colnames(kIMs_PPI_across_subsets), sep="_")
+#   
+#   # plot
+#   pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kME_embeddings", flag_date),width=ncol(meta.data) %/% 4,height=ncol(kMEs_across_subsets) %/% 4)
+#   corrplot(corr = corr_kME_meta.data, 
+#            method = "color",
+#            is.corr=T,
+#            title=sprintf("%s corr: module %s with metadata", data_prefix, "kME embeddings"))#,
+#            #order = "hclust",
+#            #hclust.method = hclustMethod)
+#   
+#   dev.off()
+#   
+#   pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kIM_embeddings", flag_date),width=ncol(meta.data) %/% 4,height=ncol(kIMs_across_subsets) %/% 4)
+#   corrplot(corr = corr_kIM_meta.data, 
+#            method = "color",
+#            is.corr=T,
+#            title=sprintf("%s corr: module %s with metadata", data_prefix, "kIM embeddings"))#,
+#            #order = "hclust",
+#            #hclust.method = hclustMethod)
+#   
+#   dev.off()
+#   
+#   ### 180607_v1.8_dev2
+#   #if (!is.null(STRINGdb_species)) {
+# 
+#   # Compute cell embedding
+#   cell_embeddings_kMEs_PPI <- datExpr_full %*% as.matrix(kMEs_PPIs_across_subsets) # cell x gene %*% gene x module -> cell x module 
+#   cell_embeddings_kIMs_PPI <- datExpr_full %*% as.matrix(kIMs_PPIs_across_subsets) # cell x gene %*% gene x module -> cell x module 
+#   
+#   # correlation matrices 
+#   corr_kMEs_PPI_meta.data <- WGCNA::cor(x=cell_embeddings_kMEs_PPI, y=meta.data, method="spearman", verbose=verbose)
+#   corr_kIMs_PPI_meta.data <- WGCNA::cor(x=cell_embeddings_kMEs_PPI, y=meta.data, method="spearman", verbose=verbose)
+#   
+#   # name the matrices
+#   # rownames(corr_kMEs_PPI_meta.data) = meta.data_corr_col_numeric
+#   # rownames(corr_kIMs_PPI_meta.data) = meta.data_corr_col_numeric
+#   # 
+#   # colnames(corr_kMEs_PPI_meta.data) = paste(prefixes, colnames(kMEs_PPIs_PPI_across_subsets), sep="_")
+#   # colnames(corr_kIMs_PPI_meta.data) = paste(prefixes, colnames(kIMs_PPI_across_subsets), sep="_")
+#   # 
+#   # plot
+#   pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kMEs_PPI_embeddings", flag_date),width = max(4, ncol(meta.data) %/% 4), height = ncol(kMEs_PPIs_across_subsets) %/% 4)
+#   corrplot(corr = corr_kMEs_PPI_meta.data, 
+#            method = "color",
+#            is.corr=T,
+#            title=sprintf("%s corr: module %s with metadata", data_prefix, "kMEs_PPI embeddings"))#,
+#            #order = "hclust",
+#            #hclust.method = hclustMethod)
+#   
+#   dev.off()
+#   
+#   pdf(sprintf("%s%s_corr_%s_with_metadata_%s.pdf", plots_dir, data_prefix, "kIMs_PPI_embeddings", flag_date),width = max(4, ncol(meta.data) %/% 4), height = ncol(kIMs_PPIs_across_subsets) %/% 4)
+#   corrplot(corr = corr_kIMs_PPI_meta.data, 
+#            method = "color",
+#            is.corr=T,
+#            title=sprintf("%s corr: module %s with metadata", data_prefix, "kIMs_PPI embeddings"))#,
+#            #order = "hclust",
+#            #hclust.method = hclustMethod)
+#   
+#   dev.off()
   #}
-  ###
-  ######################################################################
-  ######## PLOT MODULE PRESERVATION IN DIFFERENT TISSUES ###############
-  ######################################################################
+#} # end of if (!is.null(meta.data))
+
+######################################################################
+##### PLOT CELL EXPRESSION ON MODULES WITH HIGH GWAS SIGNIFICANCE ####
+######################################################################
+# 
+# gwas_sub_dirs = list.dirs(path = magma_gwas_dir, full.names = FALSE, recursive = FALSE)
+# 
+# file_suffix = "kMEs"
+# # upper level list of subsets, nested list with tables for each GWAS repo
+# list_list_magma_tables <- lapply(sNames_ok, function(x) lapply(gwas_sub_dirs, function(y) load_obj(f=paste0(tables_dir, data_prefix,"_", x, "_", file_suffix, "_magma_GWAS_", y, "_", flag_date, ".csv"))))
+# list_list_idx_signif_modules <- lapply(list_list_magma_tables, function(x) lapply(x, function(y) x[x[,max.col(x[,-which(colnames(x)=="module")])] > -log10(5^-2),][["module"]]))
+# list_MAGMA_signif_modules <- sapply(list_list_idx_signif_modules, function(x) unique(unlist(x)))
+# 
+# # Compute cell embeddings
+# list_cell_embeddings_kME_MAGMA <- lapply(list_MAGMA_signif_modules, function(x) as.matrix(kMEs_across_subsets[,colnames(kMEs_across_subsets) %in% x]) %*% t(datExpr_full)) # module x gene %*% gene x cell -> module x cell
+# 
+# # name the matrix
+# #colnames
+# # list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = rownames(datExpr_full), dimension = 2)) # cell names
+# # #rownames
+# # list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = paste(prefixes, colnames(x), sep="_"), dimension = 1))
+# 
+# # group the columns of the embeddings matrix by cell type (@ident)
+# celltypes_idx <- integer(0)
+# for (celltype in names(table(seurat_obj@ident))) {
+#   celltypes_idx <- c(celltypes_idx, which(seurat_obj@ident == celltype)) 
+# }
+# 
+# list_cell_embeddings_kME_MAGMA <- lapply(list_cell_embeddings_kME_MAGMA, function(x) x[,celltypes_idx]) 
+# 
+# # plot
+# for (i in 1:length(gwas_sub_dirs)) {
+#   pheatmap(mat = list_cell_embeddings_kME_MAGMA[[i]], 
+#            color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
+#            kmeans_k = NA,
+#            breaks = NA, 
+#            cluster_rows = F,
+#            cluster_cols = F,
+#            #clustering_method = hclustMethod,
+#            show_rownames = T,
+#            show_colnames = F,
+#            main = sprintf("%s_%s_%s_%s", data_prefix, "module_embeddings_MAGMA", gwas_sub_dirs[i], flag_date),
+#            filename=sprintf("%s%s_%s_%s_%s.pdf", plots_dir, data_prefix, "module_embeddings_MAGMA", gwas_sub_dirs[i], flag_date),
+#            width = 10,
+#            height = length(list_MAGMA_signif_modules) %/% 4,
+#            silent = T)
+# }
+# 
+# ### 180607_v1.8_dev2
+# #if (!is.null(STRINGdb_species)) {
+#   
+# file_suffix = "kMEs_PPI"
+# # upper level list of subsets, nested list with tables for each GWAS repo
+# list_list_PPI_magma_tables <- lapply(sNames_ok, function(x) lapply(gwas_sub_dirs, function(y) load_obj(file=paste0(tables_dir, data_prefix,"_", x, "_", file_suffix, "_magma_GWAS_", y, "_", flag_date, ".csv"))))
+# list_list_idx_PPI_signif_modules <- lapply(list_list_PPI_magma_tables, function(x) lapply(x, function(y) x[x[,max.col(x[,-which(colnames(x)=="module")])] > -log10(5^-2),][["module"]]))
+# list_PPI_MAGMA_signif_modules <- sapply(list_list_idx_PPI_signif_modules, function(x) unique(unlist(x)))
+# 
+# # Compute cell embeddings
+# list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_PPI_MAGMA_signif_modules, function(x) as.matrix(kMEs_PPI_across_subsets[,colnames(kMEs_PPI_across_subsets) %in% x]) %*% t(datExpr_full)) # module x gene %*% gene x cell -> module x cell
+# 
+# # name the matrix
+# #colnames
+# # list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = rownames(datExpr_full), dimension = 2)) #cell names
+# # #rownames
+# # list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) name_for_vec(to_be_named = x, given_names = paste(prefixes, colnames(x), sep="_"), dimension = 1))
+#  
+# # group the columns of the embeddings matrix by cell type (@ident)
+# 
+# list_cell_embeddings_kME_PPI_MAGMA <- lapply(list_cell_embeddings_kME_PPI_MAGMA, function(x) x[,celltypes_idx]) 
+# 
+# for (i in 1:length(gwas_sub_dirs)) {
+#   # plot
+#   pheatmap(mat = list_cell_embeddings_kME_PPI_MAGMA[[i]], 
+#            color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
+#            kmeans_k = NA,
+#            breaks = NA, 
+#            cluster_rows = F,
+#            cluster_cols = F,
+#            #clustering_method = hclustMethod,
+#            show_rownames = T,
+#            show_colnames = F,
+#            main = sprintf("%s_%s_%s_%s", data_prefix, "module_embeddings_PPI_MAGMA", gwas_sub_dirs[i], flag_date),
+#            filename=sprintf("%s%s_%s_%s_%s.pdf", plots_dir, data_prefix, "module_embeddings_PPI_MAGMA", gwas_sub_dirs[i], flag_date),
+#            width = 10,
+#            height = length(list_MAGMA_signif_modules) %/% 4,
+#            silent = T)
+# }
+# #}
+###
+######################################################################
+######## PLOT MODULE PRESERVATION IN DIFFERENT TISSUES ###############
+######################################################################
+
+if (FALSE) {
+  
+  suppressPackageStartupMessages(library(pheatmap))
   
   # Check preservation of each set of colors in all celltypes (including itself)
-  module_preservation_celltypes <- sapply(list_colors_final, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
+  module_preservation_celltypes <- sapply(list_colors, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
                                                                                                   listColors = list(x))[['preservation']][['log.pBonf']],
                                                             simplify = T)
   
   colnames(module_preservation_celltypes) = sNames_ok
-  rownames(module_preservation_celltypes) = paste(prefixes, names(unlist(list_colors_final, recursive = F, use.names = T)), sep="_")
+  rownames(module_preservation_celltypes) = paste(prefixes, names(unlist(list_colors, recursive = F, use.names = T)), sep="_")
   
   # plot
   pheatmap(mat = module_preservation_celltypes, 
@@ -1861,17 +1943,17 @@ if (FALSE) {  # TODO
            main = sprintf("%s_%s_%s", data_prefix, "module preservation across celltypes", flag_date),
            filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "module_preservation", flag_date),
            width = length(list_datExpr_ok) %/% 2,
-           height = length(unlist(list_colors_final, recursive = F)) %/% 4,
+           height = length(unlist(list_colors, recursive = F)) %/% 4,
            silent = T)
   
   ### 180607_v1.8_dev2
   #if (!is.null(STRINGdb_species)) {
-  module_PPI_preservation_celltypes <- sapply(list_colors_PPI_final, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
+  module_PPI_preservation_celltypes <- sapply(list_colors_PPI, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
                                                                                                 listColors = list(x))[['preservation']][['log.pBonf']],
                                           simplify = T)
   
   colnames(module_PPI_preservation_celltypes) = sNames_ok
-  rownames(module_PPI_preservation_celltypes) = paste(prefixes, names(unlist(list_colors_final_PPI, recursive = F, use.names = T)), sep="_")
+  rownames(module_PPI_preservation_celltypes) = paste(prefixes, names(unlist(list_colors_PPI, recursive = F, use.names = T)), sep="_")
   
   # plot
   pheatmap(mat = module_PPI_preservation_celltypes, 
@@ -1886,7 +1968,7 @@ if (FALSE) {  # TODO
            main = sprintf("%s_%s_%s", data_prefix, "PPI-enriched modules: preservation across celltypes", flag_date),
            filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "PPI_module_preservation", flag_date),
            width = length(list_datExpr_ok) %/% 2,
-           height = length(unlist(list_colors_PPI_final, recursive = F)) %/% 4,
+           height = length(unlist(list_colors_PPI, recursive = F)) %/% 4,
            silent = T)
   #}
   ###
@@ -1897,20 +1979,6 @@ if (FALSE) {  # TODO
 ######################################################################
 ### 180503_v1.8_dev1
 save.image(file=sprintf("%s%s_final_session_image.RData", RObjects_dir, data_prefix, flag_date))
-
-# Delete checkpoint session images from disk
-
-for (subsetName in sNames) {
-  if (file.exists(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))) {
-    file.remove(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))
-  }
-}
-
-# for (i in 1:11) {
-#   if (file.exists(sprintf("%s%s_checkpoint_%s_image.RData", RObjects_dir, data_prefix, i))) {
-#     file.remove(sprintf("%s%s_checkpoint_%s_image.RData", RObjects_dir, data_prefix, i))
-#   }
-# }
 
 rm(list=ls())
 invisible(gc())
