@@ -399,7 +399,7 @@ parallelCalculation = FALSE  # Note that parallel calculations are turned off by
 #do.center = if (corFnc == "bicor") FALSE else TRUE # for ScaleData() # update: just used scale_data==F
 nPC_seurat = 120 # for RunPCA() and ProjectPCA
 maxit = 1000 # for RunPCA() IRLBA package - default is 1000 https://cran.r-project.org/web/packages/irlba/irlba.pdf
-fastpath = F # for RunPCA()
+fastpath = T # for RunPCA()
 
 ############################### STRINGdb ##################################
 
