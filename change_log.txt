@@ -1,5 +1,23 @@
 # Change log
 
+## v1.8 - 18-05-29
+
+### Added
+* Allow user to filter modules on enrichment for user-specified gwas traits and/or metadata values
+* output hgcn to ensembl mapping dataframe to csv
+* Gene Set Enrichment Analysis human
+* Fixed metadata - eigengene plot
+
+### Changed
+* Moved plotting out of eigenplot function
+* Removed 'BMI' or changed to 'gwas'
+
+### Fixed
+* in magma_par, added module column to table.kme.cor.r_all 
+* Added "quote = F, row.names=F" to write.csv consistently across script
+* SeuratFactorToIndicator now distinguishes between numeric and factor data and only makes dummy variables for factors
+* Fixed bug in conditional flow around gene mapping to ensembl that resulted in failure for human
+
 ## v1.8_dev3 - 18-05-23
 
 ### added
