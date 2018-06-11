@@ -1,5 +1,30 @@
 # Change log
 
+
+## v1.9 - 18-06-11
+
+### Fixed
+* had been using PPI_pval_threshold as the PPI_pkME_threshold, i.e. 0.05. May have been submitting some genes that were not that connected to the module.
+* hsapiens mapping from hgnc symbol to ensembl_id would fail because hgnc has a typo (hgcn)
+* removed giving gene names to colors vectors in list_list_colors_PPI - apparently redundant
+* Bumped up prop.freq in jackstraw to 0.018
+* if no meta data_corr_col given by user, now sets to NULL (after seurat factor to indicator call)
+* Fix(?) max DLLs reached: detach packages, unload namespaces garbage collect at the end of each checkpoint as appropriate. Load packages only when needed
+* if there is no session image, save kMEs filename fixed from 'ok' to 'out'
+
+### Changed
+* Do not output GWAS fdr and coefficient for all modules; only for modules significantly correlated to selected traits
+* do not    rm(list_dissTOM_PPI_ok,  list_list_plot_label_ok_order, list_list_colors_PPI_order)
+* FIrst complete all analysis steps to filter out modules of interest. Then make unique colors,  output tables, output plots
+* moved checkpoint 4 to the end and removed the final save.image
+* If there is no GWAS signal, save the session image
+* Instead of calling disableWGCNAThreads() in the parameter script , do so in the main script, at the beginning of every section
+* magma_gwas_dir defaults to NULL, allowing the user to skip the step by default
+* filter MEs_PPI:   list_MEs_PPI_ok <- deleteGrey(list_MEs_PPI) %>% Filter(f=length)
+* wait with computing list_list_module_...genes until needed for eigen_mat
+* adopted a single fdr p-value variable, set to 5e-2
+* Moved checkpoint 4 to before GSEA; restored final session image
+
 ## v1.8 - 18-05-29
 
 ### Added
