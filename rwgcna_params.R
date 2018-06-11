@@ -228,7 +228,6 @@ method = "hybrid"
 options(stringsAsFactors = FALSE);
 # Multiple threads possible in RStudio server but not in desktop
 #enableWGCNAThreads(nThreads = n_cores)#
-disableWGCNAThreads() 
 randomSeed = 12345
 
 options(pairwise.complete.obs = T) # How to handle missing values in correlations
@@ -243,7 +242,9 @@ indent = 0
 
 # Takes the place of flashClust as of 2014
 
-hclustMethod = "complete" # Gandal et al 2018 use "average".
+### 180611
+#hclustMethod = "complete" # Gandal et al 2018 use "average".
+###
 # We call it hclustMethod because method is aliased with argument for cutreedynamic
 
 ################ HIERARCHICALCONSENSUSCALCULATION ####################
@@ -400,10 +401,12 @@ parallelCalculation = FALSE  # Note that parallel calculations are turned off by
 nPC_seurat = 120 # for RunPCA() and ProjectPCA
 maxit = 1000 # for RunPCA() IRLBA package - default is 1000 https://cran.r-project.org/web/packages/irlba/irlba.pdf
 fastpath = T # for RunPCA()
+adj.p.val.threshold = 5e-2
 
 ############################### STRINGdb ##################################
 
-PPI_pval_threshold = 5e-2
+PPI_pkME_threshold = 10e-2
+#adj.p.val.threshold = 5e-2
 
 ############################### TOM ##################################
 

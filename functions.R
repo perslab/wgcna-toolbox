@@ -27,7 +27,7 @@ FilterGenes <- function(seurat_obj_sub, min.cells) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
+wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, adj.p.val.threshold) {
   # gene.criterion: 'p.val' means selecting genes (used for PCA) with significant empirical p-val
   #                 'PC.loadings' means projecting all genes onto the PCs to get loadings and selecting 
   #                 genes that have a high absolute loading on a significant PC
@@ -35,7 +35,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
   # 1. pcs.compute = ncol
 
   ### 180507
-  prop.freq <- max(0.012, round(4/length(seurat_obj_sub@var.genes),3)) # to ensure we have at least 3 samples so the algorithm works well
+  prop.freq <- max(0.016, round(4/length(seurat_obj_sub@var.genes),3)) # to ensure we have at least 3 samples so the algorithm works well
   # see https://github.com/satijalab/seurat/issues/5
   ###
   
@@ -51,7 +51,6 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
                                 num.cores = n_cores,
                                 prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
   
-    score.thresh = (5e-2)/pcs.compute # TODO: Is this a suitable multiple testing adjustment
   
     ### EDIT_180426_2
     #pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value.full
@@ -67,9 +66,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
     
     for (i in (1:pcs.compute)) {
       pc.score <- suppressWarnings(prop.test( 
-        x = c(length(x = which(x = pAll[, i] <= score.thresh)), floor(x = nrow(x = pAll) * score.thresh)),
+        x = c(length(x = which(x = pAll[, i] <= adj.p.val.threshold)), floor(x = nrow(x = pAll) * adj.p.val.threshold)),
         n = c(nrow(pAll), nrow(pAll)))$p.val)
-      if (length(x = which(x = pAll[, i] <= score.thresh)) == 0) {
+      if (length(x = which(x = pAll[, i] <= adj.p.val.threshold)) == 0) {
         pc.score <- 1
       }
       if (is.null(x = score.df)) {
@@ -79,7 +78,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
       }
     }
     
-    PC_select_idx <- which(score.df$Score < score.thresh)
+    PC_select_idx <- which(score.df$Score < adj.p.val.threshold)
     
     if (nrow(pAll) == length(seurat_obj_sub@var.genes)) {
       
@@ -99,9 +98,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
       
       pAll[,sapply(pAll, function(x) class(x)!="numeric")] <- NULL # remove the column of gene names
       row_min <- apply(pAll[,PC_select_idx], MARGIN = 1, FUN = function(x) min(x))
-      names_genes_use <- rownames(pAll)[row_min < score.thresh]
+      names_genes_use <- rownames(pAll)[row_min < adj.p.val.threshold]
       
-      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < score.thresh*2]
+      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < adj.p.val.threshold*2]
     }
     
   } else if (jackstraw.num.replicate == 0) {
@@ -115,7 +114,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate) {
                                  do.center=T)
     
     loadings <- abs(seurat_obj_sub@dr$pca@gene.loadings.full[,1:(min(13,pcs.compute))])
-    max_loadings <- apply(loadings, 1, function(x) max(x))
+    max_loadings <- apply(loadings, MARGIN=1, FUN=function(x) max(x))
     names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:5000]
     
   }
@@ -643,7 +642,7 @@ PrePPIfilter_for_vec <- function(list_pkMEs, list_colors) {
 #   list_colors_PPI <- lapply(list_colors_pkME_ok, 
 #                             function(x) vecPPI_outer(colors = x,
 #                                                      STRINGdb_species = STRINGdb_species,
-#                                                      PPI_pval_threshold = PPI_pval_threshold,
+#                                                      adj.p.val.threshold = adj.p.val.threshold,
 #                                                      project_dir = project_dir, 
 #                                                      data_prefix = data_prefix, 
 #                                                      flag_date = flag_date))
@@ -1069,8 +1068,8 @@ SeuratFactorToIndicator <- function(obj, meta.colnames) {
   
   # For factor metadata columns, get logical vectors for each level
   list.list.idx = list()
-  for (j in seq(length(meta.colnames.factor))){
-    col <- grep(meta.colnames.factor[[j]], names(meta.data.factor)) # Find the meta data column index
+  for (j in 1:length(meta.colnames.factor)) {
+    col <- grep(meta.colnames.factor[j], names(meta.data.factor)) # Find the meta data column index
     list.idx <- lapply(names(table(meta.data.factor[col])), function(x) meta.data.factor[col]==x) # find, for each unique value, a logical vector of occurences
     names(list.idx) = names(table(meta.data.factor[col]))
     list.list.idx[[j]] <- list.idx
@@ -1157,7 +1156,7 @@ name_for_vec = function(to_be_named, given_names, dimension=NULL){
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pval_threshold, project_dir, data_prefix, flag_date) {
+PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold, adj.p.val.threshold, project_dir, data_prefix, flag_date) {
   # Rather than for parallelising over modules within a set of modules, parallelise over several sets of colors (produced by comparing parameters)
   # It calls PPI_innver_for_vec as a subroutine
   # Args:
@@ -1167,7 +1166,7 @@ PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pval_threshold
   # Returns: 
   #   colors_PPI: colors where modules that did not satisfy the PPI threshold are set to grey
   
-  suppressPackageStartupMessages(library(STRINGdb)) 
+  #suppressPackageStartupMessages(library(STRINGdb)) 
   
   module_PPI <- NULL
   unique_colors <- NULL
@@ -1177,7 +1176,7 @@ PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pval_threshold
   kMEs_PPI <- NULL
   pkMEs_PPI <- NULL 
   
-  unique_colors <- unique(colors[abs(pkMEs)>PPI_pval_threshold])
+  unique_colors <- unique(colors[abs(pkMEs)>PPI_pkME_threshold])
   
   string_db <- STRINGdb$new(version="10", species = STRINGdb_species, score_threshold=0, input_directory="") # Default: 10090 (Mus musculus)
   module_PPI <- sapply(unique_colors, function(x) PPI_inner_for_vec(color=x, unique_colors = unique_colors, colors = colors, string_db = string_db), simplify=T) %>% t()
@@ -1186,7 +1185,7 @@ PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pval_threshold
   # FILTER MODULES ON PPI ENRICHMENT  
 
   if (!is.null(module_PPI)) {
-    unique_colors_PPI = unique_colors[module_PPI$'p-value' < PPI_pval_threshold]
+    unique_colors_PPI = unique_colors[module_PPI$'p-value' < adj.p.val.threshold]
     genes_PPI_idx <- colors %in% unique_colors_PPI
     colors_PPI <- colors
     colors_PPI[!genes_PPI_idx] <- "grey"
@@ -1392,7 +1391,7 @@ magma_par = function(subsetNames,
     mapping_hs_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/gene_annotation.hsapiens_mmusculus_unique_orthologs.GRCh37.ens_v91.txt.gz" # to map mouse to human ensembl
     mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T)
     
-    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMMtoHs_par.txt"))
+    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMtoHs_par.txt"))
     list_kMEs_hs <- parLapply(cl,list_kMEs, function(x) mapMMtoHs(modulekME = x, 
                                                             log_dir = log_dir, 
                                                             flag_date = flag_date, 
@@ -1413,7 +1412,7 @@ magma_par = function(subsetNames,
   file_sep = ','
   
   # Set paths to mapping files to variables (these are independent of arguments)
-  mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" # columns: ensembl_gene_id, entrezgene, hgcn_symbol. Use this for mapping entrezgene to ensembl
+  mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" # columns: ensembl_gene_id, entrezgene, hgnc_symbol. Use this for mapping entrezgene to ensembl
   mapping_hs_entrez2ensembl = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T)
   
   ### 180522_v1.8_dev3
@@ -1437,67 +1436,8 @@ magma_par = function(subsetNames,
                                 SIMPLIFY=F)
     stopCluster(cl)
     invisible(gc())
-    # for (k in 1:length(list_kMEs_hs)) { 
-    #   modulekME <- list_kMEs_hs[[k]]
-    # 
-    #   ### 180522_v1.8_dev3
-    #   # moved to separate function so as to map kME file
-    #   # Initialise log file
-    #   #log_not_mapped_filepath = paste0(log_dir,flag_date,"_genes_orthology_not_mapped_",data_prefix,"_", subsetNames[k], sub_dir,".tab")
-    #   ###
-    #   
-    #   # Load MAGMA genes and remap to Ensembl gene IDs
-    #   d = dir(path=paste0(magma_gwas_dir, sub_dir, "/"), pattern="[.]genes.out", recursive = T)
-    #   gwas = vector(mode="list")
-    #   for(i in 1:length(d)) {
-    #     gwas[[i]] = read.table(paste(magma_gwas_dir, sub_dir, "/", d[[i]],sep=""),head=T, check.names = FALSE)
-    #   }
-    #   names(gwas) = gsub(".genes.out", "", d)
-    #   
-    #   # Match and replace with ENSG 
-    #   #genes = union(gwas[[1]]$GENE, gwas[[2]]$GENE)
-    #   #for(i in 3:length(gwas)) genes = union(genes, gwas[[i]]$GENE)
-    #   
-    #   # Remapping from human Entrez to human Ensembl gene IDs
-    #   for(i in 1:length(gwas)) {
-    #     idx = match(gwas[[i]]$GENE, mapping_hs_entrez2ensembl$entrezgene)
-    #     mapping = data.frame(entrez=gwas[[i]]$GENE, ensembl=mapping_hs_entrez2ensembl$ensembl_gene_id[idx])
-    #     gwas[[i]]$gene_name = mapping$ensembl
-    #   }
-    #   
-    #   
-    #   # Calculate spearman's correlation between gene module membership and GWAS gene significance
-    #   ### 180522
-    #   #colors = colnames(modulekME_ens)
-    #   colors = colnames(modulekME)
-    #   ###
-    #   table.kme.cor.p = table.kme.cor.r <- matrix(NA,nrow=length(unique(colors)),ncol=length(gwas)) 
-    #   rownames(table.kme.cor.r) = rownames(table.kme.cor.p) = unique(colors)
-    #   colnames(table.kme.cor.r) = colnames(table.kme.cor.p) = names(gwas) 
-    #   
-    #   for(m in unique(colors)) {
-    #     for(i in 1:length(gwas)) {
-    #       #col = paste("kME", m, sep="")
-    #       col = m
-    #       genes = intersect(rownames(modulekME),gwas[[i]]$gene_name)
-    #       x = -log10(gwas[[i]]$P[match(genes, gwas[[i]]$gene_name)])
-    #       y = modulekME[match(genes,rownames(modulekME)), col]
-    #       cor = cor.test(x,y,method="spearman", exact=F)
-    #       table.kme.cor.r[m,i] <- cor$estimate
-    #       table.kme.cor.p[m,i] <- cor$p.value
-    #     }
-    #   }
-    # 
-    #   rownames(table.kme.cor.r) <- rownames(table.kme.cor.p) <- paste0(names(list_kMEs_hs)[k], "_", rownames(table.kme.cor.p))
-    #   #rownames(table.kme.cor.r) <- rownames(table.kme.cor.p) <- paste0("subset_", k, "_", rownames(table.kme.cor.p))
-    #   list_table.kme.cor.r[[k]] <- table.kme.cor.r
-    #   list_table.kme.cor.p[[k]] <- table.kme.cor.p
-    #   
-    # } # end of list_kMEs_hs loop
     
-    # merge each list of tables into one big table spanning all cell clusters
-    # [deleted]
-    
+    # Prepare tables for results
     list_table.kme.cor.r <- list_table.kme.cor.p <- vector(mode="list", length = length(list_kMEs_hs))
     
     # Extract the coefficient and p-value dataframes for each module, put them into lists
@@ -1543,20 +1483,18 @@ magma_par = function(subsetNames,
     #This was missing
     #table.kme.cor.r_all <- cbind(module=dat$module, table.kme.cor.r_all)
     ###
+    
+    
+    ### 180529_v1.9_dev1
+    ### Better not output anything before we have the new color assignments
     # Write full fdr and coefficient tables to csv
-    write.csv(dat, file=paste0(tables_dir, data_prefix, "_", file_suffix, "_magma_GWAS_fdr_all_modules_all_traits", sub_dir, "_", flag_date, ".csv"), quote=F, row.names = F)
-    write.csv(table.kme.cor.r_all, file=paste0(tables_dir, data_prefix, "_", file_suffix, "_magma_GWAS_corrCoef_all_modules_all_traits", sub_dir, "_", flag_date,".csv"), quote=F, row.names = F)
-
+    # write.csv(dat, file=paste0(tables_dir, data_prefix, "_", file_suffix, "_magma_GWAS_fdr_all_modules_all_traits", sub_dir, "_", flag_date, ".csv"), quote=F, row.names = F)
+    # write.csv(table.kme.cor.r_all, file=paste0(tables_dir, data_prefix, "_", file_suffix, "_magma_GWAS_corrCoef_all_modules_all_traits", sub_dir, "_", flag_date,".csv"), quote=F, row.names = F)
+    ###
+    
     #table.kme.cor.r_all <- as.data.frame(table.kme.cor.r_all,row.names = rownames(table.kme.cor.r_all))
     #table.kme.cor.p_all <- as.data.frame(table.kme.cor.p_all, row.names = rownames(table.kme.cor.p_all))
-  
-    ### v1.8_dev4
-    # filter on user specified gwas studies
-    # dat_BMI <-  dat[c("bmi_height_yengo_2018/Meta-analysis_Locke_et_al+UKBiobank_2018.txt.gz", "module")] [dat[["bmi_height_yengo_2018/Meta-analysis_Locke_et_al+UKBiobank_2018.txt.gz"]] > -log10(0.05),]
-    # rownames(dat_BMI) <- NULL
-    # r_BMI <- cbind(table.kme.cor.r_all["bmi_height_yengo_2018/Meta-analysis_Locke_et_al+UKBiobank_2018.txt.gz"], module=dat$module)
-    # r_BMI <-r_BMI[dat[["bmi_height_yengo_2018/Meta-analysis_Locke_et_al+UKBiobank_2018.txt.gz"]] > -log10(0.05),]
-    # rownames(r_BMI) <- NULL
+
     
     if (!is.null(gwas_filter_traits)) {
       if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(dat[,-grep("module", colnames(dat))]), ignore.case=T)), simplify = T) %>% all) {
@@ -1577,9 +1515,17 @@ magma_par = function(subsetNames,
         rownames(r_filter_traits) <- NULL
       }
     } else {
-      dat_filter_traits <- dat
+      ### 180530 v1.9_dev1
+      # Already rolled out
+      # dat_filter_traits <- dat
+      # rownames(dat_filter_traits) <- NULL
+      # r_filter_traits <- cbind(table.kme.cor.r_all, module=dat$module)
+      # rownames(r_filter_traits) <- NULL
+      idx_row_include <- apply(dat[,-grep("module", colnames(dat))], MARGIN=1, max) > -log10(5e-2)
+      dat_filter_traits <- dat[idx_row_include,]
       rownames(dat_filter_traits) <- NULL
       r_filter_traits <- cbind(table.kme.cor.r_all, module=dat$module)
+      r_filter_traits <- r_filter_traits[idx_row_include,]
       rownames(r_filter_traits) <- NULL
     }
     ###
@@ -1614,9 +1560,13 @@ magma_par = function(subsetNames,
 
     ###
     
-    barColorsFilter <- gsub(".*_", "", dat_filter_traits$module)
+    ### 180529 Moved outside to main script; also won't need to find unique colors since we only plot significant modules after renaming then
     
-    barColorsFilter <- makeColorsUniqueForPlot(barColorsFilter)
+    # barColorsFilter <- gsub(".*__", "", dat_filter_traits$module)
+    # 
+    # barColorsFilter <- makeColorsUniqueForPlot(barColorsFilter)
+    
+    
     ### 180528 moved into a function
     # while (all(!duplicated(barColorsFilter)) == F) {
     #   for (i in which(duplicated(barColorsFilter))) {
@@ -1651,23 +1601,18 @@ magma_par = function(subsetNames,
     # ggsave(p, filename = paste0(plots_dir, data_prefix, "_", file_suffix, "_magma_all_modules_all_GWAS_", sub_dir, "_", flag_date, ".pdf") ,width=45,height=12)
      
     if (dim(dat_filter_traits)[1] > 0) {
+      
+      # 180529 v1.9_dev1
+      # Plotting moved outside function
       # Plot significant modules, only on selected gwas
-      p=ggplot(melt(dat_filter_traits, value.name="value"),aes(x=variable,y=value, fill = module)) + 
-        geom_bar(stat="identity",position=position_dodge(),color= "black") +
-        scale_fill_manual(values=unique(barColorsFilter)) + theme_classic() +
-        geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
-        theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
-      
-      ggsave(p, filename = paste0(plots_dir, data_prefix, "_", file_suffix, "_magma_modules_gwas_filter_", sub_dir, "_", flag_date, ".pdf") ,width=45,height=12)
-      
-      return(list("fdr"=dat_filter_traits, "corrCoef"=r_filter_traits)) 
-      
+      list_dat_gwas <- list("fdr"=dat_filter_traits, "corrCoef"=r_filter_traits) 
+      return(list_dat_gwas)
       } else {
-      
       return(NULL)
     }  
     
-  }
+  } # end of loop over sub_dirs 
+
 }
 
 
@@ -1676,11 +1621,13 @@ magma_par = function(subsetNames,
 ############################################################################################################################################################
 
 # TODO: Should we test the gwas signal modules or all PPI modules?
-
-mendelianGenes <- function() {
+if (FALSE) {
+mendelianGenes <- function(list_kMEs,
+                           coding_variants,
+                           mendelian) {
   # Load coding variant and Mendelian genes
   coding_variants <- read.table("/data/pub-others/turcot-biorxiv-2018/s21/s21.hgnc")
-  mendelian <- read.table("/data/pub-others/turcot-biorxiv-2018/table1/table1.hgnc")
+  mendelian_genes <- read.table("/data/pub-others/turcot-biorxiv-2018/table1/table1.hgnc")
   
   # Load table of kME values
   modulekME = read.csv("~/ygg-projects/mludwig/WGCNA/Campbell/Results/agrp_kmemodule.csv", row.names=1, check.names = FALSE, sep = ",")
@@ -1728,7 +1675,7 @@ mendelianGenes <- function() {
   table.p.fdr
   logit.p
 }
-
+}
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################

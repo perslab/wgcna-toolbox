@@ -7,23 +7,14 @@
 # e.g.
 # export R_MAX_NUM_DLLS=999
 # DONE time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4
-
 #  TMUX 41 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_so2_mito0.1.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-6/ --meta.data_subset_col "res.0.6" --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ --meta.data_corr_col 'c("dataset", "percent.mito", "nUMI")' --meta.data_corr_filter_vals 'c("lake", "upf")' --data_prefix epilepsy-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 100 --replace T --organism hsapiens --plot_permuted F --n_cores 30 --resume checkpoint_3
 # TMUX 32 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --meta.data_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")'  --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 20 --resume checkpoint_3
-
-
-
-
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-11/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-n01_to_n04-11 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-1/ --meta.data_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12 --resume checkpoint_2
-
 # projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-21/ --meta.data_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-AgRP-21 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 0 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 4 --resume checkpoint_3
-
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --meta.data_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 20 --resume checkpoint_3
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-10/ --meta.data_corr_col 'c("percent.mito", "percent.ribo")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 14 --resume checkpoint_2
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_so2.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-5/ --meta.data_corr_col 'c("dataset", "percent.mito", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism hsapiens --plot_permuted F --n_cores 10
-
-
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 21 --resume checkpoint_4
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-clust-all-sub-n-2 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 300 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 12
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-pancreas-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 14 --resume checkpoint_4
@@ -34,6 +25,10 @@
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-neurons-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 14 --resume checkpoint_4
 # time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix campbell-glia-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 11 --resume checkpoint_4
   
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.8_dev4.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-6/ --meta.data_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix maca-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism mmusculus --plot_permuted F --n_cores 10 
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.9_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_lake.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-lake-3/ --meta.data_subset_col "res.0.6" --magma_gwas_dir projects/jonatan/tmp-bmi-brain/data/magma/ --data_prefix epilepsy-lake-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 0 --replace T --organism hsapiens --plot_permuted F --n_cores 13
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v1.9_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-3/ --meta.data_subset_col "res.0.6" --magma_gwas_dir NULL --data_prefix epilepsy-UPF-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 100 --replace T --organism hsapiens --plot_permuted F --n_cores 13
+
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
@@ -82,12 +77,6 @@ option_list <- list(
               help = "Provide full path to Rdata input file with Seurat object with lognormalized expression data in the @data slot"),
   make_option("--project_dir", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir."),
-  make_option("--magma_gwas_dir", type="character", default = '/projects/jonatan/tmp-bmi-brain/data/magma/',
-              help = "MAGMA input GWAS data directory as a character, defaults to '/projects/jonatan/tmp-bmi-brain/data/magma/'. NULL skips this step"),
-  ### 180523 v1.8_dev4
-  make_option("--gwas_filter_traits", type="character", default = NULL,
-              help = "Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. 'body_BMI_Locke2015' or 'c('BMI', 'T1D', 'T2D')'. Case-insensitive. Defaults to NULL"),
-  ###
   make_option("--data_prefix", type="character", default=paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_rWGCNA_run"),
               help = "Dataset prefix for output files"),
   make_option("--resume", type="character", default=NULL,
@@ -116,6 +105,8 @@ option_list <- list(
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); 'signed hybrid' sets negative correlations to zero."),
   make_option("--anti_cor_action", type="character", default=NULL, 
               help = "Optional. 'kME_reassign' reassigns genes with a negative kME more than 1.5 the kME w.r.t. their own (primary) module. Should be used only with networkType 'signed hybrid'."),
+  make_option("--hclustMethod", type="character", default="complete",
+              help = "Hierarchical clustering agglomeration method. See hclust() documentation. For bulk RNAseq data, consider 'average'. Defaults to 'complete'"),
   make_option("--minClusterSize", type="character", default="15L",
               help = "Minimum genes needed to form a module, recommended 5-25. Takes a character with a vector of integer values to try 'c(15,20,25)', defaults to 'c(15L)'."),
   make_option("--deepSplit", type="character", default="3L",
@@ -132,6 +123,12 @@ option_list <- list(
               help = "Sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time."),
   make_option("--organism", type="character", default="mmusculus",
               help = "'hsapiens' or 'mmusculus'"),
+  make_option("--magma_gwas_dir", type="character", default = NULL,
+              help = "MAGMA input GWAS data directory, defaults to NULL. E.g. '/projects/jonatan/tmp-epilepsy/data/magma/', '/projects/jonatan/tmp-bmi-brain/data/magma/'. NULL skips the magma GWAS step"),
+  ### 180523 v1.8_dev4
+  make_option("--gwas_filter_traits", type="character", default = NULL,
+              help = "Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. 'body_BMI_Locke2015' or 'c('BMI', 'T1D', 'T2D')'. Case-insensitive. Defaults to NULL"),
+  ###
   make_option("--plot_permuted", type="logical", default=FALSE,
               help="Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling."),
   make_option("--n_cores", type="integer", default=5,
@@ -139,7 +136,7 @@ option_list <- list(
 )
 
 ######################################################################
-############################## LIBRARIES #############################
+############################## PACKAGES #############################
 ######################################################################
 
 #suppressMessages(library(profvis)) #  for processing time and memory profiling
@@ -148,18 +145,19 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(Matrix))
 suppressPackageStartupMessages(library(Seurat))
 suppressPackageStartupMessages(library(parallel))
-suppressPackageStartupMessages(library(WGCNA)) 
-#suppressPackageStartupMessages(library(STRINGdb)) 
-suppressPackageStartupMessages(library(liger))
 suppressPackageStartupMessages(library(reshape))
 suppressPackageStartupMessages(library(reshape2))
-suppressPackageStartupMessages(library(corrplot))
-suppressPackageStartupMessages(library(RColorBrewer))
-suppressPackageStartupMessages(library(qusage))
+#suppressPackageStartupMessages(library(WGCNA)) 
+### 180530 Only load packages when needed
+# suppressPackageStartupMessages(library(STRINGdb))
+# suppressPackageStartupMessages(library(liger))
 
-#suppressPackageStartupMessages(library(data.table))
+# suppressPackageStartupMessages(library(corrplot))
+# suppressPackageStartupMessages(library(RColorBrewer))
+#suppressPackageStartupMessages(library(qusage))
+###
 
-message("Libraries loaded")
+message("Packages loaded")
 
 ######################################################################
 ################### GET COMMAND LINE OPTIONS #########################
@@ -219,6 +217,8 @@ corFnc <- opt$corFnc
 networkType <- opt$networkType
 
 anti_cor_action <- opt$anti_cor_action
+
+hclustMethod <- opt$hclustMethod
 
 minClusterSize <- eval(parse(text=opt$minClusterSize))
 
@@ -280,22 +280,29 @@ saveIndividualTOMs = plot_permuted
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 # Load parameter values and utility functions
-source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev4.R")
-source(file = "/projects/jonatan/functions-src/functions_v1.8_dev4.R")
+source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.9_dev1.R")
+source(file = "/projects/jonatan/functions-src/functions_v1.9_dev1.R")
 
 if (organism == "mmusculus") {
   # source: South Dakota State University 
   # http://ge-lab.org/gskb/
-  geneset_path <- "/projects/jonatan/genesets/mGSKB_Ensembl.gmt"
-  gene.sets <- read.gmt(geneset_path)
+  # Avoid qusage package
+  # geneset_path <- "/projects/jonatan/genesets/mGSKB_Ensembl.gmt"
+  # gene.sets <- read.gmt(geneset_path)
+  geneset_path <- "/projects/jonatan/genesets/mGSKB_Ensembl.RData"
+  gene.sets <- load_obj(f=geneset_path)
   
 } else if (organism == "hsapiens") {
   # source: Powell, J. A. C. (2014). GO2MSIG, an automated GO based multi-species gene set generator for gene set enrichment analysis. BMC Bioinformatics, 15(1), 146. doi:10.1186/1471-2105-15-146
   # http://www.go2msig.org/cgi-bin/prebuilt.cgi?taxid=9606
-  geneset_path <- "/projects/jonatan/genesets/Homo_sapiens_GSEA_GO_sets_all_ids_April_2015.gmt"
-  gene.sets <- read.gmt(geneset_path)
-  # The genes need to be given the full ensemblID
-  gene.sets <- lapply(gene.sets, function(x) sapply(x, FUN=function(y) paste0("ENSG",paste(rep(x="0", times= 11-nchar(y)), collapse=""), collapse="" , y), simplify=T))
+  ### Instead avoid using qusage package
+  # geneset_path <- "/projects/jonatan/genesets/Homo_sapiens_GSEA_GO_sets_all_ids_April_2015.gmt"
+  # gene.sets <- read.gmt(geneset_path)
+  # # The genes need to be given the full ensemblID
+  #gene.sets <- lapply(gene.sets, function(x) sapply(x, FUN=function(y) paste0("ENSG",paste(rep(x="0", times= 11-nchar(y)), collapse=""), collapse="" , y), simplify=T))
+  
+  geneset_path <- "/projects/jonatan/genesets/Homo_sapiens_GSEA_GO_sets_all_ids_April_2015.RData"
+  gene.sets <- load_obj(f=geneset_path)
   
 }
 
@@ -354,7 +361,7 @@ if (is.null(resume)) {
   if (!any(grepl("ENSG|ENSMUSG",rownames(seurat_obj@data)))) {
 
     if (is.null(organism)) {
-      stop("Error: seurat object gene names are not in ensembl ID format. To remap from hgcn to ensembl, please provide an organism 'mmusculus' or 'hsapiens'")
+      stop("Error: seurat object gene names are not in ensembl ID format. To remap from hgnc to ensembl, please provide an organism 'mmusculus' or 'hsapiens'")
     
     } else if (!is.null(organism)) {
     # Map to ensembl_id
@@ -377,21 +384,23 @@ if (is.null(resume)) {
       
       ### 180524 v1.8_dev4
       # added (again)
-      write.csv(mapping, file=sprintf("%s%s_%s_hgcn_to_ensembl_mapping_df_%s.csv", tables_dir, data_prefix, organism, flag_date), quote = F, row.names = F)
+      save(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df_%s.RData", RObjects_dir, data_prefix, organism, flag_date))
+      write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df_%s.csv", tables_dir, data_prefix, organism, flag_date), quote = F, row.names = F)
       ###
       
     } else if (organism == "hsapiens") {
       
       STRINGdb_species <- 9606
 
-      mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" # columns: ensembl_gene_id, entrezgene, hgcn_symbol
-      mapping_direct = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T) # columns: ensembl_gene_id, entrezgene, hgcn_symbol
+      mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" # columns: ensembl_gene_id, entrezgene, hgnc_symbol
+      mapping_direct = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T) # columns: ensembl_gene_id, entrezgene, hgnc_symbol
       # Step 1: direct mapping
-      mapping = data.frame(symbol=row.names(seurat_obj@data), ensembl = mapping_direct$ensembl_gene_id[ match(row.names(seurat_obj@data), mapping_direct$hgcn_symbol) ])
+      mapping = data.frame(symbol=row.names(seurat_obj@data), ensembl = mapping_direct$ensembl_gene_id[ match(row.names(seurat_obj@data), mapping_direct$hgnc_symbol) ])
       
       ### 180524 v1.8_dev4
       # added (again)
-      write.csv(mapping, file=sprintf("%s%s_%s_hgcn_to_ensembl_mapping_df_%s.csv", tables_dir, data_prefix, organism, flag_date), quote = F, row.names = F)
+      save(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df_%s.RData", RObjects_dir, data_prefix, organism, flag_date))
+      write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df_%s.csv", tables_dir, data_prefix, organism, flag_date), quote = F, row.names = F)
       ###
     }
 
@@ -462,6 +471,8 @@ if (is.null(resume)) {
       message('Did not find all columns in meta.data_corr_col in the Seurat object meta.data slot')
       meta.data <- NULL
     }
+  } else {
+    meta.data <- NULL  
   }
 
   ### 180523 v1.8_dev4
@@ -502,6 +513,9 @@ if (is.null(resume)) {
                            "corFnc" = corFnc,
                            "networkType" = networkType,
                            "anti_cor_action" = anti_cor_action,
+                           ### 180611
+                           "hclustMethod" = hclustMethod,
+                           ###
                            "minClusterSize" = minClusterSize,
                            "deepSplit" = deepSplit,
                            "pamStage" = pamStage,
@@ -523,11 +537,11 @@ if (is.null(resume)) {
                               "minKMEtoStay" = minKMEtoStay,
                               "consensusQuantile" = consensusQuantile,
                               "fraction" = fraction,
-                              "hclustMethod" = hclustMethod,
+                              #"hclustMethod" = hclustMethod,
                               "impute" = impute,
                               "nPC_seurat" = nPC_seurat,
                               "TOMType" = TOMType,
-                              "PPI_pval_threshold" = PPI_pval_threshold))
+                              "adj.p.val.threshold" = adj.p.val.threshold))
   
   # Save run params to file
   write.csv(userParams, file=sprintf("%s%s_INFO_user_parameters_%s.csv", tables_dir, data_prefix, flag_date), quote = F, row.names = F)
@@ -601,7 +615,7 @@ if (is.null(resume)) {
     # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
     if (jackstraw.num.replicate > 0) message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstraw.num.replicate))
-    list_datExpr <- lapply(subsets, function(x) wrapJackStraw(seurat_obj_sub = x, n_cores = n_cores, jackstraw.num.replicate = jackstraw.num.replicate))
+    list_datExpr <- lapply(subsets, function(x) wrapJackStraw(seurat_obj_sub = x, n_cores = n_cores, jackstraw.num.replicate = jackstraw.num.replicate, adj.p.val.threshold = adj.p.val.threshold))
     
     invisible(gc())
     
@@ -614,22 +628,20 @@ if (is.null(resume)) {
   # Clear up
   rm(subsets, userParams, builtInParams, subsets_n_cells, seurat_obj)
   invisible(gc())
-  
+ 
   # Save or load session image 
   resume = "checkpoint_1"
   # just in case, since JackStraw is slow
   save.image(file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix))
   
-  # TODO: unload packages
-  
-  
+
 } else if (!is.null(resume)) {
   
   if (resume == "checkpoint_1") {
     
     load((file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev4.R")
-    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev4.R")
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.9_dev1.R")
+    source(file = "/projects/jonatan/functions-src/functions_v1.9_dev1.R")
     TOM.num.replicate=0
   }
   
@@ -637,6 +649,19 @@ if (is.null(resume)) {
 
 if (resume == "checkpoint_1") {
 
+  ######################################################################
+  ###################### (UN) LOAD PACKAGES ############################
+  ######################################################################
+  
+  # Unload packages
+  try(detach("package:Seurat", unload=TRUE))
+
+  # Free up DLLs
+  invisible(R.utils::gcDLLs())
+  
+  suppressPackageStartupMessages(library(WGCNA))
+  
+  try(disableWGCNAThreads()) 
   ######################################################################
   ####### PICK SOFT THRESHOLD POWER FOR ADJACENCY MATRIX ###############
   ######################################################################
@@ -746,23 +771,9 @@ if (resume == "checkpoint_1") {
   }
   
   message("Done computing the consensus Topological Overlap Matrix")
-  
-  resume="checkpoint_2"
     
   if (TOM.num.replicate > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
   
-  save.image(file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
-
-} else if (!is.null(resume)) {
-  if (resume == "checkpoint_2") {
-    load((file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev4.R")
-    source(file = "/projects/jonatan/functions-src/functions_v1.8_dev4.R")
-  }
-}
-
-if (resume == "checkpoint_2") {
-  STRINGdb_species = 9606
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
   ######################################################################
@@ -992,6 +1003,29 @@ if (resume == "checkpoint_2") {
   rm(list_list_colors_ok)
   invisible(gc())
 
+  resume="checkpoint_2"
+  
+  save.image(file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
+  
+} else if (!is.null(resume)) {
+  if (resume == "checkpoint_2") {
+    load((file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix)))
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.9_dev1.R")
+    source(file = "/projects/jonatan/functions-src/functions_v1.9_dev1.R")
+  }
+}
+
+if (resume == "checkpoint_2") {
+  
+  ######################################################################
+  #################### (UN) LOAD PACKAGES #############################
+  ######################################################################
+
+  # Free up DLLs
+  invisible(R.utils::gcDLLs())
+  
+  suppressPackageStartupMessages(library(STRINGdb))
+  
   ######################################################################
   #################### CHECK MODULES FOR PPI ENRICHMENT ################
   ######################################################################
@@ -1011,7 +1045,8 @@ if (resume == "checkpoint_2") {
   list_list_colors_PPI <- clusterMap(cl, function(a,b) mapply(function(x,y) PPI_outer_for_vec(colors = x,
                                                                                               pkMEs = y,
                                                                                               STRINGdb_species = STRINGdb_species, 
-                                                                                              PPI_pval_threshold = PPI_pval_threshold, 
+                                                                                              PPI_pkME_threshold = PPI_pkME_threshold,
+                                                                                              adj.p.val.threshold = adj.p.val.threshold, 
                                                                                               project_dir = project_dir, 
                                                                                               data_prefix = data_prefix, 
                                                                                               flag_date = flag_date), 
@@ -1027,10 +1062,14 @@ if (resume == "checkpoint_2") {
   #                           x = a, 
   #                           y = list_datExpr_ok, 
   #                           SIMPLIFY=F))
-  list_list_colors_PPI <- mapply(function(x,y) lapply(x, function(a) name_for_vec(to_be_named = a, given_names = colnames(y), dimension = NULL)), 
-                                                                          x = list_list_colors_PPI, 
-                                                                          y = list_datExpr_ok, 
-                                                                          SIMPLIFY=F)
+
+  ### 180529 v1.9_dev1
+  ## seems redundant
+  # list_list_colors_PPI <- mapply(function(x,y) lapply(x, function(a) name_for_vec(to_be_named = a, given_names = colnames(y), dimension = NULL)), 
+  #                                                                         x = list_list_colors_PPI, 
+  #                                                                         y = list_datExpr_ok, 
+  #                                                                         SIMPLIFY=F)
+  ###
   ######################################################################
   ########### ORDER PARAMETER SETS BY PPI ENRICHMENT AND PLOT ##########
   ######################################################################
@@ -1080,15 +1119,6 @@ if (resume == "checkpoint_2") {
   # }
   
   ######################################################################
-  ############## PLOT THE RANKED MODULE ASSIGNMENTS ####################
-  ######################################################################
-
-  # Pre-PPI 
-  invisible(mapply(function(x,y) parPlotDiffParams(list_colors=x, subsetName=y), x=list_list_colors_ok_matched_order, y=sNames_ok, SIMPLIFY = F))
-  # Post-PPI 
-  invisible(mapply(function(x,y) parPlotDiffParams_PPI(list_colors=x, subsetName=y), x=list_list_colors_PPI_order, y=sNames_ok, SIMPLIFY = F))
-  
-  ######################################################################
   ##### FOR EACH SUBSET SELECT PARAMETERS WITH BEST PPI ENRICHMENT #####
   ######################################################################
   
@@ -1116,17 +1146,14 @@ if (resume == "checkpoint_2") {
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
   list_list_cutree_params_final <- lapply(list_PPI_vec_n_grey, function(x) comb_list[order(x,decreasing = F)][[1]])
   list_list_cutree_params_final <- lapply(list_list_cutree_params_final, function(x) name_for_vec(to_be_named = x, given_names = param_names, dimension = NULL)) 
-  
-  ######################################################################
-  ######### PLOT FINAL MODULE ASSIGNMENT PRE- & POST-PPI FILTER ########
-  ######################################################################
-  
-  message("Plotting")
 
-  list_colors_both = mapply(FUN=cbind, list_colors, list_colors_PPI, SIMPLIFY = F)
-  names(list_colors_both) = sNames_ok
-  invisible(lapply(sNames_ok, plotFinalColors))
   
+  #PLOT FINAL MODULE ASSIGNMENT PRE- & POST-PPI FILTER
+  ### 180529 v1.9_dev1
+  # Moved: plot final parameters pre- and post PPI filter
+  # Why: to plot after making sure colours have different names
+  ###
+
   ######################################################################
   ################### DELETE PPI RUNS WITH ONLY GREY ###################
   ######################################################################
@@ -1209,20 +1236,24 @@ if (resume == "checkpoint_2") {
   #list_kIMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kIMs_PPI, y=list_colors_PPI_ok, SIMPLIFY=F)
   ###
   # clear memory
-  rm(list_dissTOM_PPI_ok, 
-     list_list_plot_label_ok_order, 
-     list_list_colors_PPI_order)
+
+  ### 180529 v.19_dev1
+  # rm(list_dissTOM_PPI_ok, 
+  #    list_list_plot_label_ok_order, 
+  #    list_list_colors_PPI_order)
   invisible(gc()) 
   
   ###180509_v1.8_dev2
   # There should be no need since we have excludeGrey = T. 
   # But it may be necessary because there are definitely still grey modules
+  ### 180531 we need MEs to make eigen matrix later
+  list_MEs_PPI_ok <- deleteGrey(list_MEs_PPI) %>% Filter(f=length)
   list_kMEs_PPI_ok <- deleteGrey(list_kMEs_PPI) %>% Filter(f=length)
   ### 180524 v1.8_dev4
   # Temporarily removed. In AgRP run 21, list_kIMs_PPI[[1]] has an extra column which has name NA
   #list_kIMs_PPI_ok <- deleteGrey(list_kIMs_PPI) %>% Filter(f=length)
   ###
-  
+
   # checkpoint
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
@@ -1238,12 +1269,24 @@ if (resume == "checkpoint_2") {
 } else if (resume == "checkpoint_3") {
   load(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
   # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev4.R")
-  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev4.R")
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.9_dev1.R")
+  source(file = "/projects/jonatan/functions-src/functions_v1.9_dev1.R")
 }  
 
 if (resume == "checkpoint_3") {
+  
 
+  ##########################################################################
+  ############################ (UN)LOAD PACKAGES ############################
+  ##########################################################################
+  
+  # Unload packages
+  try(detach(package:STRINGdb, unload=TRUE))
+  # Free up DLLs
+  invisible(R.utils::gcDLLs())
+  
+  try(disableWGCNAThreads()) 
+  
   ##########################################################################
   #################### COMPUTE MAGMA GWAS ENRICHMENT #######################
   ##########################################################################
@@ -1253,12 +1296,8 @@ if (resume == "checkpoint_3") {
     message("Scoring PPI enriched modules for enrichment with genes linked by GWAS to phenotypes of interest")
       
     file_suffix = "kMEs_PPI"    
-  
-    ### v1.8_dev4
-    # change BMI to gwas
-    #list_dat_BMI <- magma_par(subsetNames = names(list_kMEs_PPI_ok),   
+
     list_dat_gwas <- magma_par(subsetNames = names(list_kMEs_PPI_ok), 
-                               ###
                               list_kMEs = list_kMEs_PPI_ok,
                               project_dir = project_dir,
                               plots_dir = plots_dir,
@@ -1280,9 +1319,10 @@ if (resume == "checkpoint_3") {
     # dat_BMI_corrCoef <-  list_dat_BMI[["corrCoef"]]
     
     if (is.null(list_dat_gwas)) {
-      list_kMEs_PPI_ok <- lapply(list_kMEs_PPI_ok, function(x) cbind(genes=rownames(x), x))
+      list_kMEs_PPI_out <- lapply(list_kMEs_PPI_ok, function(x) cbind(genes=rownames(x), x))
       rownames(list_kMEs_PPI_out) <- NULL
       invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_PPI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote=F), list_kMEs_PPI_out, sNames_PPI_ok, SIMPLIFY = F))
+      save.image(file=sprintf("%s%s_stop_no_GWAS_signal_image.RData", RObjects_dir, data_prefix))
       
       ### 180524 v1.8_dev4
       # Temporarily removed. In AgRP run 21, list_kIMs_PPI[[1]] has an extra column which has name NA
@@ -1293,7 +1333,7 @@ if (resume == "checkpoint_3") {
       
       stop("No modules enriched for gwas_filter_traits, saving PPI filtered kMEs and kIMs and stopping")
     }
-    
+       
     dat_gwas_fdr <-  list_dat_gwas[["fdr"]]
     dat_gwas_corrCoef <-  list_dat_gwas[["corrCoef"]]
     ###
@@ -1312,193 +1352,47 @@ if (resume == "checkpoint_3") {
     sNames_gwas <- unique(gsub(paste0(modRegExpr), "", dat_gwas_fdr$module))
     sNames_gwas <- gsub("__$", "", sNames_gwas)
     
-    list_modules_gwas <- vector(mode="list", length=length(sNames_gwas))
-    names(list_modules_gwas) <- sNames_gwas
+    list_module_gwas <- vector(mode="list", length=length(sNames_gwas))
+    names(list_module_gwas) <- sNames_gwas
   
     for (name in sNames_gwas) {
       idx <- grep(pattern = paste0(name, "__.*"), x = dat_gwas_fdr$module)
-      list_modules_gwas[[name]] <- sapply(idx, function(j) gsub(".*__", "", dat_gwas_fdr$module[j]), simplify = T)
+      list_module_gwas[[name]] <- sapply(idx, function(j) gsub(".*__", "", dat_gwas_fdr$module[j]), simplify = T)
       #sNames_BMI[j] <- sNames_PPI_ok[j]
     }
   
-    list_colors_gwas <- list_colors_PPI_ok[names(list_colors_PPI_ok) %in% sNames_gwas]
-    
+    # relabel non-GWAS modules 'grey'
     list_colors_gwas <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
                                x = list_colors_gwas,
-                               y = list_modules_gwas,
+                               y = list_module_gwas,
                                SIMPLIFY = F)
-    
+    # give gene names to color assignment vectors
     list_colors_gwas <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
                                x = list_colors_gwas,
                                y = list_colors_PPI_ok[names(list_colors_PPI_ok) %in% sNames_gwas],
                                SIMPLIFY = F)
     
+    # remove any cell clusters without gwas enrichment
+    list_colors_gwas <- list_colors_PPI_ok[names(list_colors_PPI_ok) %in% sNames_gwas]
+    list_datExpr_gwas <- list_datExpr_PPI_ok[names(list_datExpr_PPI_ok) %in% sNames_gwas]
+    
   } else if (is.null(magma_gwas_dir)) {
+    
     dat_gwas_fdr <- NULL
     dat_gwas_corrCoef <- NULL
     sNames_gwas <- sNames_PPI_ok
-    list_modules_gwas <- lapply(list_kMEs_PPI_ok, function(x) colnames(x)) # TODO check 
-    names(list_modules_gwas) <- sNames_gwas
+    list_module_gwas <- lapply(list_kMEs_PPI_ok, function(x) colnames(x)) # TODO check 
+    names(list_module_gwas) <- sNames_gwas
     list_colors_gwas <- list_colors_PPI_ok 
+    list_datExpr_gwas <- list_datExpr_PPI_ok
   }
   
-  # Prepare nested lists of module genes
-  list_list_module_gwas_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_gwas, b=list_modules_gwas, SIMPLIFY=F)
-  list_list_module_gwas_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_gwas_genes, y=list_modules_gwas, SIMPLIFY=F)
-  
-  ######################################################################
-  ##################### COMPUTE CELL x EIGENGENE MATRIX ################
-  ######################################################################
-  message("Computing cell eigengene embeddings")
-  
-  eigen_mat <- make_eigen_mat(RObjects_dir = RObjects_dir,
-                              list_list_module_genes = list_list_module_gwas_genes,
-                              n_cores = n_cores,
-                              log_dir = log_dir)
-  
-  ######################################################################
-  ############# COMPUTE EIGENGENE - METADATA CORRELATION ###############
-  ######################################################################
-  
-  if (!is.null(meta.data)) {
-    
-    # compute metadata correlations with eigengene embeddings
-    
-    # arrange meta.data rows to match eigenvector embeddings
-    meta.data <- meta.data[match(rownames(meta.data), rownames(eigen_mat)),]
-    eigen_meta.data_corr <- t(WGCNA::cor(y=eigen_mat, x=meta.data, method = c("pearson"), verbose = 0)) # transpose to use p.adjust below
-    eigen_meta.data_corr_pval <- WGCNA::corPvalueStudent(eigen_meta.data_corr, n = nrow(meta.data))
-    dimnames(eigen_meta.data_corr_pval) <- dimnames(eigen_meta.data_corr_pval)
-    eigen_meta.data_corr_fdr <- p.adjust(eigen_meta.data_corr_pval, method = "fdr")
-    dim(eigen_meta.data_corr_fdr) = dim(eigen_meta.data_corr_pval)
-    dimnames(eigen_meta.data_corr_fdr) = dimnames(eigen_meta.data_corr_pval)
-    eigen_meta.data_corr_fdr <- t(eigen_meta.data_corr_fdr)
-    #eigen_meta.data_corr_fdr_log <- -log10(eigen_meta.data_corr_fdr)
-    
-    # Also transpose coefficient matrix so eigengenes are in columns
-    eigen_meta.data_corr <- t(eigen_meta.data_corr)
-
-    # reshuffle the metadata 
-    # eigen_meta.data_corr_shuffled <- vapply(1:jackstraw.num.replicate,
-    #                                         FUN = function(z) WGCNA::cor(x = meta.data[sample(x = nrow(meta.data), size = nrow(meta.data), replace = F),], 
-    #                                          y = eigen_mat, 
-    #                                          method = "pearson", 
-    #                                          verbose = 0), 
-    #                                         FUN.VALUE = array(data=0, dim = c(ncol(meta.data), ncol(eigen_mat))))
-    # 
-    # cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "log_eigen_meta.data_corr_empirical.txt"))
-    # stopCluster(cl)
-    
-    # plot
-    pdf(sprintf("%s%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, flag_date))
-    corrplot(corr = eigen_meta.data_corr,
-             add = F,
-             addCoef.col = "black",
-             number.digits = 2L,
-             number.cex = 0.5,
-             method = "color",
-             col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
-             is.corr=T,
-             #order = "hclust",
-             #hclust.method = hclustMethod,
-             title=NULL,#sprintf("%s eigenvector - meta.data correlations", data_prefix),
-             #addCoef.col = F,
-             p.mat = eigen_meta.data_corr_fdr,
-             sig.level = 5e-2)
-    invisible(dev.off())
-
-    if (!is.null(meta.data_corr_filter_vals)) {
-      
-      eigen_meta.data_corr_fdr_filter_vals <- eigen_meta.data_corr_fdr[rownames(eigen_meta.data_corr_fdr) %in% meta.data_corr_filter_vals, ,drop=F]
-      
-      # filter out modules that are not significantly correlated with meta.data_corr_filter_vals
-      list_modules_gwas_meta <- lapply(list_modules_gwas, 
-                                         function(x) x[sapply(x, function(y) 5e-2 > min(eigen_meta.data_corr_fdr_filter_vals[,grep(y, colnames(eigen_meta.data_corr_fdr_filter_vals))]))]) %>% Filter(f=length)
-      
-      sNames_gwas_meta <- names(list_modules_gwas_meta)
-      
-      # filter the module columns of the eigengene matrix
-      colnames_clean <- mapply(FUN = function(x,y) gsub(paste0(x,"_"),"", y),  x = sNames_gwas_meta, y = colnames(eigen_mat), SIMPLIFY = T)
-      #eigen_mat_meta <- eigen_mat[,sapply(X = colnames_clean, FUN = function(x) grep(x, colnames(eigen_mat)), simplify=T)] 
-      eigen_mat_meta <- eigen_mat[,colnames_clean %in% unlist(list_modules_gwas_meta) ] # %in% only does exact matches. So should be fine 
-        
-    } else if (is.null(meta.data_corr_filter_vals)) { # if the user chose not to filter modules on any metadata correlations
-      list_modules_gwas_meta <- list_modules_gwas
-      sNames_gwas_meta <- sNames_gwas 
-      eigen_mat_meta <- eigen_mat
-    }
-  } else if (is.null(meta.data)) {
-    list_modules_gwas_meta <- list_modules_gwas
-    sNames_gwas_meta <- sNames_gwas 
-    eigen_mat_meta <- eigen_mat
-  }
-
-  ##########################################################################
-  #### FILTER COLORS VECS, GENE AND KME LISTS FOR METADATA CORRELATIONS ####
-  ##########################################################################
-  
-  if (!is.null(meta.data) & !is.null(meta.data_corr_filter_vals)) {
-
-    list_colors_gwas_meta <- list_colors_gwas[names(list_colors_gwas) %in% sNames_gwas_meta]
-    
-    # reassign genes of filtered out modules to grey
-    list_colors_gwas_meta <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
-                               x = list_colors_gwas_meta,
-                               y = list_modules_gwas_meta,
-                               SIMPLIFY = F)
-    
-    # Assign gene names to the colors vectors
-    list_colors_gwas_meta <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
-                               x = list_colors_gwas_meta,
-                               y = list_colors_gwas,
-                               SIMPLIFY = F)
-    
-    # Prepare nested lists of module genes
-    list_list_module_gwas_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_gwas_meta, b=list_modules_gwas_meta, SIMPLIFY=F)
-    list_list_module_gwas_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_gwas_meta_genes, y=list_modules_gwas_meta, SIMPLIFY=F)
-    
-    # Also filter kME lists
-    # upper level
-    list_kMEs_gwas_meta <- list_kMEs_PPI_ok[names(list_kMEs_PPI_ok) %in% sNames_gwas_meta]
-    # nested level
-    list_kMEs_gwas_meta <- mapply(function(x,y) x[names(x) %in% names(y)], x=list_kMEs_gwas_meta, y=list_list_module_gwas_meta_genes, SIMPLIFY=F)
-    
-    # Filter gwas results
-    if (!is.null(magma_gwas_dir)) {
-      dat_gwas_fdr_meta <- dat_gwas_fdr[rownames(dat_gwas_fdr) %in% colnames(eigen_mat_meta)]
-      dat_gwas_corrCoef_meta <- dat_gwas_corrCoef[rownames(dat_gwas_corrCoef) %in% colnames(eigen_mat_meta)]
-    }
-    
-  } else if (is.null(meta.data) | is.null(meta.data_corr_filter_vals)) {
-    list_colors_gwas_meta <- list_colors_gwas
-    list_list_module_gwas_meta_genes <- list_list_module_gwas_genes
-    # upper level
-    list_kMEs_gwas_meta <- list_kMEs_PPI_ok[names(list_kMEs_PPI_ok) %in% sNames_gwas]
-    # nested level
-    list_kMEs_gwas_meta <- mapply(function(x,y) x[names(x) %in% names(y)], x=list_kMEs_gwas_meta, y=list_list_module_gwas_meta_genes, SIMPLIFY=F)
-
-    if (!is.null(magma_gwas_dir)) {
-      dat_gwas_fdr_meta <- dat_gwas_fdr
-      dat_gwas_corrCoef_meta <- dat_gwas_corrCoef
-    }
-  }
-    ### 180524 v1.8_dev4
-    # Temporarily removed
-    # upper level
-    #list_kIMs_gwas_meta <- list_kIMs_PPI_ok[names(list_kIMs_PPI_ok) %in% sNames_gwas_meta]
-    # nested level
-    #list_kIMs_gwas_meta <- mapply(function(x,y) x[names(x) %in% names(y)], x=list_kIMs_gwas_meta, y=list_list_module_gwas_meta_genes, SIMPLIFY=F)
-    ###
-    
-    # order the gene lists by kME
-    
-    for (i in length(list_list_module_gwas_meta_genes)) {
-      for (j in length(list_list_module_gwas_meta_genes[[i]])) {
-        kMEs <- list_kMEs_gwas_meta[[i]] 
-        genes <- list_list_module_gwas_meta_genes[[i]][[j]]
-        list_list_module_gwas_meta_genes[[i]][[j]] <- rownames(kMEs)[order(kMEs[rownames(kMEs) %in% genes, j], decreasing = T)]
-      }
-    }
+  ### 180531
+  #  compute when needed for eigen mat
+  # # Prepare nested lists of module genes
+  # list_list_module_gwas_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_gwas, b=list_module_gwas, SIMPLIFY=F)
+  # list_list_module_gwas_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_gwas_genes, y=list_module_gwas, SIMPLIFY=F)
+  ###
   
   ##########################################################################
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
@@ -1507,17 +1401,230 @@ if (resume == "checkpoint_3") {
   # TODO
   
   ######################################################################
+  ################ MAKE MODULE COLORS MORE UNIQUE ######################
+  ######################################################################
+  
+  message("Making module colors unique across cell clusters")
+  
+  modules_colors <- unlist(list_module_gwas)
+    
+  if (any(duplicated(modules_colors))) {
+    
+    idx_dupl <- which(duplicated(modules_colors))
+    all_unique_colors <- unique(gsub("\\d+", "", colors()))
+    unique_cols_available <- all_unique_colors[!all_unique_colors %in% modules_colors]
+    
+    modules_colors_unique <- modules_colors
+    
+    # Replace duplicated colors
+    for (i in 1:sum(duplicated(modules_colors))) {
+      modules_colors_unique[idx_dupl][i] <- unique_cols_available[i]
+    }
+    
+    # Extend the new naming scheme to the other (intermediate) outputs
+
+    list_module_gwas_unique <- list_module_gwas
+    i=0
+    for (j in 1:length(list_module_gwas)){
+      for (k in 1:length(list_module_gwas[[j]])) {
+        i=i+1
+        list_module_gwas_unique[[j]][[k]] <- modules_colors_unique[i]
+      }
+    }
+    
+    list_colors_gwas_unique <- mapply(function(x,y,z) ifelse(x %in% y, yes=z, no=x),
+                                      x = list_colors_gwas, 
+                                      y = list_module_gwas, 
+                                      z = list_module_gwas_unique, SIMPLIFY = F)
+    
+    names(list_colors_gwas_unique) <- names(list_colors_gwas)
+    list_colors_gwas_unique <- mapply(function(x,y) name_for_vec(to_be_named= x, given_names = names(y), dimension=NULL), x = list_colors_gwas_unique, y = list_colors_gwas, SIMPLIFY=F)
+    ### 180531 not needed yet
+    # list_list_module_gwas_genes_unique <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL),
+    #                                              x = list_list_module_gwas_genes,
+    #                                              y = list_module_gwas_unique,
+    #                                              SIMPLIFY = F)
+    ###
+    if (!is.null(magma_gwas_dir)) {
+      dat_gwas_fdr_unique <- dat_gwas_fdr_unique
+      dat_gwas_corrCoef_unique <- dat_gwas_corrCoef
+      for (i in idx_dupl) {
+        dat_gwas_fdr_unique$module[i] <- gsub("^__",paste0("__", modules_colors_unique[i]),  dat_gwas_fdr$module[i])
+        dat_gwas_corrCoef_unique$module[i] <- gsub("^__",paste0("__", modules_colors_unique[i]),  dat_gwas_corCoeff$module[i])
+      }
+    }
+  } else {
+    
+    modules_colors_unique <- modules_colors
+    list_module_gwas_unique <- list_module_gwas
+    list_colors_gwas_unique <- list_colors_gwas
+    #list_list_module_gwas_genes_unique <- list_list_module_gwas_genes
+    
+    if (!is.null(magma_gwas_dir)) {
+      dat_gwas_fdr_unique <- dat_gwas_fdr_unique
+      dat_gwas_corrCoef_unique <- dat_gwas_corrCoef
+    }
+  }
+  
+  
+  ######################################################################
+  #################### RECOMPUTE MEs, kMEs AFTER MAGMA #################
+  ######################################################################
+  
+
+  message("Re-computing MEs and kME after filtering modules for MAGMA enrichment and making colors unique across cell clusters")
+  # Even if we didn't do MAGMA, run again just for relabelling the colors.. 
+  
+  invisible(gc())
+  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_magma.txt"))
+  
+  list_MEs_gwas_unique <- clusterMap(cl, function(x,y) moduleEigengenes(expr=as.data.frame(x,col.names=col.names(x)),
+                                                                colors=y,
+                                                                excludeGrey=T), 
+                             x = list_datExpr_gwas, 
+                             y = list_colors_gwas_unique, 
+                             SIMPLIFY = F)
+  
+  #names(list_MEs_PPI_final) <- sNames_ok
+  list_kMEs_gwas_unique <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
+                                                          y$eigengenes,
+                                                          outputColumnName = "",
+                                                          corFnc = corFnc), 
+                              x=list_datExpr_gwas, 
+                              y=list_MEs_gwas_unique)
+  
+  ### 180524 v1.8_dev4
+  # Temporarily removed. In AgRP run 21, list_kIMs_PPI[[1]] has an extra column which has name NA
+  # list_kIMs_PPI <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM=x, colors=y, genes=names(y)),
+  #                             x = list_dissTOM_PPI_ok,
+  #                             y = list_colors_PPI_ok,
+  #                             SIMPLIFY=F)
+  ###
+  
+  stopCluster(cl)
+  invisible(gc())
+  
+  # Remove grey modules (if any and filter out runs with only grey (probably not possible but still))
+  list_MEs_gwas_unique <- deleteGrey(list_MEs_gwas_unique) %>% Filter(f=length)
+  list_kMEs_gwas_unique <- deleteGrey(list_kMEs_gwas_unique) %>% Filter(f=length)
+
+  ######################################################################
+  #### COMPUTE EIGENGENE - METADATA CORRELATION IN EACH CELL CLUSTER ###
+  ######################################################################
+  
+  if (!is.null(meta.data)) {
+  
+    list_meta.data <- lapply(list_datExpr_gwas, function(x) meta.data[match(rownames(x), rownames(meta.data)),]) # get list of cell * metadata
+    list_eigen_meta.data_corr <- mapply(function(x,y) t(WGCNA::cor(y=y$eigengenes, x=x, method = c("pearson"), verbose = 0)), x=list_meta.data, y=list_MEs_gwas_unique) # transpose to use p.adjust below
+    list_eigen_meta.data_corr_pval <- mapply(function(x,y) WGCNA::corPvalueStudent(x, n = nrow(y)), x=list_eigen_meta.data_corr, y=list_meta.data)
+    #dimnames(eigen_meta.data_corr_pval) <- dimnames(eigen_meta.data_corr_pval)
+    list_eigen_meta.data_corr_fdr <- lapply(list_eigen_meta.data_corr_pval, function(x) p.adjust(x, method = "fdr"))
+    
+    redim<-function(x,y){
+      dim(x)=dim(y)
+      return(x)
+    }
+    
+    list_eigen_meta.data_corr_fdr <- mapply(function(x,y) redim(x,y),x=list_eigen_meta.data_corr_fdr, y=list_eigen_meta.data_corr_pval)
+    
+    redimname<-function(x,y){
+      dimnames(x)=dimnames(y)
+      return(x)
+    }
+    
+    list_eigen_meta.data_corr_fdr <- mapply(function(x,y) redimname(x,y) %>% t(),x=list_eigen_meta.data_corr_fdr, y=list_eigen_meta.data_corr_pval) 
+    
+    # Also transpose coefficient matrix so eigengenes are in columns
+    list_eigen_meta.data_corr <- lapply(list_eigen_meta.data_corr, function(x) t(x))
+  
+    # remove "ME" from module names in metadata corr / fdr matrices
+    list_eigen_meta.data_corr <- lapply(list_eigen_meta.data_corr, function(x) name_for_vec(to_be_named = x, given_names= gsub("ME", "", colnames(x)), dimension = 2))
+    list_eigen_meta.data_corr_fdr <- lapply(list_eigen_meta.data_corr_fdr, function(x) name_for_vec(to_be_named = x, given_names= gsub("ME", "", colnames(x)), dimension = 2))
+  } 
+  
+  ##########################################################################
+  #### FILTER COLORS VECS, GENE AND KME LISTS FOR METADATA CORRELATIONS ####
+  ##########################################################################
+  
+  # WORK IN PROGRESS: FILTER WITHIN EACH CELLTYPE ON EIGEN-META CORR
+  if (!is.null(meta.data) & !is.null(meta.data_corr_filter_vals)) {
+    
+    list_module_sig <- lapply(list_eigen_meta.data_corr_fdr, function(x) apply(x, 2, function(y) any(y<.05))) # logical
+    # significantly correlated modules
+    list_module_meta <- mapply(function(x,y) colnames(x[,y]),x=list_eigen_meta.data_corr_fdr, y=list_module_sig) %>% Filter(f=length)
+
+    sNames_meta <- names(list_module_meta)
+    
+    # reassign genes of filtered out modules to grey and remove any empty cell clusters
+    list_colors_meta <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
+                               x = list_colors_gwas_unique[names(list_colors_gwas_unique) %in% sNames_meta],
+                               y = list_module_meta,
+                               SIMPLIFY = F)
+    
+    # give gene names to color assignment vectors
+    list_colors_meta <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
+                               x = list_colors_meta,
+                               y = list_colors_gwas_unique[names(list_colors_gwas_unique) %in% sNames_meta],
+                               SIMPLIFY = F)
+    
+    # Filter kME lists
+    list_kMEs_meta <- mapply(function(x,y) x[,colnames(x)%in%y],x=list_kMEs_gwas_unique, y = list_module_meta) %>% Filter(f=length)
+
+    if (!is.null(magma_gwas_dir)) {
+      dat_gwas_fdr_meta <- dat_gwas_fdr_unique[rownames(dat_gwas_fdr_unique) %in% colnames(eigen_mat),]
+      dat_gwas_corrCoef_meta <- dat_gwas_corrCoef[rownames(dat_gwas_corrCoef) %in% colnames(eigen_mat),]
+    }
+  } else if (is.null(meta.data) | is.null(meta.data_corr_filter_vals)) {
+    
+    list_colors_meta <- list_colors_gwas_unique
+    list_kMEs_meta <- list_kMEs_gwas_unique 
+    sNames_meta <- sNames_gwas
+    
+    if (!is.null(magma_gwas_dir)) {
+      dat_gwas_fdr_meta <- dat_gwas_fdr_unique
+      dat_gwas_corrCoef_meta <- dat_gwas_corrCoef_unique
+    }
+  }
+ 
+
+  resume = "checkpoint_4"
+  message("Reached checkpoint 4, saving session image")
+  save.image(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
+  
+} else if (resume == "checkpoint_4") {
+  load(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
+  # Load parameter values and utility functions anew (in case a bug was fixed)
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.9_dev1.R")
+  source(file = "/projects/jonatan/functions-src/functions_v1.9_dev1.R")
+}
+
+if (resume == "checkpoint_4") {
+  
+  ######################################################################
+  ###################### (UN) LOAD PACKAGES ############################
+  ######################################################################
+  
+  suppressPackageStartupMessages(library(liger))
+  suppressPackageStartupMessages(library(corrplot))
+  suppressPackageStartupMessages(library(RColorBrewer))
+ 
+  ######################################################################
   ############# DO GENE SET ENRICHMENT ANALYSIS (GSEA) #################
   ######################################################################
+  
   message("Performing Gene Set Enrichment Analysis (GSEA)")
 
   # convert kMEs from dataframes to (nested) lists. 
-  # NB: They are not ordered (they don't need to be for GSEA)
-  list_list_kMEs_gwas_meta <- lapply(list_kMEs_gwas_meta, function(x) as.list(x))
-  list_list_kMEs_gwas_meta <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
-                               a = list_list_kMEs_gwas_meta,
-                               b = list_kMEs_gwas_meta,
-                               SIMPLIFY = F)
+  # list_list_kMEs_meta <- lapply(list_list_kMEs_meta, function(x) as.list(x))
+  # list_list_kMEs_meta <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
+  #                              a = list_list_kMEs_gwas_meta,
+  #                              b = list_kMEs_gwas_meta,
+  #                              SIMPLIFY = F)
+  list_list_kMEs_meta <- lapply(list_kMEs_meta, function(x) as.list(x))
+  list_list_kMEs_meta <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
+                                a = list_list_kMEs_meta,
+                                b = list_kMEs_meta,
+                                SIMPLIFY = F)
   
   gene.sets.select <- if (organism=="mmusculus") gene.sets[grepl("^GO|REACTOME|KEGG", names(gene.sets))] else gene.sets
   
@@ -1531,19 +1638,19 @@ if (resume == "checkpoint_3") {
   
   invisible(gc())
   cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "log_GSEA.txt"))
-  list_list_gsea <- parLapply(cl, list_list_kMEs_gwas_meta, function(x) lapply(x, function(y) iterative.bulk.gsea(values=y, 
+  list_list_gsea <- parLapply(cl, list_list_kMEs_meta, function(x) lapply(x, function(y) iterative.bulk.gsea(values=y, 
                                                                                                             set.list=gene.sets.select)))
   # Returns a list (of clusters) of lists (of modules) of dataframes with GO terms as rownames and columns: p.val, q.val, sscore and edge
   stopCluster(cl)
   invisible(gc())
   
   # TODO
-  if (FALSE) {
-    # tmp: check if enrichment is correlated with gene set size; if yes, give a warning
-    gsea_genesetSize_corr <- sapply(list_list_gsea, function(x) lapply(x, function(y) WGCNA::cor(method="spearman", y[['sscore']], sapply(gene.sets.select[na.omit(match(names(gene.sets.select), rownames(y)))], function(z) length(z), simplify = T))))
-    if (any(gsea_genesetSize_corr)>0.05) warning("GSEA enrichment is correlated with geneset size - it may be necessary to normalize")
-    write.csv(gsea_genesetSize_corr, file = sprintf("%s%s_diagnostic_gsea_correlation_sscore_geneset_size_%s.csv", tables_dir, data_prefix, flag_date), quote =  F, row.names = F)
-  }
+  # if (FALSE) {
+  #   # tmp: check if enrichment is correlated with gene set size; if yes, give a warning
+  #   gsea_genesetSize_corr <- sapply(list_list_gsea, function(x) lapply(x, function(y) WGCNA::cor(method="spearman", y[['sscore']], sapply(gene.sets.select[na.omit(match(names(gene.sets.select), rownames(y)))], function(z) length(z), simplify = T))))
+  #   if (any(gsea_genesetSize_corr)>0.05) warning("GSEA enrichment is correlated with geneset size - it may be necessary to normalize")
+  #   write.csv(gsea_genesetSize_corr, file = sprintf("%s%s_diagnostic_gsea_correlation_sscore_geneset_size_%s.csv", tables_dir, data_prefix, flag_date), quote =  F, row.names = F)
+  # }
 
   # list_list_gsea_p.adj <- lapply(list_list_gsea, function(x) lapply(x, function(y) data.frame(geneset = rownames(y),
   #                                                                                             p.val=y["p.val"],
@@ -1556,13 +1663,82 @@ if (resume == "checkpoint_3") {
   signif.threshold = 5e-2
   list_list_gsea_signif <- lapply(list_list_gsea, function(x) lapply(x, function(y) y[y$q.val<signif.threshold,]) %>% Filter(f=nrow) ) %>% Filter(f=length) 
 
+  ######################################################################
+  ##################### PREPARE ORDERED GENE LISTS #####################
+  ######################################################################
+
+  # prepare nested lists of module genes
+  list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
+  list_list_module_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F)
+
+  ######################################################################
+  ##################### COMPUTE CELL x EIGENGENE MATRIX ################
+  ######################################################################
+  
+  message("Computing all cell embeddings on all gene module eigengenes")
+  
+  eigen_mat <- make_eigen_mat(RObjects_dir = RObjects_dir,
+                              list_list_module_genes = list_list_module_meta_genes,
+                              n_cores = n_cores,
+                              log_dir = log_dir)
+  
+  ##########################################################################
+  ############################## SAVE TABLES ###############################
+  ##########################################################################
+
+  # order the gene lists by kME
+  
+  for (i in length(list_list_module_meta_genes)) {
+    for (j in length(list_list_module_meta_genes[[i]])) {
+      kMEs <- list_kMEs_meta[[i]] 
+      genes <- list_list_module_meta_genes[[i]][[j]]
+      list_list_module_meta_genes[[i]][[j]] <- rownames(kMEs)[order(kMEs[rownames(kMEs) %in% genes, j], decreasing = T)]
+    }
+  }
+  
+  ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
+  ##########################################################################
+  
+  # Prepare module genes dataframe
+  cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
+  module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
+  ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
+  
+  # if we mapped from hgnc to ensembl, retrieve the hgnc symbols
+  if (file.exists(sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df_%s.RData", RObjects_dir, data_prefix, organism, flag_date))) {
+    list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+    list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta)
+    hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
+    df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, row.names = NULL)
+  } else {
+    df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, row.names = NULL)
+  }
+
+  invisible(write.csv(df_meta_module_genes, file = sprintf("%s%s_cell_cluster_module_genes_%s.csv",tables_dir, data_prefix, flag_date), row.names = F, quote = F))
+  
+  ############ save KMEs FOR BMI-ENRICHED MODULES ###########
+  ##########################################################################
+  
+  # output kMEs
+  # Prepare dfs with a gene column followed by kMEs 
+  list_kMEs_meta_out <- lapply(list_kMEs_meta, function(x) cbind(genes=rownames(x), x))
+  #list_kIMs_BMI_out <- lapply(list_kIMs_BMI, function(x) cbind(genes=rownames(x), x))
+  rownames(list_kMEs_meta) <- NULL
+  #rownames(list_kIMs_BMI_out) <- NULL
+
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_meta_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote = F), list_kMEs_meta_out, sNames_meta, SIMPLIFY = F))
+  #invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_BMI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote = F), list_kIMs_BMI_out, sNames_BMI, SIMPLIFY = F))
+
+  ######################## OUTPUT GSEA TABLES ###############################
+  ###########################################################################
+  
   # TODO: Output as a table for now; later incorporate in plots; possibly filter modules on enrichment
   
   invisible(mapply(function(a,b) mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_GSEA_%s.csv", tables_dir, data_prefix, b, y, flag_date), quote = F, row.names = T),
-                              x = a,
-                              y = names(a)),
-                         a = list_list_gsea, 
-                         b = names(list_list_gsea)))
+                                        x = a,
+                                        y = names(a)),
+                   a = list_list_gsea, 
+                   b = names(list_list_gsea)))
   
   invisible(mapply(function(a,b) mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_GSEA_significant_%s.csv", tables_dir, data_prefix, b, y, flag_date), quote = F, row.names = T),
                                         x = a,
@@ -1570,175 +1746,224 @@ if (resume == "checkpoint_3") {
                    a = list_list_gsea_signif, 
                    b = names(list_list_gsea_signif)))
   
-  ##########################################################################
+  ######################################################################
+  ############################### PLOT #################################
+  ######################################################################
+
+
+  ## PLOT THE MODULE ASSIGNMENTS RANKED BY N GENES ASSIGNED AFTER PPI ##
+  ######################################################################
+  
+  #TODO: PLOT MODULE ASSIGNMENT AT EACH STEP OF FILTERING  
+  
+  # Plot different parameter module assignments, pre and post-PPI
+  # Pre-PPI 
+  invisible(mapply(function(x,y) parPlotDiffParams(list_colors=x, subsetName=y), x=list_list_colors_ok_matched_order, y=sNames_ok, SIMPLIFY = F))
+  # Post-PPI 
+  invisible(mapply(function(x,y) parPlotDiffParams_PPI(list_colors=x, subsetName=y), x=list_list_colors_PPI_order, y=sNames_ok, SIMPLIFY = F))
+
+  # Plot the selected sets
+  list_colors_both = mapply(FUN=cbind, list_colors, list_colors_PPI, SIMPLIFY = F)
+  names(list_colors_both) = sNames_ok
+  invisible(lapply(sNames_ok, plotFinalColors))
+
+
+  ##################### PLOT GWAS ENRICHMENT ###########################
+  ######################################################################
+  # TODO: Does values=dat_gwas_fdr_meta$module work?
+  # NB: not the filtered version
+  
+  p=ggplot(melt(dat_gwas_fdr, value.name="value"),aes(x=variable,y=value, fill = module)) + 
+      geom_bar(stat="identity",position=position_dodge(),color= "black") +
+      scale_fill_manual(values=dat_gwas_fdr$module) + theme_classic() +
+      geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+      theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+    
+  ggsave(p, filename = paste0(plots_dir, data_prefix, "_", file_suffix, "_magma_modules_gwas_signif_", sub_dir, "_", flag_date, ".pdf") ,width=45,height=12)
+    
+   p=ggplot(melt(dat_gwas_fdr_meta, value.name="value"),aes(x=variable,y=value, fill = module)) + 
+      geom_bar(stat="identity",position=position_dodge(),color= "black") +
+      scale_fill_manual(values=dat_gwas_fdr_meta$module) + theme_classic() +
+      geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+      theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+    
+   ggsave(p, filename = paste0(plots_dir, data_prefix, "_", file_suffix, "_magma_modules_gwas_signif_", sub_dir, "_", flag_date, ".pdf") ,width=45,height=12)
+  
   ################## PLOT CELL x EIGENGENE EXPR MATRIX #####################
   ##########################################################################
 
+  # TODO: this needs fixing, only outputs row annotation
   # return the row annotation colors for cell types to reuse them for TSNE
+  if (FALSE) { 
+    htra_colors <- plot_eigen_mat(eigen_mat = eigen_mat,
+                                   RObjects_dir = RObjects_dir,
+                                   list_modules = list_module_gwas_meta,
+                                   #dat_fdr = dat_gwas_fdr_meta,
+                                   #dat_corrCoef <- dat_gwas_corrCoef_meta,
+                                   plots_dir = plots_dir, 
+                                   data_prefix = data_prefix, 
+                                   flag_date = flag_date)
+  } 
+  ############## PLOT MODULE - METADATA CORRELATION ####################
+  ######################################################################
   
-  htra_colors <- plot_eigen_mat(eigen_mat = eigen_mat_meta,
-                                 RObjects_dir = RObjects_dir,
-                                 list_modules = list_modules_gwas_meta,
-                                 #dat_fdr = dat_gwas_fdr_meta,
-                                 #dat_corrCoef <- dat_gwas_corrCoef_meta,
-                                 plots_dir = plots_dir, 
-                                 data_prefix = data_prefix, 
-                                 flag_date = flag_date)
+  if (!is.null(meta.data)) {
+    for (cell in names(list_eigen_meta.data_corr)){
+      pdf(sprintf("%s%s_%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=15, h=8) # TODO: adapt this dynamically
+      corrplot(corr = list_eigen_meta.data_corr[[cell]],
+               add = F,
+               addCoef.col = "black",
+               number.digits = 2L,
+               number.cex = 0.5,
+               method = "color",
+               col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+               is.corr=T,
+               #order = "hclust",
+               #hclust.method = hclustMethod,
+               title=NULL,#sprintf("%s eigenvector - meta.data correlations", data_prefix),
+               #addCoef.col = F,
+               p.mat = t(list_eigen_meta.data_corr_fdr[[cell]]),
+               sig.level = 5e-2)
+      dev.off()
+    }
+  }
   
-  ##########################################################################
-  ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
-  ##########################################################################
-  
-  list_list_module_gwas_meta_genes_hgnc <- lapply(list_list_module_gwas_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
-  list_list_module_gwas_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_gwas_meta_genes_hgnc, y=list_modules_gwas_meta)
-  
-  # Prepare module genes dataframe
-  cell_cluster <- rep(sNames_gwas_meta, unlist(sapply(list_list_module_gwas_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
-  module <- unlist(sapply(list_list_module_gwas_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
-  ensembl <- unlist(list_list_module_gwas_meta_genes, recursive = T, use.names = F)
-  hgnc <- unlist(list_list_module_gwas_meta_genes_hgnc, recursive = T, use.names=F)
-  
-  df_gwas_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, row.names = NULL)
-  
-  ##########################################################################
-  ############ SAVE GENE LISTS AND KMEs FOR BMI-ENRICHED MODULES ###########
-  ##########################################################################
-  
-  # output module gene df 
-  invisible(write.csv(df_gwas_meta_module_genes, file = sprintf("%s%s_gwas_meta_filter_modules_genes_%s.csv",tables_dir, data_prefix, flag_date), row.names = F, quote = F))
-  
-  # Prepare dfs with a gene column followed by kMEs / kIMs
-  list_kMEs_gwas_meta_out <- lapply(list_kMEs_gwas_meta, function(x) cbind(genes=rownames(x), x))
-  #list_kIMs_BMI_out <- lapply(list_kIMs_BMI, function(x) cbind(genes=rownames(x), x))
-  rownames(list_kMEs_gwas_meta) <- NULL
-  #rownames(list_kIMs_BMI_out) <- NULL
-  
-  # output kMEs and kIMs for BMI enriched modules
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_gwas_meta_filter_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote = F), list_kMEs_gwas_meta_out, sNames_gwas_meta, SIMPLIFY = F))
-  #invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kIMs_BMI_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote = F), list_kIMs_BMI_out, sNames_BMI, SIMPLIFY = F))
+  # TODO : We currently do this above
+  # pdf(sprintf("%s%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, flag_date))
+  # corrplot(corr = eigen_meta.data_corr,
+  #          add = F,
+  #          addCoef.col = "black",
+  #          number.digits = 2L,
+  #          number.cex = 0.5,
+  #          method = "color",
+  #          col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+  #          is.corr=T,
+  #          #order = "hclust",
+  #          #hclust.method = hclustMethod,
+  #          title=NULL,#sprintf("%s eigenvector - meta.data correlations", data_prefix),
+  #          #addCoef.col = F,
+  #          p.mat = eigen_meta.data_corr_fdr,
+  #          sig.level = 5e-2)
+  # invisible(dev.off())
 
-  resume = "checkpoint_4"
-  message("Reached checkpoint 4, saving session image")
-  save.image(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
-  
-  
-  ##########################################################################
   ############################## PLOT T-SNE OF CELLTYPES ###################
   ##########################################################################
+  
   message("Plotting t-SNE of all cells by cluster")
   
   seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
-  TSNEPlot(seurat_obj, colors.use = htra_colors, do.label = T)
+  TSNEPlot(seurat_obj, do.label = T, label.size = 8)
+  #TSNEPlot(seurat_obj, colors.use = htra_colors, do.label = T)
   ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),w=12, h=10)
   
-  ##########################################################################
+
   ######### PLOT EACH EIGENGENE EXPRESSION ON T-SNE FEATUREPLOTS ###########
   ##########################################################################
+  
   message("Making featureplots of cell eigengene expression")
   
   for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
-  seurat_obj <- AddMetaData(seurat_obj, eigen_mat_meta)
+  seurat_obj <- AddMetaData(seurat_obj, eigen_mat)
   
   for (eigengene in names(seurat_obj@meta.data)) {
-    color_to_plot <- "navy"
-    FeaturePlot(seurat_obj, features.plot = eigengene, cols.use = c("grey95", color_to_plot), min.cutoff = c("q25"))
+    color_to_plot <- "blue4"
+    FeaturePlot(seurat_obj, features.plot = eigengene, cols.use = c("grey85", color_to_plot), min.cutoff = c("q25"))
     ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_eigengene_", eigengene, ".pdf"),w=12, h=10)
   }
-  
+
+  ##########################################################################
+  # clear up
   rm(seurat_obj)
   
-  ##########################################################################
   ############# COMPUTE AND PLOT MODULE-MODULE CORRELATIONS ################
   ##########################################################################
+  # TODO
   
-  if (length(list_modules_gwas_meta) > 1) {
-    
-    corr_eigengenes <- WGCNA::cor(x=eigen_mat_meta, method=c("pearson"), verbose=verbose)
-    
-    # plot
-    pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "gwas_or_metadata_enriched_module_eigengenes", flag_date),width=ncol(eigen_mat_meta) %/% 3,height=ncol(eigen_mat_meta) %/% 3)
-    corrplot(corr = corr_eigengenes, 
-             method = "color",
-             colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
-             diag = F,
-             is.corr=T,
-             title=sprintf("%s %s corr across subsets", data_prefix, "gwas_or_metadata_enriched_module_eigengenes"),#,
-             order = "hclust",
-             hclust.method = hclustMethod)
-    
-    invisible(dev.off())
-
-    
-    if (FALSE) {
+  if (FALSE) {
+    if (length(list_module_gwas_meta) > 1) {
       
-      ##########################################################################
-      #####################  MERGE CORRELATED MODULES ##########################
-      ##########################################################################
+      corr_eigengenes <- WGCNA::cor(x=eigen_mat, method=c("pearson"), verbose=verbose)
       
-      # TODO: first verify that merging makes biological sense 
-      # TODO: update from _BMI to _gwas_meta
+      # plot
+      pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "gwas_or_metadata_enriched_module_eigengenes", flag_date),width=ncol(eigen_mat) %/% 3,height=ncol(eigen_mat) %/% 3)
+      corrplot(corr = corr_eigengenes, 
+               method = "color",
+               colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+               diag = F,
+               is.corr=T,
+               title=sprintf("%s %s corr across subsets", data_prefix, "gwas_or_metadata_enriched_module_eigengenes"),#,
+               order = "hclust",
+               hclust.method = hclustMethod)
       
-      # Identify highly correlated modules
-      corr_eigengenes_lt <- corr_eigengenes
-      corr_eigengenes_lt[!lower.tri(corr_eigengenes, diag = F)] <- NA
-      idx_toMerge <- which(corr_eigengenes_lt>(1-moduleMergeCutHeight), arr.ind = T)
+      invisible(dev.off())
+  
       
-      
-      # Merge highly correlated modules
-      
-      modules_merged <- dat_BMI_fdr$module
-      list_modules_BMI_merged <- list_modules_BMI # this is a nested version of the above list
-      list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
-      list_colors_BMI_merged <- list_colors_BMI
-      
-      if (nrow(idx_toMerge) > 0) {
+      if (FALSE) {
         
-        for (i in 1:nrow(idx_toMerge)) {
-          
-          message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(corr_eigengenes[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
-          subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-          module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-          subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-          module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-          
-          list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
-          
-          list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
-          
-          
-          list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
-          
-          modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
-          modules_merged[idx_toMerge[i,1]] <- NA
-          
-        }
+        ##########################################################################
+        #####################  MERGE CORRELATED MODULES ##########################
+        ##########################################################################
         
-        modules_merged <- modules_merged[!is.na(modules_merged)]
+        # TODO: first verify that merging makes biological sense 
+        # TODO: update from _BMI to _gwas_meta
         
-        # get a new vector of names of cell clusters with BMI enrichment after merging
-        sNames_BMI <- unique(gsub("_.*", "", modules_merged))
+        # Identify highly correlated modules
+        corr_eigengenes_lt <- corr_eigengenes
+        corr_eigengenes_lt[!lower.tri(corr_eigengenes, diag = F)] <- NA
+        idx_toMerge <- which(corr_eigengenes_lt>(1-moduleMergeCutHeight), arr.ind = T)
         
-        # Transform the vector of modules into a nested list, as before
-        list_modules_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
-        names(list_modules_BMI) <- sNames_BMI
         
-        for (name in sNames_BMI_merged) {
-          idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
-          list_modules_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
+        # Merge highly correlated modules
+        
+        modules_merged <- dat_BMI_fdr$module
+        list_module_BMI_merged <- list_module_BMI # this is a nested version of the above list
+        list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
+        list_colors_BMI_merged <- list_colors_BMI
+        
+        if (nrow(idx_toMerge) > 0) {
+          
+          for (i in 1:nrow(idx_toMerge)) {
+            
+            message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(corr_eigengenes[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
+            subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+            module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+            subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+            module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+            
+            list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
+            
+            list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
+            
+            
+            list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
+            
+            modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
+            modules_merged[idx_toMerge[i,1]] <- NA
+            
+          }
+          
+          modules_merged <- modules_merged[!is.na(modules_merged)]
+          
+          # get a new vector of names of cell clusters with BMI enrichment after merging
+          sNames_BMI <- unique(gsub("_.*", "", modules_merged))
+          
+          # Transform the vector of modules into a nested list, as before
+          list_module_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
+          names(list_module_BMI) <- sNames_BMI
+          
+          for (name in sNames_BMI_merged) {
+            idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
+            list_module_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
+          }
         }
       }
     }
   }
   
-} else if (resume == "checkpoint_4") {
-  load(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
-  # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v1.8_dev4.R")
-  source(file = "/projects/jonatan/functions-src/functions_v1.8_dev4.R")
-}  
+   
 ###
 
-######################################################################
+
 ######## PLOT MODULE PRESERVATION IN DIFFERENT TISSUES ###############
 ######################################################################
 
@@ -1797,7 +2022,7 @@ if (FALSE) {
   #}
   ###
 } # end of if (FALSE) {make all the plots} TODO: remove
-
+}
 ######################################################################
 ########################### CLEAR UP #################################
 ######################################################################
