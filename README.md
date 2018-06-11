@@ -55,7 +55,7 @@ e.g.
 * `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally expensive. Defaults to `FALSE`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5
       
-### Returns
+### Returns _OUT OF DATE_
 
 `/tables`
 
