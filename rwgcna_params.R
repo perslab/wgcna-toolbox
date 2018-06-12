@@ -401,12 +401,12 @@ parallelCalculation = FALSE  # Note that parallel calculations are turned off by
 nPC_seurat = 120 # for RunPCA() and ProjectPCA
 maxit = 1000 # for RunPCA() IRLBA package - default is 1000 https://cran.r-project.org/web/packages/irlba/irlba.pdf
 fastpath = T # for RunPCA()
-adj.p.val.threshold = 5e-2
+p.val.threshold = 5e-2
 
 ############################### STRINGdb ##################################
 
 PPI_pkME_threshold = 10e-2
-#adj.p.val.threshold = 5e-2
+#p.val.threshold = 5e-2
 
 ############################### TOM ##################################
 
