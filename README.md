@@ -49,7 +49,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 #### Perform Gene Set Enrichment Analysis (GSEA) and compute eigengene matrix
 * Use LIGER to perform GSEA
 * Filter GSEA results for fdr p-value significance
-* Filter modules for significant gene set enrichment
+* _TODO: Filter modules for significant gene set enrichment_
 * _TODO: use semantic correlation to cluster GSE terms_
 
 #### Compute and output tables
