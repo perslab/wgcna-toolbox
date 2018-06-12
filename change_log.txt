@@ -1,5 +1,19 @@
 # Change log
 
+## v2.0_dev1 - 18-06-12
+### Fixed
+* list_colors_gwas <- ... list_colors_gwas changed to list_colors_PPI_ok
+* dat_gwas_fdr_unique <- dat_gwas_fdr~~_unique~~
+is.null(magma_gwas_dir)
+* Added SIMPLIFY=F to list_eigen_meta.data_corr <- mapply(function(x,y) t(WGCNA::cor(x=x$eigengenes, y= .., also for pval calculation
+* Fixed adjusted p values for eigengene - metadata correlations so we adjust for modules across all celltypes, rather than within celltype
+* Fixed the filtering for metadata correlations. It was referring to eigen_mat colnames, which are only computed after. 
+
+### Changed
+* renamed adj.p.val.threshold to p.val.threshold
+
+### Removed
+* In magma_par, removed rownames(dat_filter_traits) <- NULL and rownames(r_filter_traits) as it seems unnecessary
 
 ## v1.9 - 18-06-11
 
