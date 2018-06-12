@@ -26,7 +26,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Run cutreeHybrid cut out modules in the distance matrices (iterate over different sets of parameters if given)
 * merge close modules
 * filter out runs with only grey modules
-* compute Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. module which gene actually belongs to)
+* compute Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. 'own' module)
 * Match modules between different parameter settings
 
 #### Filter modules and parameterisations using STRINGdb's Protein-Protein Interactions (PPI)
