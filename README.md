@@ -6,16 +6,71 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 ### Overview
 
-Finds 'robust' gene modules in a Seurat format dataset:
+#### Pre-process the expression data: perform QC and select significant genes 
 
-1. Do seurat pre-processing [workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
-2. Permute the dataset and compute a consensus Topological Overlap Matrix (TOM)
-3. Cluster on the consensus TOM to find modules. Identify eigengenes. Merge modules with highly correlated eigengenes.
-      If the user has given vectors of cutreeHybrid and mergeCloseModules parameters, plot the modules found with different parameters. Select a single set of modules, corresponding to a single set of parameters, based on the number of genes that are assigned to modules after checking the modules for Protein-Protein Interaction (PPI) enrichment via STRINGdb.
-4. Use the eigengenes to assign a kME value (pairwise correlation between gene and eigengene expression, a fuzzy module membership score) for each gene-module pair.
-5. Use MAGMA GWAS statistics to assign FDR significance scores to the modules.
-6. Measure module-metadata correlations
-7. Perform Gene Set Enrichment Analysis (GSEA)
+[workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
+
+* Map genes from symbol to ensembl ID
+* Convert factor metadata to one column per level
+* Save user parameters and built-in parameters to tables
+* Filter out genes expressed in very few cells
+* Scale the data and regress out "nUMI", "percent.mito", "percent.ribo" if present in meta.data
+* Find variable genes
+* Perform Principal Component Analysis
+* Use Jackstraw, i.e. repeated PCA on resampled datasets, to determine significant PCs and genes
+
+#### Compute consensus Topological Overlap Matrix (TOM) and find gene modules
+
+* Compute soft power for adjacency matrix
+* Resample expression matrices 
+* Compute consensus TOM
+* Run hclust to find clusters in the (inverse) TOM 
+* Run cutreeHybrid cut out modules in the distance matrices (iterate over different sets of parameters if given)
+* merge close modules
+* filter out runs with only grey modules
+* compute Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. module which gene actually belongs to)
+* Match modules between different parameter settings
+
+#### Filter modules and parameterisations using STRINGdb's Protein-Protein Interactions (PPI)
+* Check STRINGdb PPI
+* Filter out modules which are not significant and any cell types which have no significant modules
+* For each celltype, select the set of parameters with highest number of genes assigned to modules after checking the modules for PPI enrichment.
+
+#### Filter modules on genetic enrichment
+* Compute MAGMA gwas correlations
+* Filter modules based on gwas enrichment
+* _TODO: add rare variants test_
+* Assign new unique module names across all cell clusters to avoid identical or similarly named modules
+* Re-compute MEs and kMEs after MAGMA GWAS filter; remove any celltypes without significant modules
+
+#### Compute eigengene - metadata correlations
+* Compute correlation between metadata and eigengene expression, per cell type
+* Compute p value for the correlations, adjusted for multiple testing across all cell types
+* Filter modules and cell types to retain only those significantly correlated with metadata
+
+#### Perform Gene Set Enrichment Analysis (GSEA) and compute eigengene matrix
+* Use LIGER to perform GSEA
+* Filter GSEA results for fdr p-value significance
+* Filter modules for significant gene set enrichment
+* _TODO: use semantic correlation to cluster GSE terms_
+
+#### Compute and output tables
+* Prepare module gene lists ordered by kME
+* _TODO: Compute module-module correlations; merge highly correlated modules_
+* Compute cell x eigengene cell embedding matrix across all celltypes and modules
+* Prepare dataframe with columns cell type, module, gene ensembl id and, if available, gene symbol 
+* Output kMEs tables as csv
+* Output GSEA tables as csv
+
+#### Plotting
+* _TODO: Module assignment after each round of filtering_
+* Module GWAS enrichment 
+* _TODO: Cell x eigengene cell embedding matrix with genetic and metadata annotations_
+* Module-metadata correlations _TODO: incorporate into eigenmatrix plot above_
+* Cell t-SNE plot
+* Eigengene expression featureplots
+* _TODO: module-module correlation matrix across all celltypes_
+* _TODO: module preservation across different tissues_
 
 ### Usage
 
