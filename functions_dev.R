@@ -27,7 +27,7 @@ FilterGenes <- function(seurat_obj_sub, min.cells) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, adj.p.val.threshold) {
+wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, p.val.threshold) {
   # gene.criterion: 'p.val' means selecting genes (used for PCA) with significant empirical p-val
   #                 'PC.loadings' means projecting all genes onto the PCs to get loadings and selecting 
   #                 genes that have a high absolute loading on a significant PC
@@ -66,9 +66,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, adj.p
     
     for (i in (1:pcs.compute)) {
       pc.score <- suppressWarnings(prop.test( 
-        x = c(length(x = which(x = pAll[, i] <= adj.p.val.threshold)), floor(x = nrow(x = pAll) * adj.p.val.threshold)),
+        x = c(length(x = which(x = pAll[, i] <= p.val.threshold)), floor(x = nrow(x = pAll) * p.val.threshold)),
         n = c(nrow(pAll), nrow(pAll)))$p.val)
-      if (length(x = which(x = pAll[, i] <= adj.p.val.threshold)) == 0) {
+      if (length(x = which(x = pAll[, i] <= p.val.threshold)) == 0) {
         pc.score <- 1
       }
       if (is.null(x = score.df)) {
@@ -78,7 +78,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, adj.p
       }
     }
     
-    PC_select_idx <- which(score.df$Score < adj.p.val.threshold)
+    PC_select_idx <- which(score.df$Score < p.val.threshold)
     
     if (nrow(pAll) == length(seurat_obj_sub@var.genes)) {
       
@@ -98,9 +98,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstraw.num.replicate, adj.p
       
       pAll[,sapply(pAll, function(x) class(x)!="numeric")] <- NULL # remove the column of gene names
       row_min <- apply(pAll[,PC_select_idx], MARGIN = 1, FUN = function(x) min(x))
-      names_genes_use <- rownames(pAll)[row_min < adj.p.val.threshold]
+      names_genes_use <- rownames(pAll)[row_min < p.val.threshold]
       
-      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < adj.p.val.threshold*2]
+      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < p.val.threshold*2]
     }
     
   } else if (jackstraw.num.replicate == 0) {
@@ -642,7 +642,7 @@ PrePPIfilter_for_vec <- function(list_pkMEs, list_colors) {
 #   list_colors_PPI <- lapply(list_colors_pkME_ok, 
 #                             function(x) vecPPI_outer(colors = x,
 #                                                      STRINGdb_species = STRINGdb_species,
-#                                                      adj.p.val.threshold = adj.p.val.threshold,
+#                                                      p.val.threshold = p.val.threshold,
 #                                                      project_dir = project_dir, 
 #                                                      data_prefix = data_prefix, 
 #                                                      flag_date = flag_date))
@@ -1156,7 +1156,7 @@ name_for_vec = function(to_be_named, given_names, dimension=NULL){
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold, adj.p.val.threshold, project_dir, data_prefix, flag_date) {
+PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold, p.val.threshold, project_dir, data_prefix, flag_date) {
   # Rather than for parallelising over modules within a set of modules, parallelise over several sets of colors (produced by comparing parameters)
   # It calls PPI_innver_for_vec as a subroutine
   # Args:
@@ -1185,7 +1185,7 @@ PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold
   # FILTER MODULES ON PPI ENRICHMENT  
 
   if (!is.null(module_PPI)) {
-    unique_colors_PPI = unique_colors[module_PPI$'p-value' < adj.p.val.threshold]
+    unique_colors_PPI = unique_colors[module_PPI$'p-value' < p.val.threshold]
     genes_PPI_idx <- colors %in% unique_colors_PPI
     colors_PPI <- colors
     colors_PPI[!genes_PPI_idx] <- "grey"
@@ -1507,12 +1507,12 @@ magma_par = function(subsetNames,
       dat_filter_traits <- dat_filter_traits[idx_row_include,]
       # Do the same for the correlation coefficients table
       r_filter_traits <- table.kme.cor.r_all[idx_row_include,idx_col_include]
-      rownames(r_filter_traits) <- NULL
+      #rownames(r_filter_traits) <- NULL
       } else {
         dat_filter_traits <- dat
-        rownames(dat_filter_traits) <- NULL
+        #rownames(dat_filter_traits) <- NULL
         r_filter_traits <- cbind(table.kme.cor.r_all, module=dat$module)
-        rownames(r_filter_traits) <- NULL
+        #rownames(r_filter_traits) <- NULL
       }
     } else {
       ### 180530 v1.9_dev1
@@ -1523,10 +1523,10 @@ magma_par = function(subsetNames,
       # rownames(r_filter_traits) <- NULL
       idx_row_include <- apply(dat[,-grep("module", colnames(dat))], MARGIN=1, max) > -log10(5e-2)
       dat_filter_traits <- dat[idx_row_include,]
-      rownames(dat_filter_traits) <- NULL
+      #rownames(dat_filter_traits) <- NULL
       r_filter_traits <- cbind(table.kme.cor.r_all, module=dat$module)
       r_filter_traits <- r_filter_traits[idx_row_include,]
-      rownames(r_filter_traits) <- NULL
+      #rownames(r_filter_traits) <- NULL
     }
     ###
     
