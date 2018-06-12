@@ -6,9 +6,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 ### Overview
 
-#### Pre-process the expression data: perform QC and select significant genes 
-
-[workflow](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing) 
+#### Pre-process the expression data: perform QC and select significant genes ([workflow schematic](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing)) 
 
 * Map genes from symbol to ensembl ID
 * Convert factor metadata to one column per level
