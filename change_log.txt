@@ -1,6 +1,7 @@
 # Change log
 
 ## v2.0_dev1 - 18-06-12
+
 ### Fixed
 * list_colors_gwas <- ... list_colors_gwas changed to list_colors_PPI_ok
 * dat_gwas_fdr_unique <- dat_gwas_fdr~~_unique~~
