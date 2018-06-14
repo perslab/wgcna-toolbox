@@ -4,6 +4,19 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 ## Robust WGCNA pipeline
 
+*Dependencies:*
+* Seurat
+* optparse
+* WGCNA
+* dplyr
+* reshape
+* reshape2
+* Matrix
+* Stringdb
+* dplyr
+* ggplot2
+* liger
+
 ### Overview
 
 #### Pre-process the expression data: perform QC and select significant genes ([workflow schematic](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing)) 
@@ -60,7 +73,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Output kMEs tables as csv
 * Output GSEA tables as csv
 
-#### Plotting
+### Plotting - separate notebook
 * _TODO: Module assignment after each round of filtering_
 * Module GWAS enrichment 
 * _TODO: Cell x eigengene cell embedding matrix with genetic and metadata annotations_
