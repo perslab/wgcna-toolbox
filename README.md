@@ -5,8 +5,9 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 ## Robust WGCNA pipeline
 
 *Dependencies:*
-* Seurat
 * optparse
+* parallel
+* Seurat
 * WGCNA
 * dplyr
 * reshape
