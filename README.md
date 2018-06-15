@@ -88,7 +88,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 1000 --TOM.num.replicate 100 --replace T --organism mmusculus --n_cores 5`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 100 --replace T --organism mmusculus --n_cores 5`
 
 ### Args
 
@@ -112,7 +112,7 @@ e.g.
 * `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes a vector with one or more values, given as a string, e.g. `"c(2,3)"`. Takes integer values 0-4, defaults to `"c(2)"`. 
 * `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a vector with one or more values, given as a string, e.g. `"c(0.20, 0.25)"`. Recommended value range 0.05-0.25
 * `pamStage`: For `cutreeHybrid`. Perform additional Partition Around Medroids step? Takes a vector with one or two values, given as a string, e.g. `"c(TRUE,FALSE)"`, default `"c(TRUE)"`
-* `jackstraw.num.replicate`: Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above). Integer, defaults to 1000. 
+* `jackstraw.num.replicate`: Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above). Integer, defaults to 500. 
 * `TOM.num.replicate`: Number of times to permute the dataset, defaults to 100
 * `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
 * `organism`: `hsapiens` or `mmusculus`. 
