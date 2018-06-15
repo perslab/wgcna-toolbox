@@ -95,7 +95,6 @@ e.g.
 * `seurat_path`: Path to Seurat object, preferably with some QC based on nUMI and percent.mito
 * `project_dir`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables and log will be created if they do not exist. Defaults to the directory one level up from input data dir.
 * `data_prefix`: Dataset prefix for output files. Defaults to today's date.
-* `meta.data_ID`: Specify the name of a `seurat@meta.data$...` column to use for subsetting the Seurat object. If NULL (default) uses the `@ident` slot.
 * `resume`: Resume from a previous session image? Must have same path and data_prefix. Options are `checkpoint_1` - `checkpoint_4`. Defaults to `NULL`.
 * `meta.data_subset_col`: Specify a `seurat@meta.data$` column to use for subsetting the Seurat object. If NULL (default) uses the `@ident` slot. 
 * `meta.data_corr_col`: Specify `seurat@meta.data$` column(s) for which to compute correlations with gene modules. Takes a character with a vector of `meta.data` column names e.g. `nUMI` or `c('nUMI', 'Age')`. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution. Defaults to `NULL`.
