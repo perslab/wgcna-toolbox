@@ -88,7 +88,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 400 --TOM.num.replicate 100 --replace T --organism mmusculus --plot_permuted F --n_cores 5`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 1000 --TOM.num.replicate 100 --replace T --organism mmusculus --n_cores 5`
 
 ### Args
 
@@ -118,7 +118,6 @@ e.g.
 * `organism`: `hsapiens` or `mmusculus`. 
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. `body_BMI_Locke2015` or `c('BMI', 'T1D', 'T2D')`. Case-insensitive. Defaults to `NULL`
-* `plot_permuted`: Compute and plot the modules on each resampled dataset? Good for visually inspecting how robust modules are to resampling, but computationally expensive. Defaults to `FALSE`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5
       
 ### Returns _OUT OF DATE_
