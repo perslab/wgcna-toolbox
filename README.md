@@ -112,7 +112,7 @@ e.g.
 * `deepSplit`: Controls the sensitivity of the `cutreeDynamic` algorithm. Takes a vector with one or more values, given as a string, e.g. `"c(2,3)"`. Takes integer values 0-4, defaults to `"c(2)"`. 
 * `moduleMergeCutHeight`: Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a vector with one or more values, given as a string, e.g. `"c(0.20, 0.25)"`. Recommended value range 0.05-0.25
 * `pamStage`: For `cutreeHybrid`. Perform additional Partition Around Medroids step? Takes a vector with one or two values, given as a string, e.g. `"c(TRUE,FALSE)"`, default `"c(TRUE)"`
-* `jackstraw.num.replicate`: Number of times to resample to make null distributions for empirical significance tests in `JackStraw` (see `pca_genes` above). Integer, defaults to 500. 
+* `jackstraw.num.replicate`: Number of times to resample to make null distributions for empirical significance tests in `JackStraw` (see `pca_genes` above). Integer, defaults to 1000. 
 * `TOM.num.replicate`: Number of times to permute the dataset, defaults to 100
 * `replace`: Sample with replacement? If `TRUE`, uses all samples, if `FALSE`, uses 66% each time. Defaults to `TRUE`.
 * `organism`: `hsapiens` or `mmusculus`. 
