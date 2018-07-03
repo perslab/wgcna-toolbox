@@ -1,0 +1,489 @@
+---
+title: 'Robust WGCNA - plotting'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+output:
+  html_notebook: 
+    df_print: paged
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  html_document:
+    df_print: paged
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+# Setup
+
+```{r}
+options(stringsAsFactors = F)
+```
+
+Set variables
+
+```{r}
+project_dir ="/projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-2/"
+data_prefix= "mousebrain-top10-2"
+
+p.val.threshold = 5e-2
+flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+
+```
+
+```{r}
+tables_dir <- paste0(project_dir, "tables/") 
+log_dir <- paste0(project_dir, "log/") 
+RObjects_dir <- paste0(project_dir, "RObjects/") 
+plots_dir <- paste0(project_dir, "plots/")
+```
+
+## Load libraries 
+
+```{r}
+suppressPackageStartupMessages(library(corrplot))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(ComplexHeatmap))
+suppressPackageStartupMessages(library(corrplot))
+suppressPackageStartupMessages(library(RColorBrewer))
+suppressPackageStartupMessages(library(WGCNA))
+suppressPackageStartupMessages(library(Seurat))
+suppressPackageStartupMessages(library(reshape))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(dplyr))
+
+#suppressPackageStartupMessages(library(clusterProfiler))
+
+```
+
+## Load functions and constants
+
+```{r}
+source(file = "/projects/jonatan/functions-src/functions.R")
+```
+
+## Plotting
+
+### Plot modules on permuted data
+
+```{r}
+
+# TODO: retrieve code from leftovers
+
+```
+
+### Plot module assignment resulting from different parameters
+
+```{r}
+# Status: OK
+# Pre-PPI - all different parameters, ordered by n genes assigned post PPI filter
+invisible(mapply(function(a,b,c,d) plotDendro_for_vec(list_colors=a,
+                                                        geneTree = b,
+                                                        list_labels = c,
+                                                        subsetName = d,
+                                                        title = "Module params (pre-PPI), order: n assigned genes, pre-PPI filter",
+                                                        flag_file = "modules_diffParams_ranked_pre_PPI"),
+                 a = list_list_colors_ok_matched_order,
+                 b = list_geneTree_ok,
+                 c = list_list_plot_label_ok_order,
+                 d = sNames_ok, 
+                 SIMPLIFY = F))
+
+# Post-PPI - all different parameters, ordered by n genes assigned post PPI filter
+invisible(mapply(function(a,b,c,d) plotDendro_for_vec(list_colors=a,
+                                                        geneTree = b,
+                                                        list_labels = c,
+                                                        subsetName = d,
+                                                        title = "Module params (PPI), order: n assigned genes, post-PPI filter",
+                                                        flag_file = "modules_diffParams_ranked_post_PPI"),
+                 a = list_list_colors_PPI_order,
+                 b = list_geneTree_ok,
+                 c = list_list_plot_label_ok_order,
+                 d = sNames_ok, 
+                 SIMPLIFY = F))
+
+```
+
+```{r}
+
+# Plot different parameter module assignments: original, post-PPI, post-MAGMA, post- metadata correlation filter
+
+list_filter_labels = c("Original modules", "post-PPI filter", "post-MAGMA filter", "post-metadata corr filter")
+list_list_cols_tmp <- list(list_colors_uniq, list_colors_PPI_uniq, list_colors_gwas, list_colors_meta)
+
+for (i in 2:length(list_list_cols_tmp)) {
+  list_cols_tmp <- lapply(list_colors, function(x)  rep("grey", length(x))) 
+  names(list_cols_tmp) <- names(list_colors) # create a list of vectors of 'grey', each named by celltype
+  list_cols_tmp[names(list_colors) %in% names(list_list_cols_tmp[[i]])] <- list_list_cols_tmp[[i]]
+  list_list_cols_tmp[[i]] <- list_cols_tmp
+}
+
+names(list_list_cols_tmp) <- list_filter_labels
+
+list_list_cols_tmp_by_celltype <- vector(mode = "list", length=length(list_colors)) # 
+
+for (i in 1:length(list_colors)) {
+  for (j in 1:length(list_list_cols_tmp)) {
+    list_list_cols_tmp_by_celltype[[i]][[j]] <- list_list_cols_tmp[[j]][[i]]
+  }
+  names(list_list_cols_tmp_by_celltype[[i]]) <- list_filter_labels
+}
+names(list_list_cols_tmp_by_celltype) <- names(list_colors)
+
+invisible(mapply(function(a,b,c) plotDendro_for_vec(list_colors=a,
+                                                        geneTree = b,
+                                                        list_labels = list_filter_labels,
+                                                        subsetName = c,
+                                                        title = "Module params at different stages of filtering",
+                                                        flag_file = "modules_filter_stages"),
+                 a = list_list_cols_tmp_by_celltype,
+                 b = list_geneTree_ok,
+                 c = sNames_ok, 
+                 SIMPLIFY = F))
+
+```
+
+## Plot MAGMA GWAS enrichment fdr-values
+
+```{r}
+
+  magma.p.fdr.log.path <- dir(path = tables_dir, pattern = "magma.fdr.log", full.names = T, recursive = F)
+  magma.p.fdr.log.sig <- read.csv(file=magma.p.fdr.log.path, header=T, quote="") 
+  #magma.p.fdr.log.sig <- magma.p.fdr.log[apply(magma.p.fdr.log[,-grep("module|celltype", colnames(magma.p.fdr.log))], FUN = function(x) max(x) > -log10(p.val.threshold), MARGIN=1),]
+
+dat <- magma.p.fdr.log.sig[,-grep("celltype", colnames(magma.p.fdr.log.sig))]
+
+p=ggplot(melt(dat, value.name="value"), aes(x=variable, y=value, fill = module)) + 
+    geom_bar(stat="identity",position=position_dodge(),color= "black") +
+    scale_fill_manual(values=plottable_colors(dat$module)) + theme_classic() +
+    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+  
+ggsave(p, filename = paste0(plots_dir, data_prefix, "_", "_magma_", flag_date, ".pdf") ,width=45,height=12)
+
+#   
+# # filtered for metadata correlations
+# p=ggplot(melt(dat_gwas_fdr_meta, value.name="value"),aes(x=variable,y=value, fill = module)) + 
+#   geom_bar(stat="identity",position=position_dodge(),color= "black") +
+#   scale_fill_manual(values=dat_gwas_fdr_meta$module) + theme_classic() +
+#   geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+#   theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+#   
+#  ggsave(p, filename = paste0(plots_dir, data_prefix, "_", "_magma_modules_gwas_signif_", flag_date, ".pdf") ,width=45,height=12)
+```
+
+## Plot rare variants, mendelian genes
+
+```{r}
+
+rareVariants.p.fdr.log.path <- dir(path = tables_dir, pattern = "mendelian_rareVariants_fdr_log", full.names = T, recursive = F)
+rareVariants.p.fdr.log <- read.csv(file=rareVariants.p.fdr.log.path, header=T, quote="") 
+
+# all
+dat1 <- rareVariants.p.fdr.log[,-grep("celltype", colnames(rareVariants.p.fdr.log))]
+p1=ggplot(melt(dat1, value.name="value"), aes(x=variable, y=value, fill = module)) + 
+    geom_bar(stat="identity",position=position_dodge(),color= "black") +
+    scale_fill_manual(values=plottable_colors(dat1$module)) + theme_classic() +
+    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+  
+ggsave(p1, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_", flag_date, ".pdf") ,width=45,height=12)
+
+# only significant
+rareVariants.p.fdr.log.sig <- rareVariants.p.fdr.log[apply(rareVariants.p.fdr.log[,-grep("module|celltype", colnames(rareVariants.p.fdr.log))], FUN = function(x) max(x) > -log10(p.val.threshold), MARGIN=1),]
+
+dat2 <- rareVariants.p.fdr.log.sig[,-grep("celltype", colnames(rareVariants.p.fdr.log.sig))]
+p2=ggplot(melt(dat2, value.name="value"), aes(x=variable, y=value, fill = module)) + 
+    geom_bar(stat="identity",position=position_dodge(),color= "black") +
+    scale_fill_manual(values=plottable_colors(dat1$module)) + theme_classic() +
+    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+  
+ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_", flag_date, ".pdf") ,width=45,height=12)
+
+```
+
+#### Plot cell x eigengene embedding matrix
+
+```{r}
+
+eigen_mat_path <- dir(path = tables_dir, pattern="eigen_mat", full.names = T, recursive = F, ignore.case = T)
+eigen_mat <- read.csv(file = eigen_mat_path, header = T, quote = "")
+
+# Take rownames from column, then delete
+rownames(eigen_mat) <- eigen_mat[,1]
+eigen_mat[,1] <- NULL
+
+seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+
+seurat_obj <- SetAllIdent(seurat_obj, id)
+
+ident <- seurat_obj@ident
+
+eigen_mat_1 <- eigen_mat[order(seurat_obj@meta.data$ClusterName), ] 
+
+# make row annotation: random colors for celltypes
+colors_uniq <- gsub("\\d", "", colors()) %>% unique
+htra_colors <- sample(colors_uniq, size=length(table(ident)), replace=F) 
+names(htra_colors) <- names(table(ident))
+
+htra<-rowAnnotation(cellcluster = ident,
+                    annotation_legend_param = list(cellcluster = list(nrow = 7, title = "Cell cluster", title_position = "topcenter")),
+                    col=list(cellcluster = htra_colors),
+                    width = unit(5, "mm"))
+
+ht1 <- Heatmap(eigen_mat_1[,], 
+             cluster_rows = F,
+             #row_order = row.names(eigen_mat_order),
+             cluster_columns = T, 
+             #show_row_dend = F, 
+             show_column_dend = F, 
+             show_heatmap_legend = T, 
+             show_row_names = F, 
+             show_column_names = T)
+             #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_AllEigenHeatmap_rows_celltype_order_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+draw(ht1+htra)
+dev.off()
+  
+# With clustering rows
+ht2 <- Heatmap(eigen_mat[,], 
+               cluster_rows = T,
+               #row_order = row.names(eigen_mat_order),
+               cluster_columns = T, 
+               #show_row_dend = F, 
+               show_column_dend = F, 
+               show_heatmap_legend = FALSE, 
+               show_row_names = F, 
+               show_column_names = T)
+               #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_AllEigenHeatmap_rows_cluster_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+draw(ht2+htra)
+dev.off()
+  
+```
+
+### Plot module-metadata correlation matrices
+
+```{r}
+#TODO: Incorporate into eigen plot (or simply replace with another form)
+ 
+if (!is.null(metadata)) {
+  for (cell in names(list_eigen_metadata_corr_rho)){
+    pdf(sprintf("%s%s_%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=15, h=8) # TODO: adapt this dynamically
+    corrplot(corr = as.matrix(list_eigen_metadata_corr_rho[[cell]]),
+             add = F,
+             addCoef.col = "black",
+             number.digits = 2L,
+             number.cex = 3,
+             tl.cex = 3,
+             cl.cex = 1.5,
+             method = "color",
+             col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+             is.corr=T,
+             #order = "hclust",
+             #hclust.method = hclustMethod,
+             title=NULL,#sprintf("%s eigenvector - metadata correlations", data_prefix),
+             #addCoef.col = F,
+             p.mat = t(as.matrix(list_eigen_metadata_corr_fdr[[cell]])),
+             sig.level = 5e-2)
+
+    dev.off()
+  }
+}
+
+# TODO : We currently do this above
+# pdf(sprintf("%s%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, flag_date))
+# corrplot(corr = eigen_metadata_corr,
+#          add = F,
+#          addCoef.col = "black",
+#          number.digits = 2L,
+#          number.cex = 0.5,
+#          method = "color",
+#          col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+#          is.corr=T,
+#          #order = "hclust",
+#          #hclust.method = hclustMethod,
+#          title=NULL,#sprintf("%s eigenvector - metadata correlations", data_prefix),
+#          #addCoef.col = F,
+#          p.mat = eigen_metadata_corr_fdr,
+#          sig.level = 5e-2)
+# invisible(dev.off())
+```
+
+### Plot t-SNE of cell clusters
+ 
+```{r}
+
+seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+TSNEPlot(seurat_obj, do.label = T, label.size = 8)
+#TSNEPlot(seurat_obj, colors.use = htra_colors, do.label = T)
+ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),w=12, h=10)
+
+```
+
+### Plot module eigengene expression on t-SNE featureplots 
+
+```{r}
+  
+for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
+seurat_obj <- AddMetaData(seurat_obj, eigen_mat)
+
+for (eigengene in names(seurat_obj@meta.data)) {
+  color_to_plot <- "blue4"
+  FeaturePlot(seurat_obj, features.plot = eigengene, cols.use = c("grey85", color_to_plot), min.cutoff = c("q25"))
+  ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_eigengene_", eigengene, ".pdf"),w=12, h=10)
+}
+
+```
+
+### Plot module-module correlations
+
+```{r}
+
+# TODO: Update
+# TODO: Compute this in the main script
+
+if (length(list_module_gwas_meta) > 1) {
+  
+  corr_eigengenes <- WGCNA::cor(x=eigen_mat, method=c("pearson"), verbose=verbose)
+  
+  # plot
+  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "gwas_or_metadata_enriched_module_eigengenes", flag_date),width=ncol(eigen_mat) %/% 3,height=ncol(eigen_mat) %/% 3)
+  corrplot(corr = corr_eigengenes, 
+           method = "color",
+           colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+           diag = F,
+           is.corr=T,
+           title=sprintf("%s %s corr across subsets", data_prefix, "gwas_or_metadata_enriched_module_eigengenes"),#,
+           order = "hclust",
+           hclust.method = hclustMethod)
+  
+  invisible(dev.off())
+
+  
+  if (FALSE) {
+    
+    ##########################################################################
+    #####################  MERGE CORRELATED MODULES ##########################
+    ##########################################################################
+    
+    # TODO: first verify that merging makes biological sense 
+    # TODO: update from _BMI to _gwas_meta
+    
+    # Identify highly correlated modules
+    corr_eigengenes_lt <- corr_eigengenes
+    corr_eigengenes_lt[!lower.tri(corr_eigengenes, diag = F)] <- NA
+    idx_toMerge <- which(corr_eigengenes_lt>(1-moduleMergeCutHeight), arr.ind = T)
+    
+    
+    # Merge highly correlated modules
+    
+    modules_merged <- dat_BMI_fdr$module
+    list_module_BMI_merged <- list_module_BMI # this is a nested version of the above list
+    list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
+    list_colors_BMI_merged <- list_colors_BMI
+    
+    if (nrow(idx_toMerge) > 0) {
+      
+      for (i in 1:nrow(idx_toMerge)) {
+        
+        message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(corr_eigengenes[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
+        subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+        module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+        subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+        module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+        
+        list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
+        
+        list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
+        
+        
+        list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
+        
+        modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
+        modules_merged[idx_toMerge[i,1]] <- NA
+        
+      }
+      
+      modules_merged <- modules_merged[!is.na(modules_merged)]
+      
+      # get a new vector of names of cell clusters with BMI enrichment after merging
+      sNames_BMI <- unique(gsub("_.*", "", modules_merged))
+      
+      # Transform the vector of modules into a nested list, as before
+      list_module_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
+      names(list_module_BMI) <- sNames_BMI
+      
+      for (name in sNames_BMI_merged) {
+        idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
+        list_module_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
+      }
+    }
+  }
+}
+```
+
+### Plot module presevation
+
+```{r}
+
+# TODO: move the calculation into the main script
+
+suppressPackageStartupMessages(library(pheatmap))
+
+# Check preservation of each set of colors in all celltypes (including itself)
+module_preservation_celltypes <- sapply(list_colors, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
+                                                                                                listColors = list(x))[['preservation']][['log.pBonf']],
+                                                          simplify = T)
+
+colnames(module_preservation_celltypes) = sNames_ok
+rownames(module_preservation_celltypes) = paste(prefixes, names(unlist(list_colors, recursive = F, use.names = T)), sep="_")
+
+# plot
+pheatmap(mat = module_preservation_celltypes, 
+         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
+         kmeans_k = NA,
+         breaks = NA, 
+         cluster_rows = F,
+         cluster_cols = F,
+         #clustering_method = hclustMethod,
+         show_rownames = T,
+         show_colnames = T,
+         main = sprintf("%s_%s_%s", data_prefix, "module preservation across celltypes", flag_date),
+         filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "module_preservation", flag_date),
+         width = length(list_datExpr_ok) %/% 2,
+         height = length(unlist(list_colors, recursive = F)) %/% 4,
+         silent = T)
+
+### 180607_v1.8_dev2
+#if (!is.null(STRINGdb_species)) {
+module_PPI_preservation_celltypes <- sapply(list_colors_PPI, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
+                                                                                              listColors = list(x))[['preservation']][['log.pBonf']],
+                                        simplify = T)
+
+colnames(module_PPI_preservation_celltypes) = sNames_ok
+rownames(module_PPI_preservation_celltypes) = paste(prefixes, names(unlist(list_colors_PPI, recursive = F, use.names = T)), sep="_")
+
+# plot
+pheatmap(mat = module_PPI_preservation_celltypes, 
+         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
+         kmeans_k = NA,
+         breaks = NA, 
+         cluster_rows = F,
+         cluster_cols = F,
+         #clustering_method = hclustMethod,
+         show_rownames = T,
+         show_colnames = T,
+         main = sprintf("%s_%s_%s", data_prefix, "PPI-enriched modules: preservation across celltypes", flag_date),
+         filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "PPI_module_preservation", flag_date),
+         width = length(list_datExpr_ok) %/% 2,
+         height = length(unlist(list_colors_PPI, recursive = F)) %/% 4,
+         silent = T)
+#}
+###
+```
+

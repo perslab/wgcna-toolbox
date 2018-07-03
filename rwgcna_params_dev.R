@@ -1,6 +1,10 @@
 # Title: Secondary script to set up WGCNA parameters
 # Author: Jonatan Thompson, Pers Lab
 
+############################## VARIOUS ###############################
+
+p.val.threshold = 5e-2
+options(stringsAsFactors = F)
 ############################## ADJACENCY #############################
 
 #selectCols = NULL
@@ -23,7 +27,7 @@ corOptions = if (corFnc == "cor") list(use = 'p') else NULL # "use = 'p', method
 #robustX = TRUE
 #robustY = TRUE
 use = 'pairwise.complete.obs' #TWEAKPARAM
-maxPOutliers = 0.1 # Suggested by package author in https://support.bioconductor.org/p/65124/
+maxPOutliers = 0.05 # Suggested by package author in https://support.bioconductor.org/p/65124/, https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/faq.html
 quick = 0
 pearsonFallback = "individual" # in case of columns with zero MAD
 #cosine = FALSE
@@ -84,8 +88,13 @@ kME_reassign_threshold = 1.25
 # home-made - defined further down
 #nPermutations = if (test_run==FALSE) 100 else 3 # TODO set to 100 as in Gandal,...,Geschwind et al 2018
 startRunIndex = 1
-#replace = T # Sample with replacement? Galdal et al use FALSE, default FALSE. Using replacement increases variance of the sampling mean. TWEAKPARAM
+replace = T # Sample with replacement? Galdal et al use FALSE, default FALSE. Using replacement increases variance of the sampling mean. TWEAKPARAM
 fraction = if (replace) 1.0 else 0.66 # TWEAKPARAM.
+
+############################## BOOT #############################
+
+#Number of times to repeat the calculation on permuted data
+R = 10
 
 ####################### CONSENSUSCALCULATION #########################
 
@@ -121,7 +130,7 @@ useIndivTOMSubset = NULL # If individualTOMInfo is given, this argument allows t
 
 # Save individual TOMs?
 
-saveIndividualTOMs = if (plot_permuted == TRUE) TRUE else FALSE # unless we need to plot them
+saveIndividualTOMs = T 
 individualTOMFileNames = "individualTOM-Set%s-Block%b.RData"
 
 # Consensus calculation options: network calibration
@@ -191,8 +200,6 @@ minHeight = 0.1 # TODO if we want to use blockwiseConsensusModules
 
 #minClusterSize = 10 # min(20, ncol(datExpr0)/2 ) # 40 is the value in Gandal et al, 2018 # Set value in notebook after evaluation
 #deepSplit =  2 # integer value between 0 and 4. Provides a simplified control over how sensitive module detection should be to module splitting, with 0 least and 4 most sensitive. 
-pamStage = T # Only used for method "hybrid". If TRUE, the second (PAM-like) stage will be performed. Default = TRUE. Increases specificity at the cost of sensitivity. Gandal et al 2018 set this to FALSE.
-pamRespectsDendro = T # Only used if pamStage = TRUE. Logical, only used for method "hybrid". If TRUE, the PAM stage will respect the dendrogram in the sense that objects and small clusters will only be assigned to clusters that belong to the same branch that the objects or small clusters being assigned belong to. #TWEAKPARAM
 
 # cutHeight = NULL # Maximum joining heights that will be considered. For method=="tree" it defaults to 0.99. For method=="hybrid" it defaults to 99% of the range between the 5th percentile and the maximum of the joining heights on the dendrogram. #TODO research this algorithm
 # /!\ the parameter name is aliased wth the cutHeight parameter of the mergeCloseModules function which instead denotes maximum dissimilarity (i.e., 1-correlation) that qualifies modules for merging. If you need to set a non-default value, define it here as 'cutreeHybridCutHeight'
@@ -218,9 +225,17 @@ method = "hybrid"
 #assumeSimpleExternalSpecification = TRUE # 	Logical: when minExternalSplit above is a scalar (has length 1), should the function assume a simple specification of externalBranchSplitFnc and externalSplitOptions? If TRUE, externalBranchSplitFnc is taken as the function specification and externalSplitOptions the named list of options. This is suitable for simple direct calls of this function. If FALSE, externalBranchSplitFnc is assumed to be a list with a single component which specifies the function, and externalSplitOptions is a list with one component that is in turn the named list of further arguments for externalBranchSplitFnc[[1]].
 
 # Partitioning Around Medoids (PAM) stage options - these are set in the notebook script after evaluating the effects of different values
-#useMedoids = FALSE # Only used for method "hybrid" and only if labelUnlabeled==TRUE. If TRUE, the second stage will be use object to medoid distance; if FALSE, it will use average object to cluster distance. Default FALSE recommended by Langfelder et al.
-#maxPamDist = cutHeight # 	Only used for method "hybrid" and only if labelUnlabeled==TRUE. Maximum object distance to closest cluster that will result in the object assigned to that cluster. Defaults to cutHeight.
-#respectSmallClusters = TRUE #	 Only used for method "hybrid" and only if labelUnlabeled==TRUE. If TRUE, branches that failed to be clusters in stage 1 only because of insufficient size will be assigned together in stage 2. If FALSE, all objects will be assigned individually.
+#pamStage = T # Only used for method "hybrid". If TRUE, the second (PAM-like) stage will be performed. Default = TRUE. Increases specificity at the cost of sensitivity. Gandal et al 2018 set this to FALSE.
+pamRespectsDendro = T # Only used if pamStage = TRUE. Logical, only used for method "hybrid". If TRUE, the PAM stage will respect the dendrogram in the sense that objects and small clusters will only be assigned to clusters that belong to the same branch that the objects or small clusters being assigned belong to. 
+useMedoids = F # If pamStage = T, compute distance using medoids (most centrally located objects in each cluster). 
+# If not, uses average pairwise distance (recommended in the function documentation)
+maxPamDist = 0 #	Only used for method "hybrid" and only if labelUnlabeled==TRUE. 
+# maximum object distance to closest cluster that will result in the object assigned to that cluster. 
+# Defaults to cutHeight. If zero,  objects are assigned to clusters only if the object–cluster dissimilarity is smaller than the radius of the cluster (see Langfelder et al, 2007, supplement)
+# https://labs.genetics.ucla.edu/horvath/htdocs/CoexpressionNetwork/BranchCutting/Supplement.pdf
+respectSmallClusters = TRUE #	 Only used for method "hybrid" and only if labelUnlabeled==TRUE. 
+# If TRUE, branches that failed to be clusters in stage 1 only because of insufficient size will be assigned together in stage 2. 
+# If FALSE, all (lowest-level) objects will be assigned individually. Seems best to respect local structure
 
 ############################ GENERAL WGCNA ###########################
 
@@ -397,11 +412,10 @@ parallelCalculation = FALSE  # Note that parallel calculations are turned off by
 ############################ SEURAT ##################################
 
 #min.cells = 5 # Filter out genes with few cells 
-#do.center = if (corFnc == "bicor") FALSE else TRUE # for ScaleData() # update: just used scale_data==F
+do.center = if (corFnc == "bicor") FALSE else TRUE # for ScaleData() # update: just used scale_data==F
 nPC_seurat = 120 # for RunPCA() and ProjectPCA
 maxit = 1000 # for RunPCA() IRLBA package - default is 1000 https://cran.r-project.org/web/packages/irlba/irlba.pdf
 fastpath = T # for RunPCA()
-p.val.threshold = 5e-2
 
 ############################### STRINGdb ##################################
 
