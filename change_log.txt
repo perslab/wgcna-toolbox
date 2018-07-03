@@ -1,5 +1,42 @@
 # Change log
 
+## v2.1 - 18-07-03
+
+### Fixed
+*  rename duplicate modules in dat_gwas_fdr_unique and dat_gwas_corrCoef_uniqe
+* if (sum(idx_row_include)==0) save and quit 
+* Fixed the log when celltypes have been discarded
+* Fixed gene list sorting - was giving duplicates within sets..
+
+### Added
+* user can specify whether to save session image at checkpoints
+* user can specify whether to quit at a checkpoint
+* Compute empirical p-values for kME-GWAS correlation coefficients
+
+### Changed
+* When making colors unique, if there are so many modules that there are not enough colors without adding numbers, use all colors including those with number suffixes
+* Reorder list_list_module_meta_genes by kME before eigen_mat (no change in eigen_mat). Group all under the section headed "Compute and output tables"
+* Move all plotting to a separate notebook 
+* MAGMA script now does not loop over sub-folders. User should specify a single sub-folder as gwas dir e.g. ../data/MAGMA/BMI-brain/
+* In MAGMA script, moved # Load MAGMA genes and remap to Ensembl gene IDs and # Remapping from human Entrez to human Ensembl gene IDs chunks from kME_magma subroutine out to magma_par main function. Reason: no need to have them in subroutine after abandoning gwas sub-directories
+* Dissolved the magma par function 
+* moved options(stringsAsFactors = F) from magma_par to beginning of main script
+* if magma_filter_traits == NULL, do not filter gwas tables on fdr significance
+* moved stop break if there is no magma enrichment into the conditional flow which first conditions on the user having specified magma_filter_traits - i.e. if there are no magma filter traits, do not stop even if there are no significant correlations.
+*  streamlined factorToIndicator function
+* Reduced maxPOutliers for bicor from 0.1 to 0.05 to avoid discarding much of the data if bimodal, as recommended by the WGCNA authors
+* script saves session images at checkpoint but not including parameter values since the user may want to load a session but with new parameters
+* Rolled plotfinalcolors, plotdiffparams and plotdiffparamsPPI functions into one: plotDendro_for_vec
+* moved the unique colors adjustment to right after PPI to avoid confusion when comparing outputs.
+* convert rare variants and gwas output tables: Do numerical transformations, then convert to data.frame, then add columns for module and for celltype
+* removed full stops from variable names to avoid mistakes with regular expressions.
+* Script now saves metadata_corr_col and metadata_corr_filter_vals since they are used before checkpoint_1
+
+### Removed
+* --replace flag: this should not be a user option but based on what's best
+* --do.center flag: is TRUE unless corFnc = bicor
+
+
 ## v2.0_dev1 - 18-06-12
 
 ### Fixed
