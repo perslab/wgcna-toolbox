@@ -1155,13 +1155,10 @@ if (resume == "checkpoint_2") {
   list_list_cutree_params_final_PPI <- list_list_cutree_params_final[logical_subsets_PPI_ok]
   list_plot_label_final_PPI  <- list_plot_label_final[logical_subsets_PPI_ok]
   list_geneTree_PPI <- list_geneTree_ok[logical_subsets_PPI_ok]
-  
-  # Make a note of the number of modules and of the prop of genes assigned to a module, before and after PPI filter
-  diagnostic_stats$prop_genes_assigned <- diagnostic_stats$prop_genes_assigned_PPI <- diagnostic_stats$n_modules <- diagnostic_stats$n_modules_PPI <- numeric(length = nrow(diagnostic_stats))
-  
+
   # Get proportion of assigned genes
-  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(sum(x=="grey")/length(x),2), simplify=T)
-  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(sum(x=="grey")/length(x),2), simplify=T)
+  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
+  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
   
   # Count module (minus 1 for grey)
   diagnostic_stats$n_modules[sNames %in% sNames_ok] <- sapply(list_colors, function(x) length(unique(as.character(x)))-1, simplify=T) 
