@@ -89,7 +89,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --meta.data_corr_col 'c("X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --meta.data_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5  --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstraw.num.replicate 500 --TOM.num.replicate 100 --organism mmusculus --n_cores 5 --autosave T
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-1/  --data_prefix campbell-AgRP-1 --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2)" --jackstraw.num.replicate 500 --TOM.num.replicate 50 --organism mmusculus --n_cores 5`
 
 ### Args
 
@@ -99,13 +99,11 @@ e.g.
 * `autosave`: Save at four checkpoints during the script to enable resuming the session in case of problems? Defaults to `T`.
 * `quit_session`: Specify a checkpoint (`checkpoint_1` to `checkpoint_4`) after which to quit the script. Defaults to `NULL`.
 * `resume`: Resume from a previous session image? Must have same path and data_prefix. Options are `checkpoint_1` - `checkpoint_4`. Defaults to `NULL`.
-* `resume`: Resume from a previous session image? Must have same path and data_prefix. Options are `checkpoint_1` - `checkpoint_4`. Defaults to `NULL`.
-* `meta.data_subset_col`: Specify a `seurat@meta.data$` column to use for subsetting the Seurat object. If NULL (default) uses the `@ident` slot. 
-* `meta.data_corr_col`: Specify `seurat@meta.data$` column(s) for which to compute correlations with gene modules. Takes a character with a vector of `meta.data` column names e.g. `nUMI` or `c('nUMI', 'Age')`. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution. Defaults to `NULL`.
-* `meta.data_corr_filter_vals`: Specify one or more values within the `seurat@meta.data$` column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of `meta.data` column names e.g. `Female` or `c('fasted', 'HFD')`. Case-insensitive. Defaults to `NULL`.
+* `metadata_subset_col`: Specify a `seurat@meta.data$` column to use for subsetting the Seurat object. If NULL (default) uses the `@ident` slot. 
+* `metadata_corr_col`: Specify `seurat@meta.data$` column(s) for which to compute correlations with gene modules. Takes a character with a vector of `meta.data` column names e.g. `nUMI` or `c('nUMI', 'Age')`. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution. Defaults to `NULL`.
+* `metadata_corr_filter_vals`: Specify one or more values within the `seurat@meta.data$` column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of `meta.data` column names e.g. `Female` or `c('fasted', 'HFD')`. Case-insensitive. Defaults to `NULL`.
 * `use.imputed`: Use data in the `obj@imputed` slot for the computations to replace the `@data` slot? If the `@imputed` slot is empty, will revert to the default (`FALSE`).
 * `min.cells`: What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5. 
-* `do.center`: Use centered data? In either case data is scaled and nUMI and mitochrondrial genes are regressed out. Default to `TRUE`
 * `genes_use`: One of `"all"`, `"var.genes"` for seurat var.genes, or `"PCA"` for genes that load significantly on at least one significant PC. Defaults to `"PCA"`
 * `pca_genes`: If `genes_use` == `"PCA"`, use `var.genes` or `all` genes to perform PCA to select genes based on PC loadings? If `num.replicate` is zero, select 5000 genes loading highly on the top PCs for downstream analysis. If non-zero, use JackStraw to identify significant PCs. If using `all` genes for the PCA, select significant genes based on the JackStraw; otherwise just use loadings.
 * `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
@@ -117,7 +115,9 @@ e.g.
 * `pamStage`: For `cutreeHybrid`. Perform additional Partition Around Medroids step? Takes a vector with one or two values, given as a string, e.g. `"c(TRUE,FALSE)"`, default `"c(TRUE)"`
 * `jackstrawnReplicate`: Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above). Integer, defaults to 500. 
 * `TOMnReplicate`: Number of times to permute the dataset, defaults to 100
-* `organism`: `hsapiens` or `mmusculus`. 
+* `data_organism`: `hsapiens` or `mmusculus`. 
+* `fuzzyModMemebership: `kME`: gene-eigengene correlation or `kIM`: average distance from gene to each module gene. Also used when computing cell embeddings on gene modules
+* `checkPPI`: Use Protein-Protein Interactions to validate modules? Defaults to TRUE
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. `body_BMI_Locke2015` or `c('BMI', 'T1D', 'T2D')`. Case-insensitive. Defaults to `NULL`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5
