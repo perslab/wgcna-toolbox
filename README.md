@@ -13,7 +13,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * reshape
 * reshape2
 * Matrix
-* Stringdb
+* STRINGdb
 * boot
 
 
