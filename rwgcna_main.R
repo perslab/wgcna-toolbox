@@ -233,8 +233,6 @@ quit_session <- opt$quit_session
 
 metadata_subset_col <- opt$metadata_subset_col
 
-metadata_corr_col <- opt$metadata_corr_col
-
 metadata_corr_col <- eval(parse(text=opt$metadata_corr_col))
 
 metadata_corr_filter_vals <- eval(parse(text=opt$metadata_corr_filter_vals))
@@ -272,9 +270,6 @@ fuzzyModMembership <- opt$fuzzyModMembership
 checkPPI <- opt$checkPPI
 
 magma_gwas_dir <- opt$magma_gwas_dir 
-
-gwas_filter_traits <- opt$gwas_filter_traits
-
 
 gwas_filter_traits <- eval(parse(text=opt$gwas_filter_traits))
 
@@ -531,7 +526,8 @@ if (is.null(resume)) {
   ##################### SAVE PARAMETERS TO FILE ########################
   ######################################################################
   
-  diagnostic_stats <- data.frame(subset = sNames, n_cells = lapply(subsets, function(x) ncol(x@data)))
+  diagnostic_stats <- data.frame(subset = sNames, n_cells = sapply(subsets, function(x) ncol(x@data), simplify = T))
+  
   
   userParams <- cbind(list("seurat_path" = seurat_path,
                            "project_dir" = project_dir,
@@ -1242,11 +1238,11 @@ if (resume == "checkpoint_2") {
   list_geneTree_PPI <- list_geneTree_ok[logical_subsets_PPI_ok]
   
   # Make a note of the number of modules and of the prop of genes assigned to a module, before and after PPI filter
-  diagnostic_stats$prop_genes_assigned <- diagnostic_stats$prop_genes_assigned_PPI <- diagnostic_stats$n_modules <- diagnostic_stats$n_modules_PPI <- 0
+  diagnostic_stats$prop_genes_assigned <- diagnostic_stats$prop_genes_assigned_PPI <- diagnostic_stats$n_modules <- diagnostic_stats$n_modules_PPI <- numeric(length = nrow(diagnostic_stats))
   
   # Get proportion of assigned genes
-  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(min(1,sum(x=="grey"))/length(x)), simplify=T)
-  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(min(1,sum(x=="grey"))/length(x)), simplify=T)
+  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(sum(x=="grey")/length(x),2), simplify=T)
+  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(sum(x=="grey")/length(x),2), simplify=T)
   
   # Count module (minus 1 for grey)
   diagnostic_stats$n_modules[sNames %in% sNames_ok] <- sapply(list_colors, function(x) length(unique(as.character(x)))-1, simplify=T) 
