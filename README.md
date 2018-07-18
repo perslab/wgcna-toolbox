@@ -7,6 +7,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 *Dependencies:*
 * optparse
 * parallel
+* irlba
 * Seurat
 * WGCNA
 * dplyr
@@ -15,6 +16,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Matrix
 * STRINGdb
 * boot
+* liger
 
 
 ### Overview
