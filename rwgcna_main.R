@@ -2147,7 +2147,7 @@ if (resume == "checkpoint_4") {
   ######################## SAVE DIAGNOSTIC STATS ############################
   ###########################################################################
   
-  write.csv(diagnostic_stats, file=sprintf("%s%s_INFO_diagnostic_stats_%s.csv", tables_dir, data_prefix, flag_date), quote = F, row.names=F)
+  write.csv(diagnostic_stats, file=sprintf("%s%s_INFO_diagnostic_stats_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names=F)
   
 }
 ######################################################################
