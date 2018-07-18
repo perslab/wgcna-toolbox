@@ -1773,6 +1773,7 @@ if (resume == "checkpoint_4") {
   ######################### LOAD PACKAGES ##############################
   ######################################################################
   
+  suppressPackageStartupMessages(library(irlba))
   suppressPackageStartupMessages(library(Seurat))
   
   ######################################################################
