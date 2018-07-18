@@ -1,5 +1,28 @@
 # Change log
 
+v2.2 - 18-07-18
+
+### Changed
+* eigen_mat now uses fast IRLBA algorithm to compute first PC
+* simplified kIM_eachMod_norm function
+* Use GSEA for rare variants and mendelian, merged as one geneset 
+* use kIM projections for metadata correlation 
+* in QC  filter out celltype subsets with <= 20 cells 
+* added diagnostic output: n cells, n genes, n genes assigned pre-ppi, n genes assigned post-ppi, n modules pre-ppi, n modules post-ppi
+* Changed the consensusTOM networkCalibration from "full quantile" to "single quantile". Reduced sampleForCalibrationFactor for TOM calibration from 2000 to 1000 to save time.
+* Set maxBlockSize (under blockwiseModules) to 5e3 and increased the blockSizePenaltyPower to 10. Also pickSoftThreshold refers to maxBlockDize rather than hardcoding 5000
+* Replaced all parLapply with parLapplyLB and added .scheduling = c("dynamic") to all clusterMap calls to use dynamic load balancing throughout
+
+### Added
+* QC: Only analyse subsets with >= 25 samples 
+* Added kIMs (average gene-module k) as alternative to kMEs for gene-module membership, module-module correlation (through cell kIM embedded profile) and module-metadata correlation.
+
+### Fixed
+* For the cell embedding matrix, use the full seurat object @scale.data. Regress out confounding variables first.
+* When recomputing kMEs after PPI and MAGMA 	filter, added "SIMPLIFY=F" to signed_kME clusterMap
+* renamed organism variable to organism_data to avoid aliasing
+* checkpoint save images were for some reason (regExpr or environment-related, most likely) not saving everything). Now just saves everything (assuming you don't want to change parameters when resuming)
+
 ## v2.1 - 18-07-03
 
 ### Fixed
