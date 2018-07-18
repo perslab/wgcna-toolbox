@@ -89,7 +89,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-1/  --data_prefix campbell-AgRP-1 --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2)" --jackstraw.num.replicate 500 --TOM.num.replicate 50 --organism mmusculus --n_cores 5`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-1/  --data_prefix campbell-AgRP-1 --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2)" --jackstrawnReplicate 500 --TOMnReplicate 50 --organism mmusculus --n_cores 5`
 
 ### Args
 
@@ -121,4 +121,3 @@ e.g.
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. `body_BMI_Locke2015` or `c('BMI', 'T1D', 'T2D')`. Case-insensitive. Defaults to `NULL`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5
-
