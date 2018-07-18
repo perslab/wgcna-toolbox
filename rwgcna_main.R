@@ -6,64 +6,89 @@
 
 # e.g.
 # export R_MAX_NUM_DLLS=999
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_3/  --data_prefix hypo_topBMI_3 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 9 --autosave TRUE --checkPPI TRUE --resume checkpoint_4
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-3/  --data_prefix mousebrain-top10-3 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(4)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 10  --autosave T
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE --checkPPI TRUE --resume checkpoint_1
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --checkPPI T 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_3/  --data_prefix campbell_3 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 7  --autosave T --fuzzyModMembership kME --checkPPI T 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_5 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10 --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 5  --autosave T --fuzzyModMembership kME --checkPPI T
 
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9 --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_3 
-
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-2/  --data_prefix mousebrain-top10-2 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 10 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod average --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 20  --autosave T
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_proteinCoding.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-10/  --data_prefix EP-10-protein --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("UPF")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(4)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0  --organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 10 --autosave TRUE --checkPPI T --resume checkpoint_1
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-12/  --data_prefix maca-pancr-12  --use.imputed FALSE --min.cells 5 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 14 --autosave T --resume checkpoint_1
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-12/  --data_prefix maca-pancr-12  --use.imputed FALSE --min.cells 5 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 14 --autosave T --resume checkpoint_1
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9-noPPI --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(1)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_4 --checkPPI F
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9 --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_2 
-
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE --checkPPI TRUE --resume checkpoint_1
-
-
-# TMUX 67 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_1/  --data_prefix hypo_topBMI_1 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
-# TMUX 68 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center FALSE --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
-# TMUX 69 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_3/  --data_prefix hypo_topBMI_3 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --hclustMethod single --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_1/  --data_prefix maca_top29_BMI_1  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA  --pca_genes all  --corFnc bicor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(0,1,2,3)"  --pamStage "c(FALSE,TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 6  --autosave T --fuzzyModMembership kIM --checkPPI T --resume checkpoint_1
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_2/  --data_prefix campbell_2 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA  --pca_genes all  --corFnc bicor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(0,1,2,3)"  --pamStage "c(FALSE,TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 50  --n_cores 10  --autosave T --fuzzyModMembership kIM --checkPPI T --resume checkpoint_1
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_4 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 5  --genes_use PCA  --pca_genes all  --corFnc bicor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(0,1,2,3)"  --pamStage "c(FALSE,TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 10  --autosave T --fuzzyModMembership kIM --checkPPI T
 
 
 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-13/  --data_prefix maca-pancr-13  --use.imputed FALSE --min.cells 5 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --fuzzyModMembership kIM --checkPPI T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 14 --autosave T 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-14/  --data_prefix maca-pancr-14  --use.imputed FALSE --min.cells 5 --genes_use var.genes --corFnc bicor --networkType unsigned --hclustMethod complete --minClusterSize "c(15,25)" --deepSplit "c(1,3)" --pamStage "c(TRUE, FALSE)" --jackstrawnReplicate 0 --TOMnReplicate 0 --fuzzyModMembership kME --checkPPI F --data_organism mmusculus --n_cores 14 --autosave T  --resume checkpoint_2
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-/  --data_prefix mousebrain-top10-1 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(1,2,3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 10 --resume checkpoint_3 
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_lake.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-lake-4/ --metadata_subset_col "res.0.6"   --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --data_prefix EP-lake-4 --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism hsapiens --n_cores 5 --autosave T --resume checkpoint_2 --checkPPI F --regress_out "c('nUMI', 'percent.mito')" --fuzzyModMembership kIM 
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "res.0.6"  --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --data_prefix EP-UPF-4 --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism hsapiens --n_cores 10 --autosave T --resume checkpoint_1 --checkPPI F --regress_out "c('nUMI', 'percent.mito')" --fuzzyModMembership kIM
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-4/  --data_prefix mousebrain-top10-4 --metadata_subset_col ClusterName  --use.imputed FALSE --min.cells 5 --do.center FALSE --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(1)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 10 --resume checkpoint_3 
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData --project_dir /raid5/projects/timshel/sc-genetics/sc-genetics/out/out.wgcna/maca_top29_BMI/ --data_prefix maca_top29_BMI --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --min.cells 5 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 0 --TOMnReplicate 0 --n_cores 40 --autosave T --fuzzyModMembership kIM --checkPPI T --resume checkpoint_2
+
+
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_lake.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-lake-4/ --metadata_subset_col "res.0.6" --metadata_corr_col "c('dataset')" --metadata_corr_filter_vals "c('UPF')"  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix EP-lake-4 --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 100 --data_organism hsapiens --n_cores 15 --autosave T
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "res.0.6" --metadata_corr_col "c('dataset')" --metadata_corr_filter_vals "c('UPF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix EP-UPF-4 --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 100  --data_organism hsapiens --n_cores 15 --autosave T
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_4/  --data_prefix hypo_topBMI_4  --use.imputed FALSE --min.cells 5  --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_3/  --data_prefix hypo_topBMI_3 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 9 --autosave TRUE --checkPPI TRUE --resume checkpoint_4
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-3/  --data_prefix mousebrain-top10-3 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(4)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 10  --autosave T
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE --checkPPI TRUE --resume checkpoint_1
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9 --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_3 
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-3/  --data_prefix mousebrain-top10-3 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 20  --autosave T --resume checkpoint_1
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_proteinCoding.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-10/  --data_prefix EP-10-protein --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("UPF")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(4)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 10 --autosave TRUE --checkPPI T --resume checkpoint_1
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-12/  --data_prefix maca-pancr-12  --use.imputed FALSE --min.cells 5 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 14 --autosave T --resume checkpoint_1
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-12/  --data_prefix maca-pancr-12  --use.imputed FALSE --min.cells 5 --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 14 --autosave T --resume checkpoint_1
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9-noPPI --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(1)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_4 --checkPPI F
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-9/  --data_prefix EP-9 --metadata_corr_col 'c("dataset")' --metadata_corr_filter_vals 'c("upf")' --use.imputed FALSE --min.cells 8 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0  --data_organism hsapiens --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --n_cores 20 --autosave TRUE --resume checkpoint_2 
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --use.imputed FALSE --min.cells 6 --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(F)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE --checkPPI TRUE --resume checkpoint_1
+
+
+# TMUX 67 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_1/  --data_prefix hypo_topBMI_1 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
+# TMUX 68 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_2/  --data_prefix hypo_topBMI_2 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center FALSE --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod average --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
+# TMUX 69 time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-bmi-brain/data/hypo_topBMI.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/hypo_topBMI_3/  --data_prefix hypo_topBMI_3 --metadata_corr_col "c('major_cell_type')" --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --hclustMethod single --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(FALSE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --n_cores 18 --autosave TRUE 
 
 
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --metadata_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --metadata_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_so2_mito0.1.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-6/ --metadata_subset_col "res.0.6" --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/BMI-brain/ --metadata_corr_col 'c("dataset", "percent.mito", "nUMI")' --metadata_corr_filter_vals 'c("lake", "upf")' --data_prefix epilepsy-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 100 --replace T --organism hsapiens --n_cores 30 --resume checkpoint_3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")'  --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 20 --resume checkpoint_3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-11/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n01_to_n04-11 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-1/ --metadata_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-sub-n-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 12 --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 20 --resume checkpoint_3
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-10/ --metadata_corr_col 'c("percent.mito", "percent.ribo")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-pancreas-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 14 --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 21 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-sub-n-2 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 300 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 12
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-pancreas-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 14 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix epilepsy-4 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism hsapiens --n_cores 10
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-10/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n01_to_n04-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n05_to_n10-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n05_to_n10-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 6
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-AgRP-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-neurons-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 14 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-glia-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --organism mmusculus--plot_permuted F --n_cores 11 --resume checkpoint_4
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-6/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --organism mmusculus --n_cores 10 
-#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_lake.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-lake-3/ --metadata_subset_col "res.0.6" --magma_gwas_dir projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix epilepsy-lake-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --organism hsapiens --n_cores 13
-#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-3/ --metadata_subset_col "res.0.6" --magma_gwas_dir NULL --data_prefix epilepsy-UPF-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 100 --replace T --organism hsapiens --n_cores 13
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-/  --data_prefix mousebrain-top10-1 --metadata_subset_col ClusterName --metadata_corr_col 'c("Age", "AnalysisPool", "AnalysisProject",  "CellConc", "Species", "Strain", "Subclass", "CellConc", "Class", "Description", "Developmental_compartment", "DonorID", "Neurotransmitter", "OriginalClusters", "PCRCycles", "Probable_location", "Project", "Region", "Sex", "Species", "Strain", "Subclass", "TaxonomyRank1", "TaxonomyRank2", "TaxonomyRank3", "TaxonomyRank4", "TaxonomyGroup", "Tissue")' --use.imputed FALSE --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod complete --minClusterSize "c(20)" --deepSplit "c(1,2,3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 10 --resume checkpoint_3 
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-4/  --data_prefix mousebrain-top10-4 --metadata_subset_col ClusterName  --use.imputed FALSE --min.cells 5 --do.center FALSE --genes_use PCA --pca_genes all --corFnc bicor --networkType signed --hclustMethod single --minClusterSize "c(20)" --deepSplit "c(1)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.1)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('BMI', 't1d', 't2d')" --n_cores 10 --resume checkpoint_3 
+
+
+
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-22/ --metadata_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --metadata_corr_filter_vals "c('X2.group', 'X3.batches', 'X4.sex', 'X5.Diet', 'X6.FvF')" --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")' --data_prefix campbell-AgRP-22 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/EX_so2_mito0.1.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-6/ --metadata_subset_col "res.0.6" --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/BMI-brain/ --metadata_corr_col 'c("dataset", "percent.mito", "nUMI")' --metadata_corr_filter_vals 'c("lake", "upf")' --data_prefix epilepsy-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 100 --replace T --data_organism hsapiens --n_cores 30 --resume checkpoint_3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits 'c("BMI", "T1D", "T2D")'  --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 20 --resume checkpoint_3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-11/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n01_to_n04-11 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-1/ --metadata_corr_col 'c("nGene", "nUMI", "percent.mito", "percent.ribo", "X2.group", "X3.batches", "X4.sex", "X5.Diet", "X6.FvF")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-sub-n-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 12 --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-5/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-5 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 20 --resume checkpoint_3
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-10/ --metadata_corr_col 'c("percent.mito", "percent.ribo")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-pancreas-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 14 --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-1 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 21 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all_sub_n.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-clust-all-sub-n-2/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-clust-all-sub-n-2 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 300 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 12
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_pancreas.Rdata --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-pancreas-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 14 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-4/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix epilepsy-4 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3,4)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism hsapiens --n_cores 10
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n01_to_n04.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n01_to_n04-10/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n01_to_n04-10 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_n05_to_n10-9/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-n05_to_n10-9 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.20)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 6
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_AgRP_neurons.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-AgRP-6/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-AgRP-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(1,2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 0 --TOMnReplicate 0 --replace T --data_organism mmusculus--plot_permuted F --n_cores 4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_neurons_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-neurons-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-neurons-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus--plot_permuted F --n_cores 14 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_s_sub.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-campbell-glia-17/ --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix campbell-glia-17 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(20)" --deepSplit "c(2,3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 500 --TOMnReplicate 0 --replace T --data_organism mmusculus--plot_permuted F --n_cores 11 --resume checkpoint_4
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/maca/RObjects/maca_seurat_cell_ontology_class_filterRibo0.05_min20cell.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-maca-6/ --metadata_corr_col 'c("nGene", "nUMI")' --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix maca-6 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(1,2)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --data_organism mmusculus --n_cores 10 
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_lake.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-lake-3/ --metadata_subset_col "res.0.6" --magma_gwas_dir projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --data_prefix epilepsy-lake-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes var.genes --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 0 --replace T --data_organism hsapiens --n_cores 13
+#  time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.2_dev1.R --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-3/ --metadata_subset_col "res.0.6" --magma_gwas_dir NULL --data_prefix epilepsy-UPF-3 --min.cells 5 --do.center TRUE --genes_use PCA --pca_genes all --corFnc cor --networkType signed --minClusterSize "c(15)" --deepSplit "c(3)" --pamStage "c(TRUE)" --moduleMergeCutHeight "c(0.2)" --jackstrawnReplicate 400 --TOMnReplicate 100 --replace T --data_organism hsapiens --n_cores 13
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
@@ -79,21 +104,22 @@ if (FALSE) {
   metadata_corr_col = NULL #c("nUMI", "nGene", "percent.mito", "percent.ribo")
   metadata_corr_filter_vals = "UPF"
   use.imputed = F
+  regress_out = c("nUMI", "percent.mito", "percent.ribo")
   min.cells = 5
   genes_use = "PCA"
   pca_genes = 'all'
   corFnc = "cor"
   networkType = "signed"
-  anti_cor_action = NULL
   minClusterSize = c(20)
   deepSplit = c(2)
   pamStage = c(TRUE)
   moduleMergeCutHeight = c(0.2)
   jackstrawnReplicate = 0
   TOMnReplicate = 0
-  organism = "mmusculus"
+  data_organism = "mmusculus"
   magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
   gwas_filter_traits <- "c('BMI', 't1d', 't2d')"
+  fuzzyModMembership = "kIM"
   n_cores = 6
 }
 
@@ -119,12 +145,14 @@ option_list <- list(
               help = "Quit after saving session image at a checkpoint? Options are 'checkpoint_1' - 'checkpoint_4'"),
   make_option("--metadata_subset_col", type="character", default=NULL,
               help = "Specify a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
-  make_option("--metadata_corr_col", type="character", default=NULL,
+  make_option("--metadata_corr_col", type="character", default='NULL',
               help = "Specify seurat_obj@meta.data$... column(s) for which to compute correlations with gene modules. Takes a character with a vector of seurat_obj@meta.data column names e.g. 'nUMI' or 'c('nUMI', 'Age')'. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution. Defaults to NULL."),
-  make_option("--metadata_corr_filter_vals", type="character", default=NULL,
+  make_option("--metadata_corr_filter_vals", type="character", default='NULL',
               help = "Specify one or more values within the seurat@meta.data$... column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of meta.data column names e.g. 'Female' or 'c('fasted', 'HFD')'. Case-insensitive. Defaults to NULL."),
   make_option("--use.imputed", type="logical", default=F,
               help="Use data in the obj@imputed slot for the computations to replace the @data slot? If the @imputed slot is empty, will revert to the default (FALSE)"),
+  make_option("--regress_out", type="character", default='NULL',
+              help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, e.g. c('nUMI', 'percent.mito'). Defaults to NULL (not recommended, however)"),
   make_option("--min.cells", type="integer", default=5L,
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5."),
   # make_option("--do.center", type="logical", default=T,
@@ -137,27 +165,25 @@ option_list <- list(
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). Defaults to 'bicor'"), 
   make_option("--networkType", type="character", default = "signed",
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); 'signed hybrid' sets negative correlations to zero."),
-  make_option("--anti_cor_action", type="character", default=NULL, 
-              help = "Optional. 'kME_reassign' reassigns genes with a negative kME more than 1.5 the kME w.r.t. their own (primary) module. Should be used only with networkType 'signed hybrid'."),
   make_option("--hclustMethod", type="character", default="average",
               help = "Hierarchical clustering agglomeration method. One of 'ward.D', 'ward.D2', 'single', 'complete', 'average' (= UPGMA), 'mcquitty' (= WPGMA), 'median' (= WPGMC) or 'centroid' (= UPGMC). See hclust() documentation for further information. Defaults to 'average'"),
   make_option("--minClusterSize", type="character", default="15L",
               help = "Minimum genes needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector of integer values to try 'c(15,20,25)', defaults to 15."),
   make_option("--deepSplit", type="character", default="3L",
               help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector of integer values between 0-4 to try, e.g. 'c(1,2,3)', defaults to '3L'"),
-  make_option("--moduleMergeCutHeight", type="character", default="c(0.2)",
-              help = "Cut-off level for the variable (1-correlation) for merging eigengenes. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)'. Defaults to '0.2'"),
+  make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
+              help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)'. Defaults to '0.2'"),
   make_option("--pamStage", type="character", default="c(TRUE)",
               help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring speciﬁcity over sensitivity (that is, tight clusters with few mis-classiﬁcations) should set pamStage = FALSE, or at least specify the maximum allowable object–cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object–cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', default 'c(FALSE)'"),
   make_option("--jackstrawnReplicate", type="integer", default=500L,
               help = "Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above). Integer, defaults to 1000."),
   make_option("--TOMnReplicate", type="integer", default=100L,
               help = "Number of times to resample the dataset when finding the consensus TOM, defaults to 100"),
-  # make_option("--replace", type="logical", default=TRUE,
-  #             help = "In TOM, sample with replacement? Defaults to TRUE. If TRUE, uses all samples, if FALSE, uses 66% each time."),
+  make_option("--fuzzyModMembership", type="character", default="kIM",
+              help="Which 'fuzzy' measure of gene membership in a module should be used? Options are 'kME' (correlation between gene expression and module PC1 expression) and 'kIM' (sum of edges between a gene and genes in the module, normalized by number of genes in the module; i.e. average distance in the TOM between a gene and genes in the module."),  
   make_option("--checkPPI", type="logical", default=T,
               help="Valiate gene modules using Protein-Protein Interactions?"),
-  make_option("--organism", type="character", default="mmusculus",
+  make_option("--data_organism", type="character", default="mmusculus",
               help = "'hsapiens' or 'mmusculus'"),
   make_option("--magma_gwas_dir", type="character", default = NULL,
               help = "MAGMA input GWAS data directory, defaults to NULL. E.g. '/projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/', '/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/'. NULL skips the magma GWAS step"),
@@ -209,21 +235,15 @@ metadata_subset_col <- opt$metadata_subset_col
 
 metadata_corr_col <- opt$metadata_corr_col
 
-if (!is.null(metadata_corr_col)) {
-  metadata_corr_col <- eval(parse(text=metadata_corr_col))
-}
+metadata_corr_col <- eval(parse(text=opt$metadata_corr_col))
 
-metadata_corr_filter_vals <- opt$metadata_corr_filter_vals
-
-if (!is.null(metadata_corr_filter_vals)) {
-  metadata_corr_filter_vals <- eval(parse(text=metadata_corr_filter_vals))
-}
+metadata_corr_filter_vals <- eval(parse(text=opt$metadata_corr_filter_vals))
 
 use.imputed <- opt$use.imputed
 
-min.cells <- opt$min.cells
+regress_out <- eval(parse(text=opt$regress_out))
 
-#do.center <- opt$do.center
+min.cells <- opt$min.cells
 
 genes_use <- opt$genes_use
 
@@ -232,8 +252,6 @@ pca_genes <- opt$pca_genes
 corFnc <- opt$corFnc 
 
 networkType <- opt$networkType
-
-anti_cor_action <- opt$anti_cor_action
 
 hclustMethod <- opt$hclustMethod
 
@@ -249,16 +267,18 @@ jackstrawnReplicate <- opt$jackstrawnReplicate
 
 TOMnReplicate <- opt$TOMnReplicate
 
+fuzzyModMembership <- opt$fuzzyModMembership
+
 checkPPI <- opt$checkPPI
 
 magma_gwas_dir <- opt$magma_gwas_dir 
 
 gwas_filter_traits <- opt$gwas_filter_traits
 
-if (!is.null(gwas_filter_traits)) {
-  gwas_filter_traits <- eval(parse(text=gwas_filter_traits))
-}
-organism <- opt$organism
+
+gwas_filter_traits <- eval(parse(text=opt$gwas_filter_traits))
+
+data_organism <- opt$data_organism
 
 n_cores <- opt$n_cores  
 
@@ -296,13 +316,13 @@ if (!file.exists(log_dir)) dir.create(log_dir)
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 # Load parameter values and utility functions
-source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
-source(file = "/projects/jonatan/functions-src/functions.R")
+source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v2.2_dev1.R")
+source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
 
 # Entrezgene to ensemb_gene_id mapping file path for MAGMA
 mapping_hs_entrez2ensembl_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz"
 
-if (organism == "mmusculus") {
+if (data_organism == "mmusculus") {
   # For mapping symbol to ensembl
   mapping_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/Mus_musculus.GRCm38.90.gene_name_version2ensembl.txt.gz"
   # Synonyms
@@ -310,17 +330,16 @@ if (organism == "mmusculus") {
   # Mouse to human ortholog mapping  
   mapping_hs_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/gene_annotation.hsapiens_mmusculus_unique_orthologs.GRCh37.ens_v91.txt.gz"
   
-  # mendelian and coding variants paths
-  coding_variants_path <- "/projects/jonatan/genesets/coding_variants_ensembl_mm.RData"
-  mendelian_genes_path <- "/projects/jonatan/genesets/mendelian_ensembl_mm.RData"
+  # mendelian and coding variants geneset path
+  variants_path <- "/projects/jonatan/genesets/variants_ensembl_mm.RData"
 
-} else if (organism == "hsapiens") {
+} else if (data_organism == "hsapiens") {
   
   mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" # columns: ensembl_gene_id, entrezgene, hgnc_symbol
  
-  # mendelian and coding variants paths
-  mendelian_genes_path <- "/projects/jonatan/genesets/mendelian_ensembl_hs.RData"
-  coding_variants_path <- "/projects/jonatan/genesets/coding_variants_ensembl_hs.RData"
+  # mendelian and coding variants geneset path
+  variants_path <- "/projects/jonatan/genesets/variants_ensembl_hs.RData"
+  
 }
 
 try(disableWGCNAThreads())
@@ -355,6 +374,11 @@ if (is.null(resume)) {
   
   if (min(moduleMergeCutHeight) < 0 | max(moduleMergeCutHeight) > 1) stop("moduleMergeCutHeight must be a vector of doubles between 0 and 1, recommended range is between 0.1 and 0.2")
   
+  if (!fuzzyModMembership %in% c("kME", "kIM")) {
+    warning("Invalid fuzzeModuleMembership value -  reset to kME (default)")
+    fuzzyModMembership <- "kME"
+  }
+  
   if (! (jackstrawnReplicate >= 0)) stop("jackstrawnReplicate must be 0 or higher")
   
   if (! (TOMnReplicate >= 0)) stop("TOMnReplicate must be non-negative")
@@ -375,32 +399,32 @@ if (is.null(resume)) {
 
   if (!any(grepl("ENSG|ENSMUSG",rownames(seurat_obj@data)))) {
 
-    if (is.null(organism)) {
-      stop("Error: seurat object gene names are not in ensembl ID format. To remap from hgnc to ensembl, please provide an organism 'mmusculus' or 'hsapiens'")
+    if (is.null(data_organism)) {
+      stop("Error: seurat object gene names are not in ensembl ID format. To remap from hgnc to ensembl, please provide a data_organism 'mmusculus' or 'hsapiens'")
     
-    } else if (!is.null(organism)) {
+    } else if (!is.null(data_organism)) {
 
-      if (organism == "mmusculus") { 
+      if (data_organism == "mmusculus") { 
         
         # Step 1: direct mapping
         mapping_direct = read.table(gzfile(mapping_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
         mapping = data.frame(symbol=row.names(seurat_obj@data), ensembl = mapping_direct$ensembl_gene_id[ match(toupper(row.names(seurat_obj@data)), toupper(mapping_direct$gene_name_optimal)) ])
         
-        # Step 2: map remaing using synonyms
+        # Step 2: map remaining using synonyms
         mapping_synonyms = read.delim(gzfile(mapping_mm_synonyms_filepath),sep="\t",header=T, stringsAsFactors = F)
         mapping$ensembl[ which(is.na(mapping$ensembl)) ] = mapping_synonyms$ensembl[ match( toupper(mapping$symbol[which(is.na(mapping$ensembl)) ]) , toupper(mapping_synonyms$symbol)) ]
         
         # save mapping file for reference and later use
-        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, organism), quote = F, row.names = F)
+        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), quote = F, row.names = F)
         
-      } else if (organism == "hsapiens") {
+      } else if (data_organism == "hsapiens") {
         
         mapping_direct = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T, stringsAsFactors = F) # columns: ensembl_gene_id, entrezgene, hgnc_symbol
         # Step 1: direct mapping
         mapping = data.frame(symbol=row.names(seurat_obj@data), ensembl = mapping_direct$ensembl_gene_id[ match(toupper(row.names(seurat_obj@data)), toupper(mapping_direct$hgnc_symbol)) ])
         
         # save mapping file for reference and later use
-        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, organism), quote = F, row.names = F)
+        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), quote = F, row.names = F)
         
       }
 
@@ -431,12 +455,12 @@ if (is.null(resume)) {
     } else if (any(grepl("ENSG", rownames(seurat_obj@data)))) {
       
       message("Homo sapiens ensembl id gene names detected")
-      organism <- "hsapiens"
+      data_organism <- "hsapiens"
       # Save ensembl seurat object for later use
       save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
     } else if (any(grepl("ENSMUSG", rownames(seurat_obj@data)))) {
       message("mus musculus ensembl id gene names detected")
-      organism <- "mmusculus"
+      data_organism <- "mmusculus"
       # Save ensembl seurat object for later use
       save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
     }
@@ -449,6 +473,7 @@ if (is.null(resume)) {
   if (!is.null(metadata_subset_col)) {
     seurat_obj <- SetAllIdent(object = seurat_obj,id = metadata_subset_col)
   }
+
   sNames <- names(table(seurat_obj@ident))
   
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
@@ -458,44 +483,23 @@ if (is.null(resume)) {
       include <- seurat_obj@meta.data[,colnames(seurat_obj@meta.data) %in% metadata_corr_col, drop=F]
       for (i in 1:ncol(include)) {
         if (class(include[,i]) %in% c("factor", "character")) {
-          metadata <- cbind(metadata, factorToIndicator(include[,i]))        
+          metadata <- cbind(metadata, factorToIndicator(include[,i, drop=F]))        
         } else {
           metadata <- cbind(metadata, include[,i, drop=F])
         }
       }
-      rownames(metadata) <- rownames(seurat_obj@meta.data)
+      #rownames(metadata) <- rownames(seurat_obj@meta.data)
       metadata <- metadata[,-1, drop=F]
       if (!is.null(metadata_corr_filter_vals)) metadata <- metadata[, toupper(colnames(metadata)) %in% toupper(metadata_corr_filter_vals), drop = F]
       metadata <- as.data.frame(metadata)
+      
+      # Filter out any metadata columns where all the values are identical
+      metadata <- metadata[apply(metadata, MARGIN=2, FUN = function(x) length(unique(x))>1)]
+      if (ncol(metadata) == 0) metadata <- NULL    
+      
       } else metadata <- NULL
     } else metadata <- NULL
      
-    # meta <- seurat_obj@metadata[,colnames(seurat_obj@metadata) %in% meta.data_corr_col, drop=F]
-    # model = paste0("~ ", paste0(metadata_corr_col, " + ", collapse=""), collapse="") 
-    # model<- substr(x = model, start = 1, stop = nchar(model)-3)
-    # metadata <- model.matrix(eval(parse(text=model)), data=meta)
-    # metadata <- metadata[,-1, drop=F] # remove the intersect
-
-    # #formula <- paste0("~", paste0(colnames(seurat_obj@meta.data)[colnames(seurat_obj@meta.data) %in% metadata_corr_col], "+"))
-    # meta.numeric <- metadata[,sapply(metadata, function(x) x[!class(x) %in% c("factor", "character")])]
-    # #metadata <- model.matrix(metadata_corr_col[metadata_corr_col %in% colnames(seurat_obj@meta.data)], data=seurat_obj@meta.data)
-    # if (any(sapply(metadata, function(x) class(x) %in% c("character", "factor"), simplify = T))) {
-    #   for (j in colnames(metadata[sapply(metadata, function(x) class(x) %in% c("character", "factor"), simplify = T)])) {
-    #     metadata <- cbind(metadata, factorToIndicator(metadata[[j]]))
-    #     metadata[[j]] <- NULL
-    #   }
-    # }
-
-
-  ### 180523 v1.8_dev4
-  # Check metadata_corr_filter_vals
-  # if (!is.null(metadata)) if(!is.null(metadata_corr_filter_vals)) if (!any(metadata_corr_filter_vals %in% colnames(metadata))) {
-  #   message("metadata_corr_filter_vals not found in metadata_corr_col. Will not filter modules on meta data correlation")
-  #   metadata_corr_filter_vals <- NULL
-  # }
-  ###  
-  
-  
   # Subset the seurat object
   subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
                                                    ident.use = x, 
@@ -503,6 +507,22 @@ if (is.null(resume)) {
                                                    do.center = F,
                                                    subset.raw = if (!is.null(seurat_obj@raw.data)) T else F))
   
+  
+  ### Filter out cell types that have too few cells (<20).
+  # We do this do avoid downstream problems with Seurat or WGCNA. 
+  # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
+  
+  subsets_ok_idx <- sapply(subsets, function(x) {
+    if(ncol(x@data)<=20) {
+      warning(sprintf("%s cell cluster filtered out because it contains <20 cells",unique(as.character(x@ident))[1] ))
+      return(FALSE)
+    } else {
+      return(TRUE)
+    }
+  }, simplify = T)
+  
+  subsets <- subsets[subsets_ok_idx]
+  sNames <- sNames[subsets_ok_idx]
   names(subsets) <- sNames 
   
   message("Seurat object loaded and subsetted")
@@ -511,7 +531,7 @@ if (is.null(resume)) {
   ##################### SAVE PARAMETERS TO FILE ########################
   ######################################################################
   
-  subsets_n_cells <- data.frame(subset = sNames, n_cells = as.numeric(table(seurat_obj@ident)))
+  diagnostic_stats <- data.frame(subset = sNames, n_cells = lapply(subsets, function(x) ncol(x@data)))
   
   userParams <- cbind(list("seurat_path" = seurat_path,
                            "project_dir" = project_dir,
@@ -522,21 +542,20 @@ if (is.null(resume)) {
                            "metadata_subset_col" = metadata_subset_col,
                            "metadata_corr_col" = metadata_corr_col,
                            "use.imputed" = use.imputed,
+                           "regress_out" = regress_out,
                            "min.cells" = min.cells,
-                           "do.center" = do.center,
                            "genes_use" = genes_use,
                            "corFnc" = corFnc,
                            "networkType" = networkType,
-                           "anti_cor_action" = anti_cor_action,
                            "hclustMethod" = hclustMethod,
                            "minClusterSize" = minClusterSize,
                            "deepSplit" = deepSplit,
                            "pamStage" = pamStage,
                            "moduleMergeCutHeight" = moduleMergeCutHeight,
+                           "fuzzyModMembership" = fuzzyModMembership,
                            "jackstrawnReplicate" = jackstrawnReplicate,
                            "TOMnReplicate" = TOMnReplicate,
-                           #"replace" = replace,
-                           "organism" = organism,
+                           "data_organism" = data_organism,
                            "magma_gwas_dir" = magma_gwas_dir,
                            "n_cores" = n_cores))
   
@@ -544,17 +563,17 @@ if (is.null(resume)) {
                               "minKMEtoStay" = minKMEtoStay,
                               "consensusQuantile" = consensusQuantile,
                               "fraction" = fraction,
+                              "do.center" = do.center,
                               "replace" = replace,
                               "impute" = impute,
                               "nPC_seurat" = nPC_seurat,
                               "TOMType" = TOMType,
-                              "p.val.threshold" = p.val.threshold))
+                              "pvalThreshold" = pvalThreshold))
   
   # Save run params to file
   write.csv(userParams, file=sprintf("%s%s_INFO_user_parameters_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names = T)
   write.csv(builtInParams, file=sprintf("%s%s_INFO_built_in_parameters_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names = T)
-  write.csv(subsets_n_cells, file=sprintf("%s%s_INFO_subsets_n_cells_%s.csv", tables_dir, data_prefix, flag_date), quote = F, row.names=F)
-  
+
   ######################################################################
   ##################### SEURAT PROCESSING ##############################
   ######################################################################
@@ -562,10 +581,11 @@ if (is.null(resume)) {
   ### 180502_v1.7_1
   subsets <- lapply(subsets, function(x) FilterGenes(x, min.cells = min.cells))
 
-  vars.to.regress = c("nUMI", "percent.mito", "percent.ribo")[c("nUMI", "percent.mito", "percent.ribo") %in% names(seurat_obj@meta.data)]
-
+  #vars.to.regress = c("nUMI", "percent.mito", "percent.ribo")[c("nUMI", "percent.mito", "percent.ribo") %in% names(seurat_obj@meta.data)]
+  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  
   subsets <- lapply(subsets, function(x) ScaleData(object = x,
-                                                  vars.to.regress = if (length(vars.to.regress) > 0) vars.to.regress else NULL,
+                                                  vars.to.regress = vars.to.regress,
                                                   model.use="linear",
                                                   do.par=T,
                                                   num.cores = min(n_cores, detectCores()-1),
@@ -590,7 +610,7 @@ if (is.null(resume)) {
     cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "log_parPCA.txt"))
 
     tryCatch({
-      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
+      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                            pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                            pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                            use.imputed = F, # if use.imputed=T the @imputed slot has been copied to @data
@@ -601,7 +621,7 @@ if (is.null(resume)) {
                                                            fastpath = fastpath)) 
       
     }, warning = function(c) {
-      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
+      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                            pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                            pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                            use.imputed = F, # if use.imputed=T the @imputed slot has been copied to @data
@@ -613,7 +633,7 @@ if (is.null(resume)) {
     })
     ### 
     stopCluster(cl)
-    invisible(gc())
+    invisible(gc()); invisible(R.utils::gcDLLs())
     end_time <- Sys.time()
    
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
@@ -622,7 +642,7 @@ if (is.null(resume)) {
     # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
     if (jackstrawnReplicate > 0) message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstrawnReplicate))
-    list_datExpr <- lapply(subsets, function(x) wrapJackStraw(seurat_obj_sub = x, n_cores = n_cores, jackstrawnReplicate = jackstrawnReplicate, p.val.threshold = p.val.threshold))
+    list_datExpr <- lapply(subsets, function(x) wrapJackStraw(seurat_obj_sub = x, n_cores = n_cores, jackstrawnReplicate = jackstrawnReplicate, pvalThreshold = pvalThreshold))
     
     invisible(gc())
     
@@ -632,13 +652,16 @@ if (is.null(resume)) {
     list_datExpr <- lapply(subsets, function(x) seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rownames(x@scale.data) %in% x@var.genes))
   } 
   
+  # Make a note of how many genes made it into each subset
+  diagnostic_stats$n_genes <- sapply(list_datExpr, function(x) ncol(x), simplify=T)
+  
   # Clear up
-  rm(subsets, userParams, builtInParams, subsets_n_cells, seurat_obj)
+  rm(subsets, userParams, builtInParams, seurat_obj)
   invisible(gc())
  
   # Save or load session image 
   resume = "checkpoint_1"
-  if (autosave==T) save(list = ls(all.names = TRUE)[-grep("data_prefix$|corFnc$|networkType$|anti_cor_action$|hclustMethod$|minClusterSize$|deepSplit$|moduleMergeCutHeight$|pamStage$|TOMnReplicate$|checkPPI$|organism$|magma_gwas_dir$|gwas_filter_traits$|n_cores$|resume$" , ls(), ignore.case=F) ],  envir = .GlobalEnv, file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image(file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_1") quit(save="no")
     
 } else if (!is.null(resume)) {
@@ -646,8 +669,8 @@ if (is.null(resume)) {
   if (resume == "checkpoint_1") {
     
     load((file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
-    source(file = "/projects/jonatan/functions-src/functions.R")
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v2.2_dev1.R")
+    source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
     options(stringsAsFactors = F)
     disableWGCNAThreads() 
   }
@@ -669,112 +692,129 @@ if (resume == "checkpoint_1") {
   ####### PICK SOFT THRESHOLD POWER FOR ADJACENCY MATRIX ###############
   ######################################################################
   message("Computing soft threshold powers to maximise the fit of a scale free topology to the adjacency matrix")
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_compute_softPowers.txt"))
   
-    list_softPower <- mapply(function(x,y) sft_for_par(datExpr=x, subsetName=y), list_datExpr, sNames, SIMPLIFY=F)
+  list_softPower <- clusterMap(cl, function(x,y) sft_for_par(datExpr=x, subsetName=y), 
+                               x=list_datExpr, 
+                               y=sNames, 
+                               SIMPLIFY=F,
+                               .scheduling = c("dynamic"))
+
+  stopCluster(cl)
   
-    ###
+  ###
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  names(list_softPower) <- sNames
+  
+  # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
+  setwd(RObjects_dir)
+  
+  if (TOMnReplicate > 0) {
+    
+    ######################################################################
+    ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
+    ######################################################################
+    
+    message(sprintf("Resampling the data %s times with replace = %s", TOMnReplicate, replace))
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_bootStrap.txt"))
+    
+    list_multiExpr <- parLapplyLB(cl, list_datExpr, function(x) bootstrap(datExpr=x, 
+                                                                        ### 180508_v1.8_dev2
+                                                                        nPermutations = TOMnReplicate,
+                                                                        ###
+                                                                        replace = replace,
+                                                                        fraction = fraction,
+                                                                        randomSeed = randomSeed))
+    stopCluster(cl)
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    names(list_multiExpr) <- sNames 
+  
+    ######################################################################
+    ######### RUN CONSENSUSTOM ON THE RESAMPLED DATASETS #################
+    ######################################################################
+    
+    message(sprintf("Computing the consensus Topological Overlap Matrix with %s permutations", TOMnReplicate))
+  
     invisible(gc())
-    names(list_softPower) <- sNames
     
-    # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
-    setwd(RObjects_dir)
+    # Set a ceiling on n_cores to avoid depleting memory
+  
+    cl <- makeCluster(min(n_cores,10), type = "FORK", outfile = paste0(log_dir, "log_consensusTOM.txt"))
+    list_consensus <- clusterMap(cl, function(x,y){ consensus <- consensusTOM(multiExpr = x, 
+                                                                 checkMissingData = checkMissingData,
+                                                                 maxBlockSize = maxBlockSize, 
+                                                                 blockSizePenaltyPower = blockSizePenaltyPower, 
+                                                                 randomSeed = randomSeed,
+                                                                 corType = corType,
+                                                                 maxPOutliers = maxPOutliers,
+                                                                 quickCor = quickCor,
+                                                                 pearsonFallback = pearsonFallback,
+                                                                 cosineCorrelation = cosineCorrelation,
+                                                                 replaceMissingAdjacencies = replaceMissingAdjacencies,
+                                                                 power = list_softPower[[y]],
+                                                                 networkType = networkType,
+                                                                 TOMDenom = TOMDenom,
+                                                                 saveIndividualTOMs = saveIndividualTOMs,
+                                                                 individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
+                                                                 networkCalibration = networkCalibration,
+                                                                 sampleForCalibration = sampleForCalibration,
+                                                                 sampleForCalibrationFactor = sampleForCalibrationFactor,
+                                                                 getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                                                                 consensusQuantile = consensusQuantile,
+                                                                 useMean = useMean,
+                                                                 saveConsensusTOMs = saveConsensusTOMs,
+                                                                 consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
+                                                                 returnTOMs = F,
+                                                                 useDiskCache = T,
+                                                                 cacheDir = RObjects_dir,
+                                                                 cacheBase = ".blockConsModsCache",
+                                                                 verbose = verbose,
+                                                                 indent = indent)
+                                                          rm(x)
+                                                          return(consensus)}, 
+                                 x=list_multiExpr, 
+                                 y=sNames, 
+                                 SIMPLIFY=F,
+                                 .scheduling = c("dynamic"))
+    stopCluster(cl)
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
-    if (TOMnReplicate > 0) {
-      
-      ######################################################################
-      ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
-      ######################################################################
-      
-      message(sprintf("Resampling the data %s times with replace = %s", TOMnReplicate, replace))
-      
-      invisible(gc())
-      
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_bootStrap.txt"))
-      
-      list_multiExpr <- parLapply(cl, list_datExpr, function(x) bootstrap(datExpr=x, 
-                                                                          ### 180508_v1.8_dev2
-                                                                          nPermutations = TOMnReplicate,
-                                                                          ###
-                                                                          replace = replace,
-                                                                          fraction = fraction,
-                                                                          randomSeed = randomSeed))
-      stopCluster(cl)
-      
-      invisible(gc())
-      
-      names(list_multiExpr) <- sNames 
+    # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
+    list_goodGenesTOM_idx <- lapply(list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
     
-      ######################################################################
-      ######### RUN CONSENSUSTOM ON THE RESAMPLED DATASETS #################
-      ######################################################################
-      
-      message(sprintf("Computing the consensus Topological Overlap Matrix with %s permutations", TOMnReplicate))
+    # Use the goodGenesTOM_idx to filter the datExpr matrices
+    list_datExpr_gg <- mapply(FUN=function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F)
     
-      invisible(gc())
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_consensusTOM.txt"))
-      list_consensus <- clusterMap(cl, function(x,y)  consensusTOM(multiExpr = x, 
-                                                                  checkMissingData = checkMissingData,
-                                                                  maxBlockSize = maxBlockSize, 
-                                                                  blockSizePenaltyPower = blockSizePenaltyPower, 
-                                                                  randomSeed = randomSeed,
-                                                                  corType = corType,
-                                                                  maxPOutliers = maxPOutliers,
-                                                                  quickCor = quickCor,
-                                                                  pearsonFallback = pearsonFallback,
-                                                                  cosineCorrelation = cosineCorrelation,
-                                                                  replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                                                  power = list_softPower[[y]],
-                                                                  networkType = networkType,
-                                                                  TOMDenom = TOMDenom,
-                                                                  saveIndividualTOMs = saveIndividualTOMs,
-                                                                  individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
-                                                                  networkCalibration = networkCalibration,
-                                                                  sampleForCalibration = sampleForCalibration,
-                                                                  sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                                                  getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                                                  consensusQuantile = consensusQuantile,
-                                                                  useMean = useMean,
-                                                                  saveConsensusTOMs = saveConsensusTOMs,
-                                                                  consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
-                                                                  returnTOMs = F,
-                                                                  useDiskCache = T,
-                                                                  cacheDir = RObjects_dir,
-                                                                  cacheBase = ".blockConsModsCache",
-                                                                  verbose = verbose,
-                                                                  indent = indent), 
-                                   x=list_multiExpr, 
-                                   y=sNames, 
-                                   SIMPLIFY=F)
-      stopCluster(cl)
-      invisible(gc())
-      
-      # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
-      list_goodGenesTOM_idx <- lapply(list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
-      
-      # Use the goodGenesTOM_idx to filter the datExpr matrices
-      list_datExpr_gg <- mapply(FUN=function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F)
-      
-    } else if (TOMnReplicate==0) {
-      
-      message("Computing the Topological Overlap Matrix")
-      
-      ######################################################################
-      ##### COMPUTE THE ADJACENCY MATRIX AND TOM WITHOUT RESAMPLING ########
-      ######################################################################
-      
-      invisible(gc())
-      
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_TOM_for_par.txt"))
-      list_goodGenesTOM_idx <- clusterMap(cl, function(x,y) TOM_for_par(datExpr=x, 
-                                                                        subsetName=y, 
-                                                                        softPower=list_softPower[[y]]), 
-                                          x=list_datExpr, 
-                                          y=sNames, SIMPLIFY=F)
-      stopCluster(cl)
-      
-      invisible(gc())
-      
-      list_datExpr_gg <- list_datExpr
+  } else if (TOMnReplicate==0) {
+    
+    message("Computing the Topological Overlap Matrix")
+    
+    ######################################################################
+    ##### COMPUTE THE ADJACENCY MATRIX AND TOM WITHOUT RESAMPLING ########
+    ######################################################################
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_TOM_for_par.txt"))
+    list_goodGenesTOM_idx <- clusterMap(cl, function(x,y) TOM_for_par(datExpr=x, 
+                                                                      subsetName=y, 
+                                                                      softPower=list_softPower[[y]]), 
+                                        x=list_datExpr, 
+                                        y=sNames, 
+                                        SIMPLIFY=F,
+                                        .scheduling = c("dynamic"))
+    stopCluster(cl)
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    list_datExpr_gg <- list_datExpr
+    
   }
   
   message("Done computing the consensus Topological Overlap Matrix")
@@ -789,16 +829,16 @@ if (resume == "checkpoint_1") {
   #
   # out:
   #   list_geneTree
+
   
-  # Convert TOM to distance matrix
-  list_dissTOM <- lapply(sNames, dissTOM_for_par)
-  
-  # Cluster
-  invisible(gc())
+  invisible(gc()); invisible(R.utils::gcDLLs())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parHclust.txt"))
-  list_geneTree <- parLapply(cl, list_dissTOM, function(x) hclust(d=x, method=hclustMethod))
+  # Convert TOM to distance matrix
+  list_dissTOM <- parLapplyLB(cl, sNames, dissTOM_for_par)
+  # Cluster
+  list_geneTree <- parLapplyLB(cl, list_dissTOM, function(x) hclust(d=x, method=hclustMethod))
   stopCluster(cl)
-  
+  invisible(gc()); invisible(R.utils::gcDLLs())
   names(list_geneTree) = sNames # used for PlotDendro
   
   ######################################################################
@@ -836,7 +876,7 @@ if (resume == "checkpoint_1") {
     }
   }
   
-  invisible(gc())
+  invisible(gc()); invisible(R.utils::gcDLLs())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_cutreeHybrid_for_vec.txt"))
   # nb: comb_list is in the environment - no need to pass it through clusterMap
   list_list_cutree <- clusterMap(cl, function(x,y) lapply(comb_list, function(z) cutreeHybrid_for_vec(comb=z, 
@@ -846,19 +886,11 @@ if (resume == "checkpoint_1") {
                                                                                                       useMedoids = useMedoids)), 
                                  x=list_geneTree,
                                  y=list_dissTOM, 
-                                 SIMPLIFY=F)
+                                 SIMPLIFY=F,
+                                 .scheduling = c("dynamic"))
   stopCluster(cl)
-  
+  invisible(gc()); invisible(R.utils::gcDLLs())
   names(list_list_cutree) = sNames
-  
-  # Merge close modules
-  invisible(gc())
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parvecMergeCloseModules.txt"))
-  list_list_merged <- parLapply(cl, sNames, function(x) lapply(1:n_combs, function(y) mergeCloseModules_for_vec(cutree=list_list_cutree[[x]][[y]], comb=comb_list[[y]], datExpr=list_datExpr_gg[[x]], excludeGrey = excludeGrey)))
-  stopCluster(cl)
-  invisible(gc())
-  
-  names(list_list_merged) = sNames
   
   # Produce labels for plotting the modules found by different parameters
   list_plot_label <- lapply(comb_list, function(x) plotLabel_for_vec(comb=x)) # list of labels for plot
@@ -867,12 +899,31 @@ if (resume == "checkpoint_1") {
   list_list_plot_label <- lapply(sNames, function(x) list_list_plot_label$x = list_plot_label)
   names(list_list_plot_label) = sNames
   
-  # Extract the Module Eigengenes from the list returned by mergeCloseModules
-  list_list_MEs <- lapply(list_list_merged, parGetMEs) # nested lapply
-  names(list_list_MEs) = sNames
+  if (fuzzyModMembership=="kME") {
+    # Merge close modules
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parvecMergeCloseModules.txt"))
+    list_list_merged <- parLapplyLB(cl, sNames, function(x) lapply(1:n_combs, function(y) mergeCloseModules_for_vec(cutree=list_list_cutree[[x]][[y]], comb=comb_list[[y]], datExpr=list_datExpr_gg[[x]], excludeGrey = excludeGrey)))
+    stopCluster(cl)
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    names(list_list_merged) = sNames
+    
+    # Extract the colors from the list returned by mergeCloseModules
+    list_list_colors <- mapply(parGetColors, list_list_merged, list_datExpr_gg, SIMPLIFY=F)
+    
+    # Extract the Module Eigengenes from the list returned by mergeCloseModules
+    list_list_MEs <- lapply(list_list_merged, parGetMEs) # nested lapply
+    
+    names(list_list_MEs) = sNames
+    
+  } else if (fuzzyModMembership=="kIM") { # do not merge modules based on eigengene correlation 
+    
+    # TODO: merge based on kIM
+    list_list_colors <- lapply(list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
+    list_list_MEs <- NULL
+    
+  }
   
-  # Extract the colors from the list returned by mergeCloseModules
-  list_list_colors <- mapply(parGetColors, list_list_merged, list_datExpr_gg, SIMPLIFY=F)
   names(list_list_colors) <- sNames
   
   # Test if for a given vector all the genes are grey
@@ -888,14 +939,14 @@ if (resume == "checkpoint_1") {
   ### 180510_v1.8_dev2_1
   list_list_plot_label_ok <- mapply(function(x,y) x[y], x = list_list_plot_label, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_cutree_ok <- mapply(function(x,y) x[y], x = list_list_cutree, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
-  list_list_MEs_ok <- mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
+  list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   list_list_colors_ok <- mapply(function(x,y) x[y], x=list_list_colors, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
 
   sNames_ok <- sNames[logical_subsets_ok]
   list_datExpr_ok <- list_datExpr_gg[logical_subsets_ok] # If for a subset all parameters gave only grey modules, take it out of the top level list.
   list_geneTree_ok <- list_geneTree[logical_subsets_ok]
-  #list_dissTOM_ok <- list_dissTOM[logical_subsets_ok]
-  
+  list_dissTOM_ok <- list_dissTOM[logical_subsets_ok]
+
   # Assign gene names to each color vector
   list_list_colors_ok <- mapply(function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names=colnames(y), dimension = NULL)), x = list_list_colors_ok, y = list_datExpr_ok, SIMPLIFY=F)
   
@@ -907,146 +958,22 @@ if (resume == "checkpoint_1") {
     writeLines(paste0(discarded, " were dropped because the script didn't find any modules"), fileConn)
     close(fileConn)
   }
-  
-  # clear up
-  rm(list_datExpr, list_list_cutree, list_list_MEs, list_datExpr_gg, list_geneTree, list_list_plot_label, list_dissTOM)#, list_idx_mapped_gg)
-  invisible(gc())
-    
-  ######################################################################
-  ###################### compute kMEs & pkMEs ##########################
-  ######################################################################
-  # in:
-  #   list_list_MEs_ok
-  #   list_datExpr_ok
-  #
-  # out:
-  #   list_list_kMEs
-  #   list_list_pkMEs
-  
-  message("Computing kMEs: correlation between each gene and each module 'eigengene'")
- 
-  # Compute kMEs
-  invisible(gc())
-  cl <- makeCluster(spec=n_cores, type = "FORK", outfile = paste0(log_dir, "log_parkMEs_parPkMEs.txt"))
-  
-  list_list_kMEs <- clusterMap(cl, 
-                               function(x,y) parkMEs(list_MEs=x, 
-                                                     datExpr=y), 
-                               x=list_list_MEs_ok, 
-                               y=list_datExpr_ok, 
-                               SIMPLIFY = F)
-  
-  # Extract the primary kMEs - i.e. those of each gene w.r.t. the module to which it belongs
-  # We use these to filter genes that we submit to STRINGdb 
-  list_list_pkMEs <- clusterMap(cl, function(x,y) parPkMEs(list_kMEs=x, list_colors=y), x=list_list_kMEs, y=list_list_colors_ok, SIMPLIFY = F)
-  stopCluster(cl)
-  invisible(gc())
-  
-  list_list_pkMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_pkMEs, y=list_list_plot_label_ok, SIMPLIFY=F)
-  names(list_list_pkMEs) <- sNames_ok
 
-  ######################################################################
-  ########### Filter out genes with poor kME p-values ##################
-  ######################################################################
-  # Note: this seems to 'punish' smaller gene modules disproportionately due to lower sample size
-  if (FALSE) {
-    invisible(gc())
-    
-    cl <- makeCluster(spec=n_cores, 
-                      type = "FORK", 
-                      outfile = paste0(log_dir, "log_kMEs_pvals_par.txt"))
-    
-    list_list_ppvals <- clusterMap(cl, function(a,b) lapply(a, 
-                                                    function(x) WGCNA::corPvalueStudent(cor = x, 
-                                                                                        nSamples = nrow(b))),
-                                 a = list_list_pkMEs,
-                                 b = list_datExpr_ok,
-                                 SIMPLIFY = F)
-    
-      # Name the p-value vectors
-      list_list_ppvals <- clusterMap(cl,
-                                        function(a,b) lapply(a, function(x) name_for_vec(to_be_named=x,
-                                                                                        given_names = colnames(b),
-                                                                                        dimension=NULL)),
-                                      a = list_list_ppvals,
-                                      b = list_datExpr_ok,
-                                      SIMPLIFY=F)
+  if (fuzzyModMembership == "kIM") save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok_%s.RData", RObjects_dir, data_prefix, flag_date))
+  # Keep dissTOM for computing kIMs only
   
-      
-    list_list_colors_ok_sig <- clusterMap(cl,
-                                      function(a,b) mapply(function(x,y) ifelse(y<p.val.threshold,
-                                                                                yes=x,
-                                                                                no="grey"),
-                                                           x = a,
-                                                           y = b,
-                                                           SIMPLIFY=F),
-                                      a = list_list_colors_ok,
-                                      b = list_list_ppvals,
-                                      SIMPLIFY=F)
-    # name the new color vectors
-    list_list_colors_ok_sig <- clusterMap(cl,
-                                          function(a,b) mapply(function(x,y) name_for_vec(to_be_named = x,
-                                                                                          given_names = names(y),
-                                                                                          dimension=NULL),
-                                                               x = a,
-                                                               y = b,
-                                                               SIMPLIFY=F),
-                                          a = list_list_colors_ok_sig,
-                                          b = list_list_colors_ok,
-                                          SIMPLIFY=F)
-    stopCluster(cl)
-    invisible(gc())
-  
-    list_list_colors_ok <- list_list_colors_ok_sig
-    
-    # TODO: either remove or fix section below
-    
-    ######################################################################
-    ################### Compute new MEs, kMEs, pkMEs #####################
-    ######################################################################
-  
-   # in:
-    #   list_list_colors_ok_sig
-    #   list_datExpr_ok
-    #
-    # out:
-    #   list_list_MEs
-    #   list_list_kMEs
-    #   list_list_pkMEs
-  
-    
-    invisible(gc())
-    cl <- makeCluster(spec=n_cores, type = "FORK", outfile = paste0(log_dir, "log_parkMEs_parPkMEs.txt"))
-    # Compute MEs
-    
-    list_list_MEs_ok <- clusterMap(cl,
-                                   function(a,b) lapply(b, function(x) moduleEigengenes(expr = a, 
-                                                                                     colors = x, 
-                                                                                     excludeGrey = T)),
-                                   a = list_datExpr_ok,
-                                   b = list_list_colors_ok,
-                                   SIMPLIFY=F)
-      
-    # Compute kMEs
-    list_list_kMEs <- clusterMap(cl, 
-                                 function(x,y) parkMEs(list_MEs=x, 
-                                                       datExpr=y), 
-                                 x=list_list_MEs_ok, 
-                                 y=list_datExpr_ok, 
-                                 SIMPLIFY = F)
-    
-    # Extract the primary kMEs - i.e. those of each gene w.r.t. the module to which it belongs
-    # We use these to filter genes that we submit to STRINGdb 
-    list_list_pkMEs <- clusterMap(cl, function(x,y) parPkMEs(list_kMEs=x, list_colors=y), 
-                                  x=list_list_kMEs, 
-                                  y=list_list_colors_ok, 
-                                  SIMPLIFY = F)
-    stopCluster(cl)
-    invisible(gc())
-    
-    list_list_pkMEs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_pkMEs, y=list_list_plot_label_ok, SIMPLIFY=F)
-    names(list_list_pkMEs) <- sNames_ok
+  # Delete consensus TOMs from disk
+  for (subsetName in sNames) {
+    if (file.exists(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))) {
+      file.remove(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))
+    }
   }
+  
+  rm(list_datExpr, list_list_cutree, list_list_MEs, list_datExpr_gg, list_geneTree, list_list_plot_label, list_dissTOM)#, list_idx_mapped_gg)
+  if (fuzzyModMembership != "kIM")  rm(list_dissTOM_ok)
+  
+  invisible(gc())
+  
   ######################################################################
   ############## Match colors between parameter settings ###############
   ######################################################################
@@ -1055,37 +982,127 @@ if (resume == "checkpoint_1") {
   #
   # out:
   #   list_list_colors_ok_matched
-
+  
   message("Matching module color labels between parameter settings")
-
+  
   # Align / match the colors so similar modules found with different sets of parameters have the same name
-  invisible(gc())
+  invisible(gc()); invisible(R.utils::gcDLLs())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parMatchColors.txt"))
-  list_list_colors_ok_matched <- parLapply(cl, list_list_colors_ok, parMatchColors)
+  list_list_colors_ok_matched <- parLapplyLB(cl, list_list_colors_ok, parMatchColors)
   stopCluster(cl)
-  invisible(gc())
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   # Rename highest level list entries (cell clusters)
   names(list_list_colors_ok_matched) = sNames_ok
   
   # Name each entry of the vectors of color assignments with the corresponding genes
-  list_list_colors_ok_matched <- mapply(function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names=colnames(y), dimension = NULL)), x=list_list_colors_ok_matched, y=list_datExpr_ok, SIMPLIFY=F)
-
+  list_list_colors_ok_matched <- mapply(function(x,y) lapply(x, 
+                                                             function(z) name_for_vec(to_be_named=z, 
+                                                                                      given_names=colnames(y), 
+                                                                                      dimension = NULL)), 
+                                        x=list_list_colors_ok_matched, 
+                                        y=list_datExpr_ok, 
+                                        SIMPLIFY=F)
+  
   # clear up 
   rm(list_list_colors_ok)
   invisible(gc())
+  
+  
+  ######################################################################
+  ################# compute kMEs & pkMEs / kIMs & pkIMs ################
+  ######################################################################
+  # in:
+  #   
+  #   (list_list_MEs_ok)
+  #   (list_datExpr_ok)
+  #   (list_dissTOM_ok)
+  #   (list_list_colors_ok)
+  #
+  # out:
+  #   list_list_kMs
+  #   list_list_pkMs
+    
+  message(paste0("Computing gene-module ", fuzzyModMembership), "s")
+ 
+  # Compute kMEs / kIMs
+  
+  invisible(gc())
+  
+  cl <- makeCluster(spec=n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_kMs_pkMs.txt"))
 
+  if (fuzzyModMembership == "kME") {
+    
+    #NB: need to recompute MEs after matching colors
+    
+    list_list_MEs_ok_matched <- clusterMap(cl, function(x,y) lapply(y, function(z) moduleEigengenes(expr = as.data.frame(x, col.names=col.names(x)),
+                                                                  colors=z,
+                                                                  excludeGrey=F)), 
+                               x = list_datExpr_ok, 
+                               y = list_list_colors_ok_matched, 
+                               SIMPLIFY = F,
+                               .scheduling = c("dynamic"))
+    
+    list_list_kMs <- clusterMap(cl, 
+                               function(x,y) parkMEs(list_MEs=x, 
+                                                     datExpr=y), 
+                               x=list_list_MEs_ok_matched, 
+                               y=list_datExpr_ok, 
+                               SIMPLIFY = F,
+                               .scheduling = c("dynamic"))
+    
+  } else if (fuzzyModMembership == "kIM") {
+    
+    list_dissTOM_ok <- load_obj(f=sprintf("%s%s_list_dissTOM_ok_%s.RData", RObjects_dir, data_prefix, flag_date))
+    
+    list_list_kMs <- clusterMap(cl, function(x,y) lapply(y, function(z) kIM_eachMod_norm(dissTOM = x, 
+                                                                                          colors = z)),
+                                 x = list_dissTOM_ok,
+                                 y = list_list_colors_ok_matched, 
+                                 SIMPLIFY=F,
+                                .scheduling = c("dynamic"))
+    
+    names(list_list_kMs) = sNames_ok
+      
+    rm(list_dissTOM_ok)
+
+  }
+  
+  # Extract the primary kMs - i.e. those of each gene w.r.t. the module to which it belongs
+  # We use these to filter genes that we submit to STRINGdb 
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  list_list_pkMs <- clusterMap(cl, function(x,y) parPkMs(list_kMs=x, 
+                                                         list_colors=y), 
+                               x=list_list_kMs, 
+                               y=list_list_colors_ok_matched, 
+                               SIMPLIFY = F,
+                               .scheduling = c("dynamic"))
+ 
+  stopCluster(cl)
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  
+  # Delete the grey module kM columns after finding pkMs
+  list_list_kMs <- lapply(list_list_kMs, deleteGrey)
+  
+  # The pkM vectors already have gene names. Now name each vector, and each list of vectors
+  list_list_pkMs <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y[[1]], dimension = NULL), x=list_list_pkMs, y=list_list_plot_label_ok, SIMPLIFY=F)
+  names(list_list_pkMs) <- sNames_ok
+  
+  ######################################################################
+  ############################ CHECKPOINT ##############################
+  ######################################################################
+  
   resume="checkpoint_2"
   
   #save.image(file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save(list = ls(all.names = TRUE)[-grep("data_prefix$|corFnc$|networkType$|anti_cor_action$|hclustMethod$|minClusterSize$|deepSplit$|moduleMergeCutHeight$|pamStage$|TOMnReplicate$|checkPPI$|organism$|magma_gwas_dir$|gwas_filter_traits$|n_cores$|resume$" , ls(), ignore.case=F) ], envir = .GlobalEnv, file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_2") quit(save="no")
   
 } else if (!is.null(resume)) {
   if (resume == "checkpoint_2") {
     load((file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix)))
-    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
-    source(file = "/projects/jonatan/functions-src/functions.R")
+    source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v2.2_dev1.R")
+    source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
     options(stringsAsFactors = F)
   }
 }
@@ -1106,36 +1123,54 @@ if (resume == "checkpoint_2") {
   ######################################################################
   # in:
   #   list_list_colors_ok_matched
-  #   list_list_pkMEs
+  #   list_list_pkMs
   #
   # out:
   #   list_list_colors_ok_matched_PPI
   if (checkPPI == T) {
+    
     message("Checking modules for significant Protein-Protein Interactions through STRINGdb")
   
-    if (organism == "hsapiens") STRINGdb_species <- 9606 else if (organism == "mmusculus") STRINGdb_species <- 10090
+    if (data_organism == "hsapiens") STRINGdb_species <- 9606 else if (data_organism == "mmusculus") STRINGdb_species <- 10090
     
-    invisible(gc())
+    if (fuzzyModMembership=="kME") {
+      # Value already set in parameters; just make it into a vector of identical values, one entry per celltype 
+      list_PPI_pkM_threshold <- as.list(rep(PPI_pkME_threshold, times = length(list_list_pkMs)))
+    } else if (fuzzyModMembership=="kIM") {
+      # If using pkIMs to filter out genes with low module membership from the lists submitted to the PPI analysis, for each
+      # cellType subset (upper level of the list_list_pkMs), compute the 0.05 quantile of gene primary module membership values (pkIMs)
+      # and set that as a threshold for that datatype. Code below returns a numeric vector of quantile values.
+      list_PPI_pkM_threshold <- lapply(list_list_pkMs, function(x) quantile(unlist(x, use.names = F), probs = c(0.05), names=F))
+    }
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_PPI_outer_for_vec.txt"))
-    
-    list_list_colors_PPI <- clusterMap(cl, function(a,b) mapply(function(x,y) PPI_outer_for_vec(colors = x,
-                                                                                                pkMEs = y,
-                                                                                                STRINGdb_species = STRINGdb_species, 
-                                                                                                PPI_pkME_threshold = PPI_pkME_threshold,
-                                                                                                p.val.threshold = p.val.threshold, 
-                                                                                                project_dir = project_dir, 
-                                                                                                data_prefix = data_prefix, 
-                                                                                                flag_date = flag_date), 
-                                                                x = a, y = b, SIMPLIFY=F), 
-                                       a = list_list_colors_ok_matched, 
-                                       b = list_list_pkMEs, 
+
+    list_list_colors_PPI <- mapply(function(a,b,c) clusterMap(cl, function(x,y) PPI_outer_for_vec(colors = x,
+                                                                                                pkMs = y,
+                                                                                                STRINGdb_species = STRINGdb_species,
+                                                                                                PPI_pkM_threshold = c,
+                                                                                                pvalThreshold = pvalThreshold,
+                                                                                                project_dir = project_dir,
+                                                                                                data_prefix = data_prefix,
+                                                                                                flag_date = flag_date),
+                                                                x = a,
+                                                                y = b,
+                                                                SIMPLIFY=F,
+                                                              .scheduling = c("dynamic")),
+                                       a = list_list_colors_ok_matched,
+                                       b = list_list_pkMs,
+                                       c = list_PPI_pkM_threshold,
                                        SIMPLIFY=F)
     stopCluster(cl)
-    invisible(gc())
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
-  } else if (checkPPI==F) list_list_colors_PPI <- list_list_colors_ok_matched
-  
+  } else if (checkPPI==F) {
+    
+    list_list_colors_PPI <- list_list_colors_ok_matched
+    
+  }
   ######################################################################
   ########### ORDER PARAMETER SETS BY PPI ENRICHMENT AND PLOT ##########
   ######################################################################
@@ -1200,25 +1235,38 @@ if (resume == "checkpoint_2") {
   sNames_PPI <- sNames_ok[logical_subsets_PPI_ok]
   list_colors_PPI <- list_colors_PPI[logical_subsets_PPI_ok]
   list_datExpr_PPI <- list_datExpr_ok[logical_subsets_PPI_ok]
-  #list_dissTOM_PPI <- list_dissTOM_ok[logical_subsets_PPI_ok]
-  
+
   list_colors <- list_colors[logical_subsets_PPI_ok]
   list_list_cutree_params_final_PPI <- list_list_cutree_params_final[logical_subsets_PPI_ok]
   list_plot_label_final_PPI  <- list_plot_label_final[logical_subsets_PPI_ok]
   list_geneTree_PPI <- list_geneTree_ok[logical_subsets_PPI_ok]
   
-  # Checkpoint
+  # Make a note of the number of modules and of the prop of genes assigned to a module, before and after PPI filter
+  diagnostic_stats$prop_genes_assigned <- diagnostic_stats$prop_genes_assigned_PPI <- diagnostic_stats$n_modules <- diagnostic_stats$n_modules_PPI <- 0
+  
+  # Get proportion of assigned genes
+  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(min(1,sum(x=="grey"))/length(x)), simplify=T)
+  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(min(1,sum(x=="grey"))/length(x)), simplify=T)
+  
+  # Count module (minus 1 for grey)
+  diagnostic_stats$n_modules[sNames %in% sNames_ok] <- sapply(list_colors, function(x) length(unique(as.character(x)))-1, simplify=T) 
+  diagnostic_stats$n_modules_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) length(unique(as.character(x)))-1, simplify=T) 
+  
+  ######################################################################
+  ############################# CHECKPOINT #############################
+  ######################################################################
+
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
   #save.image(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save(list = ls(all.names = TRUE)[-grep("data_prefix$|corFnc$|networkType$|anti_cor_action$|hclustMethod$|minClusterSize$|deepSplit$|moduleMergeCutHeight$|pamStage$|TOMnReplicate$|checkPPI$|organism$|magma_gwas_dir$|gwas_filter_traits$|n_cores$|resume$" , ls(), ignore.case=F) ], envir = .GlobalEnv, file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_3") quit(save="no")
   
 } else if (resume == "checkpoint_3") {
   load(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
   # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
-  source(file = "/projects/jonatan/functions-src/functions.R")
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v2.2_dev1.R")
+  source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
   options(stringsAsFactors = F)
 }  
 
@@ -1229,10 +1277,12 @@ if (resume == "checkpoint_3") {
   ##########################################################################
   
   # Free up DLLs
-  try(detach("package:STRINGdb", unload=TRUE))
+  #try(detach("package:STRINGdb", unload=TRUE))
   invisible(R.utils::gcDLLs())
   # Load packages
+  suppressPackageStartupMessages(library(irlba))
   suppressPackageStartupMessages(library(boot))
+  suppressPackageStartupMessages(library(liger))
   
   ######################################################################
   ##################### MAKE MODULE COLORS UNIQUE ######################
@@ -1271,6 +1321,8 @@ if (resume == "checkpoint_3") {
   names(list_mods_uniq) <- names(list_colors_PPI)
     
   # Update color vectors
+  # TODO: review
+  
   list_colors_PPI_uniq <- mapply(function(x,y,z) z[match(x, y)],
                              x = list_colors_PPI, 
                              y = list_mods, 
@@ -1292,153 +1344,229 @@ if (resume == "checkpoint_3") {
   list_colors_PPI_uniq <- mapply(function(x,y) name_for_vec(to_be_named= x, given_names = names(y), dimension=NULL), x = list_colors_PPI_uniq, y = list_colors_PPI, SIMPLIFY=F)
     
   ######################################################################
-  ########## RECOMPUTE MEs, kMEs, kIMs, pkMEs AFTER PPI FILTER #########
+  ########## RECOMPUTE MEs, kMs, pkMs AFTER PPI FILTER #########
   ######################################################################
   # in:
   #   list_colors_PPI_ok
   #   list_datExpr_PPI_ok
-  #   list_dissTOM_PPI_ok
   #
   # out:
-  #   list_MEs_PPI
-  #   list_kMEs_PPI
+  #   list_Ms_PPI
+  #   list_kMs_PPI
   
-  message("Computing kMEs after filtering modules for significant Protein-Protein Interactions")
+  if (checkPPI==T) message("Computing kMs after filtering modules for significant Protein-Protein Interactions")
   
-  invisible(gc())
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_pkMEs_PPI.txt"))
-
-  
-  list_MEs_PPI <- clusterMap(cl, function(x,y) moduleEigengenes(expr = as.data.frame(x, col.names=col.names(x)),
+  if (fuzzyModMembership == "kME") {
+    
+    invisible(gc())
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kMEs_PPI.txt"))
+    
+    list_MEs_PPI <- clusterMap(cl, function(x,y) moduleEigengenes(expr = as.data.frame(x, col.names=col.names(x)),
                                                                       colors=y,
                                                                       excludeGrey=T), 
                                    x = list_datExpr_PPI, 
                                    y = list_colors_PPI_uniq, 
-                                   SIMPLIFY = F)
+                                   SIMPLIFY = F,
+                               .scheduling = c("dynamic"))
 
-  list_kMEs_PPI <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
-                      y$eigengenes,
-                      outputColumnName = "",
-                      corFnc = corFnc), 
-                      x=list_datExpr_PPI, 
-                      y=list_MEs_PPI)
- 
-  stopCluster(cl)
-  invisible(gc())
-  
-  # not needed
-  # for (j in 1:length(list_kMEs_PPI)) {
-  #   colnames(list_kMEs_PPI[[j]]) <- gsub("^kME", "", colnames(list_kMEs_PPI[[j]]), ignore.case = F)
-  # }
-  
-  # Name rows in each dataframe - no, not necessary
-  #list_kMEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = 1), x=list_kMEs_PPI, y=list_colors_PPI_uniq, SIMPLIFY=F)
-  
-  ###180509_v1.8_dev2
-  # There should be no need since we have excludeGrey = T. 
-  # But it may be necessary because there are definitely still grey modules
-  ### 180531 we need MEs to make eigen matrix later
-  #list_MEs_PPI <- deleteGrey(list_MEs_PPI) %>% Filter(f=length)
-  #list_kMEs_PPI <- deleteGrey(list_kMEs_PPI) %>% Filter(f=length)
+    list_kMs_PPI <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
+                                y$eigengenes,
+                                outputColumnName = "",
+                                corFnc = corFnc), 
+                                x=list_datExpr_PPI, 
+                                y=list_MEs_PPI,
+                               SIMPLIFY=F,
+                               .scheduling = c("dynamic"))
+    stopCluster(cl)
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+  } else if (fuzzyModMembership == "kIM"){
+    
+    list_dissTOM_ok_path <- dir(path = RObjects_dir, pattern = "list_dissTOM_ok", full.names = T)
+    list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+    list_dissTOM_PPI <- list_dissTOM_ok[sNames_ok %in% sNames_PPI]
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kIMs_PPI.txt"))
+    
+    list_kMs_PPI <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM = x, 
+                                                            colors = y),
+                                x = list_dissTOM_PPI, 
+                                y = list_colors_PPI_uniq, 
+                                SIMPLIFY=F, 
+                               .scheduling = c("dynamic"))
+    
+    stopCluster(cl)
+    
+    names(list_kMs_PPI) <- sNames_PPI
+    # Delete the grey module kIM column
+    list_kMs_PPI <- deleteGrey(list_kMs_PPI)
+    
+    rm(list_dissTOM_PPI, list_dissTOM_ok)
+    
+    list_MEs_PPI <- NULL
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+  } 
 
-  # Delete consensus TOMs from disk
-  for (subsetName in sNames) {
-    if (file.exists(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))) {
-      file.remove(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName))
+
+  ######################################################################
+  ############## FILTER OUT MODULES EXPRESSED IN FEW CELLS #############
+  ######################################################################
+
+
+  #TODO 
+  if (FALSE) {
+    if (fuzzyModMembership == "kME") {
+      
+      # compute embedding mat
+      
+      
+      
+    } else if (fuzzyModMembership == "kIM") {
+      
+      # compute the equivalent to eigengenes (i.e. embeddings) but using kIMs as eigenvectors on which to project each cell's gene-length vector
+      
+      list_list_datExpr_PPI <- mapply(function(a,b,c) lapply(colnames(b), function(x) a[,match(names(c)[c==x], colnames(a))]),
+                                      a = list_datExpr_PPI,
+                                      b = list_kMs_gwas,
+                                      c = list_colors_gwas,
+                                      SIMPLIFY=F)
+      
+      
+      list_list_kMs_gwas <- mapply(function(a,b) mapply(function(x,y) a[match(names(b)[b==y], rownames(a)),y],
+                                                        x= a,
+                                                        y=colnames(a),
+                                                        SIMPLIFY=F), 
+                                   a = list_kMs_gwas, 
+                                   b = list_colors_gwas, 
+                                   SIMPLIFY=F)
+      
+      
+      list_list_kMs_gwas <- mapply(function(a,b,c) mapply(function(x,y) name_for_vec(to_be_named = x, 
+                                                                                     given_names = names(c)[c==y], 
+                                                                                     dimension=NULL),
+                                                          x = a,
+                                                          y = colnames(b),
+                                                          SIMPLIFY=F),
+                                   
+                                   a = list_list_kMs_gwas, 
+                                   b = list_kMs_gwas,
+                                   c = list_colors_gwas, 
+                                   SIMPLIFY=F)
+      
+      invisible(gc())
+      
+      cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "list_cell_embed_mat_for_meta_corr.txt"))
+      
+      list_embed_mat <- clusterMap(cl,function(a,b) as.matrix(mapply(function(x,y) x %*% as.matrix(y),
+                                                                     x = a,
+                                                                     y = b,
+                                                                     SIMPLIFY=T)),
+                                   a = list_list_datExpr_gwas,
+                                   b = list_list_kMs_gwas,
+                                   SIMPLIFY=F,
+                                   .scheduling = c("dynamic"))
+      stopCluster(cl)
+      
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      
+      # name columns embedding matrices
+      list_embed_mat <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=2),
+                               x = list_embed_mat,
+                               y = list_module_gwas,
+                               SIMPLIFY=F)
+      
+      # name rows of embedding matrices
+      tmp_rownames <- lapply(list_list_datExpr_gwas, function(x) rownames(x[[1]]))
+      
+      list_embed_mat <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1),
+                               x = list_embed_mat,
+                               y = tmp_rownames,
+                               SIMPLIFY=F)
     }
+    
+  
+  
   }
-
+  
+  
   ##########################################################################
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
   ##########################################################################
 
   message("Checking modules for enrichment with rare variants/mendelian genes")
   
-  coding_variants <- load_obj(f=coding_variants_path)
-  mendelian_genes <- load_obj(f=mendelian_genes_path)
+  variants <- load_obj(f=variants_path)
+
+  # convert kMs from dataframes to lists
+  list_list_kMs_PPI <- lapply(list_kMs_PPI, function(x) as.list(x)) 
+
+  # give gene names to each vector of kMs
+  list_list_kMs_PPI <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
+                              a = list_list_kMs_PPI,
+                              b = list_kMs_PPI,
+                              SIMPLIFY = F)
   
-  # 'Looping' over celltypes, compute logistic model for each module
-  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mendelian_rare_variants_par.txt"))
+  names(list_list_kMs_PPI) = sNames_PPI 
+  # prepend the celltype to the module name
+  # list_list_kMs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names=paste0(y, "_", names(x)), dimension=NULL), 
+  #                             x=list_list_kMs_PPI, 
+  #                             y=sNames_PPI,
+  #                             SIMPLIFY = F)
   
-  rare_variants_results <- clusterMap(cl, function(x,y) mendelianGenes(cellType = x,
-                                                                       colors = y,
-                                                                       coding_variants = coding_variants,
-                                                                       mendelian_genes = mendelian_genes), 
-                                  x = names(list_colors_PPI_uniq),
-                                  y = list_colors_PPI_uniq,
-                                  SIMPLIFY=F)
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_log_variants_GSEA.txt"))
+  
+  list_list_variants_GSEA <- parLapplyLB(cl, list_list_kMs_PPI, 
+                                       function(x) lapply(x, 
+                                                          function(y) gsea(values = y, geneset = variants, plot = F, return.details=T)))
+  # Returns a list (of modules) of dataframes with enrichment terms as rownames and columns: p.val, q.val, sscore and edge
   stopCluster(cl)
-  invisible(gc())
-  # Put odd-ratios and p-values into separate celltype-length lists
-  list_variants.or <- list_variants.p <- vector(mode = "list", length = length(rare_variants_results))
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
-  for (i in 1:length(rare_variants_results)) { 
-    list_variants.or[[i]] <- rare_variants_results[[i]][['or']]
-    list_variants.p[[i]] <- rare_variants_results[[i]][['p.val']]
-  }
+  # dissolve the top level celltype list so we have a list of module enrichment vectors
+  list_variants_GSEA <- unlist(list_list_variants_GSEA, recursive = F, use.names = T) 
+  #variants_GSEA_mat <- matrix(nrow=length(list_variants_GSEA), ncol=6) 
   
-  # Merge each list into a single table
-  for (t in 1:length(list_variants.or)) {
-    if (t == 1) {
-      variants.or.all <- list_variants.or[[t]]
-      variants.p.all <- list_variants.p[[t]]
-    } else {
-      variants.or.all <- rbind(variants.or.all, list_variants.or[[t]]) 
-      variants.p.all <- rbind(variants.p.all, list_variants.p[[t]]) 
-    }
-  }
+  celltype_col <- rep(sNames_PPI, times=sapply(list_list_variants_GSEA, length))
+  mods_col <- gsub("^.*\\.", "", names(list_variants_GSEA))
+  GSEA_cols <- Reduce( f = rbind, list_variants_GSEA)
   
-  # adjust analytical p-values for multiple testing
-  variants.p.fdr.all = p.adjust(variants.p.all, method="fdr")
-  dim(variants.p.fdr.all) = dim(variants.p.all);  dimnames(variants.p.fdr.all) = dimnames(variants.p.all)
-  
-  # Transform fdr-corrected p-values to -log10(p.val)
-  variants.p.fdr.log <- -log10(variants.p.fdr.all)
-  
-  # Convert everything to dataframe
-  variants.or.all <- variants.or.all %>% as.data.frame 
-  variants.p.all <- variants.p.all  %>% as.data.frame 
-  variants.p.fdr.log  <- variants.p.fdr.log  %>% as.data.frame 
-  
-  # Add module and celltype as columns
-  module <- gsub(".+__","",rownames(variants.p.fdr.log))
-  celltype <- gsub("__.+","",rownames(variants.p.fdr.log))
-  
-  variants.p.fdr.log <- cbind(celltype, module, variants.p.fdr.log) 
-  variants.p.all <- cbind(celltype, module,variants.p.all)
-  variants.or.all <- cbind(celltype,module,variants.or.all)
-  
+  variants_GSEA_df  <- data.frame(celltype=celltype_col, module=mods_col, GSEA_cols, row.names=NULL, stringsAsFactors = F)
+  # adjust p.vals for multiple testing
+  p.adjust(variants_GSEA_df[['p.val']], method = "fdr") %>% -log10(.) -> variants_GSEA_df$q.val 
+        
   ##########################################################################
-  ##############COMPUTE MAGMA COMMON VARIANTS GWAS ENRICHMENT ##############
-  ########  ##################################################################
+  ############# COMPUTE MAGMA COMMON VARIANTS GWAS ENRICHMENT ##############
+  ##########################################################################
   
   # MAGMA docs: http://ctg.cncr.nl/software/MAGMA/doc/manual_v1.06.pdf
   
   if (!is.null(magma_gwas_dir)) {
     
-    message("Scoring PPI enriched modules for enrichment with genes linked by GWAS to phenotypes of interest")
+    message("Scoring enriched modules for enrichment with genes linked by GWAS to phenotypes of interest")
       
-    if (organism == "mmusculus") {
-      
+    if (data_organism == "mmusculus") {
+      invisible(gc()); invisible(R.utils::gcDLLs())
       # map mouse to human gene orthologs  
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
       
       cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMtoHs_par.txt"))
-      list_kMEs_hs <- parLapply(cl, list_kMEs_PPI, function(x) mapMMtoHs(modulekME = x, 
-                                                                    log_dir = log_dir, 
-                                                                    flag_date = flag_date, 
-                                                                    data_prefix = data_prefix, 
-                                                                    mapping_orthology = mapping_orthology))
+      list_kMs_hs <- parLapplyLB(cl, list_kMs_PPI, function(x) mapMMtoHs(modulekM = x, 
+                                                                      log_dir = log_dir, 
+                                                                      flag_date = flag_date, 
+                                                                      data_prefix = data_prefix, 
+                                                                      mapping_orthology = mapping_orthology))
       stopCluster(cl)
-      invisible(gc())
+      invisible(gc()); invisible(R.utils::gcDLLs())
      
-      names(list_kMEs_hs) <- names(list_kMEs_PPI)
-      #rm(list_kMEs_PPI)
+      names(list_kMs_hs) <- names(list_kMs_PPI)
       
-    } else if (organism == "hsapiens") {
-      list_kMEs_hs <- list_kMEs_PPI
-      names(list_kMEs_hs) <- names(list_kMEs_PPI)
-      #rm(list_kMEs_PPI)
+    } else if (data_organism == "hsapiens") {
+      list_kMs_hs <- list_kMs_PPI
+      names(list_kMs_hs) <- names(list_kMs_PPI)
     }
     
     # Load gene mapping and annotation files
@@ -1456,24 +1584,25 @@ if (resume == "checkpoint_3") {
     names(gwas) = gsub(".genes.out", "", d)
     
     # Remap from human Entrez to human Ensembl gene IDs
-    for(i in 1:length(gwas)) {
+    for (i in 1:length(gwas)) {
       idx = match(gwas[[i]]$GENE, mapping_hs_entrez2ensembl$entrezgene)
       mapping = data.frame(entrez=gwas[[i]]$GENE, ensembl=mapping_hs_entrez2ensembl$ensembl_gene_id[idx])
       gwas[[i]]$gene_name = mapping$ensembl
     }
-
-    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "kME_magma_par.txt"))
-    magma_results <- clusterMap(cl, function(x,y) kME_magma(cellType = x, 
-                                                            modulekME = y,
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "kM_magma_par.txt"))
+    magma_results <- clusterMap(cl, function(x,y) kM_magma(cellType = x, 
+                                                            modulekM = y,
                                                             gwas = gwas),
-                                x = names(list_kMEs_hs),
-                                y = list_kMEs_hs,
-                                SIMPLIFY=F)
+                                x = names(list_kMs_hs),
+                                y = list_kMs_hs,
+                                SIMPLIFY=F,
+                                .scheduling = c("dynamic"))
     stopCluster(cl)
-    invisible(gc())
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
     # Prepare tables for results
-    list_magma.r <- list_magma.p <- list_magma.emp.p <- vector(mode="list", length = length(list_kMEs_hs))
+    list_magma.r <- list_magma.p <- list_magma.emp.p <- vector(mode="list", length = length(list_kMs_hs))
     
     # Extract the coefficient, analytical p-value and empirical p-value dataframes for each module, put them into lists
     
@@ -1512,9 +1641,6 @@ if (resume == "checkpoint_3") {
     magma.emp.p.all <- magma.emp.p.all %>% as.data.frame
     magma.r.all <- magma.r.all %>% as.data.frame
     
-    # Add module and celltype as columns
-    #magma.p.fdr.log$module <- magma.p.all$module <- magma.emp.p.all$module <- magma.r.all$module <- gsub("kME|kME\\.","",rownames(magma.p.fdr.log))
-    
     celltype <- gsub("__.+","",rownames(magma.p.fdr.log))    
     module <- gsub(".+__","",rownames(magma.p.fdr.log))
 
@@ -1529,18 +1655,20 @@ if (resume == "checkpoint_3") {
     magma.p.all <- NULL
     magma.emp.p.all <- NULL 
     magma.p.fdr.log <- NULL
+    
   }
   
   ##########################################################################
-  ############## FILTER MODULES ON GENES WITH GWAS ENRICHMENT #############
+  ############## FILTER MODULES ON GENES WITH GWAS ENRICHMENT ##############
   ##########################################################################
   
-  # TODO: resume filtering once we've sorted MAGMA
+  # TODO: check if MAGMA needs correcting for gene length
+  # TODO: Need to add non-protein coding genes to MAGMA
   
-  if (FALSE & !is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
+  if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
     
     # If filtering out non-gwas enriched modules, also retain modules with rare variant / mendelian gene enrichment 
-    idx_row_rareVariants <- rowMin(as.matrix(variants.p.fdr.all)) < p.val.threshold
+    idx_row_variants <- variants_GSEA_df$q.val[match(variants_GSEA_df$module, magma.p.fdr.log$module)] > -log10(pvalThreshold)
     
     # Check if the gwas_filter_traits strings provided by the user can be found in the magma_gwas_dir files
     
@@ -1557,10 +1685,10 @@ if (resume == "checkpoint_3") {
       magma.r.sig <- magma.r.all[,idx_col_keep]
       
       # Identify rows to keep
-      idx_row_gwas <- apply(magma.p.fdr.log.sig[,-grep("module|celltype", colnames(magma.p.fdr.log.sig))], MARGIN = 1, max) > -log10(p.val.threshold)
+      idx_row_gwas <- apply(magma.p.fdr.log.sig[,-grep("module|celltype", colnames(magma.p.fdr.log.sig))], MARGIN = 1, max) > -log10(pvalThreshold)
       
       # rows enriched for gwas common variants and/or for rare variants
-      idx_row_keep <- idx_row_gwas | idx_row_rareVariants
+      idx_row_keep <- idx_row_gwas | idx_row_variants
         
       if (sum(idx_row_keep)>0) {
 
@@ -1590,114 +1718,148 @@ if (resume == "checkpoint_3") {
   ####### FILTER MODULES ON GWAS SIGNIFICANCE ALSO IN OTHER FILES ######
   ######################################################################
     
-    if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) { # NB: if no significant gwas correlations found in previous section, gwas_filter_traits <- NULL
-      
-      # Also filter out non-MAGMA/rare variant enriched modules in rare variants results (although we can still keep and plot the full results)
-      # variants.or.all_gwas <- variants.or.all[idx_row_keep,] 
-      # variants.p.fdr.log_gwas <- variants.p.fdr.log[idx_row_keep,]
-  
-      # get cell types with modules with gwas enrichment
-      sNames_gwas <- names(table(magma.p.fdr.log.sig$celltype))
-      
-      list_module_gwas <- vector(mode="list", length=length(sNames_gwas))
-      names(list_module_gwas) <- sNames_gwas
-      
-      # Get a list of vectors with modules per celltype
-      for (name in sNames_gwas) {
-        idx <- grep(pattern = name, x = magma.p.fdr.log.sig$celltype)
-        list_module_gwas[[name]] <- sapply(idx, function(j) magma.p.fdr.log.sig$module[j], simplify = T)
-      }
-      
-      # Filter out cell types with no significant modules
-      list_colors_gwas <- list_colors_PPI_uniq[sNames_PPI  %in% sNames_gwas]
-        
-      # relabel non-GWAS modules 'grey'
-      list_colors_gwas <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
-                                 ### 180611
-                                 # x = list_colors_gwas,
-                                 x = list_colors_gwas, 
-                                 y = list_module_gwas,
-                                 SIMPLIFY = F)
-      
-      # give gene names to color assignment vectors
-      list_colors_gwas <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
-                                 x = list_colors_gwas,
-                                 y = list_colors_PPI_uniq[sNames_PPI %in% sNames_gwas, drop=F],
-                                 SIMPLIFY = F)
-      
-      # remove any cell clusters without gwas enrichment: expression matrices
-      list_datExpr_gwas <- list_datExpr_PPI[sNames_PPI %in% sNames_gwas, drop=F] 
-      
-    } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
-      
-      sNames_gwas <- sNames_PPI
-      list_module_gwas <- lapply(list_kMEs_PPI, function(x) colnames(x)) 
-      names(list_module_gwas) <- sNames_gwas
-      list_colors_gwas <- list_colors_PPI_uniq
-      list_datExpr_gwas <- list_datExpr_PPI
+  if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) { # NB: if no significant gwas correlations found in previous section, gwas_filter_traits <- NULL
+    
+    # get cell types with modules with gwas enrichment
+    sNames_gwas <- names(table(magma.p.fdr.log.sig$celltype))
+    
+    list_module_gwas <- vector(mode="list", length=length(sNames_gwas))
+    names(list_module_gwas) <- sNames_gwas
+    
+    # Get a list of vectors with modules per celltype
+    for (name in sNames_gwas) {
+      idx <- grep(pattern = name, x = magma.p.fdr.log.sig$celltype)
+      list_module_gwas[[name]] <- sapply(idx, function(j) magma.p.fdr.log.sig$module[j], simplify = T)
     }
     
+    # Filter out cell types with no significant modules
+    list_colors_gwas <- list_colors_PPI_uniq[sNames_PPI  %in% sNames_gwas]
+      
+    # relabel non-GWAS modules 'grey'
+    list_colors_gwas <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
+                               ### 180611
+                               # x = list_colors_gwas,
+                               x = list_colors_gwas, 
+                               y = list_module_gwas,
+                               SIMPLIFY = F)
+    
+    # give gene names to color assignment vectors
+    list_colors_gwas <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
+                               x = list_colors_gwas,
+                               y = list_colors_PPI_uniq[sNames_PPI %in% sNames_gwas, drop=F],
+                               SIMPLIFY = F)
+    
+    # remove any cell clusters without gwas enrichment: expression matrices
+    list_datExpr_gwas <- list_datExpr_PPI[sNames_PPI %in% sNames_gwas, drop=F] 
+    
+  } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
+    
+    sNames_gwas <- sNames_PPI
+    list_module_gwas <- lapply(list_kMs_PPI, function(x) colnames(x)) 
+    names(list_module_gwas) <- sNames_gwas
+    list_colors_gwas <- list_colors_PPI_uniq
+    list_datExpr_gwas <- list_datExpr_PPI
+  }
+    
   ######################################################################
-  #################### RECOMPUTE MEs, kMEs AFTER MAGMA #################
+  #################### RECOMPUTE kMs AFTER MAGMA #######################
   ######################################################################
   
   if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
   
-    message("Re-computing MEs and kME after filtering modules for MAGMA enrichment")
+    message("Re-computing ", fuzzyModMembership, "s after filtering modules for MAGMA enrichment")
     
-    invisible(gc())
-    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_magma.txt"))
+    if (fuzzyModMembership=="kME") {
+      
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_magma.txt"))
+      
+      list_MEs_gwas <- clusterMap(cl, function(x,y) moduleEigengenes(expr=as.data.frame(x,col.names=col.names(x)),
+                                                                    colors=y,
+                                                                    excludeGrey=T), 
+                                 x = list_datExpr_gwas, 
+                                 y = list_colors_gwas, 
+                                 SIMPLIFY = F,
+                                 .scheduling = c("dynamic"))
     
-    list_MEs_gwas <- clusterMap(cl, function(x,y) moduleEigengenes(expr=as.data.frame(x,col.names=col.names(x)),
-                                                                  colors=y,
-                                                                  excludeGrey=T), 
-                               x = list_datExpr_gwas, 
-                               y = list_colors_gwas, 
-                               SIMPLIFY = F)
-  
-    list_kMEs_gwas <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
-                                                            y$eigengenes,
-                                                            outputColumnName = "",
-                                                            corFnc = corFnc), 
-                                x=list_datExpr_gwas, 
-                                y=list_MEs_gwas)
-    
-    ### 180524 v1.8_dev4
-    # Temporarily removed. In AgRP run 21, list_kIMs_PPI[[1]] has an extra column which has name NA
-    # list_kIMs_PPI <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM=x, colors=y, genes=names(y)),
-    #                             x = list_dissTOM_PPI_ok,
-    #                             y = list_colors_PPI_ok,
-    #                             SIMPLIFY=F)
-    ###
-    
-    stopCluster(cl)
-    invisible(gc())
-    
+      list_kMs_gwas <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
+                                                              y$eigengenes,
+                                                              outputColumnName = "",
+                                                              corFnc = corFnc), 
+                                  x=list_datExpr_gwas, 
+                                  y=list_MEs_gwas,
+                                  SIMPLIFY=F,
+                                  .scheduling = c("dynamic"))
+      
+      stopCluster(cl)
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      
+    } else if (fuzzyModMembership=="kIM") {
+
+      list_dissTOM_ok_path <- dir(path = RObjects_dir, pattern = "list_dissTOM_ok", full.names = T)
+      list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+      list_dissTOM_gwas <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_gwas]
+      rm(list_dissTOM_ok)  
+      
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      
+      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kIMs_magma.txt"))
+      
+      list_kMs_gwas <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM = x, 
+                                                                    colors = y),
+                                 x = list_dissTOM_gwas, 
+                                 y = list_colors_gwas, 
+                                 SIMPLIFY=F,
+                                 .scheduling = c("dynamic"))
+      
+      stopCluster(cl)
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      names(list_kMs_gwas) <- sNames_gwas
+      
+      # Delete the grey module kIM column
+      list_kMs_gwas <- deleteGrey(list_kMs_gwas)
+      
+      rm(list_dissTOM_gwas)
+      
+      list_MEs_gwas <- NULL
+      
+      invisible(gc())
+      
+    }
+ 
     # Remove grey modules (if any and filter out runs with only grey (probably not possible but still))
     list_MEs_gwas <- deleteGrey(list_MEs_gwas) %>% Filter(f=length)
-    list_kMEs_gwas<- deleteGrey(list_kMEs_gwas) %>% Filter(f=length)
+    list_kMs_gwas<- deleteGrey(list_kMs_gwas) %>% Filter(f=length)
     
   } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
+    
     list_MEs_gwas <- list_MEs_PPI
-    list_kMEs_gwas <- list_kMEs_PPI
+    list_kMs_gwas <- list_kMs_PPI
+    
   }
   
   resume = "checkpoint_4"
   message("Reached checkpoint 4, saving session image")
   #save.image(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save(list = ls(all.names = TRUE)[-grep("data_data_prefix$|corFnc$|networkType$|anti_cor_action$|hclustMethod$|minClusterSize$|deepSplit$|moduleMergeCutHeight$|pamStage$|TOMnReplicate$|checkPPI$|organism$|magma_gwas_dir$|gwas_filter_traits$|n_cores$|resume$" , ls(), ignore.case=F) ], envir = .GlobalEnv, file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_4") quit(save="no")
   
 } else if (resume == "checkpoint_4") {
   load(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
   # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params.R")
-  source(file = "/projects/jonatan/functions-src/functions.R")
+  source(file = "/projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_params_v2.2_dev1.R")
+  source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
   options(stringsAsFactors = F)
 }
 
 if (resume == "checkpoint_4") {
-
+ 
+  ######################################################################
+  ######################### LOAD PACKAGES ##############################
+  ######################################################################
+  
+  suppressPackageStartupMessages(library(Seurat))
+  
   ######################################################################
   #### COMPUTE EIGENGENE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
@@ -1706,39 +1868,119 @@ if (resume == "checkpoint_4") {
     
     list_metadata <- lapply(list_datExpr_gwas, function(x) metadata[match(rownames(x), rownames(metadata)), , drop=F]) # get list of cell * metadata
     
-    # Compute correlation between metadata (columns) and eigengenes (columns). 
-    list_eigen_metadata_corr_rho <- mapply(function(x,y) WGCNA::cor(x=x, 
-                                                                 y=y$eigengenes, 
-                                                                 method = c("pearson"), 
-                                                                 verbose = 0, 
-                                                                 #use = 'all.obs'),
-                                                                 use = 'pairwise.complete.obs'), 
-                                        x=list_metadata, 
-                                        y=list_MEs_gwas,  
-                                        SIMPLIFY = F) 
+    if (fuzzyModMembership=="kME") {
+      # Compute correlation between metadata (columns) and eigengenes (columns). 
+      list_mod_metadata_corr_rho <- mapply(function(x,y) cor(x=as.matrix(x), 
+                                                             y=as.matrix(y$eigengenes), 
+                                                             method = c("pearson"), 
+                                                             use = 'pairwise.complete.obs'), 
+                                          x=list_metadata, 
+                                          y=list_MEs_gwas,  
+                                          SIMPLIFY = F) 
+        
+    
       
-    list_eigen_metadata_corr_rho <- lapply(list_eigen_metadata_corr_rho, function(x) name_for_vec(to_be_named = x, given_names = colnames(metadata), dimension = 1)) 
+      # Remove 'ME' from eigengene names
+      for (j in 1:length(list_mod_metadata_corr_rho)) {
+        colnames(list_mod_metadata_corr_rho[[j]]) <- gsub("^ME", "", colnames(list_mod_metadata_corr_rho[[j]]), ignore.case=F)
+      }
       
-    # Remove 'ME' from eigengene names
-    for (j in 1:length(list_eigen_metadata_corr_rho)) {
-      colnames(list_eigen_metadata_corr_rho[[j]]) <- gsub("^ME", "", colnames(list_eigen_metadata_corr_rho[[j]]), ignore.case=F)
+    } else if (fuzzyModMembership == "kIM") {
+      
+      # compute the equivalent to eigengenes (i.e. embeddings) but using kIMs as eigenvectors on which to project each cell's gene-length vector
+      
+      list_list_datExpr_gwas <- mapply(function(a,b,c) lapply(colnames(b), function(x) a[,match(names(c)[c==x], colnames(a))]),
+                                  a = list_datExpr_gwas,
+                                  b = list_kMs_gwas,
+                                  c = list_colors_gwas,
+                                  SIMPLIFY=F)
+        
+      
+      list_list_kMs_gwas <- mapply(function(a,b) mapply(function(x,y) a[match(names(b)[b==y], rownames(a)),y],
+                                                   x= a,
+                                                   y=colnames(a),
+                                                   SIMPLIFY=F), 
+                         a = list_kMs_gwas, 
+                         b = list_colors_gwas, 
+                         SIMPLIFY=F)
+                       
+      
+      list_list_kMs_gwas <- mapply(function(a,b,c) mapply(function(x,y) name_for_vec(to_be_named = x, 
+                                                                                given_names = names(c)[c==y], 
+                                                                                dimension=NULL),
+                                                     x = a,
+                                                     y = colnames(b),
+                                                     SIMPLIFY=F),
+
+                              a = list_list_kMs_gwas, 
+                              b = list_kMs_gwas,
+                              c = list_colors_gwas, 
+                              SIMPLIFY=F)
+      
+      invisible(gc())
+      
+      cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "list_cell_embed_mat_for_meta_corr.txt"))
+      
+      list_embed_mat <- clusterMap(cl,function(a,b) as.matrix(mapply(function(x,y) x %*% as.matrix(y),
+                                                         x = a,
+                                                         y = b,
+                                                         SIMPLIFY=T)),
+                                    a = list_list_datExpr_gwas,
+                                    b = list_list_kMs_gwas,
+                                    SIMPLIFY=F,
+                                   .scheduling = c("dynamic"))
+      stopCluster(cl)
+
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      
+      # name columns embedding matrices
+      list_embed_mat <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=2),
+                               x = list_embed_mat,
+                               y = list_module_gwas,
+                               SIMPLIFY=F)
+      
+      # name rows of embedding matrices
+      tmp_rownames <- lapply(list_list_datExpr_gwas, function(x) rownames(x[[1]]))
+      
+      list_embed_mat <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension=1),
+                               x = list_embed_mat,
+                               y = tmp_rownames,
+                               SIMPLIFY=F)
+      
+      # Get correlations
+      list_mod_metadata_corr_rho <- mapply(function(x,y) cor(x=as.matrix(x), 
+                                                              y=as.matrix(y), 
+                                                              method = c("pearson"), 
+                                                              use = 'pairwise.complete.obs'), 
+                                           x=list_metadata, 
+                                           y=list_embed_mat,  
+                                           SIMPLIFY = F) 
+      
+      # Clear space
+      rm(list_embed_mat, list_list_datExpr_gwas, list_list_kMs_gwas)
+      
+      list_mod_metadata_corr_rho <- lapply(list_mod_metadata_corr_rho, function(x) name_for_vec(to_be_named = x, given_names = colnames(metadata), dimension = 1)) 
+      
     }
     
+    # Name the rows of the correlation matrix with the metadata columns
+    list_mod_metadata_corr_rho <- lapply(list_mod_metadata_corr_rho, function(x) name_for_vec(to_be_named = x, given_names = colnames(metadata), dimension = 1)) 
+    
     # Compute p values
-    list_eigen_metadata_corr_pval <- mapply(function(x,y) WGCNA::corPvalueStudent(x, 
-                                                                                   n = nrow(y)), 
-                                             x=list_eigen_metadata_corr_rho, 
+    list_mod_metadata_corr_pval <- mapply(function(x,y) WGCNA::corPvalueStudent(x, 
+                                                                                n = nrow(y)), 
+                                             x=list_mod_metadata_corr_rho, 
                                              y=list_metadata, 
                                              SIMPLIFY=F)
     
     # Convert p values into one big matrix in order to adjust p-values for the number of modules tested across *all* celltypes
-    for (j in 1:length(list_eigen_metadata_corr_pval)) {
+    for (j in 1:length(list_mod_metadata_corr_pval)) {
       if (j==1) {
-        corr_pval <- as.data.frame(list_eigen_metadata_corr_pval[[j]])
-        colnames(corr_pval) <- paste0(names(list_eigen_metadata_corr_pval)[j], "__", colnames(corr_pval)) 
+        corr_pval <- as.data.frame(list_mod_metadata_corr_pval[[j]])
+        colnames(corr_pval) <- paste0(names(list_mod_metadata_corr_pval)[j], "__", colnames(corr_pval)) 
       } else {
-        tmp <- list_eigen_metadata_corr_pval[[j]]
-        colnames(tmp) <- paste0(names(list_eigen_metadata_corr_pval)[j], "__", colnames(tmp)) 
+        tmp <- list_mod_metadata_corr_pval[[j]]
+        colnames(tmp) <- paste0(names(list_mod_metadata_corr_pval)[j], "__", colnames(tmp)) 
         corr_pval <- cbind(corr_pval, tmp)
       }
     }
@@ -1751,14 +1993,14 @@ if (resume == "checkpoint_4") {
     corr_fdr.log <- -log10(corr_fdr)     
     
     # Split single dataframe back into a list of celltypes
-    list_eigen_metadata_corr_fdr <- list_eigen_metadata_corr_fdr.log <- vector(mode = "list", length = length(list_eigen_metadata_corr_pval))
-    names(list_eigen_metadata_corr_fdr) <- names(list_eigen_metadata_corr_fdr.log) <- names(list_eigen_metadata_corr_rho)
+    list_mod_metadata_corr_fdr <- list_mod_metadata_corr_fdr.log <- vector(mode = "list", length = length(list_mod_metadata_corr_pval))
+    names(list_mod_metadata_corr_fdr) <- names(list_mod_metadata_corr_fdr.log) <- names(list_mod_metadata_corr_rho)
     
     k = 0
-    for (j in 1:length(list_eigen_metadata_corr_fdr.log)) {
-      list_eigen_metadata_corr_fdr[[j]] <- as.data.frame(corr_fdr[,(k+1):(k+ncol(list_eigen_metadata_corr_pval[[j]])), drop=F])
-      list_eigen_metadata_corr_fdr.log[[j]] <- as.data.frame(corr_fdr.log[,(k+1):(k+ncol(list_eigen_metadata_corr_pval[[j]])), drop=F])
-      k <- k + ncol(list_eigen_metadata_corr_pval[[j]])
+    for (j in 1:length(list_mod_metadata_corr_fdr.log)) {
+      list_mod_metadata_corr_fdr[[j]] <- as.data.frame(corr_fdr[,(k+1):(k+ncol(list_mod_metadata_corr_pval[[j]])), drop=F])
+      list_mod_metadata_corr_fdr.log[[j]] <- as.data.frame(corr_fdr.log[,(k+1):(k+ncol(list_mod_metadata_corr_pval[[j]])), drop=F])
+      k <- k + ncol(list_mod_metadata_corr_pval[[j]])
     }
     
     # Also make a single dataframe for saving 
@@ -1775,11 +2017,12 @@ if (resume == "checkpoint_4") {
   if (!is.null(metadata_corr_col) & !is.null(metadata_corr_filter_vals)) {
     
     if (!is.null(metadata)) {
+      
       # Get a list of logical vectors indicating significant correlations
-      list_idx_module_sig <- lapply(list_eigen_metadata_corr_fdr.log, function(x) apply(x, 2, function(y) any(y>-log10(p.val.threshold)))) # logical
+      list_idx_module_sig <- lapply(list_mod_metadata_corr_fdr.log, function(x) apply(x, 2, function(y) any(y>-log10(pvalThreshold)))) # logical
      
       # Only keep significantly correlated modules within each celltype
-      list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_eigen_metadata_corr_fdr.log, y=list_idx_module_sig, SIMPLIFY=F) 
+      list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_sig, SIMPLIFY=F) 
       list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) 
   
       sNames_meta <- sNames_gwas[sapply(list_idx_module_sig, any, simplify = T)]
@@ -1799,39 +2042,91 @@ if (resume == "checkpoint_4") {
                                  y = list_colors_gwas[names(list_colors_gwas) %in% sNames_meta, drop=F],
                                  SIMPLIFY = F)
       
-      # Filter kME lists
-      list_kMEs_meta <- list_kMEs_gwas[names(list_kMEs_gwas) %in% sNames_meta, drop = F]
-      list_kMEs_meta <- mapply(function(x,y) x[,colnames(x)%in%y],x=list_kMEs_meta, y = list_module_meta) %>% Filter(f=length)
+      # Filter kM lists
+      list_kMs_meta <- list_kMs_gwas[names(list_kMs_gwas) %in% sNames_meta, drop = F]
+      list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y],x=list_kMs_meta, y = list_module_meta) %>% Filter(f=length)
   
-      # if (!is.null(magma_gwas_dir)) {
-      #   idx <- unlist(list_module_meta) %in% unlist(list_module_gwas)
-      #   magma.p.fdr.log.sig_meta <- magma.p.fdr.log.sig[idx,]
-      #   magma.r.sig_meta <- magma.r.sig[idx,]
-      # }
+        
     } else 
     
-    # TODO: remove, just a backstop
     sNames_meta <- sNames_gwas
     list_colors_meta <- list_colors_gwas
     list_module_meta <- list_module_gwas
-    list_kMEs_meta <- list_kMEs_gwas 
-    
+    list_kMs_meta <- list_kMs_gwas
+
   } else if (is.null(metadata_corr_col) | is.null(metadata_corr_filter_vals)) {
     
     sNames_meta <- sNames_gwas
     list_colors_meta <- list_colors_gwas
     list_module_meta <- list_module_gwas
-    list_kMEs_meta <- list_kMEs_gwas 
+    list_kMs_meta <- list_kMs_gwas 
     # if (!is.null(magma_gwas_dir)) {
     #   magma.p.fdr.log.sig_meta <- magma.p.fdr.log.sig
     #   magma.r.sig_meta <- magma.r.sig
     # }
   }
-  
+
   ######################################################################
-  ##################### PREPARE ORDERED GENE LISTS #####################
+  ##################### COMPUTE CELL x EIGENGENE MATRIX ################
   ######################################################################
   
+  message("Computing all cell embeddings on all modules, across celltypes")
+  
+  seurat_obj_path <- dir(path = RObjects_dir, pattern = "seurat_obj_ensembl", full.names = T)
+  seurat_obj <- load_obj(seurat_obj_path)
+  
+  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  seurat_obj <- ScaleData(object = seurat_obj, 
+                          vars.to.regress = vars.to.regress,
+                          model.use="linear",
+                          do.par=T,
+                          num.cores = min(n_cores, detectCores()-1),
+                          do.scale=T,
+                          do.center=do.center)
+  
+  datExpr <- t(seurat_obj@scale.data)
+  rm(seurat_obj)
+  
+  invisible(gc())
+  
+  latentGeneType <- if (fuzzyModMembership == "kME") "ME" else if (fuzzyModMembership=="kIM") "IM"
+  
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "make_cell_embed_mat.txt"))
+  
+  list_cellModEmbed_mat <- clusterMap(cl, function(x,y,z) cellModEmbed(datExpr = datExpr, 
+                                                                       colours = x,
+                                                                       latentGeneType = latentGeneType,
+                                                                       cellType = y,
+                                                                       kMs = if (latentGeneType== "IM") z else NULL), 
+                                      x = list_colors_meta, 
+                                      y = names(list_colors_meta),
+                                      z = list_kMs_meta,
+                                      SIMPLIFY=F,
+                                      .scheduling = c("dynamic"))
+  
+  stopCluster(cl)
+  
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  
+  list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
+  
+  ##########################################################################
+  ########### CORRELATE MODULE EXPRESSION PROFILES ACROSS CELLTYPES ########
+  ##########################################################################
+  
+  # Compute correlation between cell module embeddings
+  mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
+  
+  # Cluster modules across celltypes using the Pearson correlation between module cell embeddings
+  corr_pos <- mod_corr
+  corr_pos[corr_pos<0] <- 0
+  corr_dist <- as.dist(m = (1-corr_pos), diag = F, upper = F) # convert to (1-corr) distance matrix
+  corr_dendro <- hclust(d = corr_dist, method = "average")
+  
+  # use a simple cut to determine clusters
+  corr_clust = cutreeStatic(dendro = corr_dendro, cutHeight = moduleMergeCutHeight, minSize=1)
+  names(corr_clust) =  corr_dendro$labels
+
   # prepare nested lists of module genes
   list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
   list_list_module_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F)
@@ -1843,28 +2138,18 @@ if (resume == "checkpoint_4") {
   for (i in 1:length(list_list_module_meta_genes)) {
     # iterate over modules
     for (j in 1:length(list_list_module_meta_genes[[i]])) {
-      kMEs <- list_kMEs_meta[[i]] 
+      kMs <- list_kMs_meta[[i]] 
       genes <- list_list_module_meta_genes[[i]][[j]]
-      tmp[[i]][[j]] <- genes[order(kMEs[rownames(kMEs) %in% genes, j], decreasing=T)]
+      tmp[[i]][[j]] <- genes[order(kMs[rownames(kMs) %in% genes, j], decreasing=T)]
     }
   }
   
   list_list_module_meta_genes <- tmp
   
-  ######################################################################
-  ##################### COMPUTE CELL x EIGENGENE MATRIX ################
-  ######################################################################
-
-  message("Computing all cell embeddings on all gene module eigengenes")
-
-  eigen_mat <- make_eigen_mat(RObjects_dir = RObjects_dir,
-                            list_list_module_genes = list_list_module_meta_genes,
-                            n_cores = n_cores,
-                            log_dir = log_dir)
-  
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
+  
   
   # Prepare module genes dataframe
   cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
@@ -1872,8 +2157,8 @@ if (resume == "checkpoint_4") {
   ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
   
   # if we mapped from hgnc to ensembl, retrieve the hgnc symbols
-  if (file.exists(sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.RData", tables_dir, data_prefix, organism))) {
-    mapping <- read.csv(file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, organism), stringsAsFactors = F)
+  if (file.exists(sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.RData", tables_dir, data_prefix, data_organism))) {
+    mapping <- read.csv(file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), stringsAsFactors = F)
     list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
     list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta)
     hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
@@ -1897,42 +2182,54 @@ if (resume == "checkpoint_4") {
   
   save(list_list_module_meta_genes, file=sprintf("%s%s_list_list_module_genes.RData", RObjects_dir, data_prefix))
   
-  ################## SAVE KMEs FOR BMI-ENRICHED MODULES ####################
+  ################## SAVE KMs FOR BMI-ENRICHED MODULES ####################
   ##########################################################################
 
   # Prepare dfs with a gene column followed by kMEs 
-  list_kMEs_meta_out <- lapply(list_kMEs_meta, function(x) cbind(genes=rownames(x), x))
-  rownames(list_kMEs_meta) <- NULL
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_kMEs_meta_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=F, quote = F), list_kMEs_meta_out, sNames_meta, SIMPLIFY = F))
+  list_kMs_meta_out <- lapply(list_kMs_meta, function(x) cbind(genes=rownames(x), x))
+  rownames(list_kMs_meta) <- NULL
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%ss_meta_%s.csv", tables_dir, data_prefix, y, fuzzyModMembership, flag_date), row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
 
   ############### OUTPUT MENDELIAN/RARE VARIANT RESULTS #####################
   ###########################################################################
   
+  variants_GSEA_df <- arrange(variants_GSEA_df, desc(scaled.score))  
+  
   # Full set of results
-  invisible(write.csv(variants.p.fdr.log, file=sprintf("%s%s_mendelian_rareVariants_fdr_log_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-  invisible(write.csv(variants.or.all, file=sprintf("%s%s_mendelian_rareVariants_OR_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+  invisible(write.csv(variants_GSEA_df, file=sprintf("%s%s_mendelian_rareVariants_GSEA_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
 
   ######################## OUTPUT MAGMA RESULTS #############################
   ###########################################################################
   
-  invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_magma.fdr.log.sig_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-  invisible(write.csv(magma.r.sig, file=sprintf("%s%s_magma.r.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-  invisible(write.csv(magma.p.all, file=sprintf("%s%s_magma.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-  invisible(write.csv(magma.emp.p.all, file=sprintf("%s%s_magma.emp.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+  if (!is.null(magma_gwas_dir)) {
+    invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_magma.fdr.log.sig_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+    invisible(write.csv(magma.r.sig, file=sprintf("%s%s_magma.r.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+    invisible(write.csv(magma.p.all, file=sprintf("%s%s_magma.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+    invisible(write.csv(magma.emp.p.all, file=sprintf("%s%s_magma.emp.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+  }
   
   ####################### OUTPUT METADATA CORRELATION RESULTS ###############
   ###########################################################################
   
-  invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_all_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, flag_date), row.names=T, quote = F))
-  
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_rho_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_eigen_metadata_corr_rho, sNames_meta, SIMPLIFY = F))
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_eigen_metadata_corr_fdr.log, sNames_meta, SIMPLIFY = F))
+  if (!is.null(metadata_corr_col) & !is.null(metadata)) {
+    invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_all_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, flag_date), row.names=T, quote = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_rho_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_mod_metadata_corr_rho, sNames_meta, SIMPLIFY = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_mod_metadata_corr_fdr.log, sNames_meta, SIMPLIFY = F))
+  }
+  ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
+  ###########################################################################
 
-  ############################ OUTPUT EIGEN MAT #############################
+  try(invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_cellModEmbed_%s.csv", tables_dir, data_prefix, fuzzyModMembership, flag_date), row.names=T, quote = F)))
+  
+  ################## SAVE MODULE-MODULE CORRELATION FILES ###################
+  ###########################################################################
+  save(mod_corr, corr_dendro, corr_clust, file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects_dir, data_prefix, flag_date))
+  
+  ######################## SAVE DIAGNOSTIC STATS ############################
   ###########################################################################
   
-  invisible(write.csv(eigen_mat, file=sprintf("%s%s_eigen_mat_%s.csv", tables_dir, data_prefix, flag_date), row.names=T, quote = F))
-
+  write.csv(diagnostic_stats, file=sprintf("%s%s_INFO_diagnostic_stats_%s.csv", tables_dir, data_prefix, flag_date), quote = F, row.names=F)
+  
 }
 ######################################################################
 ########################### CLEAR UP #################################

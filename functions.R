@@ -27,7 +27,7 @@ FilterGenes <- function(seurat_obj_sub, min.cells) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, p.val.threshold) {
+wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThreshold) {
   # gene.criterion: 'p.val' means selecting genes (used for PCA) with significant empirical p-val
   #                 'PC.loadings' means projecting all genes onto the PCs to get loadings and selecting 
   #                 genes that have a high absolute loading on a significant PC
@@ -66,9 +66,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, p.val.thr
     
     for (i in (1:pcs.compute)) {
       pc.score <- suppressWarnings(prop.test( 
-        x = c(length(x = which(x = pAll[, i] <= p.val.threshold)), floor(x = nrow(x = pAll) * p.val.threshold)),
+        x = c(length(x = which(x = pAll[, i] <= pvalThreshold)), floor(x = nrow(x = pAll) * pvalThreshold)),
         n = c(nrow(pAll), nrow(pAll)))$p.val)
-      if (length(x = which(x = pAll[, i] <= p.val.threshold)) == 0) {
+      if (length(x = which(x = pAll[, i] <= pvalThreshold)) == 0) {
         pc.score <- 1
       }
       if (is.null(x = score.df)) {
@@ -78,7 +78,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, p.val.thr
       }
     }
     
-    PC_select_idx <- which(score.df$Score < p.val.threshold)
+    PC_select_idx <- which(score.df$Score < pvalThreshold)
     
     if (nrow(pAll) == length(seurat_obj_sub@var.genes)) {
       
@@ -98,9 +98,9 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, p.val.thr
       
       pAll[,sapply(pAll, function(x) class(x)!="numeric")] <- NULL # remove the column of gene names
       row_min <- apply(pAll[,PC_select_idx, drop=F], MARGIN = 1, FUN = function(x) min(x))
-      names_genes_use <- rownames(pAll)[row_min < p.val.threshold]
+      names_genes_use <- rownames(pAll)[row_min < pvalThreshold]
       
-      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < p.val.threshold*2]
+      if (length(names_genes_use) < 1000) names_genes_use <- rownames(pAll)[row_min < pvalThreshold*2]
     }
     
   } else if (jackstrawnReplicate == 0) {
@@ -175,7 +175,7 @@ sft_for_par <- function(datExpr, subsetName) {
     
     sft = pickSoftThreshold(data=datExpr,
                             powerVector = powers,
-                            blockSize = min(5000, ncol(datExpr)), #try to prevent crashing
+                            blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
                             corFnc = corFnc,
                             corOptions =  corOptions,
                             networkType = networkType,
@@ -471,94 +471,56 @@ replaceNA = function(replace_in, replace_from) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# parPkMEs = function(list_kMEs, list_colors) {
-#   
-#   list_pkMEs <- list()
-#   
-#   for (j in 1:length(list_colors)) {
-#     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
-#     # EDIT_180421_8
-#     #pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
-#     
-#     pkMEs <- vector(mode="numeric",length=length(list_colors[[1]]))
-#     ###
-#     # Loop over every gene and get its pkME
-#     for (i in 1:length(pkMEs)) {
-#       #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
-#       pkMEs[i] <- list_kMEs[[j]][paste0("kME", list_colors[[j]][[i]])] [i,]    
-#     }
-#     
-#     list_pkMEs[[j]] <- pkMEs 
-#     
-#   }
-#   return(list_pkMEs)
-# }
-
-parPkMEs = function(list_kMEs, list_colors) {
+parPkMs = function(list_kMs, 
+                   list_colors) {
   
-  list_pkMEs <- list()
+  list_pkMs <- list()
+  list_kMs <- lapply(list_kMs, function(x) name_for_vec(to_be_named = x, given_names = gsub("kME", "", colnames(x), ignore.case =F), dimension=2))
+  
+  for (j in 1:length(list_colors)) {
+    # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
+    pkMs <- vector(mode="numeric",length=length(list_colors[[1]]))
+    ###
+    # Loop over every gene and get its pkME
+    for (i in 1:length(pkMs)) {
+      #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
+      pkMs[i] <- list_kMs[[j]] [list_colors[[j]][i]] [i,]    
+    }
+    list_pkMs[[j]] <- pkMs 
+    names(list_pkMs[[j]]) <- names(list_colors[[j]])
+  }
+  return(list_pkMs)
+}
+
+
+parPkMs_2 = function(list_kMs, list_colors) {
+  
+  list_pkMs <- list()
   
   for (j in 1:length(list_colors)) {
     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
     # EDIT_180421_8
     #pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
-    
-    pkMEs <- vector(mode="numeric",length=length(list_colors[[1]]))
+
+    pkMs <- vector(mode="numeric",length=length(list_colors[[1]]))
     ###
     # Loop over every gene and get its pkME
-    for (i in 1:length(pkMEs)) {
+    for (i in 1:length(pkMs)) {
       #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
-      pkMEs[i] <- list_kMEs[[j]][paste0("kME", list_colors[[j]][[i]])] [i,]    
+      pkMs[i] <- list_kMs[[j]][list_colors[[j]][[i]]] [i,]    
     }
     
-    list_pkMEs[[j]] <- pkMEs 
+    list_pkMs[[j]] <- pkMs 
     
   }
-  return(list_pkMEs)
+  return(list_pkMs)
 }
 
 
-parPkMEs_2 = function(list_kMEs, list_colors) {
-  
-  list_pkMEs <- list()
-  
-  for (j in 1:length(list_colors)) {
-    # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
-    # EDIT_180421_8
-    #pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
-    
-    pkMEs <- vector(mode="numeric",length=length(list_colors[[1]]))
-    ###
-    # Loop over every gene and get its pkME
-    for (i in 1:length(pkMEs)) {
-      #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
-      pkMEs[i] <- list_kMEs[[j]][list_colors[[j]][[i]]] [i,]    
-    }
-    
-    list_pkMEs[[j]] <- pkMEs 
-    
-  }
-  return(list_pkMEs)
-}
-
-
-
-
-
-
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# Delete grey kMEs and kIMs
-# deleteGrey <- function(list_kMs) {
-#   for (k in 1:length(list_k)) {
-#     if (any(grepl("grey", colnames(list_kMs[[k]])))) list_kMs[[k]][['grey']] <- NULL
-#     if (any(grepl("kMEgrey", colnames(list_kMs[[k]])))) list_kMs[[k]][['kMEgrey']] <- NULL
-#   }
-#   return(list_kMs)
-# }
 
 deleteGrey <- function(list_kMs) {
   for (k in 1:length(list_kMs)) {
@@ -627,59 +589,29 @@ kME_reassign_fnc = function(MEs, kMEs, pkMEs, kME_reassign_threshold, colors, fi
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kIM_eachMod_norm = function(dissTOM, colors, genes) {
+kIM_eachMod_norm = function(dissTOM, colors) {
   # compute intramodularConnectivity for every gene with regard to every cluster
   unique_colors = sort(names(table(colors)))#[-which(sort(names(table(colors))) == "grey")]
-  
+  # Convert the distance matrix to a proximity matrix. Nb: It is squary with 0 diagonal
   mTOM <- as.matrix(1-dissTOM)
-  
-  results = matrix(nrow=length(genes), ncol=length(unique_colors))
-  normTerms <- numeric(length(unique_colors))
-  
-  for (j in 1:length(unique_colors)) {
-    for (i in 1:length(genes)) {
-      results[i,j] <- sum(mTOM[i,colors %in% unique_colors[[j]]])
+  # make a gene * unique_colors matrix for results: each gene's degree w.r.t each color (module)
+  results = matrix(nrow=length(colors), ncol=length(unique_colors))
+
+  for (j in 1:length(unique_colors)) { # modules in columns
+    message(paste0("Computing kIM for ", unique_colors[j]))
+    for (i in 1:length(colors)) { # genes in rows
+      results[i,j] <- sum(mTOM[i,colors %in% unique_colors[[j]]]) / sum(colors == unique_colors[[j]])  # for that gene, sum connections to other genes assigned to module j
     }
-    
-    #normTerms[j] <- max(colSums(mTOM[,colors %in% unique_colors[[j]]]))
-    normTerms[j] <- sum(colSums(mTOM[,colors %in% unique_colors[[j]]]))
+    #normTerms[j] <- sum(colSums(mTOM[,colors %in% unique_colors[[j]]])) 
+    # 180706: Rather than normalize by the sum of degrees of a module's genes, instead normalize
+    # just by the number of genes in the module, making the kIM = average degree between a gene
+    # and genes in the module = "average" clustering parame
   }
-  
-  results_norm <- as.data.frame(t(t(results)/normTerms), col.names = unique_colors, row.names=genes)
-
-  #colnames(results_norm) <- unique_colors
-  #rownames(results_norm) <- genes
-
-  return(results_norm)
-  
+  # Output a dataframe with genes in rows and modules (colors) as columns
+  results <- as.data.frame(results, row.names= names(colors))
+  colnames(results) = unique_colors
+  return(results)
 }
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-PrePPIfilter_for_vec <- function(list_pkMEs, list_colors) {
-  # Filter the genes so we only submit to STRINGdb if abs(pkME) > 0.1
-  list_idx_pkME_ok <- lapply(list_pkMEs, function(x) abs(x) > 0.1)
-  list_colors_pkME_ok <- mapply(function(x,y) x[y], x=list_colors, y=list_idx_pkME_ok, SIMPLIFY = F)
-  return(list_colors_pkME_ok)
-}
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-# parVecPPI_outer <- function(list_colors_pkME_ok) {
-#   list_colors_PPI <- lapply(list_colors_pkME_ok, 
-#                             function(x) vecPPI_outer(colors = x,
-#                                                      STRINGdb_species = STRINGdb_species,
-#                                                      p.val.threshold = p.val.threshold,
-#                                                      project_dir = project_dir, 
-#                                                      data_prefix = data_prefix, 
-#                                                      flag_date = flag_date))
-#   
-#   return(list_colors_PPI)
-# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -695,16 +627,15 @@ count_grey_in_list_of_vec = function(list_colors) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# TODO: why does this differ from the version above? Can they be merged?
 
-getPkMEs <- function(colors, kMEs) {
-  pkMEs <- vector(length=length(colors))
+getPkMs <- function(colors, kMs) {
+  pkMs <- vector(length=length(colors))
   
   for (i in 1:length(colors)) {
-    pkMEs[i] <- kMEs[colors[i]][i,]
+    pkMs[i] <- kMs[colors[i]][i,]
   }
   
-  return(pkMEs)
+  return(pkMs)
 }
 
 ############################################################################################################################################################
@@ -738,9 +669,9 @@ plottable_colors <- function(colors) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-checkGrey <- function(kMEs) {
-  if (any(grepl("grey", colnames(kMEs)))) kMEs[['grey']] <- NULL 
-  return(kMEs)
+checkGrey <- function(kMs) {
+  if (any(grepl("grey", colnames(kMs)))) kMs[['grey']] <- NULL 
+  return(kMs)
 }
 
 ############################################################################################################################################################
@@ -1128,13 +1059,27 @@ name_for_vec = function(to_be_named, given_names, dimension=NULL){
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold, p.val.threshold, project_dir, data_prefix, flag_date) {
+PPI_outer_for_vec = function(colors, 
+                             pkMs, 
+                             STRINGdb_species, 
+                             PPI_pkM_threshold, 
+                             pvalThreshold, 
+                             project_dir, 
+                             data_prefix, 
+                             flag_date) {
+  
   # Rather than for parallelising over modules within a set of modules, parallelise over several sets of colors (produced by comparing parameters)
   # It calls PPI_innver_for_vec as a subroutine
   # Args:
+  #   colors
+  #   pkMs
   #   STRINGdb_species
-  #   pkMEs
-  #   colors       
+  #   PPI_pkM_threshold: numeric scalar
+  #   pvalThreshold: numeric scalar
+  #   project_dir
+  #   data_prefix
+  #   flag_date
+  #   
   # Returns: 
   #   colors_PPI: colors where modules that did not satisfy the PPI threshold are set to grey
   
@@ -1144,26 +1089,31 @@ PPI_outer_for_vec = function(colors, pkMEs, STRINGdb_species, PPI_pkME_threshold
   unique_colors <- NULL
   unique_colors_PPI <- NULL
   colors_PPI <- NULL
-  MEs_PPI <- NULL
-  kMEs_PPI <- NULL
-  pkMEs_PPI <- NULL 
   
-  unique_colors <- unique(colors[abs(pkMEs)>PPI_pkME_threshold])
+  unique_colors <- unique(colors[pkMs>PPI_pkM_threshold])
   
-  string_db <- STRINGdb$new(version="10", species = STRINGdb_species, score_threshold=0, input_directory="") # Default: 10090 (Mus musculus)
-  module_PPI <- sapply(unique_colors, function(x) PPI_inner_for_vec(color=x, unique_colors = unique_colors, colors = colors, string_db = string_db), simplify=T) %>% t()
+  string_db <- STRINGdb$new(version="10", 
+                            species = STRINGdb_species, 
+                            score_threshold=0, 
+                            input_directory="") # Default: 10090 (Mus musculus)
+  sapply(unique_colors, function(x) PPI_inner_for_vec(color=x, 
+                                                      unique_colors = unique_colors, 
+                                                      colors = colors, 
+                                                      string_db = string_db), simplify=T) %>% t() -> module_PPI 
+  
   module_PPI <- as.data.frame(module_PPI, row.names = unique_colors)
   
   # FILTER MODULES ON PPI ENRICHMENT  
 
   if (!is.null(module_PPI)) {
-    unique_colors_PPI = unique_colors[module_PPI$'p-value' < p.val.threshold]
+    unique_colors_PPI = unique_colors[module_PPI$'p-value' < pvalThreshold]
     genes_PPI_idx <- colors %in% unique_colors_PPI
     colors_PPI <- colors
     colors_PPI[!genes_PPI_idx] <- "grey"
   } else {
     colors_PPI <- rep("grey", length(colors))
   }  
+  
   return(colors_PPI)
 }
 
@@ -1201,17 +1151,17 @@ PPI_inner_for_vec <- function(color, unique_colors, colors, string_db) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-mapMMtoHs = function(modulekME,
+mapMMtoHs = function(modulekM,
                      log_dir,
                      flag_date,
                      data_prefix,
                      mapping_orthology) {
   
-  if (!is.null(modulekME$genes)) modulekME$genes <- NULL
+  if (!is.null(modulekM$genes)) modulekM$genes <- NULL
   
   log_not_mapped_filepath = paste0(log_dir,flag_date,"_genes_orthology_not_mapped_",data_prefix,"_", ".tab")
   
-  mapping = data.frame(ensembl.mouse=row.names(modulekME))
+  mapping = data.frame(ensembl.mouse=row.names(modulekM))
   # orthology mapping
   mapping$ensembl.human = mapping_orthology$ensembl_gene_id[ match(mapping$ensembl.mouse, mapping_orthology$mmusculus_homolog_ensembl_gene) ]
   #mapping$ensembl.human[mapping$ensembl.human == ""] = NA
@@ -1219,23 +1169,23 @@ mapMMtoHs = function(modulekME,
   append = !file.exists(log_not_mapped_filepath)
   col.names = !append 
   write.table(df_not_mapped,log_not_mapped_filepath,quote=F,sep="\t", col.names = col.names, row.names=F, append=append)
-  #modulekME$symbol = mapping$symbol
-  modulekME$ensembl = mapping$ensembl.human
-  modulekME = na.omit(modulekME)
+  #modulekM$symbol = mapping$symbol
+  modulekM$ensembl = mapping$ensembl.human
+  modulekM = na.omit(modulekM)
   
   ### 180508_v.18_dev2
-  #tmp = within(modulekME, rm("symbol","ensembl"))
-  tmp = within(modulekME, rm("ensembl"))
+  #tmp = within(modulekM, rm("symbol","ensembl"))
+  tmp = within(modulekM, rm("ensembl"))
   ###
   
   # Average duplicated gene IDs
-  modulekME_ens <-aggregate(tmp, by=list(modulekME$ensembl),FUN=mean, na.rm=TRUE)
-  rownames(modulekME_ens) = modulekME_ens$Group.1
-  modulekME_ens = within(modulekME_ens, rm("Group.1"))
+  modulekM_ens <-aggregate(tmp, by=list(modulekM$ensembl),FUN=mean, na.rm=TRUE)
+  rownames(modulekM_ens) = modulekM_ens$Group.1
+  modulekM_ens = within(modulekM_ens, rm("Group.1"))
   
-  modulekME_ens$genes <- NULL
+  modulekM_ens$genes <- NULL
   
-  return(modulekME_ens)
+  return(modulekM_ens)
 }
 
 
@@ -1257,28 +1207,28 @@ cor_magma_pval <- function(gwas_pvals,
 ############################################################################################################################################################
 
 
-kME_magma <- function(cellType,
-                      modulekME,
+kM_magma <- function(cellType,
+                      modulekM,
                       gwas) {
   # Usage: Subroutine to calculate spearman's correlation between gene module membership and GWAS gene significance
   # Args: 
   # Returns:
   
-  colors = colnames(modulekME)
-  table.kme.cor.p = table.kme.cor.r = table.kme.cor.emp.p <- matrix(NA,nrow=length(unique(colors)),ncol=length(gwas)) 
-  rownames(table.kme.cor.r) = rownames(table.kme.cor.p) = rownames(table.kme.cor.emp.p) = unique(colors)
-  colnames(table.kme.cor.r) = colnames(table.kme.cor.p) = colnames(table.kme.cor.emp.p) = names(gwas) 
+  colors = colnames(modulekM)
+  table.kM.cor.p = table.kM.cor.r = table.kM.cor.emp.p <- matrix(NA,nrow=length(unique(colors)),ncol=length(gwas)) 
+  rownames(table.kM.cor.r) = rownames(table.kM.cor.p) = rownames(table.kM.cor.emp.p) = unique(colors)
+  colnames(table.kM.cor.r) = colnames(table.kM.cor.p) = colnames(table.kM.cor.emp.p) = names(gwas) 
   
   for (col in unique(colors)) {
     for (j in 1:length(gwas)) {
-      #col = paste("kME", m, sep="")
-      genes = intersect(rownames(modulekME),gwas[[j]]$gene_name)
+      #col = paste("kM", m, sep="")
+      genes = intersect(rownames(modulekM),gwas[[j]]$gene_name)
       x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
-      y = modulekME[match(genes,rownames(modulekME)), col]
+      y = modulekM[match(genes,rownames(modulekM)), col]
       
       cor = cor.test(x,y,method="spearman", exact=F)
-      table.kme.cor.r[col,j] <- cor$estimate
-      table.kme.cor.p[col,j] <- cor$p.value
+      table.kM.cor.r[col,j] <- cor$estimate
+      table.kM.cor.p[col,j] <- cor$p.value
       
       # Generate 1000 (10000) permutation distribution samples and their associated correlation coefficients
       # For a 0.05 significance threshold this gives an error of the p-value of sqrt(p(1-p)/k) ~ 0.00689202437 (0.0021794497)
@@ -1291,13 +1241,13 @@ kME_magma <- function(cellType,
                        parallel = "no")
       
       # compute the empirical probability of the p-value - should correspond to the p-value, ideally..
-      table.kme.cor.emp.p[col,j] <- ecdf(boot_out$t)(boot_out$t0)
+      table.kM.cor.emp.p[col,j] <- ecdf(boot_out$t)(boot_out$t0)
     }
   }
   
-  rownames(table.kme.cor.r) <- rownames(table.kme.cor.p) <- rownames(table.kme.cor.emp.p) <- paste0(cellType, "__", rownames(table.kme.cor.p))
+  rownames(table.kM.cor.r) <- rownames(table.kM.cor.p) <- rownames(table.kM.cor.emp.p) <- paste0(cellType, "__", rownames(table.kM.cor.p))
   
-  return(list('p.val'= table.kme.cor.p, 'corrCoef' = table.kme.cor.r, 'emp.p.val' = table.kme.cor.emp.p))
+  return(list('p.val'= table.kM.cor.p, 'corrCoef' = table.kM.cor.r, 'emp.p.val' = table.kM.cor.emp.p))
   
 }
 
@@ -1339,7 +1289,7 @@ mendelianGenes <- function(cellType,
                            mendelian_genes) {
   # Usage: compute rare variants enrichment for a set of modules
   # Arguments:
-  #   kMEs: table of kMEs (WGCNA)
+  #   kMs: table of kMs (WGCNA)
   #   colors: character vector of color (module) assignments (WGCNA), with names = genes (human or mouse?)
   #   coding_variants: vector of genes which...
   #   mendelian_genes: genes for which SNPs on a single gene is associated with phenotype (BMI)
@@ -1402,7 +1352,7 @@ mendelianGenes <- function(cellType,
 # NOT IN USE 
 # 180522: /!\ can't install DOSE
 
-# GO_for_par = function(list_kMEs_gwas) {
+# GO_for_par = function(list_kMs_gwas) {
 #   
 #   suppressPackageStartupMessages(library(DOSE))
 #   suppressPackageStartupMessages(library(GO.db))
@@ -1414,11 +1364,11 @@ mendelianGenes <- function(cellType,
 #   
 #   list_GSEA_gwas <- NULL
 #   
-#   # # select only kME columns of gwas enriched module
-#   # list_kMEs_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMEs_PPI_ok_gwas, y = list_modules_PPI_gwas)
+#   # # select only kM columns of gwas enriched module
+#   # list_kMs_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMs_PPI_ok_gwas, y = list_modules_PPI_gwas)
 #    
-#   # Order genes by kME to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
-#   list_list_module_gwas_genes_order <- lapply(list_kMEs_gwas, function(x) lapply(colnames(x), function(y) rownames(x)[order(x[[y]], decreasing=T)]))
+#   # Order genes by kM to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
+#   list_list_module_gwas_genes_order <- lapply(list_kMs_gwas, function(x) lapply(colnames(x), function(y) rownames(x)[order(x[[y]], decreasing=T)]))
 #   
 #   ### 190509_v1.8.dev2
 #   ### # Got to here!
@@ -1426,14 +1376,14 @@ mendelianGenes <- function(cellType,
 #   cl <- makeCluster(n_cores, type = "FORK", 
 #                     outfile = paste0(log_dir, "log_gprofiler.txt"))
 #   
-#   list_list_ggo <- parLapply(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) groupGO(gene = y,
+#   list_list_ggo <- parLapplyLB(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) groupGO(gene = y,
 #                                                                                                           OrgDb    = org.Mm.eg.db,
 #                                                                                                           ont      = "CC",
 #                                                                                                           #level    = 3,
 #                                                                                                           readable = T)))
 #   
 #   
-#   ego3 <- parLapply(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) gseGO(geneList = y,
+#   ego3 <- parLapplyLB(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) gseGO(geneList = y,
 #                                                                                                OrgDb        = org.Mm.eg.db,
 #                                                                                                ont          = "CC",
 #                                                                                                nPerm        = 1000,
@@ -1476,10 +1426,10 @@ mendelianGenes <- function(cellType,
 # 
 #   list_GSEA_PPI_gwas <- NULL
 #   
-#   # select only kME columns of gwas enriched moduled 
-#   list_kMEs_PPI_ok_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMEs_ok[names(list_kMEs_PPI_ok) %in% sNames_PPI_gwas], y = list_modules_PPI_gwas)
+#   # select only kM columns of gwas enriched moduled 
+#   list_kMs_PPI_ok_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMs_ok[names(list_kMs_PPI_ok) %in% sNames_PPI_gwas], y = list_modules_PPI_gwas)
 #   
-#   # Order genes by kME to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
+#   # Order genes by kM to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
 #   list_list_module_PPI_gwas_genes_order <- lapply(list_kMEs_PPI_ok_gwas, function(x) lapply(colnames(x), function(y) rownames(x)[order(x[[y]], decreasing=T)]))
 #   
 #   # name them
@@ -1489,7 +1439,7 @@ mendelianGenes <- function(cellType,
 #                     outfile = paste0(log_dir, "log_gprofiler_PPI.txt"))
 #   
 #   ### 180607_v1.8_dev2
-#   list_list_gprofiles_PPI <- parLapply(cl, list_list_module_PPI_genes_order, function(x) gprofiler(query=x, 
+#   list_list_gprofiles_PPI <- parLapplyLB(cl, list_list_module_PPI_genes_order, function(x) gprofiler(query=x, 
 #                                                                                                    organism = organism, 
 #                                                                                                    sort_by_structure = T,
 #                                                                                                    ordered_query = T, 
@@ -1572,7 +1522,7 @@ make_eigen_mat <- function(RObjects_dir,
   
   # Score cells on eigengenes 
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_eigengene_allscore.txt"))
-  eigenge_allscore.list<-parLapply(cl, eiglist, function(x) moduleEigengenes((s.coexp), x, impute = T)$eigengenes) #Score cell matrix on each eigengene found in each celltype
+  eigenge_allscore.list<-parLapplyLB(cl, eiglist, function(x) moduleEigengenes((s.coexp), x, impute = T)$eigengenes) #Score cell matrix on each eigengene found in each celltype
   stopCluster(cl)
   invisible(gc())
   
@@ -1600,6 +1550,43 @@ make_eigen_mat <- function(RObjects_dir,
   return(eigen_mat)
 }
 
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+cellModEmbed <- function(datExpr, 
+                        colours=NULL, 
+                        latentGeneType,
+                        cellType=NULL,
+                        kMs=NULL) {
+  # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
+  # colors is a character vector with gene names
+  # the genes should be ordered identically
+  
+  # prepare celltype character for naming columns
+  if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
+  if (latentGeneType == "ME") { 
+    list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+    embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
+    colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
+  } else if (latentGeneType == "IM") {
+    list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+    list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
+                       x= kMs,
+                       y=colnames(kMs),
+                       SIMPLIFY=F)
+    
+    embed_mat <- as.matrix(mapply(function(x,y) x %*% as.matrix(y),
+                                  x = list_datExpr,
+                                  y = list_kMs,
+                                  SIMPLIFY=T))
+    # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
+    # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
+    colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
+  } 
+  rownames(embed_mat) <- rownames(datExpr)
+  return(embed_mat)
+}
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1732,4 +1719,90 @@ if (FALSE) {
   pdf(sprintf("%s%s_mean.celltype.eig.expr_%s.pdf", plots_dir, data_prefix, flag_date ),h=12,w=12)
   draw(ht.mean.celltype.eig.expr)
   dev.off()
+}
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+ipak <- function(pkg, bioconductor = F){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) {
+    if (bioconductor==F) {
+      try(install.packages(new.pkg, dependencies = TRUE))
+    } else {
+      source("https://bioconductor.org/biocLite.R")
+      biocLite(pkg)
+    }
+  }
+  sapply(pkg, require, character.only = TRUE)
+}
+
+# usage
+# packages <- c("ggplot2", "plyr", "reshape2", "RColorBrewer", "scales", "grid")
+# ipak(packages)
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+# Remove packages installed under 3.5.0
+
+#pak3.5 <- installed.packages()[,"Package"][grep("3.5.0", installed.packages()[,"Built"])]
+
+rpak <- function(pkg){
+  installed.pkg <- pkg[(pkg %in% installed.packages()[, "Package"])]
+  if (length(installed.pkg)) {
+    try(remove.packages(installed.pkg))
+  }
+}
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+wrap_consensusTOM <- function(...) {
+  # a function wrapper the sole purpose of which is to create a function environment which contains only the 
+  # necessary variables (...) required by consensusTOM. These should be named.
+  # This creates a suitable environment for using makeCluster to set up fork clusters while sending only the necessary variables
+  # from the global environment to the workers, thereby saving memory.
+  
+  cl <- makeCluster(n_cores_consTOM, type = "FORK", outfile = paste0(log_dir, "log_consensusTOM.txt"))
+  
+  list_consensus <- clusterMap(cl, function(x,y) consensusTOM(multiExpr = x, 
+                                                              checkMissingData = checkMissingData,
+                                                              maxBlockSize = maxBlockSize, 
+                                                              blockSizePenaltyPower = blockSizePenaltyPower, 
+                                                              randomSeed = randomSeed,
+                                                              corType = corType,
+                                                              maxPOutliers = maxPOutliers,
+                                                              quickCor = quickCor,
+                                                              pearsonFallback = pearsonFallback,
+                                                              cosineCorrelation = cosineCorrelation,
+                                                              replaceMissingAdjacencies = replaceMissingAdjacencies,
+                                                              power = list_softPower[[y]],
+                                                              networkType = networkType,
+                                                              TOMDenom = TOMDenom,
+                                                              saveIndividualTOMs = saveIndividualTOMs,
+                                                              individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
+                                                              networkCalibration = networkCalibration,
+                                                              sampleForCalibration = sampleForCalibration,
+                                                              sampleForCalibrationFactor = sampleForCalibrationFactor,
+                                                              getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                                                              consensusQuantile = consensusQuantile,
+                                                              useMean = useMean,
+                                                              saveConsensusTOMs = saveConsensusTOMs,
+                                                              consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
+                                                              returnTOMs = F,
+                                                              useDiskCache = T,
+                                                              cacheDir = RObjects_dir,
+                                                              cacheBase = ".blockConsModsCache",
+                                                              verbose = verbose,
+                                                              indent = indent), 
+                               x=list_multiExpr, 
+                               y=sNames, 
+                               SIMPLIFY=F)
+  stopCluster(cl)
+  invisible(gc())
+  
+  return(list_consensus)
 }

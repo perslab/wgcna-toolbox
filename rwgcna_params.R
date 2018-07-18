@@ -3,7 +3,7 @@
 
 ############################## VARIOUS ###############################
 
-p.val.threshold = 5e-2
+pvalThreshold = 5e-2
 options(stringsAsFactors = F)
 ############################## ADJACENCY #############################
 
@@ -37,8 +37,8 @@ pearsonFallback = "individual" # in case of columns with zero MAD
 ############################## BLOCKWISEMODULES ######################
 
 #blocks = NULL # optional specification of blocks in which hierarchical clustering and module detection should be performed. If given, must be a numeric vector with one entry per gene of multiExpr giving the number of the block to which the corresponding gene belongs.
-maxBlockSize = 10e7 # integer giving maximum block size for module detection. Should be higher than the number of samples to avoid block-wise module detection. Ignored if blocks above is non-NULL. Otherwise, if the number of genes in datExpr exceeds maxBlockSize, genes will be pre-clustered into blocks whose size should not exceed maxBlockSize.
-blockSizePenaltyPower = 10e-7 # number specifying how strongly blocks should be penalized for exceeding the maximum size. Set to a lrge number or Inf if not exceeding maximum block size is very important.
+maxBlockSize = 5e3 # integer giving maximum block size for module detection. Should be higher than the number of samples to avoid block-wise module detection. Ignored if blocks above is non-NULL. Otherwise, if the number of genes in datExpr exceeds maxBlockSize, genes will be pre-clustered into blocks whose size should not exceed maxBlockSize.
+blockSizePenaltyPower = 10 # number specifying how strongly blocks should be penalized for exceeding the maximum size. Set to a lrge number or Inf if not exceeding maximum block size is very important.
 #nPreclusteringCenters = as.integer(min(ncol(datExpr0)/20, 100*ncol(datExpr0)/maxBlockSize))
 
 loadTOM = FALSE # load TOM from previously saved file?
@@ -88,13 +88,13 @@ kME_reassign_threshold = 1.25
 # home-made - defined further down
 #nPermutations = if (test_run==FALSE) 100 else 3 # TODO set to 100 as in Gandal,...,Geschwind et al 2018
 startRunIndex = 1
-replace = T # Sample with replacement? Galdal et al use FALSE, default FALSE. Using replacement increases variance of the sampling mean. TWEAKPARAM
+replace = F # Sample with replacement, or 2/3 without replacement? Galdal et al use FALSE. Using replacement increases variance of the sampling mean. TWEAKPARAM
 fraction = if (replace) 1.0 else 0.66 # TWEAKPARAM.
 
 ############################## BOOT #############################
 
 #Number of times to repeat the calculation on permuted data
-R = 10
+R = 20
 
 ####################### CONSENSUSCALCULATION #########################
 
@@ -135,15 +135,15 @@ individualTOMFileNames = "individualTOM-Set%s-Block%b.RData"
 
 # Consensus calculation options: network calibration
 
-networkCalibration = "full quantile" # "single quantile",  "none" # network calibration method. One of "single quantile", "full quantile", "none" (or a unique abbreviation of one of them).
+networkCalibration =  "single quantile" #full quantile" #   "none" # network calibration method. One of "single quantile", "full quantile", "none" (or a unique abbreviation of one of them).
 # Full quantile normalization, implemented in normalize.quantiles, adjusts the TOM matrices such that all quantiles equal each other (and equal to the quantiles of the component-wise average of the individual TOM matrices).
 
 # Simple quantile calibration options
 
-# calibrationQuantile = 0.95 # if networkCalibration is "single quantile", topological overlaps (or adjacencies if TOMs are not computed) will be scaled such that their calibrationQuantile quantiles will agree.
+calibrationQuantile = 0.95 # if networkCalibration is "single quantile", topological overlaps (or adjacencies if TOMs are not computed) will be scaled such that their calibrationQuantile quantiles will agree.
 
 sampleForCalibration = TRUE # if TRUE, calibration quantiles will be determined from a sample of network similarities. Note that using all data can double the memory footprint of the function and the function may fail.
-sampleForCalibrationFactor = 2000 # determines the number of samples for calibration: the number is 1/calibrationQuantile * sampleForCalibrationFactor. Should be set well above 1 to ensure accuracy of the sampled quantile.
+sampleForCalibrationFactor = 1000 # determines the number of samples for calibration: the number is 1/calibrationQuantile * sampleForCalibrationFactor. Should be set well above 1 to ensure accuracy of the sampled quantile.
 getNetworkCalibrationSamples = FALSE # logical: should samples used for TOM calibration be saved for future analysis? This option is only available when sampleForCalibration is TRUE.
 
 # Consensus definition
@@ -420,7 +420,7 @@ fastpath = T # for RunPCA()
 ############################### STRINGdb ##################################
 
 PPI_pkME_threshold = 10e-2
-#p.val.threshold = 5e-2
+#pvalThreshold = 5e-2
 
 ############################### TOM ##################################
 

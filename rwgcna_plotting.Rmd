@@ -19,15 +19,14 @@ output:
 
 # Setup
 
+## Set variables and constants 
 ```{r}
 options(stringsAsFactors = F)
-```
 
-Set variables
-
-```{r}
-project_dir ="/projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-2/"
-data_prefix= "mousebrain-top10-2"
+#project_dir = "/projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-3/"
+#data_prefix = "mousebrain-top10-3"
+project_dir = "/projects/timshel/sc-genetics/sc-genetics/out/out.wgcna/maca_top29_BMI/"
+data_prefix = "maca_top29_BMI"
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -44,16 +43,17 @@ plots_dir <- paste0(project_dir, "plots/")
 ## Load libraries 
 
 ```{r}
-suppressPackageStartupMessages(library(corrplot))
+
+suppressPackageStartupMessages(library(reshape))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(WGCNA))
+suppressPackageStartupMessages(library(Seurat))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(corrplot))
 suppressPackageStartupMessages(library(RColorBrewer))
-suppressPackageStartupMessages(library(WGCNA))
-suppressPackageStartupMessages(library(Seurat))
-suppressPackageStartupMessages(library(reshape))
-suppressPackageStartupMessages(library(reshape2))
-suppressPackageStartupMessages(library(dplyr))
+
 
 #suppressPackageStartupMessages(library(clusterProfiler))
 
@@ -62,7 +62,14 @@ suppressPackageStartupMessages(library(dplyr))
 ## Load functions and constants
 
 ```{r}
-source(file = "/projects/jonatan/functions-src/functions.R")
+source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
+```
+
+# Load session image
+
+```{r}
+session_image_path <- dir(pattern = "final_session_image", path = RObjects_dir, full.names = T)
+load(session_image_path)
 ```
 
 ## Plotting
@@ -78,6 +85,7 @@ source(file = "/projects/jonatan/functions-src/functions.R")
 ### Plot module assignment resulting from different parameters
 
 ```{r}
+
 # Status: OK
 # Pre-PPI - all different parameters, ordered by n genes assigned post PPI filter
 invisible(mapply(function(a,b,c,d) plotDendro_for_vec(list_colors=a,
@@ -109,6 +117,7 @@ invisible(mapply(function(a,b,c,d) plotDendro_for_vec(list_colors=a,
 
 ```{r}
 
+# TODO: Update for just original and post-PPI
 # Plot different parameter module assignments: original, post-PPI, post-MAGMA, post- metadata correlation filter
 
 list_filter_labels = c("Original modules", "post-PPI filter", "post-MAGMA filter", "post-metadata corr filter")
@@ -162,7 +171,7 @@ p=ggplot(melt(dat, value.name="value"), aes(x=variable, y=value, fill = module))
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-ggsave(p, filename = paste0(plots_dir, data_prefix, "_", "_magma_", flag_date, ".pdf") ,width=45,height=12)
+ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_", flag_date, ".pdf") ,width=45,height=12)
 
 #   
 # # filtered for metadata correlations
@@ -179,6 +188,8 @@ ggsave(p, filename = paste0(plots_dir, data_prefix, "_", "_magma_", flag_date, "
 
 ```{r}
 
+# TODO: Update for GSEA
+
 rareVariants.p.fdr.log.path <- dir(path = tables_dir, pattern = "mendelian_rareVariants_fdr_log", full.names = T, recursive = F)
 rareVariants.p.fdr.log <- read.csv(file=rareVariants.p.fdr.log.path, header=T, quote="") 
 
@@ -190,7 +201,7 @@ p1=ggplot(melt(dat1, value.name="value"), aes(x=variable, y=value, fill = module
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-ggsave(p1, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_", flag_date, ".pdf") ,width=45,height=12)
+ggsave(p1, filename = paste0(plots_dir, data_prefix,  "_rareVariants_", flag_date, ".pdf") ,width=45,height=12)
 
 # only significant
 rareVariants.p.fdr.log.sig <- rareVariants.p.fdr.log[apply(rareVariants.p.fdr.log[,-grep("module|celltype", colnames(rareVariants.p.fdr.log))], FUN = function(x) max(x) > -log10(p.val.threshold), MARGIN=1),]
@@ -198,7 +209,7 @@ rareVariants.p.fdr.log.sig <- rareVariants.p.fdr.log[apply(rareVariants.p.fdr.lo
 dat2 <- rareVariants.p.fdr.log.sig[,-grep("celltype", colnames(rareVariants.p.fdr.log.sig))]
 p2=ggplot(melt(dat2, value.name="value"), aes(x=variable, y=value, fill = module)) + 
     geom_bar(stat="identity",position=position_dodge(),color= "black") +
-    scale_fill_manual(values=plottable_colors(dat1$module)) + theme_classic() +
+    scale_fill_manual(values=plottable_colors(dat2$module)) + theme_classic() +
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
@@ -209,21 +220,28 @@ ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_
 #### Plot cell x eigengene embedding matrix
 
 ```{r}
-
-eigen_mat_path <- dir(path = tables_dir, pattern="eigen_mat", full.names = T, recursive = F, ignore.case = T)
-eigen_mat <- read.csv(file = eigen_mat_path, header = T, quote = "")
+# TODO: update for generalised kM
+cellModEmbed_path <- dir(path = tables_dir, pattern="cellModEmbed", full.names = T, recursive = F, ignore.case = T)
+cellModEmbed_mat <- read.csv(file = cellModEmbed_path, header = T, quote = "")
 
 # Take rownames from column, then delete
-rownames(eigen_mat) <- eigen_mat[,1]
-eigen_mat[,1] <- NULL
+rownames(cellModEmbed_mat) <- cellModEmbed_mat[,1]
+cellModEmbed_mat[,1] <- NULL
 
+colnames(cellModEmbed_mat) <- gsub("^X", "", colnames(cellModEmbed_mat), ignore.case = F)
 seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
 
-seurat_obj <- SetAllIdent(seurat_obj, id)
-
+seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
 ident <- seurat_obj@ident
 
-eigen_mat_1 <- eigen_mat[order(seurat_obj@meta.data$ClusterName), ] 
+```
+
+```{r}
+# Order cells by celltype
+cellModEmbed_mat <- cellModEmbed_mat[match(rownames(cellModEmbedorder(ident), ] 
+
+# Take sqrt of values (first make positive, then sqrt, then restore original sign)
+cellModEmbed_mat %>% '*'(sign(.)) %>% sqrt(.) %>% '*'(sign(cellModEmbed_mat)) -> cellModEmbed_mat_sqrt
 
 # make row annotation: random colors for celltypes
 colors_uniq <- gsub("\\d", "", colors()) %>% unique
@@ -235,35 +253,53 @@ htra<-rowAnnotation(cellcluster = ident,
                     col=list(cellcluster = htra_colors),
                     width = unit(5, "mm"))
 
-ht1 <- Heatmap(eigen_mat_1[,], 
+ht1 <- Heatmap(cellModEmbed_mat_sqrt[,], 
              cluster_rows = F,
-             #row_order = row.names(eigen_mat_order),
+             #row_order = ,
              cluster_columns = T, 
              #show_row_dend = F, 
              show_column_dend = F, 
              show_heatmap_legend = T, 
              show_row_names = F, 
-             show_column_names = T)
+             show_column_names = T,
+             heatmap_legend_param = list(title = "Expression"))
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_AllEigenHeatmap_rows_celltype_order_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+pdf(sprintf("%s%s_cellModEmbed_sqrt_cellOrder_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
 draw(ht1+htra)
 dev.off()
   
 # With clustering rows
-ht2 <- Heatmap(eigen_mat[,], 
+ht2 <- Heatmap(cellModEmbed_mat_sqrt[,], 
                cluster_rows = T,
-               #row_order = row.names(eigen_mat_order),
+               #row_order = NULL,
                cluster_columns = T, 
                #show_row_dend = F, 
                show_column_dend = F, 
-               show_heatmap_legend = FALSE, 
+               show_heatmap_legend = T, 
                show_row_names = F, 
-               show_column_names = T)
+               show_column_names = T,
+               heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_AllEigenHeatmap_rows_cluster_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+pdf(sprintf("%s%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
 draw(ht2+htra)
 dev.off()
-  
+
+
+# Without clustering rows nor columns
+ht3 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+               cluster_rows = F,
+               #row_order = NULL,
+               cluster_columns = F, 
+               #show_row_dend = F, 
+               #show_column_dend = F, 
+               show_heatmap_legend = T, 
+               show_row_names = F, 
+               show_column_names = T,
+               heatmap_legend_param = list(title = "Expression"))
+               #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+draw(ht3+htra)
+dev.off()  
 ```
 
 ### Plot module-metadata correlation matrices
@@ -271,18 +307,19 @@ dev.off()
 ```{r}
 #TODO: Incorporate into eigen plot (or simply replace with another form)
  
+
 if (!is.null(metadata)) {
   for (cell in names(list_eigen_metadata_corr_rho)){
-    pdf(sprintf("%s%s_%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=15, h=8) # TODO: adapt this dynamically
+    pdf(sprintf("%s%s_%s_mod_corr_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=15, h=8) # TODO: adapt this dynamically
     corrplot(corr = as.matrix(list_eigen_metadata_corr_rho[[cell]]),
              add = F,
              addCoef.col = "black",
              number.digits = 2L,
-             number.cex = 3,
-             tl.cex = 3,
-             cl.cex = 1.5,
+             number.cex = 2,
+             tl.cex = 2,
+             cl.cex = 1,
              method = "color",
-             col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+             col=colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias=1)(200),
              is.corr=T,
              #order = "hclust",
              #hclust.method = hclustMethod,
@@ -295,23 +332,6 @@ if (!is.null(metadata)) {
   }
 }
 
-# TODO : We currently do this above
-# pdf(sprintf("%s%s_corr_eigengenes_metadata_%s.pdf", plots_dir, data_prefix, flag_date))
-# corrplot(corr = eigen_metadata_corr,
-#          add = F,
-#          addCoef.col = "black",
-#          number.digits = 2L,
-#          number.cex = 0.5,
-#          method = "color",
-#          col=colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
-#          is.corr=T,
-#          #order = "hclust",
-#          #hclust.method = hclustMethod,
-#          title=NULL,#sprintf("%s eigenvector - metadata correlations", data_prefix),
-#          #addCoef.col = F,
-#          p.mat = eigen_metadata_corr_fdr,
-#          sig.level = 5e-2)
-# invisible(dev.off())
 ```
 
 ### Plot t-SNE of cell clusters
@@ -325,17 +345,32 @@ ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),
 
 ```
 
+## Plot metadata in cells on t-SNE featureplots
+
+```{r}
+
+for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
+seurat_obj <- AddMetaData(seurat_obj, as.data.frame(metadata))
+
+for (feat in names(seurat_obj@meta.data)) {
+  color_to_plot <- "blue4"
+  FeaturePlot(seurat_obj, features.plot = feat, cols.use = c("grey85", color_to_plot))#, min.cutoff = c("q25"))
+  ggsave(paste0(plots_dir,data_prefix,"_featplot_", feat, flag_date, ".pdf"),w=12, h=10)
+}
+
+```
+
 ### Plot module eigengene expression on t-SNE featureplots 
 
 ```{r}
-  
-for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
-seurat_obj <- AddMetaData(seurat_obj, eigen_mat)
 
-for (eigengene in names(seurat_obj@meta.data)) {
+for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
+seurat_obj <- AddMetaData(seurat_obj, cellModEmbed_mat[match(rownames(seurat_obj@meta.data), rownames(cellModEmbed_mat)),])
+
+for (mod in names(seurat_obj@meta.data)) {
   color_to_plot <- "blue4"
-  FeaturePlot(seurat_obj, features.plot = eigengene, cols.use = c("grey85", color_to_plot), min.cutoff = c("q25"))
-  ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_eigengene_", eigengene, ".pdf"),w=12, h=10)
+  FeaturePlot(seurat_obj, features.plot = mod, cols.use = c("grey85", color_to_plot), min.cutoff = c("q25"))
+  ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_mod_", mod, ".pdf"),w=12, h=10)
 }
 
 ```
@@ -344,87 +379,137 @@ for (eigengene in names(seurat_obj@meta.data)) {
 
 ```{r}
 
-# TODO: Update
-# TODO: Compute this in the main script
+load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
 
-if (length(list_module_gwas_meta) > 1) {
+
+# plot
+  pdf(sprintf("%s%s_mod_corr%s.pdf", plots_dir, data_prefix, flag_date), width=ncol(cellModEmbed_mat) %/% 3,height=ncol(cellModEmbed_mat) %/% 3)
   
-  corr_eigengenes <- WGCNA::cor(x=eigen_mat, method=c("pearson"), verbose=verbose)
-  
-  # plot
-  pdf(sprintf("%s%s_%s_corr_across_subsets_%s.pdf", plots_dir, data_prefix, "gwas_or_metadata_enriched_module_eigengenes", flag_date),width=ncol(eigen_mat) %/% 3,height=ncol(eigen_mat) %/% 3)
-  corrplot(corr = corr_eigengenes, 
+  corrplot(corr = mod_corr, 
            method = "color",
-           colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(200),
+           col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
            diag = F,
            is.corr=T,
-           title=sprintf("%s %s corr across subsets", data_prefix, "gwas_or_metadata_enriched_module_eigengenes"),#,
+           #title=sprintf("%s module corr across subsets", data_prefix),
            order = "hclust",
-           hclust.method = hclustMethod)
-  
+           hclust.method = hclustMethod,
+           addCoef.col = "black",
+           tl.srt = 45,
+           number.digits = 2L,
+           number.cex = 0.5)
+           #tl.cex = 2,
+           #cl.cex = 1)
+    
   invisible(dev.off())
 
+```
+
+# plot module clusters
+
+```{r}
+
+load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
+
+pdf(sprintf("%s%s_module_cluster%s.pdf", plots_dir, data_prefix, flag_date),width=ncol(cellModEmbed_mat) %/% 3,height=ncol(cellModEmbed_mat) %/% 3)
+
+plotDendroAndColors(dendro=mod_corr_dendro,
+                    colors = mod_corr_clust,
+                    addGuide=T,
+                    dendroLabels=NULL, 
+                    main="Module clustering across celltypes")
+                    #cex.colorLabels=0.4)
+#abline(h=1-moduleMergeCutHeight)
+dev.off()
+```
+
+
+# Compute kMEs of the merged modules
+
+```{r}
+# TODO
+```
+
+# Compute rare variant and mendelian gene enrichment with the merged modules
+
+```{r}
+# TODO
+```
+
+# Compute MAGMA enrichment with the merged modules 
+
+```{r}
+# TODO
+```
+
+# 
+
+```{r}
+
+```
+
+# Compute eigen_mat of the merged modules
+
+
+
+
+
+```{r}
+##########################################################################
+#####################  MERGE CORRELATED MODULES ##########################
+##########################################################################
+# ARCHIVE
+
+# Identify highly correlated modules
+mod_corr_lt <- mod_corr
+mod_corr_lt[!lower.tri(mod_corr, diag = F)] <- NA
+idx_toMerge <- which(mod_corr_lt>(1-moduleMergeCutHeight), arr.ind = T)
+
+
+# Merge highly correlated modules
+
+modules_merged <- dat_BMI_fdr$module
+list_module_BMI_merged <- list_module_BMI # this is a nested version of the above list
+list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
+list_colors_BMI_merged <- list_colors_BMI
+
+if (nrow(idx_toMerge) > 0) {
   
-  if (FALSE) {
+  for (i in 1:nrow(idx_toMerge)) {
     
-    ##########################################################################
-    #####################  MERGE CORRELATED MODULES ##########################
-    ##########################################################################
+    message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(mod_corr[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
+    subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+    module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
+    subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
+    module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
     
-    # TODO: first verify that merging makes biological sense 
-    # TODO: update from _BMI to _gwas_meta
+    list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
     
-    # Identify highly correlated modules
-    corr_eigengenes_lt <- corr_eigengenes
-    corr_eigengenes_lt[!lower.tri(corr_eigengenes, diag = F)] <- NA
-    idx_toMerge <- which(corr_eigengenes_lt>(1-moduleMergeCutHeight), arr.ind = T)
+    list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
     
     
-    # Merge highly correlated modules
+    list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
     
-    modules_merged <- dat_BMI_fdr$module
-    list_module_BMI_merged <- list_module_BMI # this is a nested version of the above list
-    list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
-    list_colors_BMI_merged <- list_colors_BMI
+    modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
+    modules_merged[idx_toMerge[i,1]] <- NA
     
-    if (nrow(idx_toMerge) > 0) {
-      
-      for (i in 1:nrow(idx_toMerge)) {
-        
-        message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(corr_eigengenes[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
-        subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-        module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-        subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-        module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-        
-        list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
-        
-        list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
-        
-        
-        list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
-        
-        modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
-        modules_merged[idx_toMerge[i,1]] <- NA
-        
-      }
-      
-      modules_merged <- modules_merged[!is.na(modules_merged)]
-      
-      # get a new vector of names of cell clusters with BMI enrichment after merging
-      sNames_BMI <- unique(gsub("_.*", "", modules_merged))
-      
-      # Transform the vector of modules into a nested list, as before
-      list_module_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
-      names(list_module_BMI) <- sNames_BMI
-      
-      for (name in sNames_BMI_merged) {
-        idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
-        list_module_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
-      }
-    }
+  }
+  
+  modules_merged <- modules_merged[!is.na(modules_merged)]
+  
+  # get a new vector of names of cell clusters with BMI enrichment after merging
+  sNames_BMI <- unique(gsub("_.*", "", modules_merged))
+  
+  # Transform the vector of modules into a nested list, as before
+  list_module_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
+  names(list_module_BMI) <- sNames_BMI
+  
+  for (name in sNames_BMI_merged) {
+    idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
+    list_module_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
   }
 }
+
+
 ```
 
 ### Plot module presevation
