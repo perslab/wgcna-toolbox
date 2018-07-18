@@ -471,6 +471,7 @@ if (is.null(resume)) {
                            "fuzzyModMembership" = fuzzyModMembership,
                            "jackstrawnReplicate" = jackstrawnReplicate,
                            "TOMnReplicate" = TOMnReplicate,
+                           "checkPPI" = checkPPI,
                            "data_organism" = data_organism,
                            "magma_gwas_dir" = magma_gwas_dir,
                            "n_cores" = n_cores))
