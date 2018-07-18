@@ -1779,7 +1779,9 @@ if (resume == "checkpoint_4") {
   #### COMPUTE EIGENGENE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
   
-  if (!is.null(metadata_corr_col)) if (!is.null(metadata)) {
+  if (!is.null(metadata_corr_col)) {
+    
+    if (!is.null(metadata)) {
     
     list_metadata <- lapply(list_datExpr_gwas, function(x) metadata[match(rownames(x), rownames(metadata)), , drop=F]) # get list of cell * metadata
     
@@ -1924,7 +1926,9 @@ if (resume == "checkpoint_4") {
     colnames(corr_fdr.log) <- colnames(corr_pval)
     corr_fdr.log <- as.data.frame(corr_fdr.log)
   } 
-  
+  } else {
+    metadata <- NULL
+  }
   ##########################################################################
   #### FILTER COLORS VECS, GENE AND KME LISTS FOR METADATA CORRELATIONS ####
   ##########################################################################
