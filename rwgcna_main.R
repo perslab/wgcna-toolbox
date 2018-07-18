@@ -460,6 +460,7 @@ if (is.null(resume)) {
                            "regress_out" = regress_out,
                            "min.cells" = min.cells,
                            "genes_use" = genes_use,
+                           "pca_genes" = pca_genes,
                            "corFnc" = corFnc,
                            "networkType" = networkType,
                            "hclustMethod" = hclustMethod,
