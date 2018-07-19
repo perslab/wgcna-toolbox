@@ -73,7 +73,7 @@ option_list <- list(
   make_option("--use.imputed", type="logical", default=F,
               help="Use data in the obj@imputed slot for the computations to replace the @data slot? If the @imputed slot is empty, will revert to the default (FALSE)"),
   make_option("--regress_out", type="character", default='NULL',
-              help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, e.g. c('nUMI', 'percent.mito'). Defaults to NULL (not recommended, however)"),
+              help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, e.g. "c('nUMI', 'percent.mito')". Defaults to NULL (not recommended, however)"),
   make_option("--min.cells", type="integer", default=5L,
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5."),
   # make_option("--do.center", type="logical", default=T,
