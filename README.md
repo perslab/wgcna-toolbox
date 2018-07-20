@@ -59,7 +59,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Compute p value for the correlations, adjusted for multiple testing across all cell types
 * If desired, filter modules and cell types to retain only those significantly correlated with metadata
 
-### Compute cell module embedding matrix for whole dataset
+#### Compute cell module embedding matrix for whole dataset
 * Project every cell in the dataset onto the 'latent gene' of each module
 
 #### Compute and output tables
@@ -69,7 +69,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Prepare dataframe with columns cell type, module, gene ensembl id and, if available, gene symbol 
 * Output kMEs / kIM tables as csv
 
-### Plotting - separate notebook
+#### Plotting - separate notebook
 * Module assignment under different parameters
 * Module assignment after each round of filtering (PPI, gwas, metadata correlations)
 * Module GWAS enrichment with MAGNA
