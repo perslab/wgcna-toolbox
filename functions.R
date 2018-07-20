@@ -1555,10 +1555,10 @@ make_eigen_mat <- function(RObjects_dir,
 ############################################################################################################################################################
 
 cellModEmbed <- function(datExpr, 
-                        colours=NULL, 
-                        latentGeneType,
-                        cellType=NULL,
-                        kMs=NULL) {
+                         colours=NULL, 
+                         latentGeneType,
+                         cellType=NULL,
+                         kMs=NULL) {
   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
   # colors is a character vector with gene names
   # the genes should be ordered identically
@@ -1566,9 +1566,32 @@ cellModEmbed <- function(datExpr,
   # prepare celltype character for naming columns
   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
   if (latentGeneType == "ME") { 
-    list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-    embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
-    colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
+    
+    colours_full <- rep("grey", times = ncol(datExpr))
+    names(colours_full) <- colnames(datExpr)
+    
+    for (col in unique(colours)) {
+      colours_full[names(colours_full) %in% names(colours[colours==col])] <- col
+    }
+    
+    embed_mat <- moduleEigengenes(expr=datExpr, 
+                                  colors = colours_full, 
+                                  impute = TRUE, 
+                                  nPC = 1, 
+                                  align = "along average", 
+                                  excludeGrey = TRUE, 
+                                  subHubs = TRUE,
+                                  trapErrors = FALSE, 
+                                  returnValidOnly = trapErrors, 
+                                  scale = TRUE,
+                                  verbose = 0, 
+                                  indent = 0)$eigengenes
+    
+    # list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+    # embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
+    
+    colnames(embed_mat) <- paste0(cellType_prefix, gsub("ME", "", colnames(embed_mat)))
+    
   } else if (latentGeneType == "IM") {
     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
     list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
@@ -1583,11 +1606,10 @@ cellModEmbed <- function(datExpr,
     # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
     # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
     colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
+    rownames(embed_mat) <- rownames(datExpr)
   } 
-  rownames(embed_mat) <- rownames(datExpr)
   return(embed_mat)
 }
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
