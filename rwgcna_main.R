@@ -2028,7 +2028,7 @@ if (resume == "checkpoint_4") {
   invisible(gc()); invisible(R.utils::gcDLLs())
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
-  
+  rownames(cellModEmbed_mat) <- rownames(datExpr)
   ##########################################################################
   ########### CORRELATE MODULE EXPRESSION PROFILES ACROSS CELLTYPES ########
   ##########################################################################
