@@ -105,7 +105,7 @@ option_list <- list(
   make_option("--checkPPI", type="logical", default=T,
               help="Valiate gene modules using Protein-Protein Interactions?"),
   make_option("--data_organism", type="character", default="mmusculus",
-              help = "'hsapiens' or 'mmusculus'"),
+              help = "'hsapiens' or 'mmusculus', [default %default]"),
   make_option("--magma_gwas_dir", type="character", default = NULL,
               help = "MAGMA input GWAS data directory, defaults to NULL. E.g. '/projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/', '/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/'. NULL skips the magma GWAS step"),
   make_option("--gwas_filter_traits", type="character", default = NULL,
@@ -229,6 +229,8 @@ if (!file.exists(RObjects_dir)) dir.create(RObjects_dir)
 log_dir = paste0(project_dir,"log/")
 if (!file.exists(log_dir)) dir.create(log_dir)
 
+scratch_dir = "/scratch/tmp-wgcna/"
+  
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 # Load parameter values and utility functions
@@ -309,6 +311,17 @@ if (is.null(resume)) {
   
   seurat_obj <- load_obj(f=seurat_path)
   
+  # Use imputed data if user opted to do so 
+  if (is.null(seurat_obj@imputed) | any(dim(seurat_obj@imputed)) == FALSE) use.imputed <- F
+  if (use.imputed==T) seurat_obj@data <- seurat_obj@imputed
+  
+  # Set seurat object ident
+  if (!is.null(metadata_subset_col)) {
+    seurat_obj <- SetAllIdent(object = seurat_obj,id = metadata_subset_col)
+  }
+  
+  sNames <- names(table(seurat_obj@ident))
+  
   ######################################################################
   ################# IF SYMBOL, REMAP TO ENSEMBL ID #####################
   ######################################################################
@@ -363,35 +376,33 @@ if (is.null(resume)) {
       # rename Seurat object rows where mapping was successful to ensembl ID
       rownames(seurat_obj@data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       rownames(seurat_obj@raw.data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
-      
-      # Save ensembl seurat object for later use
-      save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
-      
+
       }
     } else if (any(grepl("ENSG", rownames(seurat_obj@data)))) {
       
       message("Homo sapiens ensembl id gene names detected")
       data_organism <- "hsapiens"
-      # Save ensembl seurat object for later use
-      save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+
     } else if (any(grepl("ENSMUSG", rownames(seurat_obj@data)))) {
+      
       message("mus musculus ensembl id gene names detected")
       data_organism <- "mmusculus"
-      # Save ensembl seurat object for later use
-      save(seurat_obj, file=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+
     }
   
-  # Use imputed data if user opted to do so 
-  if (is.null(seurat_obj@imputed) | any(dim(seurat_obj@imputed)) == FALSE) use.imputed <- F
-  if (use.imputed==T) seurat_obj@data <- seurat_obj@imputed
-  
-  # Set seurat object ident
-  if (!is.null(metadata_subset_col)) {
-    seurat_obj <- SetAllIdent(object = seurat_obj,id = metadata_subset_col)
-  }
+  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  seurat_obj <- ScaleData(object = seurat_obj, 
+                          vars.to.regress = vars.to.regress,
+                          model.use="linear",
+                          do.par=T,
+                          num.cores = min(n_cores, detectCores()-1),
+                          do.scale=T,
+                          do.center=T)
 
-  sNames <- names(table(seurat_obj@ident))
-  
+  # Save scale and regressed whole expression matrix with ensembl rownames for later use
+  save(seurat_obj@scale.data, file = sprintf("%stmp_%s_scale_regr_data_ensembl_%s.RData", scratch_dir, data_prefix, flag_date))
+  save(seurat_obj@ident, file = sprintf("%stmp_%s_ident_%s.RData", scratch_dir, data_prefix, flag_date))
+         
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
   if (!is.null(metadata_corr_col)) {
     if (any(colnames(seurat_obj@meta.data) %in% metadata_corr_col)) {
@@ -580,7 +591,7 @@ if (is.null(resume)) {
  
   # Save or load session image 
   resume = "checkpoint_1"
-  if (autosave==T) save.image(file=sprintf("%s%s_checkpoint_1_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image(file=sprintf("%s%s_checkpoint_1_image.RData", scratch_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_1") quit(save="no")
     
 } else if (!is.null(resume)) {
@@ -627,7 +638,7 @@ if (resume == "checkpoint_1") {
   names(list_softPower) <- sNames
   
   # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
-  setwd(RObjects_dir)
+  setwd(scratch_dir)
   
   if (TOMnReplicate > 0) {
     
@@ -838,7 +849,10 @@ if (resume == "checkpoint_1") {
   } else if (fuzzyModMembership=="kIM") { # do not merge modules based on eigengene correlation 
     
     # TODO: merge based on kIM
+    
     list_list_colors <- lapply(list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
+    
+    
     list_list_MEs <- NULL
     
   }
@@ -879,7 +893,7 @@ if (resume == "checkpoint_1") {
   }
   
   # Keep dissTOM for computing kIMs (just in case, also if fuzzyModMembership = kME)
-  save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok_%s.RData", RObjects_dir, data_prefix, flag_date))
+  save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok_%s.RData", scratch_dir, data_prefix, flag_date))
   
   # Delete consensus TOMs from disk
   for (subsetName in sNames) {
@@ -972,7 +986,8 @@ if (resume == "checkpoint_1") {
     
   } else if (fuzzyModMembership == "kIM") {
     
-    list_dissTOM_ok <- load_obj(f=sprintf("%s%s_list_dissTOM_ok_%s.RData", RObjects_dir, data_prefix, flag_date))
+    list_dissTOM_ok <- load_obj(f=sprintf("%s%s_list_dissTOM_ok_%s.RData", scratch_dir, data_prefix, flag_date))
+    names(list_dissTOM_ok) <- sNames_ok
     
     list_list_kMs <- clusterMap(cl, function(x,y) lapply(y, function(z) kIM_eachMod_norm(dissTOM = x, 
                                                                                           colors = z)),
@@ -1014,7 +1029,7 @@ if (resume == "checkpoint_1") {
   resume="checkpoint_2"
   
   #save.image(file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_2_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_2_image.RData", scratch_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_2") quit(save="no")
   
 } else if (!is.null(resume)) {
@@ -1175,7 +1190,7 @@ if (resume == "checkpoint_2") {
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
   #save.image(file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_3_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_3_image.RData", scratch_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_3") quit(save="no")
   
 } else if (resume == "checkpoint_3") {
@@ -1298,8 +1313,9 @@ if (resume == "checkpoint_3") {
     
   } else if (fuzzyModMembership == "kIM"){
     
-    list_dissTOM_ok_path <- dir(path = RObjects_dir, pattern = "list_dissTOM_ok", full.names = T)
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = "list_dissTOM_ok", full.names = T)
     list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+    names(list_dissTOM_ok) <- sNames_ok
     list_dissTOM_PPI <- list_dissTOM_ok[sNames_ok %in% sNames_PPI]
     
     invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1468,7 +1484,7 @@ if (resume == "checkpoint_3") {
       invisible(gc()); invisible(R.utils::gcDLLs())
       # map mouse to human gene orthologs  
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
-      
+
       cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMtoHs_par.txt"))
       list_kMs_hs <- parLapplyLB(cl, list_kMs_PPI, function(x) mapMMtoHs(modulekM = x, 
                                                                       log_dir = log_dir, 
@@ -1712,8 +1728,9 @@ if (resume == "checkpoint_3") {
       
     } else if (fuzzyModMembership=="kIM") {
 
-      list_dissTOM_ok_path <- dir(path = RObjects_dir, pattern = "list_dissTOM_ok", full.names = T)
+      list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = "list_dissTOM_ok", full.names = T)
       list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+      names(list_dissTOM_ok) <- sNames_ok
       list_dissTOM_gwas <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_gwas]
       rm(list_dissTOM_ok)  
       
@@ -1731,9 +1748,6 @@ if (resume == "checkpoint_3") {
       stopCluster(cl)
       invisible(gc()); invisible(R.utils::gcDLLs())
       names(list_kMs_gwas) <- sNames_gwas
-      
-      # Delete the grey module kIM column
-      list_kMs_gwas <- deleteGrey(list_kMs_gwas)
       
       rm(list_dissTOM_gwas)
       
@@ -1757,7 +1771,7 @@ if (resume == "checkpoint_3") {
   resume = "checkpoint_4"
   message("Reached checkpoint 4, saving session image")
   #save.image(file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_4_image.RData", RObjects_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_4_image.RData", scratch_dir, data_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_4") quit(save="no")
   
 } else if (resume == "checkpoint_4") {
@@ -1997,20 +2011,8 @@ if (resume == "checkpoint_4") {
   
   message("Computing all cell embeddings on all modules, across celltypes")
   
-  seurat_obj_path <- dir(path = RObjects_dir, pattern = "seurat_obj_ensembl", full.names = T)
-  seurat_obj <- load_obj(seurat_obj_path)
-  
-  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
-  seurat_obj <- ScaleData(object = seurat_obj, 
-                          vars.to.regress = vars.to.regress,
-                          model.use="linear",
-                          do.par=T,
-                          num.cores = min(n_cores, detectCores()-1),
-                          do.scale=T,
-                          do.center=do.center)
-  
-  datExpr <- t(seurat_obj@scale.data)
-  rm(seurat_obj)
+  scale_data_path <- dir(path = scratch_dir, pattern = "scale_regr_data_ensembl", full.names = T)
+  load_obj(scale_data_path) %>% t %>% datExpr 
   
   invisible(gc())
   
@@ -2034,6 +2036,8 @@ if (resume == "checkpoint_4") {
   invisible(gc()); invisible(R.utils::gcDLLs())
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
+  
+  rownames(cellModEmbed_mat) <- rownames(datExpr)
   
   ##########################################################################
   ########### CORRELATE MODULE EXPRESSION PROFILES ACROSS CELLTYPES ########
@@ -2075,7 +2079,6 @@ if (resume == "checkpoint_4") {
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
   
-  
   # Prepare module genes dataframe
   cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
   module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
@@ -2110,7 +2113,7 @@ if (resume == "checkpoint_4") {
   ################## SAVE KMs FOR BMI-ENRICHED MODULES ####################
   ##########################################################################
 
-  # Prepare dfs with a gene column followed by kMEs 
+  # Prepare dfs with a gene column followed by kMEs / kIMs 
   list_kMs_meta_out <- lapply(list_kMs_meta, function(x) cbind(genes=rownames(x), x))
   rownames(list_kMs_meta) <- NULL
   invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%ss_meta_%s.csv", tables_dir, data_prefix, y, fuzzyModMembership, flag_date), row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
