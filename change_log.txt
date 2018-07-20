@@ -22,6 +22,8 @@ v2.2 - 18-07-18
 * When recomputing kMEs after PPI and MAGMA 	filter, added "SIMPLIFY=F" to signed_kME clusterMap
 * renamed organism variable to organism_data to avoid aliasing
 * checkpoint save images were for some reason (regExpr or environment-related, most likely) not saving everything). Now just saves everything (assuming you don't want to change parameters when resuming)
+* When loading checkpoint_4, due to logical structure around metadata computation parts, would get 'metadata not found' (if not already set to NULL)
+* diagnostics_stats came out with extra columns and counting prop grey rather than 1-prop grey
 
 ## v2.1 - 18-07-03
 
