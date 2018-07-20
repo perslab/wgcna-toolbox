@@ -24,66 +24,61 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 #### Pre-process the expression data: perform QC and select significant genes ([workflow schematic](https://drive.google.com/file/d/1fntPIANPdC5ix1zKf1-mmcSRvIFQ24aB/view?usp=sharing)) 
 
 * Map genes from symbol to ensembl ID
-* Convert factor metadata to one column per level
-* Save user parameters and built-in parameters to tables
+* Convert factor metadata to one column per level with dummy variables (similar to model.matrix function)
+* Save user parameters and built-in parameters to tables; keep track of n cells and n genes in each celltype subset
 * Filter out genes expressed in very few cells
-* Scale the data and regress out "nUMI", "percent.mito", "percent.ribo" if present in meta.data
+* Scale the data and regress out selected potential confounders, e.g. "nUMI", "percent.mito", "percent.ribo,  if present in obj@meta.data
 * Find variable genes
-* Perform Principal Component Analysis
-* Use Jackstraw, i.e. repeated PCA on resampled datasets, to determine significant PCs and genes
+* Perform Principal Component Analysis. Use Jackstraw, i.e. repeated PCA on resampled datasets, to determine significant PCs and genes; or to save time use top 5000 PCA loading genes or just variable genes 
 
 #### Compute consensus Topological Overlap Matrix (TOM) and find gene modules
 
 * Compute soft power for adjacency matrix
 * Resample expression matrices 
-* Compute consensus TOM
+* Compute consensus TOM across resampled expression matrices
 * Run hclust to find clusters in the (inverse) TOM 
 * Run cutreeHybrid cut out modules in the distance matrices (iterate over different sets of parameters if given)
 * merge close modules
 * filter out runs with only grey modules
-* compute Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. 'own' module)
+* compute fuzzy module membership for every gene-module pair, either Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. 'own' module); or intramodular k (kIMs), which are average distance between a gene and each gene in the module
 * Match modules between different parameter settings
 
-#### Filter modules and parameterisations using STRINGdb's Protein-Protein Interactions (PPI)
-* Check STRINGdb PPI
-* Filter out modules which are not significant and any cell types which have no significant modules
+#### Find Protein-Protein Interactions (PPI)
+* Run gene modules against STRINGdb PPI enrichment database
+* If desired, filter out modules which are not significant and any cell types which have no significant modules
 * For each celltype, select the set of parameters with highest number of genes assigned to modules after checking the modules for PPI enrichment.
 
-#### Filter modules on genetic enrichment
-* Compute MAGMA gwas correlations
-* Filter modules based on gwas enrichment
-* _TODO: add rare variants test_
-* Assign new unique module names across all cell clusters to avoid identical or similarly named modules
-* Re-compute MEs and kMEs after MAGMA GWAS filter; remove any celltypes without significant modules
+#### Find genetic enrichment
+* Make colors unique across celltypes
+* Compute rare variant enrichment
+* Compute MAGMA gwas enrichment
+* Re-compute MEs and kMEs after MAGMA GWAS filter; remove any celltypes without significant modules if desired
 
 #### Compute eigengene - metadata correlations
 * Compute correlation between metadata and eigengene expression, per cell type
 * Compute p value for the correlations, adjusted for multiple testing across all cell types
-* Filter modules and cell types to retain only those significantly correlated with metadata
+* If desired, filter modules and cell types to retain only those significantly correlated with metadata
 
-#### Perform Gene Set Enrichment Analysis (GSEA) and compute eigengene matrix
-* Use LIGER to perform GSEA
-* Filter GSEA results for fdr p-value significance
-* _TODO: Filter modules for significant gene set enrichment_
-* _TODO: use semantic correlation to cluster GSE terms_
+### Compute cell module embedding matrix for whole dataset
+* Project every cell in the dataset onto the 'latent gene' of each module
 
 #### Compute and output tables
-* Prepare module gene lists ordered by kME
-* _TODO: Compute module-module correlations; merge highly correlated modules_
+* Module gene lists ordered by kME/kIM
+* Module-module correlations and clustering
 * Compute cell x eigengene cell embedding matrix across all celltypes and modules
 * Prepare dataframe with columns cell type, module, gene ensembl id and, if available, gene symbol 
-* Output kMEs tables as csv
-* Output GSEA tables as csv
+* Output kMEs / kIM tables as csv
 
 ### Plotting - separate notebook
-* _TODO: Module assignment after each round of filtering_
-* Module GWAS enrichment 
-* _TODO: Cell x eigengene cell embedding matrix with genetic and metadata annotations_
-* Module-metadata correlations _TODO: incorporate into eigenmatrix plot above_
+* Module assignment under different parameters
+* Module assignment after each round of filtering (PPI, gwas, metadata correlations)
+* Module GWAS enrichment with MAGNA
+* Module geneset enrichment analysis 
+* Cell x eigengene cell embedding heatmap across whole dataset
+* Module-metadata correlations 
 * Cell t-SNE plot
-* Eigengene expression featureplots
-* _TODO: module-module correlation matrix across all celltypes_
-* _TODO: module preservation across different tissues_
+* Eigengene expression featureplots in t-SNE space
+* module-module correlation matrix across all celltypes
 
 ### Usage
 
