@@ -324,10 +324,13 @@ rownames(cellModEmbed_mat) <- cellModEmbed_mat[,1]
 cellModEmbed_mat[,1] <- NULL
 
 #colnames(cellModEmbed_mat) <- gsub("^X", "", colnames(cellModEmbed_mat), ignore.case = F)
-seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+scale_data <- load_obj(f=sprintf("%s%s_scale_regr_data_ensembl_%s.RData", scratch_dir, data_prefix, flag_date))
+
+# scale_data_path <- dir(path = scratch_dir, pattern = "scale_regr_data_ensembl", full.names = T)
+# scale_data <- load_obj(scale_data_path) 
 
 #seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
-ident <- seurat_obj@ident
+ident <- load_obj(f=sprintf("%s%s_ident_%s.RData", RObjects_dir, data_prefix, flag_date))
 
 ```
 
@@ -596,10 +599,6 @@ dev.off()
 ```
 
 # Compute eigen_mat of the merged modules
-
-
-
-
 
 ```{r}
 ##########################################################################
