@@ -397,7 +397,7 @@ if (is.null(resume)) {
       include <- seurat_obj@meta.data[,colnames(seurat_obj@meta.data) %in% metadata_corr_col, drop=F]
       for (i in 1:ncol(include)) {
         if (class(include[,i]) %in% c("factor", "character")) {
-          metadata <- cbind(metadata, factorToIndicator(include[,i, drop=F]))        
+          metadata <- cbind(metadata, factorToIndicator(include[,i, drop=T]))        
         } else {
           metadata <- cbind(metadata, include[,i, drop=F])
         }
@@ -410,7 +410,7 @@ if (is.null(resume)) {
       # Filter out any metadata columns where all the values are identical
       metadata <- metadata[apply(metadata, MARGIN=2, FUN = function(x) length(unique(x))>1)]
       if (ncol(metadata) == 0) metadata <- NULL    
-      
+      rownames(metadata) = rownames(seurat_obj@meta.data)
       } else metadata <- NULL
     } else metadata <- NULL
      
