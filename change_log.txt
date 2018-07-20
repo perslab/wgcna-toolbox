@@ -24,6 +24,7 @@ v2.2 - 18-07-18
 * checkpoint save images were for some reason (regExpr or environment-related, most likely) not saving everything). Now just saves everything (assuming you don't want to change parameters when resuming)
 * When loading checkpoint_4, due to logical structure around metadata computation parts, would get 'metadata not found' (if not already set to NULL)
 * diagnostics_stats came out with extra columns and counting prop grey rather than 1-prop grey
+* cellModEmbed function, which is used for computing eigengene embeddings for all cells in the expression matrix. It was not taking into account direction of the eigenvectors, which are now aligned to average expression, which is default in moduleEigengenes
 
 ## v2.1 - 18-07-03
 
