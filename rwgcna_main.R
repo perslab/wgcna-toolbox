@@ -152,6 +152,8 @@ resume <- opt$resume
 
 quit_session <- opt$quit_session
 
+metadata_subset_col <- opt$metadata_subset_col
+
 metadata_corr_col <- eval(parse(text=opt$metadata_corr_col))
 
 metadata_corr_filter_vals <- eval(parse(text=opt$metadata_corr_filter_vals))
