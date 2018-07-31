@@ -164,64 +164,64 @@ seurat_to_datExpr = function(seurat_obj_sub, idx_genes_use) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-sft_for_par <- function(datExpr, subsetName) { 
-  softPower <- 8 # Set a default value as fall back
-  # EDIT 180501_4 remove tryCatch in parallelised functions
-  #tryCatch({
-    
-    disableWGCNAThreads()
-    
-    powers = c(1:30)
-    
-    sft = pickSoftThreshold(data=datExpr,
-                            powerVector = powers,
-                            blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
-                            corFnc = corFnc,
-                            corOptions =  corOptions,
-                            networkType = networkType,
-                            verbose = verbose)
-    
-    pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-    #par(mfrow = c(1,2));
-    cex1 = 0.9;
-    # Scale-free topology fit index as a function of the soft-thresholding power
-    plot(sft$fitIndices[,1],
-         -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-         xlab="Soft Threshold (power)",
-         ylab="Scale Free Topology Model Fit,signed R^2",
-         type="n",
-         main = paste("Scale independence"));
-    text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-         labels=powers,cex=cex1,col="red");
-    # this line corresponds to using an R^2 cut-off of 0.9
-    abline(h=0.90,col="red")
-    dev.off()
-    # Mean connectivity as a function of the soft-thresholding power
-    pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-    plot(sft$fitIndices[,1], sft$fitIndices[,5],
-         xlab="Soft Threshold (power)",
-         ylab="Mean Connectivity",
-         type="n",
-         main = paste("Mean connectivity"))
-    text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
-    dev.off()
-    
-    # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
-    # take smallest softPower; else take best fitting one
-    
-    fitIndices <- as.data.frame(sft$fitIndices)
-    fitIndices_filter <- fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T))
-    if (sum(fitIndices_filter$SFT.R.sq >= 0.9) > 1) {
-      softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
-    } else {
-      softPower <- (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,]
-    }
-  # EDIT 180501_4 remove tryCatch in parallelised functions
-  # }, error = function(c) {
-  #   write.csv("ERROR", file=sprintf("%s%s_%s_pickSoftThreshold_ERROR_set_to_8_as_default_%s.csv", project_dir, data_prefix, subsetName, flag_date), row.names = F)
-  # })
-  return(softPower)
-}
+# sft_for_par <- function(datExpr, subsetName) { 
+#   softPower <- 8 # Set a default value as fall back
+#   # EDIT 180501_4 remove tryCatch in parallelised functions
+#   #tryCatch({
+#     
+#     disableWGCNAThreads()
+#     
+#     powers = c(1:30)
+#     
+#     sft = pickSoftThreshold(data=datExpr,
+#                             powerVector = powers,
+#                             blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
+#                             corFnc = corFnc,
+#                             corOptions =  corOptions,
+#                             networkType = networkType,
+#                             verbose = verbose)
+#     
+#     pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
+#     #par(mfrow = c(1,2));
+#     cex1 = 0.9;
+#     # Scale-free topology fit index as a function of the soft-thresholding power
+#     plot(sft$fitIndices[,1],
+#          -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+#          xlab="Soft Threshold (power)",
+#          ylab="Scale Free Topology Model Fit,signed R^2",
+#          type="n",
+#          main = paste("Scale independence"));
+#     text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+#          labels=powers,cex=cex1,col="red");
+#     # this line corresponds to using an R^2 cut-off of 0.9
+#     abline(h=0.90,col="red")
+#     dev.off()
+#     # Mean connectivity as a function of the soft-thresholding power
+#     pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
+#     plot(sft$fitIndices[,1], sft$fitIndices[,5],
+#          xlab="Soft Threshold (power)",
+#          ylab="Mean Connectivity",
+#          type="n",
+#          main = paste("Mean connectivity"))
+#     text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+#     dev.off()
+#     
+#     # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
+#     # take smallest softPower; else take best fitting one
+#     
+#     fitIndices <- as.data.frame(sft$fitIndices)
+#     fitIndices_filter <- fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T))
+#     if (sum(fitIndices_filter$SFT.R.sq >= 0.9) > 1) {
+#       softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
+#     } else {
+#       softPower <- (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,]
+#     }
+#   # EDIT 180501_4 remove tryCatch in parallelised functions
+#   # }, error = function(c) {
+#   #   write.csv("ERROR", file=sprintf("%s%s_%s_pickSoftThreshold_ERROR_set_to_8_as_default_%s.csv", project_dir, data_prefix, subsetName, flag_date), row.names = F)
+#   # })
+#   return(softPower)
+# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -309,7 +309,7 @@ TOM_for_par = function(datExpr, subsetName, softPower) {
 dissTOM_for_par = function(subsetName) {
   # We now use hierarchical clustering to produce a hierarchical clustering tree (dendrogram) of genes.
   # We use Dynamic Tree Cut from the package dynamicTreeCut.    
-  load(sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName)) # Load the consensus TOM generated by blockwiseConsensusModules
+  load(sprintf("%s%s_consensusTOM-block.1.RData", scratch_dir, subsetName)) # Load the consensus TOM generated by blockwiseConsensusModules
   
   dissTOM <- 1-as.dist(consTomDS) # Convert proximity to distance
   rm(consTomDS)
@@ -345,7 +345,13 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
   if (any(as.logical(cutree$labels))) { # Are there any modules at all? Avoids an error
     merged = mergeCloseModules(exprData=as.matrix(datExpr), 
                                colors = cutree$labels, 
-                               cutHeight=comb[[4]])
+                               impute =T,
+                               corFnc = corFnc,
+                               corOptions = corOptions,
+                               cutHeight=comb[[4]],
+                               iterate = T,
+                               getNewMEs = F,
+                               getNewUnassdME = F)
     colors = labels2colors(merged$colors)
     #MEs = merged$newMEs 
     MEs = moduleEigengenes(expr = as.matrix(datExpr),
@@ -356,7 +362,7 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
     colors = labels2colors(cutree$labels)
     MEs = NULL
   }
-  return(list("cols" = colors, "MEGs"= MEs))
+  return(list("cols" = colors, "MEs"= MEs))
 }
 
 
@@ -374,10 +380,10 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-parGetMEs = function(list_merged) {
-  list_MEs = lapply(list_merged, function(x) x$MEGs) # list of merged color eigengenes
-  return(list_MEs)
-}
+# parGetMEs = function(list_merged) {
+#   list_MEs = lapply(list_merged, function(x) x$MEGs) # list of merged color eigengenes
+#   return(list_MEs)
+# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -397,7 +403,7 @@ extract_and_name_colors <- function(merged, datExpr) {
 parGetColors = function(list_merged, datExpr) {
   list_colors = lapply(list_merged, function(x) extract_and_name_colors(merged=x, datExpr=datExpr)) # list of merged colors
   return(list_colors)
-}  
+}
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -405,6 +411,7 @@ parGetColors = function(list_merged, datExpr) {
 
 parMatchColors <- function(list_colors) {
   # Inherits n_combs from the parent environment, same for every subsetName, no need to pass as an argument
+
   if (length(list_colors)>1) {
     # Match colors between iterations by reference to the set of colors with the highest number of unique colors
     max_colors_idx = which.max(lapply(list_colors, function(x) length(table(x))))
@@ -413,7 +420,6 @@ parMatchColors <- function(list_colors) {
     diffParams_colors[, max_colors_idx] = list_colors[[max_colors_idx]] # use the set of colors with the highest number of modules as 'reference'
     
     for (j in (1:n_combs)[-max_colors_idx]) {
-      
       if (length(table(list_colors[[j]])) > 1) {
         diffParams_colors[,j] <- matchLabels(source = list_colors[[j]], # traverse gene colour assignments
                                              reference = diffParams_colors[,max_colors_idx],
@@ -423,7 +429,7 @@ parMatchColors <- function(list_colors) {
       
         } else if (length(table(list_colors[[j]])) == 1) {
         diffParams_colors[,j] <- "grey"
-      }
+        }
     }
     # Split the matrix of matched colors back into a list 
     list_colors_matched <- split(diffParams_colors, rep(1:ncol(diffParams_colors), each = nrow(diffParams_colors))) 
@@ -432,8 +438,11 @@ parMatchColors <- function(list_colors) {
     diffParams_colors <- as.matrix(list_colors[[1]], nrow=length(list_colors[[1]]), ncol=1)
     list_colors_matched <- list_colors
   } 
+    
+ 
   
   return(list_colors_matched)
+    
 }
 
 
@@ -1557,10 +1566,10 @@ make_eigen_mat <- function(RObjects_dir,
 ############################################################################################################################################################
 
 cellModEmbed <- function(datExpr, 
-                         colours=NULL, 
-                         latentGeneType,
-                         cellType=NULL,
-                         kMs=NULL) {
+                        colours=NULL, 
+                        latentGeneType,
+                        cellType=NULL,
+                        kMs=NULL) {
   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
   # colors is a character vector with gene names
   # the genes should be ordered identically
@@ -1568,32 +1577,9 @@ cellModEmbed <- function(datExpr,
   # prepare celltype character for naming columns
   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
   if (latentGeneType == "ME") { 
-    
-    colours_full <- rep("grey", times = ncol(datExpr))
-    names(colours_full) <- colnames(datExpr)
-    
-    for (col in unique(colours)) {
-      colours_full[names(colours_full) %in% names(colours[colours==col])] <- col
-    }
-    
-    embed_mat <- moduleEigengenes(expr=datExpr, 
-                                  colors = colours_full, 
-                                  impute = TRUE, 
-                                  nPC = 1, 
-                                  align = "along average", 
-                                  excludeGrey = TRUE, 
-                                  subHubs = TRUE,
-                                  trapErrors = FALSE, 
-                                  returnValidOnly = trapErrors, 
-                                  scale = TRUE,
-                                  verbose = 0, 
-                                  indent = 0)$eigengenes
-    
-    # list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-    # embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
-    
-    colnames(embed_mat) <- paste0(cellType_prefix, gsub("ME", "", colnames(embed_mat)))
-    
+    list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+    embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
+    colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
   } else if (latentGeneType == "IM") {
     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
     list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
@@ -1608,10 +1594,11 @@ cellModEmbed <- function(datExpr,
     # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
     # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
     colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
-    rownames(embed_mat) <- rownames(datExpr)
   } 
+  rownames(embed_mat) <- rownames(datExpr)
   return(embed_mat)
 }
+
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1830,3 +1817,9 @@ wrap_consensusTOM <- function(...) {
   
   return(list_consensus)
 }
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+

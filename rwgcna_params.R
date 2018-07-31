@@ -94,7 +94,7 @@ fraction = if (replace) 1.0 else 0.66 # TWEAKPARAM.
 ############################## BOOT #############################
 
 #Number of times to repeat the calculation on permuted data
-R = 20
+R = 300
 
 ####################### CONSENSUSCALCULATION #########################
 
@@ -110,7 +110,7 @@ metaAnalysisWeights = NULL
 # Correlation options
 
 #corAndPvalueFnc = if (corFnc == "cor") corAndPvalue else bicorAndPvalue # TODO check that this works
-corOptions = list()
+corOptions = NULL # if (corFnc == "cor") list(use = 'p')
 corComponent = if (corFnc == "cor") "cor" else "bicor"
 getQvalues = TRUE # should q-values (estimates of FDR) be calculated?
 useRankPvalue = TRUE # Logical: should the rankPvalue function be used to obtain alternative meta-analysis statistics?
@@ -148,7 +148,7 @@ getNetworkCalibrationSamples = FALSE # logical: should samples used for TOM cali
 
 # Consensus definition
 
-consensusQuantile = 0.5 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
+consensusQuantile = 0.20 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
 # Set to quartile recommended for different datasets in http://www.genetics.ucla.edu/courses/statgene/networks/files/Langfelder-Thursday-ConsensusModules.pdf.
 useMean = FALSE # should the consensus be determined from a (possibly weighted) mean across the data sets rather than a quantile?
 #setWeights = NULL # Optional vector (one component per input set) of weights to be used for weighted mean consensus. Only used when useMean above is TRUE.

@@ -23,10 +23,15 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-#project_dir = "/projects/jonatan/tmp-rwgcna-tests/mousebrain-top10-3/"
-#data_prefix = "mousebrain-top10-3"
-project_dir = "/projects/timshel/sc-genetics/sc-genetics/out/out.wgcna/maca_top29_BMI/"
-data_prefix = "maca_top29_BMI"
+project_dir = "/projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_5/"
+data_prefix = "mousebrain_top10_5"
+
+project_dir = "/projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/"
+data_prefix = "maca_top29_BMI_2"
+
+project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell_3/"
+data_prefix = "campbell_3"
+
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -38,6 +43,7 @@ tables_dir <- paste0(project_dir, "tables/")
 log_dir <- paste0(project_dir, "log/") 
 RObjects_dir <- paste0(project_dir, "RObjects/") 
 plots_dir <- paste0(project_dir, "plots/")
+
 ```
 
 ## Load libraries 
@@ -62,7 +68,7 @@ suppressPackageStartupMessages(library(RColorBrewer))
 ## Load functions and constants
 
 ```{r}
-source(file = "/projects/jonatan/functions-src/functions_v2.2_dev1.R")
+source(file = "/projects/jonatan/functions-src/functions_dev.R")
 ```
 
 # Load session image
@@ -159,11 +165,11 @@ invisible(mapply(function(a,b,c) plotDendro_for_vec(list_colors=a,
 
 ```{r}
 
-  magma.p.fdr.log.path <- dir(path = tables_dir, pattern = "magma.fdr.log", full.names = T, recursive = F)
-  magma.p.fdr.log.sig <- read.csv(file=magma.p.fdr.log.path, header=T, quote="") 
-  #magma.p.fdr.log.sig <- magma.p.fdr.log[apply(magma.p.fdr.log[,-grep("module|celltype", colnames(magma.p.fdr.log))], FUN = function(x) max(x) > -log10(p.val.threshold), MARGIN=1),]
+magma.p.fdr.log.path <- dir(path = tables_dir, pattern = "magma.fdr.log.sig", full.names = T, recursive = F)
+magma.p.fdr.log <- read.csv(file=magma.p.fdr.log.path, header=T, quote="") 
 
-dat <- magma.p.fdr.log.sig[,-grep("celltype", colnames(magma.p.fdr.log.sig))]
+
+dat <- magma.p.fdr.log[,-grep("celltype", colnames(magma.p.fdr.log))]
 
 p=ggplot(melt(dat, value.name="value"), aes(x=variable, y=value, fill = module)) + 
     geom_bar(stat="identity",position=position_dodge(),color= "black") +
@@ -171,7 +177,24 @@ p=ggplot(melt(dat, value.name="value"), aes(x=variable, y=value, fill = module))
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_", flag_date, ".pdf") ,width=45,height=12)
+ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_PT_log", flag_date, ".pdf") ,width=45,height=12)
+
+
+# Filtered for only t1d/t2d/BMI gwas 
+magma.p.fdr.log.sig <- magma.p.fdr.log[, grep("module|celltype|BMI|scz|t1d|t2d", colnames(magma.p.fdr.log), ignore.case = T)]
+# filtered for 
+magma.p.fdr.log.sig <- magma.p.fdr.log.sig[apply(magma.p.fdr.log.sig[,-grep("module|celltype", colnames(magma.p.fdr.log.sig))], FUN = function(x) max(x) > -log10(p.val.threshold), MARGIN=1),]
+
+
+dat2 <- magma.p.fdr.log.sig[,-grep("celltype", colnames(magma.p.fdr.log.sig))]
+
+p=ggplot(melt(dat2, value.name="value"), aes(x=variable, y=value, fill = module)) + 
+    geom_bar(stat="identity",position=position_dodge(),color= "black") +
+    scale_fill_manual(values=plottable_colors(dat2$module)) + theme_classic() +
+    geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
+    theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
+  
+ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_signif_", flag_date, ".pdf") ,width=45,height=12)
 
 #   
 # # filtered for metadata correlations
@@ -188,7 +211,7 @@ ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_", flag_date, ".pdf"
 
 ```{r}
 
-# TODO: Update for GSEA
+# TODO: Update for GSEA, doesn't work at present
 
 rareVariants.p.fdr.log.path <- dir(path = tables_dir, pattern = "mendelian_rareVariants_fdr_log", full.names = T, recursive = F)
 rareVariants.p.fdr.log <- read.csv(file=rareVariants.p.fdr.log.path, header=T, quote="") 
@@ -220,40 +243,51 @@ ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_
 #### Plot cell x eigengene embedding matrix
 
 ```{r}
-# TODO: update for generalised kM
+
+# This should already be set if user loaded session image
+fuzzyModMembership ="kME"
+
+# Find cell module embedding matrix 
 cellModEmbed_path <- dir(path = tables_dir, pattern="cellModEmbed", full.names = T, recursive = F, ignore.case = T)
+cellModEmbed_path <- cellModEmbed_path[grep(fuzzyModMembership, cellModEmbed_path)]
 cellModEmbed_mat <- read.csv(file = cellModEmbed_path, header = T, quote = "")
 
 # Take rownames from column, then delete
 rownames(cellModEmbed_mat) <- cellModEmbed_mat[,1]
 cellModEmbed_mat[,1] <- NULL
 
-colnames(cellModEmbed_mat) <- gsub("^X", "", colnames(cellModEmbed_mat), ignore.case = F)
-seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+#colnames(cellModEmbed_mat) <- gsub("^X", "", colnames(cellModEmbed_mat), ignore.case = F)
+#scale_data <- load_obj(f=sprintf("%s%s_scale_regr_data_ensembl_%s.RData", scratch_dir, data_prefix, flag_date))
 
-seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
-ident <- seurat_obj@ident
+# scale_data_path <- dir(path = scratch_dir, pattern = "scale_regr_data_ensembl", full.names = T)
+# scale_data <- load_obj(scale_data_path) 
+
+#seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
+ident <- load_obj(f=sprintf("%s%s_ident_%s.RData", RObjects_dir, data_prefix, flag_date))
 
 ```
 
 ```{r}
-# Order cells by celltype
-cellModEmbed_mat <- cellModEmbed_mat[match(rownames(cellModEmbedorder(ident), ] 
 
-# Take sqrt of values (first make positive, then sqrt, then restore original sign)
+
+# Order cells by celltype
+cellModEmbed_mat <- cellModEmbed_mat[order(ident, decreasing=T), ] 
+
+# To bring out mid-range expression differences in plot, take sqrt of values (first make positive, then sqrt, then restore original sign)
+
 cellModEmbed_mat %>% '*'(sign(.)) %>% sqrt(.) %>% '*'(sign(cellModEmbed_mat)) -> cellModEmbed_mat_sqrt
 
 # make row annotation: random colors for celltypes
 colors_uniq <- gsub("\\d", "", colors()) %>% unique
-htra_colors <- sample(colors_uniq, size=length(table(ident)), replace=F) 
-names(htra_colors) <- names(table(ident))
+htra_colors <- sample(colors_uniq, size=length(unique(ident)), replace=F) 
+names(htra_colors) <- sort(unique(ident), decreasing=T)
 
-htra<-rowAnnotation(cellcluster = ident,
+htra<-rowAnnotation(cellcluster = sort(ident, decreasing=T),
                     annotation_legend_param = list(cellcluster = list(nrow = 7, title = "Cell cluster", title_position = "topcenter")),
                     col=list(cellcluster = htra_colors),
                     width = unit(5, "mm"))
 
-ht1 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+ht1 <- Heatmap(cellModEmbed_mat[,], 
              cluster_rows = F,
              #row_order = ,
              cluster_columns = T, 
@@ -264,12 +298,29 @@ ht1 <- Heatmap(cellModEmbed_mat_sqrt[,],
              show_column_names = T,
              heatmap_legend_param = list(title = "Expression"))
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_cellModEmbed_sqrt_cellOrder_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
+pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
 draw(ht1+htra)
 dev.off()
   
-# With clustering rows
+# with square root transform to bring out mid-range expression differences
 ht2 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+             cluster_rows = F,
+             #row_order = ,
+             cluster_columns = T, 
+             #show_row_dend = F, 
+             show_column_dend = F, 
+             show_heatmap_legend = T, 
+             show_row_names = F, 
+             show_column_names = T,
+             heatmap_legend_param = list(title = "Expression"))
+             #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_sqrt%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+draw(ht2+htra)
+dev.off()
+  
+
+# With clustering rows
+ht3 <- Heatmap(cellModEmbed_mat[,], 
                cluster_rows = T,
                #row_order = NULL,
                cluster_columns = T, 
@@ -280,13 +331,29 @@ ht2 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
-draw(ht2+htra)
+pdf(sprintf("%s%s_%s_cellModEmbed_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+draw(ht3+htra)
+dev.off()
+
+# With clustering rows, sqrt
+ht4 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+               cluster_rows = T,
+               #row_order = NULL,
+               cluster_columns = T, 
+               #show_row_dend = F, 
+               show_column_dend = F, 
+               show_heatmap_legend = T, 
+               show_row_names = F, 
+               show_column_names = T,
+               heatmap_legend_param = list(title = "Expression"))
+               #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+draw(ht4+htra)
 dev.off()
 
 
 # Without clustering rows nor columns
-ht3 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+ht5 <- Heatmap(cellModEmbed_mat[,], 
                cluster_rows = F,
                #row_order = NULL,
                cluster_columns = F, 
@@ -297,8 +364,25 @@ ht3 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
-draw(ht3+htra)
+pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+draw(ht5+htra)
+dev.off()  
+
+
+# Without clustering rows nor columns, sqrt
+ht6 <- Heatmap(cellModEmbed_mat_sqrt[,], 
+               cluster_rows = F,
+               #row_order = NULL,
+               cluster_columns = F, 
+               #show_row_dend = F, 
+               #show_column_dend = F, 
+               show_heatmap_legend = T, 
+               show_row_names = F, 
+               show_column_names = T,
+               heatmap_legend_param = list(title = "Expression"))
+               #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
+pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+draw(ht6+htra)
 dev.off()  
 ```
 
@@ -335,10 +419,11 @@ if (!is.null(metadata)) {
 ```
 
 ### Plot t-SNE of cell clusters
- 
-```{r}
+```{r, fig.height=10, fig.width=10}
 
 seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+if (is.null(seurat_obj@dr$pca)) seurat_obj <- RunPCA(object=seurat_obj, pc.genes = var.genes, pcs.compute = 20, do.print = F)
+if (is.null(seurat_obj@dr$tsne)) seurat_obj <- RunTSNE(object = seurat_obj, reduction.use = PCA, dims.use = 1:20)
 TSNEPlot(seurat_obj, do.label = T, label.size = 8)
 #TSNEPlot(seurat_obj, colors.use = htra_colors, do.label = T)
 ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),w=12, h=10)
@@ -347,7 +432,7 @@ ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),
 
 ## Plot metadata in cells on t-SNE featureplots
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 
 for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
 seurat_obj <- AddMetaData(seurat_obj, as.data.frame(metadata))
@@ -362,7 +447,7 @@ for (feat in names(seurat_obj@meta.data)) {
 
 ### Plot module eigengene expression on t-SNE featureplots 
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 
 for (j in names(seurat_obj@meta.data)) seurat_obj@meta.data[j] <- NULL
 seurat_obj <- AddMetaData(seurat_obj, cellModEmbed_mat[match(rownames(seurat_obj@meta.data), rownames(cellModEmbed_mat)),])
@@ -377,7 +462,7 @@ for (mod in names(seurat_obj@meta.data)) {
 
 ### Plot module-module correlations
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 
 load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
 
@@ -406,7 +491,7 @@ load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date
 
 # plot module clusters
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 
 load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
 
@@ -423,7 +508,7 @@ dev.off()
 ```
 
 
-# Compute kMEs of the merged modules
+# Compute kMs of the merged modules
 
 ```{r}
 # TODO
@@ -448,10 +533,6 @@ dev.off()
 ```
 
 # Compute eigen_mat of the merged modules
-
-
-
-
 
 ```{r}
 ##########################################################################
