@@ -935,17 +935,34 @@ if (resume == "checkpoint_1") {
     
   } else if (fuzzyModMembership=="kIM") { # do not merge modules based on eigengene correlation 
     
-    # TODO: merge based on kIM
-    
     list_list_colors <- lapply(list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
     
+    # Merge close modules using correlation between IM embeddings
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_mergeCloseModskIM.txt"))
+    
+    list_list_colors <- clusterMap(function(a,b,c) mapply(function(x,y) mergeCloseModskIM(datExpr=c,
+                                                                                          colours=x,
+                                                                                          kIMs=y,
+                                                                                          verbose=verbose,
+                                                                                          moduleMergeCutHeight=moduleMergeCutHeight), 
+                                                          x = a,
+                                                          y = b, 
+                                                          SIMPLIFY=F), 
+                                   a = list_list_colors, 
+                                   b = list_list_kMs, 
+                                   c = list_datExpr,
+                                   SIMPLIFY=F,
+                                   .scheduling = c("dynamic"))
+    stopCluster(cl)
+    invisible(gc()); invisible(R.utils::gcDLLs())
+
     list_list_MEs <- NULL
     
   }
   
   names(list_list_colors) <- sNames
-  
   
   ######################################################################
   ############## Match colors between parameter settings ###############

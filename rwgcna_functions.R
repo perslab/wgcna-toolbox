@@ -1,7 +1,6 @@
 # Title: sc functions
 # Author: Jonatan Thompson, Pers Lab
 
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -158,8 +157,6 @@ seurat_to_datExpr = function(seurat_obj_sub, idx_genes_use) {
   return(datExpr)  
 }
 
-
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -278,7 +275,6 @@ bootstrap <- function(datExpr,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-
 TOM_for_par = function(datExpr, subsetName, softPower) {
   
   ### 180503 v1.7
@@ -365,26 +361,6 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
   return(list("cols" = colors, "MEs"= MEs))
 }
 
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-# parvecMergeCloseModules = function(list_cutree, datExpr) {
-#   # Inherits comb_list from the parent environment, same for every subsetName, no need to pass as an argument
-#   list_merged <- mapply(function(x,y) vecMergeCloseModules(cutree=x,comb=y, datExpr_filter=datExpr_filter), list_cutree, comb_list, SIMPLIFY=FALSE) # Merge modules whose eigengenes are highly correlated
-#   return(list_merged)
-# }
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-# parGetMEs = function(list_merged) {
-#   list_MEs = lapply(list_merged, function(x) x$MEGs) # list of merged color eigengenes
-#   return(list_MEs)
-# }
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -395,6 +371,40 @@ extract_and_name_colors <- function(merged, datExpr) {
   return(colors)
 }
 
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+# TODO
+mergeCloseModskIM = function(datExpr,
+                             colours,
+                             kIMs) {
+  
+  cellModEmbed_mat <- cellModEmbed(datExpr, 
+                                   colours=colours, 
+                                   latentGeneType = "IM",
+                                   cellType=NULL,
+                                   kMs=kIMs)
+  
+  mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
+  
+  # Cluster modules across celltypes using the Pearson correlation between module cell embeddings
+  corr_pos <- mod_corr
+  corr_pos[corr_pos<0] <- 0
+  corr_dist <- as.dist(m = (1-corr_pos), diag = F, upper = F) # convert to (1-corr) distance matrix
+  corr_dendro <- hclust(d = corr_dist, method = "average")
+  
+  # use a simple cut to determine clusters
+  corr_clust = cutreeStatic(dendro = corr_dendro, cutHeight = moduleMergeCutHeight, minSize=1)
+  names(corr_clust) =  corr_dendro$labels
+  
+  
+  # merge modules
+  
+  # make new color vector
+  
+  return(colors_merged)
+}
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -461,8 +471,8 @@ parkMEs = function(list_MEs, datExpr) {
     list_kMEs[[j]] = signedKME(datExpr=as.matrix(datExpr),
                                datME=list_MEs[[j]]$eigengenes,
                                #list_MEs[[j]],#$eigengenes,
-                               #outputColumnName="",
-                               corFnc = corFnc)
+                               outputColumnName="",
+                               corFnc = corFnc )
   }
   return(list_kMEs)
 }
@@ -529,7 +539,6 @@ parPkMs_2 = function(list_kMs, list_colors) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
 
 deleteGrey <- function(list_kMs) {
   for (k in 1:length(list_kMs)) {
@@ -631,11 +640,9 @@ count_grey_in_list_of_vec = function(list_colors) {
   return(vec_n_grey)
 }
 
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
 
 getPkMs <- function(colors, kMs) {
   pkMs <- vector(length=length(colors))
@@ -733,30 +740,6 @@ plotCorr_for_par = function(corrMatrix, vectorNames, subsetName, diag, is.corr, 
   #clustering_distance_rows = dist(resR.G_G@listData$pvalue[select], method="euclidian"))
   dev.off()
 }
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-### 180516 Not a good idea - rather use the eigen_mat
-
-# get_kMEs_all_genes = function(kMEs, all_genes) {
-#   # works equally well for kIMs
-#   # kMEs should be a named dataframe or matrix
-#   # all_genes should be a vector
-#   
-#   out <- matrix(0, nrow=length(all_genes), ncol = ncol(kMEs))
-#   rownames(out) <- all_genes
-#   colnames(out) <- colnames(kMEs)
-#   row_idx <- all_genes %in% rownames(kMEs)
-#   
-#   ### EDIT_180429_5
-#   # out[row_idx,] <- as.matrix(kMEs)[row_idx,]
-#   out[row_idx,] <- as.matrix(kMEs) 
-#   ###
-#   return(out)
-#   
-# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -958,46 +941,6 @@ factorToIndicator <- function(vec) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# SeuratFactorToIndicator <- function(obj, meta.colnames) {
-#   # @Usage:   Converts factor/character metadata to new dummy variable columns
-#   # @args:    obj: Seurat object
-#   #           meta.colnames: list of metadata column names - character
-#   # @return:  dataframe with numeric metadata columns, column bound to 'dummy' variable columns, one for each level of each factor or character meta data column in obj
-#   # @depends: Seurat
-#   # @author:  Jonatan Thompson jjt3f2188@gmail.com
-#   # @date:    180524
-#   # @TODO: 
-#   
-#   idx_factor = sapply(obj@meta.data, function(x) class(x) %in% c("factor", "character"))
-#   
-#   metadata.factor <- obj@meta.data[idx_factor]
-#   metadata.factor <- metadata.factor[colnames(metadata.factor) %in% meta.colnames]
-#   meta.colnames.factor <- meta.colnames[meta.colnames %in% colnames(metadata.factor)]
-#   
-#   metadata.numeric <- obj@meta.data[!idx_factor]
-#   metadata.numeric <- metadata.numeric[colnames(metadata.numeric) %in% meta.colnames]
-# 
-#   
-#   # For factor metadata columns, get logical vectors for each level
-#   list.list.idx = list()
-#   for (j in 1:length(meta.colnames.factor)) {
-#     col <- grep(meta.colnames.factor[j], names(metadata.factor)) # Find the meta data column index
-#     list.idx <- lapply(names(table(metadata.factor[col])), function(x) metadata.factor[col]==x) # find, for each unique value, a logical vector of occurences
-#     names(list.idx) = names(table(metadata.factor[col]))
-#     list.list.idx[[j]] <- list.idx
-#   }
-#   
-#   flatlist.idx <- unlist(list.list.idx, recursive=F, use.names = T) # Flatten to list of logical vectors  
-#   #names(flatlist.idx) <- unlist(values, recursive=F) # Assign a feature name to each vector
-#   new_cols <- cbind(metadata.numeric, data.frame(lapply(flatlist.idx, function(x) as.numeric(x)), row.names=row.names(obj@meta.data))) # Make numeric dataframe
-#   #return(AddMetaData(object=obj, new_cols)) # Add dataframe to Seurat object and return
-#   return(new_cols) # return dataframe, not seurat object
-# }
-###
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
 wrapSubset <- function(obj, ident, do.scale=T, do.center=T) {
   # @Status:  OK
   # @Usage:   Pseudo-wrapper for Seurat's SubsetData, ScaleData, FindVariableGenes and runPCA functions
@@ -1104,7 +1047,7 @@ PPI_outer_for_vec = function(colors,
   string_db <- STRINGdb$new(version="10", 
                             species = STRINGdb_species, 
                             score_threshold=0, 
-                            input_directory="") # Default: 10090 (Mus musculus)
+                            input_directory="") 
   
   # For each module, check STRING_db enrichment
   sapply(unique_colors, function(x) PPI_inner_for_vec(color=x, 
@@ -1131,7 +1074,6 @@ PPI_outer_for_vec = function(colors,
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
 
 PPI_inner_for_vec <- function(color, unique_colors, colors, string_db) {
   # Parallelise over modules within a set of modules
@@ -1217,7 +1159,6 @@ cor_magma_pval <- function(gwas_pvals,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-
 kM_magma <- function(cellType,
                       modulekM,
                       gwas) {
@@ -1294,6 +1235,8 @@ makeColorsUniqueForPlot = function(cols) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
+# disused
+
 mendelianGenes <- function(cellType,
                            colors,
                            coding_variants,
@@ -1356,210 +1299,6 @@ mendelianGenes <- function(cellType,
   
 }
 
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-# NOT IN USE 
-# 180522: /!\ can't install DOSE
-
-# GO_for_par = function(list_kMs_gwas) {
-#   
-#   suppressPackageStartupMessages(library(DOSE))
-#   suppressPackageStartupMessages(library(GO.db))
-#   suppressPackageStartupMessages(library(org.Hs.eg.db))
-#   suppressPackageStartupMessages(library(GSEABase))
-#   suppressPackageStartupMessages(library(clusterProfiler))
-#   
-#   ### Only for PPI
-#   
-#   list_GSEA_gwas <- NULL
-#   
-#   # # select only kM columns of gwas enriched module
-#   # list_kMs_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMs_PPI_ok_gwas, y = list_modules_PPI_gwas)
-#    
-#   # Order genes by kM to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
-#   list_list_module_gwas_genes_order <- lapply(list_kMs_gwas, function(x) lapply(colnames(x), function(y) rownames(x)[order(x[[y]], decreasing=T)]))
-#   
-#   ### 190509_v1.8.dev2
-#   ### # Got to here!
-#   invisible(gc())
-#   cl <- makeCluster(n_cores, type = "FORK", 
-#                     outfile = paste0(log_dir, "log_gprofiler.txt"))
-#   
-#   list_list_ggo <- parLapplyLB(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) groupGO(gene = y,
-#                                                                                                           OrgDb    = org.Mm.eg.db,
-#                                                                                                           ont      = "CC",
-#                                                                                                           #level    = 3,
-#                                                                                                           readable = T)))
-#   
-#   
-#   ego3 <- parLapplyLB(list_list_module_gwas_genes_order, function(x) lapply(x, function(y) gseGO(geneList = y,
-#                                                                                                OrgDb        = org.Mm.eg.db,
-#                                                                                                ont          = "CC",
-#                                                                                                nPerm        = 1000,
-#                                                                                                minGSSize    = 100,
-#                                                                                                maxGSSize    = 500,
-#                                                                                                pvalueCutoff = 0.05,
-#                                                                                                verbose      = FALSE)))
-#   stopCluster(cl)
-#   invisible(gc())
-# }
-
-# list_list_gprofiles <- lapply( list_list_module_gwas_genes_order, function(x) gprofiler(query=x, 
-#                                                                                        organism = organism, 
-#                                                                                        sort_by_structure = T,
-#                                                                                        ordered_query = T, 
-#                                                                                        significant = T, 
-#                                                                                        exclude_iea = T, # TODO check with Dylan
-#                                                                                        underrep = F,
-#                                                                                        evcodes = F, 
-#                                                                                        region_query = F, 
-#                                                                                        max_p_value = 1, 
-#                                                                                        min_set_size = 0,
-#                                                                                        max_set_size = 0, 
-#                                                                                        min_isect_size = 0, 
-#                                                                                        correction_method = "analytical",
-#                                                                                        hier_filtering = "none", 
-#                                                                                        domain_size = "annotated", 
-#                                                                                        custom_bg = "",
-#                                                                                        numeric_ns = "", 
-#                                                                                        png_fn = NULL, 
-#                                                                                        include_graph = F, 
-#                                                                                        src_filter = NULL))
-
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-# NOT IN USE
-# GSEA_for_par = function() {
-# 
-#   list_GSEA_PPI_gwas <- NULL
-#   
-#   # select only kM columns of gwas enriched moduled 
-#   list_kMs_PPI_ok_gwas <- mapply(function(x,y) x[,colnames(x) %in% y], x = list_kMs_ok[names(list_kMs_PPI_ok) %in% sNames_PPI_gwas], y = list_modules_PPI_gwas)
-#   
-#   # Order genes by kM to their own module. This allows us to submit them as ranked queries to gprofiler for GSEA style p-values (https://cran.r-project.org/web/packages/gProfileR/gProfileR.pdf)
-#   list_list_module_PPI_gwas_genes_order <- lapply(list_kMEs_PPI_ok_gwas, function(x) lapply(colnames(x), function(y) rownames(x)[order(x[[y]], decreasing=T)]))
-#   
-#   # name them
-# 
-#   invisible(gc())
-#   cl <- makeCluster(n_cores, type = "FORK", 
-#                     outfile = paste0(log_dir, "log_gprofiler_PPI.txt"))
-#   
-#   ### 180607_v1.8_dev2
-#   list_list_gprofiles_PPI <- parLapplyLB(cl, list_list_module_PPI_genes_order, function(x) gprofiler(query=x, 
-#                                                                                                    organism = organism, 
-#                                                                                                    sort_by_structure = T,
-#                                                                                                    ordered_query = T, 
-#                                                                                                    significant = T, 
-#                                                                                                    exclude_iea = F, # TODO check with Dylan
-#                                                                                                    underrep = F,
-#                                                                                                    evcodes = F, 
-#                                                                                                    region_query = F, 
-#                                                                                                    max_p_value = 1, 
-#                                                                                                    min_set_size = 0,
-#                                                                                                    max_set_size = 0, 
-#                                                                                                    min_isect_size = 0, 
-#                                                                                                    correction_method = "analytical",
-#                                                                                                    hier_filtering = "none", 
-#                                                                                                    domain_size = "annotated", 
-#                                                                                                    custom_bg = "",
-#                                                                                                    numeric_ns = "", 
-#                                                                                                    png_fn = NULL, 
-#                                                                                                    include_graph = F, 
-#                                                                                                    src_filter = NULL))
-#   
-#   stopCluster(cl)
-#   invisible(gc())
-#   
-#   
-#   ### edit_180504_v1.7_dev1
-#   # Assign names to each list with gprofiler dataframes
-#   #list_list_gprofiles_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names= colnames(y), dimension = NULL),  x=list_list_gprofiles_PPI,  y=list_kIMs_PPI, SIMPLIFY=F)
-#   list_list_gprofiles_PPI <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension = NULL),  x=list_list_gprofiles_PPI,  y=list_list_module_PPI_genes_order, SIMPLIFY=F)
-#   ###
-#   #names(list_list_gprofiles_PPI) <- sNames_ok_PPIfilter
-# }
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-make_eigen_mat <- function(RObjects_dir,
-                        list_list_module_genes,
-                        n_cores,
-                        log_dir) {
-
-
-  # melt each nested list to a single dataframe with a gene column and a module (list name) column
-  sigmod_list <- lapply(list_list_module_genes, function(x) melt.list(x))
-  
-  # Join list of dataframes into a single dataframe by the gene columns
-  sigmod_list %>%
-    Reduce(function(dtf1,dtf2) full_join(dtf1,dtf2, by = 'value'), .) -> gene_modules.df
-  
-  # sigmod_list %>%
-  #   Reduce(function(dtf1,dtf2) full_join(dtf1,dtf2,by="value"), .)->gene_modules.df
-  
-  #gene_modules.df["L1"] <- NULL
-  gene_modules.df <- sapply(gene_modules.df, as.character) %>% as.data.frame
-  
-  colnames(gene_modules.df) <- c("genes", names(sigmod_list))
-  
-  gene_modules.df[is.na(gene_modules.df)]<-'random'
-  
-  row.names(gene_modules.df) <-  gene_modules.df$genes
-  
-  gene_modules.df<-gene_modules.df[,-1, drop=F]
-  
-  # FILTER SEURATOBJ 
-  
-  # load seurat object
-  seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
-  # Get ident
-  ident <- seurat_obj@ident
-  # filter
-  s.coexp <- t(seurat_obj@data[rownames(seurat_obj@data) %in% row.names(gene_modules.df),, drop=F]) 
-  s.coexp <- as.matrix(s.coexp)
-  # Free up memory
-  rm(seurat_obj)
-  # order genes and modules same
-  s.coexp <- s.coexp[,order(colnames(s.coexp)), drop=F]
-  gene_modules.df<-gene_modules.df[order(row.names(gene_modules.df)),, drop=F]
-  #identical(colnames(s.coexp),row.names(gene_modules.df))
-  eiglist<-as.list(as.data.frame(gene_modules.df))
-  
-  # Score cells on eigengenes 
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_eigengene_allscore.txt"))
-  eigenge_allscore.list<-parLapplyLB(cl, eiglist, function(x) moduleEigengenes((s.coexp), x, impute = T)$eigengenes) #Score cell matrix on each eigengene found in each celltype
-  stopCluster(cl)
-  invisible(gc())
-  
-  #Rename Columns in each eigengene matrix
-  for (i in 1:length(eigenge_allscore.list)){ 
-    colnames(eigenge_allscore.list[[i]])<-paste0(names(eigenge_allscore.list)[[i]],'_',colnames(eigenge_allscore.list[[i]])) 
-  }
-  
-  eigen_mat <- bind_cols(eigenge_allscore.list) # Merge Eigengene Matrices
-  eigen_mat <- eigen_mat[,!grepl('.*merandom$',colnames(eigen_mat), ignore.case = T), drop=F] #Remove eigengene scores on genes that were not found in modules in a cell type
-  row.names(eigen_mat)<-row.names(s.coexp) 
-
-  # Reorder rows in eigenmat by cell type
-  for (i in 1:length(unique(ident))) {
-    if (i==1) {
-      eigen_mat_order <- eigen_mat[ident== names(table(ident))[i],,drop=F]
-    } else {
-      eigen_mat_order <- rbind(eigen_mat_order, eigen_mat[ident== names(table(ident))[i],,drop=F])
-    }
-  }
-  ### 180528 prefixing the cell cluster is redundant
-  #prefix <- rep(x=names(list_list_module_genes), times=sapply(list_list_module_genes, length))
-  colnames(eigen_mat) <- gsub("gene_modules.df|ME", "", colnames(eigen_mat))
-  #colnames(eigen_mat) <- paste0(prefix,"_", colnames(eigen_mat))
-  return(eigen_mat)
-}
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1602,111 +1341,6 @@ cellModEmbed <- function(datExpr,
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
-# WORK IN PROGRESS
-
-plot_eigen_mat = function(eigen_mat,
-                          RObjects_dir,
-                          list_modules,
-                          #dat_fdr,
-                          #dat_corrCoef,
-                          plots_dir, 
-                          data_prefix, 
-                          flag_date) {
-  
-  # load libraries within the function environment to reduce the risk of 'maximum DLLs reached' error later
-  suppressPackageStartupMessages(library(ComplexHeatmap))
-
-  # load seurat object
-  seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
-  # Get ident
-  ident <- seurat_obj@ident
-  
-  # make row annotation
-  htra_colors <- sample(colors()[c(1:151,362:length(colors()))], size=length(table(ident)), replace=F) 
-  names(htra_colors) <- names(table(ident))
-  
-  htra<-rowAnnotation(cellcluster = ident,
-                      annotation_legend_param = list(cellcluster = list(nrow = 7, title = "Cell cluster", title_position = "topcenter")),
-                      col=list(cellcluster = htra_colors),
-                      width = unit(5, "mm"))
-
-  # Make column annotations
-  # make non-duplicate colors corresponding to modules
-  # htca_colors <- unlist(list_modules, use.names =T)
-  # names(htca_colors) <- colnames(eigen_mat)
-  # 
-  # # replace duplicate colors with related ones
-  # while (all(!duplicated(htca_colors)) == F) {
-  #   for (i in which(duplicated(htca_colors))) {
-  #     newColor <- "newcolor"
-  #     k=1
-  #     while (!newColor %in% colors()) {
-  #       if (k<100) {
-  #         newColor <- paste0(htca_colors[i], sample.int(4, 1, replace=T))
-  #       } else if (k==100) {
-  #         newColor <- paste0("grey", sample.int(99, 1, replace=T))        
-  #       }
-  #       k = k+1
-  #     }
-  #     htca_colors[i] <- newColor
-  #  }
-  # }
-  
-
-  #colAnnodf <- data.frame(dat_fdr[-grep("module", colnames(dat_fdr))])
-                          #dat_corrCoef[-grep("module", colnames(dat_corrCoef))])
-
-  #module = htca_colors,
-  
-  #rownames(colAnnodf) <- dat_fdr$module
-  
-  ### 180524
-  
-  #$colnames(colAnnodf[-grep("module", colnames(dat_fdr))])
-  # paste0(colnames(colAnnodf[-grep("module", colnames(dat_fdr))])[j], "_fdr")
-  
-  # idx_col <- 1:(ncol(colAnnodf)-1)
-  # suffix <- c(rep(",", ncol(colAnnodf)-2),"")
-  # htca <- HeatmapAnnotation(eval(parse(text = paste0("fdr_", idx_col , "= anno_barplot(colAnnodf[[", idx_col, "]], axis=T, axis_side='right', baseline = 0, gp = gpar(fill = htca_colors)), height = unit(50, 'mm'), show_annotation_name = TRUE,  annotation_name_offset = unit(10, 'mm'), annotation_name_side = 'right', annotation_name_rot = c(0, 0, 90))",suffix))))
-
-  # plot heatmap without column annotations
-  
-  tryCatch({   
-  # Without clustering rows
-  ht1 <- Heatmap(eigen_mat[,], 
-               cluster_rows = F,
-               #row_order = row.names(eigen_mat_order),
-               cluster_columns = T, 
-               #show_row_dend = F, 
-               show_column_dend = F, 
-               show_heatmap_legend = FALSE, 
-               show_row_names = F, 
-               show_column_names = T)
-               #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_AllEigenHeatmap_rows_celltype_order_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
-  draw(ht1+htra)
-  dev.off()
-  
-  # With clustering rows
-  ht1 <- Heatmap(eigen_mat[,], 
-                 cluster_rows = T,
-                 #row_order = row.names(eigen_mat_order),
-                 cluster_columns = T, 
-                 #show_row_dend = F, 
-                 show_column_dend = F, 
-                 show_heatmap_legend = FALSE, 
-                 show_row_names = F, 
-                 show_column_names = T)
-                 #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_AllEigenHeatmap_rows_cluster_%s.pdf", plots_dir, data_prefix, flag_date ),h=20,w=20)
-  draw(ht1+htra)
-  dev.off()
-  
-  }, error = function(x) warning("Heatmap plot failed. Maybe only one module?"))
- return(htra_colors)
-}
-
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1731,95 +1365,3 @@ if (FALSE) {
   draw(ht.mean.celltype.eig.expr)
   dev.off()
 }
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-ipak <- function(pkg, bioconductor = F){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg)) {
-    if (bioconductor==F) {
-      try(install.packages(new.pkg, dependencies = TRUE))
-    } else {
-      source("https://bioconductor.org/biocLite.R")
-      biocLite(pkg)
-    }
-  }
-  sapply(pkg, require, character.only = TRUE)
-}
-
-# usage
-# packages <- c("ggplot2", "plyr", "reshape2", "RColorBrewer", "scales", "grid")
-# ipak(packages)
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-# Remove packages installed under 3.5.0
-
-#pak3.5 <- installed.packages()[,"Package"][grep("3.5.0", installed.packages()[,"Built"])]
-
-rpak <- function(pkg){
-  installed.pkg <- pkg[(pkg %in% installed.packages()[, "Package"])]
-  if (length(installed.pkg)) {
-    try(remove.packages(installed.pkg))
-  }
-}
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-wrap_consensusTOM <- function(...) {
-  # a function wrapper the sole purpose of which is to create a function environment which contains only the 
-  # necessary variables (...) required by consensusTOM. These should be named.
-  # This creates a suitable environment for using makeCluster to set up fork clusters while sending only the necessary variables
-  # from the global environment to the workers, thereby saving memory.
-  
-  cl <- makeCluster(n_cores_consTOM, type = "FORK", outfile = paste0(log_dir, "log_consensusTOM.txt"))
-  
-  list_consensus <- clusterMap(cl, function(x,y) consensusTOM(multiExpr = x, 
-                                                              checkMissingData = checkMissingData,
-                                                              maxBlockSize = maxBlockSize, 
-                                                              blockSizePenaltyPower = blockSizePenaltyPower, 
-                                                              randomSeed = randomSeed,
-                                                              corType = corType,
-                                                              maxPOutliers = maxPOutliers,
-                                                              quickCor = quickCor,
-                                                              pearsonFallback = pearsonFallback,
-                                                              cosineCorrelation = cosineCorrelation,
-                                                              replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                                              power = list_softPower[[y]],
-                                                              networkType = networkType,
-                                                              TOMDenom = TOMDenom,
-                                                              saveIndividualTOMs = saveIndividualTOMs,
-                                                              individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
-                                                              networkCalibration = networkCalibration,
-                                                              sampleForCalibration = sampleForCalibration,
-                                                              sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                                              getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                                              consensusQuantile = consensusQuantile,
-                                                              useMean = useMean,
-                                                              saveConsensusTOMs = saveConsensusTOMs,
-                                                              consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
-                                                              returnTOMs = F,
-                                                              useDiskCache = T,
-                                                              cacheDir = RObjects_dir,
-                                                              cacheBase = ".blockConsModsCache",
-                                                              verbose = verbose,
-                                                              indent = indent), 
-                               x=list_multiExpr, 
-                               y=sNames, 
-                               SIMPLIFY=F)
-  stopCluster(cl)
-  invisible(gc())
-  
-  return(list_consensus)
-}
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-
