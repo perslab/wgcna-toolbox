@@ -1,5 +1,18 @@
 # Change log
 
+v2.3 - 01-08-2018
+
+Changed
+* Save scale data matrix rather than whole RObject to disk for later reuse (cashing)
+* Use scratch_dir - HDD hard disk - for temporary checkpoint session images, scale matrix and TOM files
+* removed unnecessary named function parGetMEs, totally unnecessary
+* changed version control structure to full git workflow: deleted dev versions
+* change consensusTOM consensusQuantile to 0.2 as a way to weed out modules depending on relatively few cells
+
+Fixed
+* In mergeCloseModules, was computing Eigengenes twice, within the mergeCloseModules function and afterwards. Now only afterwards.
+* the script would remove all grey parametrisations BEFORE matching colors, but colors takes n_combs as an (implicit) argument, so this could produce an error if some parametrisations were all grey and were removed
+
 v2.2 - 18-07-18
 
 ### Changed
