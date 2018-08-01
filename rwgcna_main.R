@@ -430,7 +430,7 @@ if (is.null(resume)) {
   ident <- seurat_obj@ident
   
   # Save scale and regressed whole expression matrix with ensembl rownames for later use
-  save(scale_data, file = sprintf("%stmp_%s_scale_regr_data_ensembl_%s.RData", scratch_dir, data_prefix, flag_date))
+  save(scale_data, file = sprintf("%stmp_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix))
   save(ident, file = sprintf("%stmp_%s_ident_%s.RData", scratch_dir, data_prefix, flag_date))
          
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
@@ -1022,7 +1022,7 @@ if (resume == "checkpoint_1") {
   }
   
   # Keep dissTOM for computing kIMs (just in case, also if fuzzyModMembership = kME)
-  save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok_%s.RData", scratch_dir, data_prefix, flag_date))
+  save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok.RData", scratch_dir, data_prefix))
   
   # Delete consensus TOMs from disk
   for (subsetName in sNames) {
@@ -1080,8 +1080,9 @@ if (resume == "checkpoint_1") {
                                .scheduling = c("dynamic"))
     
   } else if (fuzzyModMembership == "kIM") {
-    
-    list_dissTOM_ok <- load_obj(f=sprintf("%s%s_list_dissTOM_ok_%s.RData", scratch_dir, data_prefix, flag_date))
+
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
+    list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
     names(list_dissTOM_ok) <- sNames_ok
     
     list_list_kMs <- clusterMap(cl, function(x,y) lapply(y, function(z) kIM_eachMod_norm(dissTOM = x, 
@@ -1407,7 +1408,7 @@ if (resume == "checkpoint_3") {
     
   } else if (fuzzyModMembership == "kIM"){
     
-    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = "list_dissTOM_ok", full.names = T)
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
     list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
     names(list_dissTOM_ok) <- sNames_ok
     list_dissTOM_PPI <- list_dissTOM_ok[sNames_ok %in% sNames_PPI]
@@ -1822,7 +1823,7 @@ if (resume == "checkpoint_3") {
       
     } else if (fuzzyModMembership=="kIM") {
 
-      list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = "list_dissTOM_ok", full.names = T)
+      list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
       list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
       names(list_dissTOM_ok) <- sNames_ok
       list_dissTOM_gwas <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_gwas]
