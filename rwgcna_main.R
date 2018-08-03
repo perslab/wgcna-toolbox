@@ -933,30 +933,59 @@ if (resume == "checkpoint_1") {
     
     names(list_list_MEs) = sNames
     
-  } else if (fuzzyModMembership=="kIM") { # do not merge modules based on eigengene correlation 
+  } else if (fuzzyModMembership=="kIM") { 
     
     list_list_colors <- lapply(list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
+    
+    list_list_colors <- mapply(function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names = colnames(y), dimension=NULL)),
+                               x = list_list_colors,
+                               y = list_datExpr_gg,
+                               SIMPLIFY=F)
+    
+    list_list_colors <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = y, dimension=NULL),
+                               x = list_list_colors,
+                               y = list_plot_label,
+                               SIMPLIFY=F)
+    
+    names(list_list_colors) <- sNames
     
     # Merge close modules using correlation between IM embeddings
     invisible(gc()); invisible(R.utils::gcDLLs())
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_mergeCloseModskIM.txt"))
     
-    list_list_colors <- clusterMap(function(a,b,c) mapply(function(x,y) mergeCloseModskIM(datExpr=c,
-                                                                                          colours=x,
-                                                                                          kIMs=y,
-                                                                                          verbose=verbose,
-                                                                                          moduleMergeCutHeight=moduleMergeCutHeight), 
+    list_list_kMs <- clusterMap(cl, function(a,b) lapply(b, function(x) kIM_eachMod_norm(dissTOM = a, 
+                                                                                        colors = x)),
+                                a = list_dissTOM,
+                                b = list_list_colors,
+                                SIMPLIFY=F,
+                                .scheduling = c("dynamic"))
+    
+    list_list_kMs <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = colnames(b), dimension = 1)),
+                                a = list_list_kMs,
+                                b = list_datExpr_gg,
+                                SIMPLIFY = F)
+    
+    list_list_merged <- mapply(function(a,b,c,d) mapply(function(x,y) mergeCloseModskIM(datExpr =c,
+                                                                                        colours = x,
+                                                                                        kIMs  = y,
+                                                                                        iterate=T,
+                                                                                        dissTOM = d,
+                                                                                        moduleMergeCutHeight=moduleMergeCutHeight,
+                                                                                        verbose=verbose),
                                                           x = a,
-                                                          y = b, 
-                                                          SIMPLIFY=F), 
-                                   a = list_list_colors, 
-                                   b = list_list_kMs, 
-                                   c = list_datExpr,
-                                   SIMPLIFY=F,
-                                   .scheduling = c("dynamic"))
+                                                          y = b,
+                                                          SIMPLIFY=F),
+                                   a = list_list_colors,
+                                   b = list_list_kMs,
+                                   c = list_datExpr_gg,
+                                   d = list_dissTOM,
+                                   SIMPLIFY=F)
+    
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
+
+    list_list_colors <- list_list_merged$colours
 
     list_list_MEs <- NULL
     
@@ -1068,6 +1097,8 @@ if (resume == "checkpoint_1") {
   #   list_list_kMs
   #   list_list_pkMs
     
+  #TODO: do not need to recompute MEs after matching colors. Just rename them.
+  
   message(paste0("Computing gene-module ", fuzzyModMembership), "s")
  
   # Compute kMEs / kIMs
@@ -1078,7 +1109,6 @@ if (resume == "checkpoint_1") {
 
   if (fuzzyModMembership == "kME") {
     
-    #NB: need to recompute MEs after matching colors
     
     list_list_MEs_ok_matched <- clusterMap(cl, function(x,y) lapply(y, function(z) moduleEigengenes(expr = as.data.frame(x, col.names=col.names(x)),
                                                                   colors=z,
@@ -1193,7 +1223,7 @@ if (resume == "checkpoint_2") {
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_PPI_outer_for_vec.txt"))
 
-    list_list_colors_PPI <- mapply(function(a,b,c) clusterMap(cl, function(x,y) PPI_outer_for_vec(colors = x,
+    list_list_PPI <- clusterMap(cl, function(a,b,c) mapply(function(x,y) PPI_outer_for_vec(colors = x,
                                                                                                 pkMs = y,
                                                                                                 STRINGdb_species = STRINGdb_species,
                                                                                                 PPI_pkM_threshold = c,
@@ -1203,14 +1233,24 @@ if (resume == "checkpoint_2") {
                                                                                                 flag_date = flag_date),
                                                                 x = a,
                                                                 y = b,
-                                                                SIMPLIFY=F,
-                                                              .scheduling = c("dynamic")),
+                                                                SIMPLIFY=F),
                                        a = list_list_colors_matched_ok,
                                        b = list_list_pkMs,
                                        c = list_PPI_pkM_threshold,
-                                       SIMPLIFY=F)
+                                       SIMPLIFY=F,
+                                       .scheduling = c("dynamic"))
+    
+    list_list_colors_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI))
+    list_list_interactions_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) y$interactions_PPI_signif))
+  
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    names(list_list_colors_PPI) <- names(list_list_interactions_PPI_signif) <- list_list_colors_matched_ok 
+    list_list_interactions_PPI_signif <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = names(y), dimension=NULL),
+                                         x=list_list_interactions_PPI_signif,
+                                         y=list_list_colors_matched_ok, 
+                                         SIMPLIFY = F)
     
   } else if (checkPPI==F) {
     
@@ -1240,6 +1280,7 @@ if (resume == "checkpoint_2") {
   list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_colors_matched_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_matched_ok , y = list_PPI_vec_n_grey, SIMPLIFY = F )
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  list_list_interactions_PPI_signif_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_interactions_PPI_signif, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   
   ######################################################################
   ##### FOR EACH SUBSET SELECT PARAMETERS WITH BEST PPI ENRICHMENT #####
@@ -1249,12 +1290,14 @@ if (resume == "checkpoint_2") {
   list_plot_label_final <- lapply(list_list_plot_label_ok_order, function(x) x[[1]])
   list_colors_PPI <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
   list_colors <- lapply(list_list_colors_matched_ok_order, function(x) x[[1]])
-
+  list_interactions_PPI_signif <- lapply(list_list_interactions_PPI_signif_order, function(x) x[[1]])
+  
   # Name by cell clusters
   names(list_plot_label_final) <- sNames_ok
   names(list_colors_PPI) <- sNames_ok
   names(list_colors) <- sNames_ok
-
+  names(list_interactions_PPI_signif) <- sNames_ok
+  
   # Make list of list of final parameters
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
   list_list_cutree_params_final <- lapply(list_PPI_vec_n_grey, function(x) comb_list[order(x,decreasing = F)][[1]])
@@ -1280,6 +1323,7 @@ if (resume == "checkpoint_2") {
   
   sNames_PPI <- sNames_ok[logical_subsets_PPI_ok]
   list_colors_PPI <- list_colors_PPI[logical_subsets_PPI_ok]
+  list_interactions_PPI_signif_ok <- list_interactions_PPI_signif[logical_subsets_PPI_ok]
   list_datExpr_PPI <- list_datExpr_ok[logical_subsets_PPI_ok]
 
   list_colors <- list_colors[logical_subsets_PPI_ok]
@@ -2152,23 +2196,9 @@ if (resume == "checkpoint_4") {
   rownames(cellModEmbed_mat) <- rownames(datExpr)
   
   ##########################################################################
-  ########### CORRELATE MODULE EXPRESSION PROFILES ACROSS CELLTYPES ########
+  ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
   
-  message("Compute correlation between cell module embeddings")
-  
-  mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
-  
-  # Cluster modules across celltypes using the Pearson correlation between module cell embeddings
-  corr_pos <- mod_corr
-  corr_pos[corr_pos<0] <- 0
-  corr_dist <- as.dist(m = (1-corr_pos), diag = F, upper = F) # convert to (1-corr) distance matrix
-  corr_dendro <- hclust(d = corr_dist, method = "average")
-  
-  # use a simple cut to determine clusters
-  corr_clust = cutreeStatic(dendro = corr_dendro, cutHeight = moduleMergeCutHeight, minSize=1)
-  names(corr_clust) =  corr_dendro$labels
-
   # prepare nested lists of module genes
   list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
   list_list_module_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F)
@@ -2187,11 +2217,7 @@ if (resume == "checkpoint_4") {
   }
   
   list_list_module_meta_genes <- tmp
-  
-  ##########################################################################
-  ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
-  ##########################################################################
-  
+
   # Prepare module genes dataframe
   cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
   module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
@@ -2222,6 +2248,14 @@ if (resume == "checkpoint_4") {
   }
   
   save(list_list_module_meta_genes, file=sprintf("%s%s_list_list_module_genes.RData", RObjects_dir, data_prefix))
+  
+  ####################### SAVE STRINGDB PPI OUTPUT #########################
+  ##########################################################################
+  
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_STRINGdb_output_%s.csv", tables_dir, data_prefix, y,  flag_date), row.names=F, quote = F), 
+                   x=list_interactions_PPI_signif_ok, 
+                   y= sNames_PPI, 
+                   SIMPLIFY = F))
   
   ################## SAVE KMs FOR BMI-ENRICHED MODULES ####################
   ##########################################################################
@@ -2261,10 +2295,6 @@ if (resume == "checkpoint_4") {
   ###########################################################################
 
   try(invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_cellModEmbed_%s.csv", tables_dir, data_prefix, fuzzyModMembership, flag_date), row.names=T, quote = F)))
-  
-  ################## SAVE MODULE-MODULE CORRELATION FILES ###################
-  ###########################################################################
-  save(mod_corr, corr_dendro, corr_clust, file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects_dir, data_prefix, flag_date))
   
   ######################## SAVE DIAGNOSTIC STATS ############################
   ###########################################################################

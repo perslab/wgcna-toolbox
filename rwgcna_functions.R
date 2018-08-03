@@ -293,7 +293,7 @@ TOM_for_par = function(datExpr, subsetName, softPower) {
                             verbose=verbose,
                             indent = indent)
   
-  save(consTomDS, file=sprintf("%s%s_consensusTOM-block.1.RData", RObjects_dir, subsetName)) # Save TOM the way consensusTOM would have done
+  save(consTomDS, file=sprintf("%s%s_consensusTOM-block.1.RData", scratch_dir, subsetName)) # Save TOM the way consensusTOM would have done
   goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
   return(goodGenesTOM_idx)
 }
@@ -375,16 +375,34 @@ extract_and_name_colors <- function(merged, datExpr) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# TODO
 mergeCloseModskIM = function(datExpr,
                              colours,
-                             kIMs) {
+                             kIMs,
+                             iterate = F,
+                             dissTOM = NULL,
+                             cellModEmbed_mat = NULL,
+                             moduleMergeCutHeight=0.2,
+                             verbose=2) {
   
-  cellModEmbed_mat <- cellModEmbed(datExpr, 
-                                   colours=colours, 
-                                   latentGeneType = "IM",
-                                   cellType=NULL,
-                                   kMs=kIMs)
+  # Usage: compute correlations between gene module cell embeddings. 
+  #         merge modules with a positive correlation > 1-moduleMergeCutHeight
+  #
+  # Args: datExpr: a cell * gene expression matrix
+  #       colours: vector module assignments with gene names
+  #       kIMs: generalised IntraModular connectivity, dataframe of gene row and module column
+  #       dissTOM: only needed if iterate=T, in order to recompute kIMs
+  #       cellModEmbed_mat: embedding matrix of cell rows and module columbs. Passing the matrix saves time; otherwise will be computed
+  #       moduleMergeCutHeight: max distance (1-correlation coefficient) for merging modules
+  #       verbose: verbosity of WGCNA::cor function, 1-5
+  #       iterate: iterate until no modules are close enough to merge, boolean, defaults to T
+  #
+  # Returns: colours_merged, vector of new module assignments with gene names
+  
+  if (is.null(cellModEmbed_mat))  cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
+                                                                   colours=colours, 
+                                                                   latentGeneType = "IM",
+                                                                   cellType=NULL,
+                                                                   kMs=kIMs)
   
   mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
   
@@ -395,15 +413,49 @@ mergeCloseModskIM = function(datExpr,
   corr_dendro <- hclust(d = corr_dist, method = "average")
   
   # use a simple cut to determine clusters
-  corr_clust = cutreeStatic(dendro = corr_dendro, cutHeight = moduleMergeCutHeight, minSize=1)
+  corr_clust = cutreeStatic(dendro = corr_dendro, 
+                            cutHeight = moduleMergeCutHeight, 
+                            minSize=1)
   names(corr_clust) =  corr_dendro$labels
   
-  
+  if (length(unique(corr_clust)) == length(unique(colours))) {
+    return(list(colours=colours, kIMs = kIMs))
+  } else {
+    colours_merged <- colours
   # merge modules
+    for (clust in unique(corr_clust)) { # loop over numeric cluster assignments
+      new_colour = names(corr_clust)[corr_clust==clust][1] # use the colours name of the first module in the cluster
+      for (colour in names(corr_clust[corr_clust==clust])) { # loop over all module colours in the cluster
+        colours_merged[colours_merged==colour] <- new_colour # give them all the new colour
+      }
+    }
+  }
   
-  # make new color vector
+  # Repeat recursively until no more merges
+  if (iterate==T) {
+    if (length(unique(colours)) > length(unique(colours_merged))) {
+      # Compute new kIMs
+      kIMs_merged <- kIM_eachMod_norm(dissTOM = dissTOM, 
+                                      colors = colours_merged)
+      
+      # Call function recursively
+      merged <- mergeCloseModskIM(datExpr=datExpr,
+                                  colours=colours_merged,
+                                  kIMs=kIMs_merged,
+                                  dissTOM = dissTOM,
+                                  cellModEmbed_mat = cellModEmbed_mat,
+                                  moduleMergeCutHeight=moduleMergeCutHeight,
+                                  verbose=verbose,
+                                  iterate=iterate) 
+
+
+      colours_merged <- merged$colours_merged
+      kIMs_merged <- merged$kIMs_merged
+      
+      }
+    } 
   
-  return(colors_merged)
+  return(list(colours=colours_merged, kIMs = kIMs_merged))
 }
 
 ############################################################################################################################################################
@@ -1060,6 +1112,7 @@ PPI_outer_for_vec = function(colors,
   # FILTER MODULES ON PPI ENRICHMENT  
 
   if (!is.null(module_PPI)) {
+    module_PPI_signif <- module_PPI[module_PPI$'p-value' < pvalThreshold,]
     unique_colors_PPI = unique_colors[module_PPI$'p-value' < pvalThreshold]
     genes_PPI_idx <- colors %in% unique_colors_PPI
     colors_PPI <- colors
@@ -1068,7 +1121,7 @@ PPI_outer_for_vec = function(colors,
     colors_PPI <- rep("grey", length(colors))
   }  
   
-  return(colors_PPI)
+  return(list("colors_PPI" = colors_PPI, "interactions_PPI_signif" = interactions_PPI_signif))
 }
 
 ############################################################################################################################################################
@@ -1304,11 +1357,47 @@ mendelianGenes <- function(cellType,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
+# cellModEmbed <- function(datExpr, 
+#                         colours=NULL, 
+#                         latentGeneType,
+#                         cellType=NULL,
+#                         kMs=NULL) {
+#   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
+#   # colors is a character vector with gene names
+#   # the genes should be ordered identically
+#   
+#   # prepare celltype character for naming columns
+#   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
+#   if (latentGeneType == "ME") { 
+#     list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+#     
+#     embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
+#     colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
+#   } else if (latentGeneType == "IM") {
+#     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+#     list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
+#                        x= kMs,
+#                        y=colnames(kMs),
+#                        SIMPLIFY=F)
+#     
+#     embed_mat <- as.matrix(mapply(function(x,y) x %*% as.matrix(y),
+#                                   x = list_datExpr,
+#                                   y = list_kMs,
+#                                   SIMPLIFY=T))
+#     # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
+#     # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
+#     colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
+#   } 
+#   rownames(embed_mat) <- rownames(datExpr)
+#   return(embed_mat)
+# }
+
+
 cellModEmbed <- function(datExpr, 
-                        colours=NULL, 
-                        latentGeneType,
-                        cellType=NULL,
-                        kMs=NULL) {
+                         colours=NULL, 
+                         latentGeneType,
+                         cellType=NULL,
+                         kMs=NULL) {
   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
   # colors is a character vector with gene names
   # the genes should be ordered identically
@@ -1316,9 +1405,32 @@ cellModEmbed <- function(datExpr,
   # prepare celltype character for naming columns
   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
   if (latentGeneType == "ME") { 
-    list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-    embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
-    colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
+    
+    colours_full <- rep("grey", times = ncol(datExpr))
+    names(colours_full) <- colnames(datExpr)
+    
+    for (col in unique(colours)) {
+      colours_full[names(colours_full) %in% names(colours[colours==col])] <- col
+    }
+    
+    embed_mat <- moduleEigengenes(expr=datExpr, 
+                                  colors = colours_full, 
+                                  impute = TRUE, 
+                                  nPC = 1, 
+                                  align = "along average", 
+                                  excludeGrey = TRUE, 
+                                  subHubs = TRUE,
+                                  trapErrors = FALSE, 
+                                  returnValidOnly = trapErrors, 
+                                  scale = TRUE,
+                                  verbose = 0, 
+                                  indent = 0)$eigengenes
+    
+    # list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
+    # embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
+    
+    colnames(embed_mat) <- paste0(cellType_prefix, gsub("ME", "", colnames(embed_mat)))
+    
   } else if (latentGeneType == "IM") {
     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
     list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
@@ -1333,8 +1445,8 @@ cellModEmbed <- function(datExpr,
     # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
     # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
     colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
+    rownames(embed_mat) <- rownames(datExpr)
   } 
-  rownames(embed_mat) <- rownames(datExpr)
   return(embed_mat)
 }
 

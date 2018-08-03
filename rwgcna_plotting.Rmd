@@ -32,6 +32,9 @@ data_prefix = "maca_top29_BMI_2"
 project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell_3/"
 data_prefix = "campbell_3"
 
+project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-16/"
+data_prefix = "maca_pancr_16"
+
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -43,7 +46,7 @@ tables_dir <- paste0(project_dir, "tables/")
 log_dir <- paste0(project_dir, "log/") 
 RObjects_dir <- paste0(project_dir, "RObjects/") 
 plots_dir <- paste0(project_dir, "plots/")
-
+scratch_dir <- "/scratch/tmp-wgcna/"
 ```
 
 ## Load libraries 
@@ -68,33 +71,9 @@ suppressPackageStartupMessages(library(RColorBrewer))
 ## Load functions and constants
 
 ```{r}
-LocationOfThisScript = function() # Function LocationOfThisScript returns the location of this .R script (may be needed to source other files in same dir)
-{
-  this.file = NULL
-  # This file may be 'sourced'
-  for (i in -(1:sys.nframe())) {
-    if (identical(sys.function(i), base::source)) this.file = (normalizePath(sys.frame(i)$ofile))
-  }
-  
-  if (!is.null(this.file)) return(dirname(this.file))
-  
-  # But it may also be called from the command line
-  cmd.args = commandArgs(trailingOnly = FALSE)
-  cmd.args.trailing = commandArgs(trailingOnly = TRUE)
-  cmd.args = cmd.args[seq.int(from=1, length.out=length(cmd.args) - length(cmd.args.trailing))]
-  res = gsub("^(?:--file=(.*)|.*)$", "\\1", cmd.args)
-  
-  # If multiple --file arguments are given, R uses the last one
-  res = tail(res[res != ""], 1)
-  if (0 < length(res)) return(dirname(res))
-  
-  # Both are not the case. Maybe we are in an R GUI?
-  return(NULL)
-}
-current.dir = paste0(LocationOfThisScript(), "/")
-
-source(file = paste0(current.dir, "rwgcna_params.R"))
-source(file = paste0(current.dir, "rwgcna_functions.R"))
+networkType="signed"
+source(file =  "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_params.R")
+source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
 ```
 
 # Load session image
@@ -126,7 +105,7 @@ invisible(mapply(function(a,b,c,d) plotDendro_for_vec(list_colors=a,
                                                         subsetName = d,
                                                         title = "Module params (pre-PPI), order: n assigned genes, pre-PPI filter",
                                                         flag_file = "modules_diffParams_ranked_pre_PPI"),
-                 a = list_list_colors_ok_matched_order,
+                 a = list_list_colors_matched_ok_order,
                  b = list_geneTree_ok,
                  c = list_list_plot_label_ok_order,
                  d = sNames_ok, 
@@ -203,7 +182,7 @@ p=ggplot(melt(dat, value.name="value"), aes(x=variable, y=value, fill = module))
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_PT_log", flag_date, ".pdf") ,width=45,height=12)
+ggsave(p, filename = paste0(plots_dir, data_prefix, "_magma_log", flag_date, ".pdf") ,width=45,height=12)
 
 
 # Filtered for only t1d/t2d/BMI gwas 
@@ -266,7 +245,7 @@ ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_
 
 ```
 
-#### Plot cell x eigengene embedding matrix
+#### Load cell x eigengene embedding matrix
 
 ```{r}
 
@@ -289,12 +268,14 @@ cellModEmbed_mat[,1] <- NULL
 # scale_data <- load_obj(scale_data_path) 
 
 #seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
-ident <- load_obj(f=sprintf("%s%s_ident_%s.RData", RObjects_dir, data_prefix, flag_date))
+ident_path <- dir(path=scratch_dir, pattern=paste0(data_prefix, "_ident"), full.names=T)
+ident <- load_obj(f=ident_path)
 
 ```
 
-```{r}
+#### Plot cell x eigengene embedding matrix
 
+```{r}
 
 # Order cells by celltype
 cellModEmbed_mat <- cellModEmbed_mat[order(ident, decreasing=T), ] 
@@ -324,7 +305,7 @@ ht1 <- Heatmap(cellModEmbed_mat[,],
              show_column_names = T,
              heatmap_legend_param = list(title = "Expression"))
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht1+htra)
 dev.off()
   
@@ -340,7 +321,7 @@ ht2 <- Heatmap(cellModEmbed_mat_sqrt[,],
              show_column_names = T,
              heatmap_legend_param = list(title = "Expression"))
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_sqrt%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_sqrt%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht2+htra)
 dev.off()
   
@@ -357,7 +338,7 @@ ht3 <- Heatmap(cellModEmbed_mat[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht3+htra)
 dev.off()
 
@@ -373,7 +354,7 @@ ht4 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht4+htra)
 dev.off()
 
@@ -390,7 +371,7 @@ ht5 <- Heatmap(cellModEmbed_mat[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht5+htra)
 dev.off()  
 
@@ -407,10 +388,174 @@ ht6 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"))
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=nrow(cellModEmbed_mat) %/% 1000, w=ncol(cellModEmbed_mat) %/% 2)
+pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht6+htra)
 dev.off()  
 ```
+
+### Compute module-module correlations
+
+```{r, fig.height=10, fig.width=10}
+
+##########################################################################
+########### CORRELATE MODULE EXPRESSION PROFILES ACROSS CELLTYPES ########
+##########################################################################
+
+mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
+
+# Cluster modules across celltypes using the Pearson correlation between module cell embeddings
+corr_pos <- mod_corr
+corr_pos[corr_pos<0] <- 0
+corr_dist <- as.dist(m = (1-corr_pos), diag = F, upper = F) # convert to (1-corr) distance matrix
+corr_dendro <- hclust(d = corr_dist, method = "average")
+
+# use a simple cut to determine clusters
+corr_clust = cutreeStatic(dendro = corr_dendro, cutHeight = moduleMergeCutHeight, minSize=1)
+names(corr_clust) =  corr_dendro$labels
+names(corr_clust) <- gsub(" |\\.","_",names(corr_clust)) 
+
+```
+
+### Plot module-module correlation matrix across cell clusters
+
+```{r}
+
+pdf(sprintf("%s%s_mod_corr_%s.pdf", plots_dir, data_prefix, flag_date), width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8,ncol(cellModEmbed_mat) %/% 3))
+
+corrplot(corr = mod_corr, 
+         method = "color",
+         col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
+         diag = F,
+         is.corr=T,
+         #title=sprintf("%s module corr across subsets", data_prefix),
+         order = "hclust",
+         hclust.method = hclustMethod,
+         addCoef.col = "black",
+         tl.srt = 45,
+         number.digits = 2L,
+         number.cex = 0.5)
+         #tl.cex = 2,
+         #cl.cex = 1)
+  
+invisible(dev.off())
+
+```
+
+### plot hierarchical clustering dendrogram of modules found across celltype
+
+```{r, fig.height=10, fig.width=10}
+
+pdf(sprintf("%s%s_module_cluster_%s.pdf", plots_dir, data_prefix, flag_date),width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8, ncol(cellModEmbed_mat) %/% 3))
+
+plotDendroAndColors(dendro=corr_dendro,
+                    colors = corr_clust,
+                    addGuide=T,
+                    dendroLabels=NULL, 
+                    main="Module clustering across celltypes")
+                    #cex.colorLabels=0.4)
+#abline(h=1-moduleMergeCutHeight)
+dev.off()
+```
+
+# Merge close modules - genelists
+
+```{r}
+genelist_path <- dir(pattern = paste0(data_prefix, "_list_list_module_genes"), path = RObjects_dir, full.names = T)
+list_list_module_genes <- load_obj(f=genelist_path)
+  
+######################################################################
+########################## MERGE GENE LISTS ##########################
+######################################################################
+
+# First make a one-layer list where the celltype is in the name
+list_module_genes <- unlist(list_list_module_genes, use.names = T, recursive=F)
+names(list_module_genes) <- gsub(pattern = " ", replacement = "_", names(list_module_genes))
+names(list_module_genes) <- gsub(pattern = "\\.", replacement = "__", names(list_module_genes))
+
+# Merge the module gene lists
+list_module_genes_merge <- lapply(unique(corr_clust), function(x) Reduce(f=union, 
+                                                                         list_module_genes[names(list_module_genes) %in% names(corr_clust)[corr_clust==x]]))
+tmp_cols <- paste0(gsub("\\w.+__", "", names(list_module_genes)),".")
+tmp_cellTypes <- paste0(gsub("__\\w+", "", names(list_module_genes)), ".")
+
+tmp_cellTypes_merge <- sapply(unique(corr_clust), function(x) Reduce(f=paste0, tmp_cellTypes[names(list_module_genes) %in% names(corr_clust)[corr_clust==x]]))
+tmp_cellTypes_merge <- gsub("*\\.$", "", tmp_cellTypes_merge)
+
+tmp_cols_merge <- sapply(unique(corr_clust), function(x) Reduce(f=paste0, tmp_cols[names(list_module_genes) %in% names(corr_clust)[corr_clust==x]]))
+tmp_cols_merge <- gsub("\\..*$", "", tmp_cols_merge)
+
+names(list_module_genes_merge) <- paste0(tmp_cellTypes_merge, "__", tmp_cols_merge)
+```
+
+# Make merged module color assignment vectors (for module cell embeddings)
+
+```{r}
+# for every module, make a colors vector where the genes are coloured, within the whole range of genes in the dissTOM
+scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_scale_regr_data_ensembl"), full.names = T)
+load_obj(scale_data_path) %>% t -> datExpr 
+
+allGenes <- colnames(datExpr)
+list_colors_merge <- mapply(function(x,y) ifelse(allGenes %in% x, yes=y, no="grey"), 
+                                x=list_module_genes_merge, 
+                                y=names(list_module_genes_merge), SIMPLIFY=F)
+list_colors_merge <- lapply(list_colors_merge,as.factor)
+```
+
+### Compute eigen embedding of the merged modules on all cells
+Can only do eigen embedding as otherwise we need to compute the full matrix TOM and then get the kIMs
+
+```{r}
+
+invisible(gc())
+  
+latentGeneType <- "ME" 
+
+cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "merged_mod_cell_embed_mat.txt"))
+
+list_cellModEmbed_mat <- clusterMap(cl, function(x,y) cellModEmbed(datExpr = datExpr, 
+                                                                     colours = x,
+                                                                     latentGeneType = latentGeneType,
+                                                                     cellType = y,
+                                                                     kMs = NULL), 
+                                    x = list_colors_merge, 
+                                    y = names(list_colors_merge),
+                                    SIMPLIFY=F,
+                                    .scheduling = c("dynamic"))
+
+stopCluster(cl)
+
+invisible(gc()); invisible(R.utils::gcDLLs())
+
+list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
+
+rownames(cellModEmbed_mat) <- rownames(datExpr)
+  
+```
+
+# Compute rare variant and mendelian gene enrichment with the merged modules
+
+```{r}
+# TODO
+```
+
+# Compute MAGMA enrichment with the merged modules 
+
+```{r}
+# TODO
+```
+
+# 
+
+```{r}
+
+```
+
+# Compute eigen_mat of the merged modules
+
+```{r}
+
+```
+
 
 ### Plot module-metadata correlation matrices
 
@@ -419,9 +564,9 @@ dev.off()
  
 
 if (!is.null(metadata)) {
-  for (cell in names(list_eigen_metadata_corr_rho)){
-    pdf(sprintf("%s%s_%s_mod_corr_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=15, h=8) # TODO: adapt this dynamically
-    corrplot(corr = as.matrix(list_eigen_metadata_corr_rho[[cell]]),
+  for (cell in names(list_mod_metadata_corr_rho)){
+    pdf(sprintf("%s%s_%s_mod_corr_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=max(8, ncol(list_mod_metadata_corr_rho[[cell]]) %/% 2), h=max(8, nrow(list_mod_metadata_corr_rho[[cell]]) %/% 2)) # TODO: adapt this dynamically
+    corrplot(corr = as.matrix(list_mod_metadata_corr_rho[[cell]]),
              add = F,
              addCoef.col = "black",
              number.digits = 2L,
@@ -435,7 +580,7 @@ if (!is.null(metadata)) {
              #hclust.method = hclustMethod,
              title=NULL,#sprintf("%s eigenvector - metadata correlations", data_prefix),
              #addCoef.col = F,
-             p.mat = t(as.matrix(list_eigen_metadata_corr_fdr[[cell]])),
+             p.mat = t(as.matrix(list_mod_metadata_corr_fdr[[cell]])),
              sig.level = 5e-2)
 
     dev.off()
@@ -445,9 +590,11 @@ if (!is.null(metadata)) {
 ```
 
 ### Plot t-SNE of cell clusters
-```{r, fig.height=10, fig.width=10}
 
-seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+```{r, fig.height=10, fig.width=10}
+#seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+seurat_obj <- load_obj(f=seurat_path)
+
 if (is.null(seurat_obj@dr$pca)) seurat_obj <- RunPCA(object=seurat_obj, pc.genes = var.genes, pcs.compute = 20, do.print = F)
 if (is.null(seurat_obj@dr$tsne)) seurat_obj <- RunTSNE(object = seurat_obj, reduction.use = PCA, dims.use = 1:20)
 TSNEPlot(seurat_obj, do.label = T, label.size = 8)
@@ -484,198 +631,5 @@ for (mod in names(seurat_obj@meta.data)) {
   ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_mod_", mod, ".pdf"),w=12, h=10)
 }
 
-```
-
-### Plot module-module correlations
-
-```{r, fig.height=10, fig.width=10}
-
-load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
-
-
-# plot
-  pdf(sprintf("%s%s_mod_corr%s.pdf", plots_dir, data_prefix, flag_date), width=ncol(cellModEmbed_mat) %/% 3,height=ncol(cellModEmbed_mat) %/% 3)
-  
-  corrplot(corr = mod_corr, 
-           method = "color",
-           col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
-           diag = F,
-           is.corr=T,
-           #title=sprintf("%s module corr across subsets", data_prefix),
-           order = "hclust",
-           hclust.method = hclustMethod,
-           addCoef.col = "black",
-           tl.srt = 45,
-           number.digits = 2L,
-           number.cex = 0.5)
-           #tl.cex = 2,
-           #cl.cex = 1)
-    
-  invisible(dev.off())
-
-```
-
-# plot module clusters
-
-```{r, fig.height=10, fig.width=10}
-
-load(file=sprintf("%s%s_mod_mod_corr_files_%s", RObjects, data_prefix, flag_date))
-
-pdf(sprintf("%s%s_module_cluster%s.pdf", plots_dir, data_prefix, flag_date),width=ncol(cellModEmbed_mat) %/% 3,height=ncol(cellModEmbed_mat) %/% 3)
-
-plotDendroAndColors(dendro=mod_corr_dendro,
-                    colors = mod_corr_clust,
-                    addGuide=T,
-                    dendroLabels=NULL, 
-                    main="Module clustering across celltypes")
-                    #cex.colorLabels=0.4)
-#abline(h=1-moduleMergeCutHeight)
-dev.off()
-```
-
-
-# Compute kMs of the merged modules
-
-```{r}
-# TODO
-```
-
-# Compute rare variant and mendelian gene enrichment with the merged modules
-
-```{r}
-# TODO
-```
-
-# Compute MAGMA enrichment with the merged modules 
-
-```{r}
-# TODO
-```
-
-# 
-
-```{r}
-
-```
-
-# Compute eigen_mat of the merged modules
-
-```{r}
-##########################################################################
-#####################  MERGE CORRELATED MODULES ##########################
-##########################################################################
-# ARCHIVE
-
-# Identify highly correlated modules
-mod_corr_lt <- mod_corr
-mod_corr_lt[!lower.tri(mod_corr, diag = F)] <- NA
-idx_toMerge <- which(mod_corr_lt>(1-moduleMergeCutHeight), arr.ind = T)
-
-
-# Merge highly correlated modules
-
-modules_merged <- dat_BMI_fdr$module
-list_module_BMI_merged <- list_module_BMI # this is a nested version of the above list
-list_list_module_BMI_genes_merged  <- list_list_module_BMI_genes
-list_colors_BMI_merged <- list_colors_BMI
-
-if (nrow(idx_toMerge) > 0) {
-  
-  for (i in 1:nrow(idx_toMerge)) {
-    
-    message(paste0("Merging ", dat_BMI_fdr$module[idx_toMerge[i,1]], " with ", dat_BMI_fdr$module[idx_toMerge[i,2]], " - eigengene correlation is ", round(mod_corr[idx_toMerge[i,1],idx_toMerge[i,2]],2)))
-    subset_from <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-    module_from <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,1]])
-    subset_to <- gsub("_.*", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-    module_to <- gsub(".*_", "", dat_BMI_fdr$module[idx_toMerge[i,2]])
-    
-    list_list_module_BMI_genes_merged[[subset_to]] [[module_to]] <- union(list_list_module_BMI_genes[[subset_to]] [[module_to]] , list_list_module_BMI_genes[[subset_from]][[module_from]])
-    
-    list_list_module_BMI_genes_merged[[subset_from]] [[module_from]] <- NULL
-    
-    
-    list_colors_BMI_merged[[subset_from]] [ list_colors_BMI_merged[[subset_from]] == module_from] <- module_to 
-    
-    modules_merged[idx_toMerge[i,2]] <- paste0(dat_BMI_fdr$module[idx_toMerge[i,2]], "_", dat_BMI_fdr$module[idx_toMerge[i,1]])
-    modules_merged[idx_toMerge[i,1]] <- NA
-    
-  }
-  
-  modules_merged <- modules_merged[!is.na(modules_merged)]
-  
-  # get a new vector of names of cell clusters with BMI enrichment after merging
-  sNames_BMI <- unique(gsub("_.*", "", modules_merged))
-  
-  # Transform the vector of modules into a nested list, as before
-  list_module_BMI <- vector(mode="list", length=length(sNames_BMI_merged))
-  names(list_module_BMI) <- sNames_BMI
-  
-  for (name in sNames_BMI_merged) {
-    idx <- grep(pattern = paste0(name, "_.*"), x = modules_merged)
-    list_module_BMI[[name]] <- sapply(idx, function(j) gsub(".*_", "", modules_merged[j]), simplify = T)
-  }
-}
-
-
-```
-
-### Plot module presevation
-
-```{r}
-
-# TODO: move the calculation into the main script
-
-suppressPackageStartupMessages(library(pheatmap))
-
-# Check preservation of each set of colors in all celltypes (including itself)
-module_preservation_celltypes <- sapply(list_colors, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
-                                                                                                listColors = list(x))[['preservation']][['log.pBonf']],
-                                                          simplify = T)
-
-colnames(module_preservation_celltypes) = sNames_ok
-rownames(module_preservation_celltypes) = paste(prefixes, names(unlist(list_colors, recursive = F, use.names = T)), sep="_")
-
-# plot
-pheatmap(mat = module_preservation_celltypes, 
-         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
-         kmeans_k = NA,
-         breaks = NA, 
-         cluster_rows = F,
-         cluster_cols = F,
-         #clustering_method = hclustMethod,
-         show_rownames = T,
-         show_colnames = T,
-         main = sprintf("%s_%s_%s", data_prefix, "module preservation across celltypes", flag_date),
-         filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "module_preservation", flag_date),
-         width = length(list_datExpr_ok) %/% 2,
-         height = length(unlist(list_colors, recursive = F)) %/% 4,
-         silent = T)
-
-### 180607_v1.8_dev2
-#if (!is.null(STRINGdb_species)) {
-module_PPI_preservation_celltypes <- sapply(list_colors_PPI, function(x) wrapModulePreservation(listDatExpr = list_datExpr_ok,
-                                                                                              listColors = list(x))[['preservation']][['log.pBonf']],
-                                        simplify = T)
-
-colnames(module_PPI_preservation_celltypes) = sNames_ok
-rownames(module_PPI_preservation_celltypes) = paste(prefixes, names(unlist(list_colors_PPI, recursive = F, use.names = T)), sep="_")
-
-# plot
-pheatmap(mat = module_PPI_preservation_celltypes, 
-         color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))[0:100],
-         kmeans_k = NA,
-         breaks = NA, 
-         cluster_rows = F,
-         cluster_cols = F,
-         #clustering_method = hclustMethod,
-         show_rownames = T,
-         show_colnames = T,
-         main = sprintf("%s_%s_%s", data_prefix, "PPI-enriched modules: preservation across celltypes", flag_date),
-         filename=sprintf("%s%s_%s_%s.pdf", plots_dir, data_prefix, "PPI_module_preservation", flag_date),
-         width = length(list_datExpr_ok) %/% 2,
-         height = length(unlist(list_colors_PPI, recursive = F)) %/% 4,
-         silent = T)
-#}
-###
 ```
 
