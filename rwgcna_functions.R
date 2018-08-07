@@ -15,8 +15,8 @@ FilterGenes <- function(seurat_obj_sub, min.cells) {
     seurat_obj_sub@raw.data <- seurat_obj_sub@raw.data[genes.use, ]
     seurat_obj_sub@data <- seurat_obj_sub@data[genes.use, ]
   }
-      # EDIT 180501_4 remove tryCatch in parallelised functions
-      #   }}, error = function(c) { warning("parFilterGenes produced an error - returning unchanged seurat subset")
+  # EDIT 180501_4 remove tryCatch in parallelised functions
+  #   }}, error = function(c) { warning("parFilterGenes produced an error - returning unchanged seurat subset")
   #     return(seurat_obj_sub_backup)
   # })
   return(seurat_obj_sub)
@@ -32,7 +32,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
   #                 genes that have a high absolute loading on a significant PC
   # Schematic:
   # 1. pcs.compute = ncol
-
+  
   ### 180507
   prop.freq <- max(0.016, round(4/length(seurat_obj_sub@var.genes),3)) # to ensure we have at least 3 samples so the algorithm works well
   # see https://github.com/satijalab/seurat/issues/5
@@ -49,8 +49,8 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
                                 do.par = T,
                                 num.cores = n_cores,
                                 prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
-  
-  
+    
+    
     ### EDIT_180426_2
     #pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value.full
     pAll <- GetDimReduction(seurat_obj_sub, reduction.type = "pca", slot = "jackstraw")@emperical.p.value
@@ -88,7 +88,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
                                    genes.print = NULL, 
                                    replace.pc=F, 
                                    do.center=T)
-        
+      
       loadings <- abs(seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx, drop=F])
       max_loadings <- apply(loadings, 1, function(x) max(x))
       names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:5000]
@@ -117,31 +117,31 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
     names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:5000]
     
   }
-    
-    ### EDIT_180426_2
-    ### EDIT_180429_3
-    # seurat_obj_sub@dr$pca@gene.loadings.full <- seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]
-    # max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
-    
-    #max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]), MARGIN=1, max, T)
-    
-    
-    ###
-    ### EDIT 180430_3
-    # we were getting poor results on Campbell neurons..
-    # threshold <- quantile(max_loads, 0.5)
-    # names_genes_use = names(max_loads[max_loads > threshold])
-    #threshold <- quantile(max_loads, 0.5)
-    #names_genes_use = names(max_loads[order(max_loads, decreasing=T)][1:5000])
-    
-    ### 180504_v1.7_5
-    # datExpr <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] %>% t()
-    # colnames(datExpr) <- rownames(seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,])
-    # ###
-    datExpr <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] %>% t() #%>% as.matrix() 
-    colnames(datExpr) <- rownames(seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,])
-    
-    
+  
+  ### EDIT_180426_2
+  ### EDIT_180429_3
+  # seurat_obj_sub@dr$pca@gene.loadings.full <- seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]
+  # max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full), MARGIN=1, max, T)
+  
+  #max_loads <- apply(abs(seurat_obj_sub@dr$pca@gene.loadings.full[,PC_select_idx]), MARGIN=1, max, T)
+  
+  
+  ###
+  ### EDIT 180430_3
+  # we were getting poor results on Campbell neurons..
+  # threshold <- quantile(max_loads, 0.5)
+  # names_genes_use = names(max_loads[max_loads > threshold])
+  #threshold <- quantile(max_loads, 0.5)
+  #names_genes_use = names(max_loads[order(max_loads, decreasing=T)][1:5000])
+  
+  ### 180504_v1.7_5
+  # datExpr <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] %>% t()
+  # colnames(datExpr) <- rownames(seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,])
+  # ###
+  datExpr <- seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,] %>% t() #%>% as.matrix() 
+  colnames(datExpr) <- rownames(seurat_obj_sub@scale.data[rownames(seurat_obj_sub@scale.data) %in% names_genes_use,])
+  
+  
   return(datExpr)
 }
 
@@ -249,27 +249,27 @@ bootstrap <- function(datExpr,
   nGenes = ncol(datExpr);
   
   try(
-  for (run in startRunIndex:endRunIndex)
-    
-  {
-
-    set.seed(randomSeed + 2*run + 1);
-    
-    if (run == startRunIndex & replace == T) {
-      useSamples = c(1:nSamples) # The first run just returns the full dataset
-    } else if (run>startRunIndex | replace == F) 
-    {  useSamples = sample(nSamples, as.integer(nSamples * fraction), replace = replace)
-    } 
-    
-    
-    samExpr = as.matrix(datExpr[useSamples, ]);
-    
-    result[[run]]$data <- samExpr
-  })
+    for (run in startRunIndex:endRunIndex)
+      
+    {
+      
+      set.seed(randomSeed + 2*run + 1);
+      
+      if (run == startRunIndex & replace == T) {
+        useSamples = c(1:nSamples) # The first run just returns the full dataset
+      } else if (run>startRunIndex | replace == F) 
+      {  useSamples = sample(nSamples, as.integer(nSamples * fraction), replace = replace)
+      } 
+      
+      
+      samExpr = as.matrix(datExpr[useSamples, ]);
+      
+      result[[run]]$data <- samExpr
+    })
   
   return(result)
 }
-  
+
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -309,7 +309,7 @@ dissTOM_for_par = function(subsetName) {
   
   dissTOM <- 1-as.dist(consTomDS) # Convert proximity to distance
   rm(consTomDS)
-
+  
   return(dissTOM)
 }
 
@@ -336,7 +336,7 @@ cutreeHybrid_for_vec <- function(comb, geneTree, dissTOM, maxPamDist, useMedoids
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
+mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_MEs_by_kIMs=F, dissTOM = NULL) {
   # Utility function for more easily parallelising mergeCloseModules
   if (any(as.logical(cutree$labels))) { # Are there any modules at all? Avoids an error
     merged = mergeCloseModules(exprData=as.matrix(datExpr), 
@@ -350,9 +350,11 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
                                getNewUnassdME = F)
     colors = labels2colors(merged$colors)
     #MEs = merged$newMEs 
-    MEs = moduleEigengenes(expr = as.matrix(datExpr),
+    MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
                            colors,
-                           excludeGrey = excludeGrey)
+                           excludeGrey = excludeGrey,
+                           scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                           dissTOM = dissTOM)
   }
   else {# only grey modules
     colors = labels2colors(cutree$labels)
@@ -376,86 +378,85 @@ extract_and_name_colors <- function(merged, datExpr) {
 ############################################################################################################################################################
 
 mergeCloseModskIM = function(datExpr,
-                             colours,
+                             colors,
                              kIMs,
-                             iterate = F,
                              dissTOM = NULL,
-                             cellModEmbed_mat = NULL,
-                             moduleMergeCutHeight=0.2,
-                             verbose=2) {
+                             moduleMergeCutHeight,
+                             verbose=2,
+                             celltype) {
   
   # Usage: compute correlations between gene module cell embeddings. 
   #         merge modules with a positive correlation > 1-moduleMergeCutHeight
   #
   # Args: datExpr: a cell * gene expression matrix
-  #       colours: vector module assignments with gene names
-  #       kIMs: generalised IntraModular connectivity, dataframe of gene row and module column
+  #       colors: vector module assignments with gene names
+  #       kIMs: generalised IntraModular connectivity, dataframe of gene row and module column. Should not include the grey module
   #       dissTOM: only needed if iterate=T, in order to recompute kIMs
   #       cellModEmbed_mat: embedding matrix of cell rows and module columbs. Passing the matrix saves time; otherwise will be computed
   #       moduleMergeCutHeight: max distance (1-correlation coefficient) for merging modules
   #       verbose: verbosity of WGCNA::cor function, 1-5
-  #       iterate: iterate until no modules are close enough to merge, boolean, defaults to T
   #
-  # Returns: colours_merged, vector of new module assignments with gene names
+  # Returns: list with entries colors=colors_merged, kIMs = kIMs_merged
   
-  if (is.null(cellModEmbed_mat))  cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
-                                                                   colours=colours, 
-                                                                   latentGeneType = "IM",
-                                                                   cellType=NULL,
-                                                                   kMs=kIMs)
+  corr_clust <- character(length = length(unique(colors)))
+  colors_original <- colors
+  # Remove 'grey' (unassigned) module 
+  #if (any(colnames(kIMs) == "grey")) kIMs[["grey"]] <- NULL
   
-  mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
-  
-  # Cluster modules across celltypes using the Pearson correlation between module cell embeddings
-  corr_pos <- mod_corr
-  corr_pos[corr_pos<0] <- 0
-  corr_dist <- as.dist(m = (1-corr_pos), diag = F, upper = F) # convert to (1-corr) distance matrix
-  corr_dendro <- hclust(d = corr_dist, method = "average")
-  
-  # use a simple cut to determine clusters
-  corr_clust = cutreeStatic(dendro = corr_dendro, 
-                            cutHeight = moduleMergeCutHeight, 
-                            minSize=1)
-  names(corr_clust) =  corr_dendro$labels
-  
-  if (length(unique(corr_clust)) == length(unique(colours))) {
-    return(list(colours=colours, kIMs = kIMs))
-  } else {
-    colours_merged <- colours
-  # merge modules
-    for (clust in unique(corr_clust)) { # loop over numeric cluster assignments
-      new_colour = names(corr_clust)[corr_clust==clust][1] # use the colours name of the first module in the cluster
-      for (colour in names(corr_clust[corr_clust==clust])) { # loop over all module colours in the cluster
-        colours_merged[colours_merged==colour] <- new_colour # give them all the new colour
+  while (TRUE) {
+    message(paste0(celltype, ": computing cell-module embedding matrix"))
+    cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
+                                     colors=colors, 
+                                     latentGeneType = "IM",
+                                     cellType=NULL,
+                                     kMs=kIMs)
+    
+    # Cluster modules using the Pearson correlation between module cell embeddings
+    mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
+    mod_corr[mod_corr<0] <- 0 #only keep positive correlations
+    corr_dist <- as.dist(m = (1-mod_corr), diag = F, upper = F) # convert to (1-corr) distance matrix
+    corr_dendro <- hclust(d = corr_dist, method = "average")
+    
+    # use a simple cut to determine clusters
+    corr_clust = cutreeStatic(dendro = corr_dendro, 
+                              cutHeight = moduleMergeCutHeight, 
+                              minSize=1)
+    names(corr_clust) =  corr_dendro$labels
+    
+    # At this point if corr_clust has as many unique modules as the original partition, the while loop will exit
+    if(length(unique(corr_clust)) == length(unique(colors))-1) {  # minus one for the grey module, absent in corr_clust
+      message(paste0(celltype, " done"))
+      break
+    }
+    
+    # if not we merge modules
+    n_merge <-  length(unique(colors)) - 1 - length(unique(corr_clust)) # minus one for the grey module, absent in corr_clust
+    if (verbose>0) message(paste0(celltype, ": ", n_merge, " modules to be merged with others"))
+    
+    merge_idx <- sapply(unique(corr_clust), function(x) sum(corr_clust==x)>1)
+    
+    # merge modules
+    for (clust in unique(corr_clust)[merge_idx]) { # loop over numeric cluster assignments 
+      new_color = names(corr_clust)[corr_clust==clust][1] # use the colors name of the first module in the cluster
+      for (color in names(corr_clust[corr_clust==clust])) { # loop over all module colors in the cluster
+        colors[colors==color] <- new_color # give them all the new colour
       }
     }
+    
+    # compute merged module kIMs 
+    message(paste0("Computing merged module kIMs for ", celltype))
+    # Compute new kIMs
+    kIMs <- kIM_eachMod_norm(dissTOM = dissTOM, 
+                            colors = colors,
+                            verbose = 1,
+                            excludeGrey = T)
+    
   }
   
-  # Repeat recursively until no more merges
-  if (iterate==T) {
-    if (length(unique(colours)) > length(unique(colours_merged))) {
-      # Compute new kIMs
-      kIMs_merged <- kIM_eachMod_norm(dissTOM = dissTOM, 
-                                      colors = colours_merged)
-      
-      # Call function recursively
-      merged <- mergeCloseModskIM(datExpr=datExpr,
-                                  colours=colours_merged,
-                                  kIMs=kIMs_merged,
-                                  dissTOM = dissTOM,
-                                  cellModEmbed_mat = cellModEmbed_mat,
-                                  moduleMergeCutHeight=moduleMergeCutHeight,
-                                  verbose=verbose,
-                                  iterate=iterate) 
 
-
-      colours_merged <- merged$colours_merged
-      kIMs_merged <- merged$kIMs_merged
-      
-      }
-    } 
+  names(colors) = names(colors_original)
   
-  return(list(colours=colours_merged, kIMs = kIMs_merged))
+  return(list(colors=colors, kIMs = kIMs))
 }
 
 ############################################################################################################################################################
@@ -473,7 +474,7 @@ parGetColors = function(list_merged, datExpr) {
 
 parMatchColors <- function(list_colors) {
   # Inherits n_combs from the parent environment, same for every subsetName, no need to pass as an argument
-
+  
   if (length(list_colors)>1) {
     # Match colors between iterations by reference to the set of colors with the highest number of unique colors
     max_colors_idx = which.max(lapply(list_colors, function(x) length(table(x))))
@@ -488,10 +489,10 @@ parMatchColors <- function(list_colors) {
                                              pThreshold = 5e-2,
                                              na.rm = TRUE,
                                              extraLabels = standardColors())#paste0("Extra_", 0:500)) # labels for modules in source that cannot be matched to any modules in reference
-      
-        } else if (length(table(list_colors[[j]])) == 1) {
+        
+      } else if (length(table(list_colors[[j]])) == 1) {
         diffParams_colors[,j] <- "grey"
-        }
+      }
     }
     # Split the matrix of matched colors back into a list 
     list_colors_matched <- split(diffParams_colors, rep(1:ncol(diffParams_colors), each = nrow(diffParams_colors))) 
@@ -500,11 +501,11 @@ parMatchColors <- function(list_colors) {
     diffParams_colors <- as.matrix(list_colors[[1]], nrow=length(list_colors[[1]]), ncol=1)
     list_colors_matched <- list_colors
   } 
-    
- 
+  
+  
   
   return(list_colors_matched)
-    
+  
 }
 
 
@@ -518,7 +519,7 @@ parkMEs = function(list_MEs, datExpr) {
   # Compute kMEs and pkMEs for each set of colors corresponding to distinct parameters
   list_kMEs <- NULL
   list_kMEs <- vector(mode="list", length=length(list_MEs))
- 
+  
   for (j in 1:length(list_MEs)) {
     list_kMEs[[j]] = signedKME(datExpr=as.matrix(datExpr),
                                datME=list_MEs[[j]]$eigengenes,
@@ -572,7 +573,7 @@ parPkMs_2 = function(list_kMs, list_colors) {
     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
     # EDIT_180421_8
     #pkMEs <- vector(mode="numeric",length=nrow(diffParams_colors))
-
+    
     pkMs <- vector(mode="numeric",length=length(list_colors[[1]]))
     ###
     # Loop over every gene and get its pkME
@@ -604,7 +605,104 @@ deleteGrey <- function(list_kMs) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kME_reassign_fnc = function(MEs, kMEs, pkMEs, kME_reassign_threshold, colors, filter, corFnc, excludeGrey) {
+kM_reassign = function(colors,
+                       fuzzyModMembership,
+                       dissTOM = NULL,
+                       datExpr = NULL,
+                       verbose=2,
+                       corFnc=NULL,
+                       max_iter=5,
+                       celltype,
+                       scale_MEs_by_kIMs=F) {
+
+  # Usage: iteratively reassign genes to modules based on kIM / kME until the number to reassign <= stop_condition
+  # Args: 
+  #   fuzzyModMembership: "kME" or "kIM"
+  #   dissTOM: list of TOM distance matrices. Only required if fuzzyModMembership = "kIM"
+  #   datExpr: cell x gene expression matrix. Only required if fuzzyModMembership = "kME"
+  #   colors: vector of module assignments with gene names
+  #   corFnc: WGCNA correlation function; only needed if fuzzyModMembership = "kME"
+  #   verbose: 0-5, controls message output
+  #   max_iter: integer; max iterations.
+  # Value:
+  #   list with entries "colors", "kMs" and "log". 
+
+  # initialise
+  colors_original <- colors
+  reassign_total  <- reassign_t_1 <- logical(length(colors))
+  reassign_t <- ! logical(length(colors))
+  min_change = 5 # the minimum change from one iteration to the next required to continue
+  t = 1
+  
+  while(TRUE) {
+    
+    if (fuzzyModMembership == "kME") {
+      
+      message(paste0(celltype, ": Computing Module Eigengenes"))
+      MEs <- moduleEigengenes_kIM_scale(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
+                                        colors = colors,
+                                        excludeGrey=F,
+                                        scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                                        dissTOM=dissTOM)
+      
+      message(paste0(celltype, ": Computing ", fuzzyModMembership, "s"))
+      kMs <- signedKME(as.matrix(datExpr),
+                       MEs$eigengenes,
+                       outputColumnName = "",
+                       corFnc = corFnc)
+      
+    } else if (fuzzyModMembership == "kIM") {
+      
+      message(paste0(celltype, ": Computing ", fuzzyModMembership, "s"))
+      kMs <- kIM_eachMod_norm(dissTOM=dissTOM, 
+                              colors=colors, 
+                              verbose=verbose,
+                              excludeGrey=F)
+    }
+    
+    maxkMs <- max.col(kMs) #  integer vector of length nrow(kMs)
+    colors_new <- sapply(maxkMs, function(j) colnames(kMs)[j]) # get new module assignment vector
+    colors_new[colors=="grey"] <- "grey" # Do not reallocate genes previously allocated to grey, since they are likely to get reallocated as "grey" is not a real cohesive module
+  
+    reassign_t <- colors_new != colors
+    
+    if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break 
+    
+    reassign_total <- reassign_total | reassign_t
+
+    message(paste0(celltype, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
+    
+    names(colors_new) <- names(colors)
+    colors <- colors_new
+    reassign_t_1 <- reassign_t
+    t = t+1
+  }
+  
+  log <- data.frame("gene" = names(colors)[reassign_total], 
+                   "original_module" = colors_original[reassign_total], 
+                   "new_module" = colors[reassign_total], stringsAsFactors=F, row.names=NULL)
+    
+  if (verbose > 0) message(paste0(celltype, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
+  
+  
+  return(list("colors" = colors, "kMs" = kMs, "log" = log))
+  
+}
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+# DEPRECATED 
+kM_reassign_neg_fnc = function(Ms, 
+                            kMs, 
+                            pkMs, 
+                            kM_reassign_threshold, 
+                            colors, 
+                            datExpr, 
+                            corFnc, 
+                            excludeGrey,
+                            scale_MEs_by_kIMs=F,
+                            dissTOM=NULL) {
   # Status: hiatus - currently unused
   # Returns a list with new colors,l MEs, kMEs, pkMEs, and dataframe with information on the reassigned genes
   
@@ -626,11 +724,13 @@ kME_reassign_fnc = function(MEs, kMEs, pkMEs, kME_reassign_threshold, colors, fi
     colors[rows_to_reassign] <- colors[col_most_negkME][rows_to_reassign]
     
     # Recompute Module Eigengenes, kME, pkME
-    MEs = moduleEigengenes(expr = as.matrix(datExpr_filter),
+    MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
                            colors,
-                           excludeGrey = excludeGrey)
+                           excludeGrey = excludeGrey,
+                           scale_MEs_by_kIMs=scale_MEs_by_kIMs,
+                           dissTOM=dissTOM)
     
-    kMEs = signedKME(as.matrix(datExpr_filter),
+    kMEs = signedKME(as.matrix(datExpr),
                      MEs$eigengenes,
                      outputColumnName = "",
                      corFnc = corFnc)
@@ -659,24 +759,35 @@ kME_reassign_fnc = function(MEs, kMEs, pkMEs, kME_reassign_threshold, colors, fi
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kIM_eachMod_norm = function(dissTOM, colors) {
-  # compute intramodularConnectivity for every gene with regard to every cluster
+kIM_eachMod_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
+  # compute intramodularConnectivity for every gene with regard to every module
+  # Args:
+  #   dissTOM: distance matrix from WGCNA in sparse matrix form
+  #   colors: vector of module assignment 'color' labels with gene names
+  #   verbose: controls messages
+  #   excludeGrey: compute "grey" kME?
+  # Value:
+  #   kIMs: gene x module dataframe of normalised intramodular gene-module connectivity scores,
+  #         which are just the mean distance between the gene and every gene in that module
+  
   unique_colors = sort(names(table(colors)))#[-which(sort(names(table(colors))) == "grey")]
+  if (excludeGrey ==T) unique_colors <- unique_colors[!unique_colors=="grey"]
   # Convert the distance matrix to a proximity matrix. Nb: It is squary with 0 diagonal
   mTOM <- as.matrix(1-dissTOM)
   # make a gene * unique_colors matrix for results: each gene's degree w.r.t each color (module)
   results = matrix(nrow=length(colors), ncol=length(unique_colors))
-
+  
   for (j in 1:length(unique_colors)) { # modules in columns
-    message(paste0("Computing kIM for ", unique_colors[j]))
+    
+    if (verbose>2) message(paste0("Computing kIM for ", unique_colors[j]))
+    
     for (i in 1:length(colors)) { # genes in rows
-      results[i,j] <- sum(mTOM[i,colors %in% unique_colors[[j]]]) / sum(colors == unique_colors[[j]])  # for that gene, sum connections to other genes assigned to module j
+      results[i,j] <- sum(mTOM[i,colors %in% unique_colors[[j]]]) / sum(colors == unique_colors[[j]])  # for that gene, sum connections to other genes assigned to module j and divide by n genes in module
     }
-    #normTerms[j] <- sum(colSums(mTOM[,colors %in% unique_colors[[j]]])) 
-    # 180706: Rather than normalize by the sum of degrees of a module's genes, instead normalize
-    # just by the number of genes in the module, making the kIM = average degree between a gene
-    # and genes in the module = "average" clustering parame
   }
+  
+  if (verbose>0) message("Done computing kIMs for set of colors")
+  
   # Output a dataframe with genes in rows and modules (colors) as columns
   results <- as.data.frame(results, row.names= names(colors))
   colnames(results) = unique_colors
@@ -716,7 +827,7 @@ plottable_colors <- function(colors) {
   # otherwise, first try to remove full stops and numbers. Then try to replace them and returns the vector
   
   idx_not_real_colors = !(colors %in% colors())
-
+  
   if (sum(idx_not_real_colors)>0) {
     colors[idx_not_real_colors] <- gsub("\\.\\d+|\\_\\d+", "", colors[idx_not_real_colors])
   }
@@ -724,7 +835,7 @@ plottable_colors <- function(colors) {
   # If there are still any 'not real' colors, make them black
   idx_not_real_colors = !(colors %in% colors())
   n_replace <- sum(idx_not_real_colors)
-
+  
   if (n_replace>0) {
     #unused = setdiff(colors(), colors) 
     colors[idx_not_real_colors] <- "black" #unused[1:n_replace]
@@ -747,12 +858,12 @@ checkGrey <- function(kMs) {
 ############################################################################################################################################################
 
 plotDendro_for_vec <- function(list_colors, 
-                                geneTree,
-                                list_labels,
-                                subsetName,
-                                title,
-                                flag_file) {
-
+                               geneTree,
+                               list_labels,
+                               subsetName,
+                               title,
+                               flag_file) {
+  
   list_colors <- lapply(list_colors, plottable_colors)
   
   colors_mat = matrix(unlist(list_colors), nrow=length(list_colors[[1]]), ncol=length(list_colors))
@@ -1110,7 +1221,7 @@ PPI_outer_for_vec = function(colors,
   module_PPI <- as.data.frame(module_PPI, row.names = unique_colors)
   
   # FILTER MODULES ON PPI ENRICHMENT  
-
+  
   if (!is.null(module_PPI)) {
     module_PPI_signif <- module_PPI[module_PPI$'p-value' < pvalThreshold,]
     unique_colors_PPI = unique_colors[module_PPI$'p-value' < pvalThreshold]
@@ -1121,7 +1232,7 @@ PPI_outer_for_vec = function(colors,
     colors_PPI <- rep("grey", length(colors))
   }  
   
-  return(list("colors_PPI" = colors_PPI, "interactions_PPI_signif" = interactions_PPI_signif))
+  return(list("colors_PPI" = colors_PPI, "module_PPI" = module_PPI, "module_PPI_signif" = module_PPI_signif))
 }
 
 ############################################################################################################################################################
@@ -1129,24 +1240,28 @@ PPI_outer_for_vec = function(colors,
 ############################################################################################################################################################
 
 PPI_inner_for_vec <- function(color, unique_colors, colors, string_db) {
-  # Parallelise over modules within a set of modules
-  # utility function to parallelise the PPI STRINGdb call
-  # args: color should be one of the unique_colors
+  # Usave: 
+  #   Parallelise over modules within a set of modules
+  #   utility function to parallelise the PPI STRINGdb call
+  # args: 
+  #   color should be one of the unique_colors
+  # value:
+  #   module_PPI: a list with named entries 'p-value' and 'expected interactions'
   
   ppi <- data.frame(gene = names(colors[colors==color])) # extract the genes with the corresponding color to dataframe
-  module_PPI <- list('p-value'=1, 'expected interactions'=NA)
-
+  module_PPI <- list('p-value' = 1, 'expected interactions' = NA)
+  
   tryCatch({
-   
-  example1_mapped <- string_db$map(ppi, 'gene', removeUnmappedRows = TRUE ) # Check the dataframe genes' PPI. May produce error: we couldn't map to STRING 100% of your identifiers
-  # (ctd.) .. Error in if (hitList[i] %in% V(ppi_network)$name) { : argument is of length zero
-  hits <- example1_mapped$STRING_id
-  module_PPI['p-value'] = p.adjust(string_db$get_ppi_enrichment(hits)$enrichment,method = 'fdr',n = length(names(colors)))
-  module_PPI['expected interactions'] = string_db$get_ppi_enrichment(hits)$lambda
-  
-  
+    
+    example1_mapped <- string_db$map(ppi, 'gene', removeUnmappedRows = TRUE ) # Check the dataframe genes' PPI. May produce error: we couldn't map to STRING 100% of your identifiers
+    # (ctd.) .. Error in if (hitList[i] %in% V(ppi_network)$name) { : argument is of length zero
+    hits <- example1_mapped$STRING_id
+    module_PPI['p-value'] = p.adjust(string_db$get_ppi_enrichment(hits)$enrichment,method = 'fdr',n = length(names(colors)))
+    module_PPI['expected interactions'] = string_db$get_ppi_enrichment(hits)$lambda
+    
+    
   }, error = function(c) {
-     module_PPI <- list('p-value'=1, 'expected interactions' = NA) # probably unnecessary since defined above but just in case it has been changed in place
+    module_PPI <- list('p-value'=1, 'expected interactions' = NA) # probably unnecessary since defined above but just in case it has been changed in place
   }) 
   
   return(module_PPI)
@@ -1213,8 +1328,8 @@ cor_magma_pval <- function(gwas_pvals,
 ############################################################################################################################################################
 
 kM_magma <- function(cellType,
-                      modulekM,
-                      gwas) {
+                     modulekM,
+                     gwas) {
   # Usage: Subroutine to calculate spearman's correlation between gene module membership and GWAS gene significance
   # Args: 
   # Returns:
@@ -1282,7 +1397,7 @@ makeColorsUniqueForPlot = function(cols) {
   }
   return(cols)
 }
-  
+
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1300,7 +1415,7 @@ mendelianGenes <- function(cellType,
   #   colors: character vector of color (module) assignments (WGCNA), with names = genes (human or mouse?)
   #   coding_variants: vector of genes which...
   #   mendelian_genes: genes for which SNPs on a single gene is associated with phenotype (BMI)
-
+  
   # Gene lists
   gene.lists = vector(mode="list")
   gene.lists[[1]] = coding_variants
@@ -1394,10 +1509,13 @@ mendelianGenes <- function(cellType,
 
 
 cellModEmbed <- function(datExpr, 
-                         colours=NULL, 
+                         colors=NULL, 
                          latentGeneType,
                          cellType=NULL,
-                         kMs=NULL) {
+                         kMs=NULL,
+                         excludeGrey=T,
+                         scale_MEs_by_kIMs=F,
+                         dissTOM=NULL) {
   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
   # colors is a character vector with gene names
   # the genes should be ordered identically
@@ -1406,19 +1524,21 @@ cellModEmbed <- function(datExpr,
   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
   if (latentGeneType == "ME") { 
     
-    colours_full <- rep("grey", times = ncol(datExpr))
-    names(colours_full) <- colnames(datExpr)
+    colors_full <- rep("grey", times = ncol(datExpr))
+    names(colors_full) <- colnames(datExpr)
     
-    for (col in unique(colours)) {
-      colours_full[names(colours_full) %in% names(colours[colours==col])] <- col
+    for (col in unique(colors)) {
+      colors_full[names(colors_full) %in% names(colors[colors==col])] <- col
     }
     
-    embed_mat <- moduleEigengenes(expr=datExpr, 
-                                  colors = colours_full, 
+    embed_mat <- moduleEigengenes_kIM_scale(expr=datExpr, 
+                                  colors = colors_full, 
+                                  scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                                  dissTOM=dissTOM,
                                   impute = TRUE, 
                                   nPC = 1, 
                                   align = "along average", 
-                                  excludeGrey = TRUE, 
+                                  excludeGrey = excludeGrey, 
                                   subHubs = TRUE,
                                   trapErrors = FALSE, 
                                   returnValidOnly = trapErrors, 
@@ -1432,8 +1552,10 @@ cellModEmbed <- function(datExpr,
     colnames(embed_mat) <- paste0(cellType_prefix, gsub("ME", "", colnames(embed_mat)))
     
   } else if (latentGeneType == "IM") {
-    list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-    list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
+    
+    list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colors)[colors==x], colnames(datExpr))])
+    
+    list_kMs <- mapply(function(x,y) kMs[match(names(colors)[colors==y], rownames(kMs)),y],
                        x= kMs,
                        y=colnames(kMs),
                        SIMPLIFY=F)
@@ -1453,27 +1575,264 @@ cellModEmbed <- function(datExpr,
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
 
 # TODO: Reintroduce average cell type gene expression heatmap?
 if (FALSE) {
   mean.celltype.eig.expr <- t(sapply(names(table(meta$neuron_groups)), function(x) rowMeans(t(eigen_mat[meta$neuron_groups==x,,drop=F])), simplify=T))
-
-
+  
+  
   ht.mean.celltype.eig.expr <- Heatmap(mean.celltype.eig.expr, 
-               cluster_rows = T, 
-               cluster_columns = T, 
-               show_row_dend = F, 
-               show_column_dend = F, 
-               show_heatmap_legend = FALSE, 
-               show_row_names = T,
-               row_names_side = "left",
-               show_column_names = T)
-               #top_annotation = htca)
+                                       cluster_rows = T, 
+                                       cluster_columns = T, 
+                                       show_row_dend = F, 
+                                       show_column_dend = F, 
+                                       show_heatmap_legend = FALSE, 
+                                       show_row_names = T,
+                                       row_names_side = "left",
+                                       show_column_names = T)
+  #top_annotation = htca)
   #bottom_annotation = htca)
   pdf(sprintf("%s%s_mean.celltype.eig.expr_%s.pdf", plots_dir, data_prefix, flag_date ),h=12,w=12)
   draw(ht.mean.celltype.eig.expr)
   dev.off()
 }
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE, dissTOM=NULL, impute = TRUE, nPC = 1, align = "along average", 
+                                         excludeGrey = FALSE, grey = if (is.numeric(colors)) 0 else "grey", 
+                                         subHubs = TRUE, trapErrors = FALSE, returnValidOnly = trapErrors, 
+                                         softPower = 6, scale = TRUE, verbose = 0, indent = 0) 
+{
+  ############ ADDED ############ 
+  kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors) else NULL
+  ############################### 
+  
+  spaces = indentSpaces(indent)
+  if (verbose == 1) 
+    printFlush(paste(spaces, "moduleEigengenes: Calculating", 
+                     nlevels(as.factor(colors)), "module eigengenes in given set."))
+  if (is.null(expr)) {
+    stop("moduleEigengenes: Error: expr is NULL. ")
+  }
+  if (is.null(colors)) {
+    stop("moduleEigengenes: Error: colors is NULL. ")
+  }
+  if (is.null(dim(expr)) || length(dim(expr)) != 2) 
+    stop("moduleEigengenes: Error: expr must be two-dimensional.")
+  if (dim(expr)[2] != length(colors)) 
+    stop("moduleEigengenes: Error: ncol(expr) and length(colors) must be equal (one color per gene).")
+  if (is.factor(colors)) {
+    nl = nlevels(colors)
+    nlDrop = nlevels(colors[, drop = TRUE])
+    if (nl > nlDrop) 
+      stop(paste("Argument 'colors' contains unused levels (empty modules). ", 
+                 "Use colors[, drop=TRUE] to get rid of them."))
+  }
+  if (softPower < 0) 
+    stop("softPower must be non-negative")
+  alignRecognizedValues = c("", "along average")
+  if (!is.element(align, alignRecognizedValues)) {
+    printFlush(paste("ModulePrincipalComponents: Error:", 
+                     "parameter align has an unrecognised value:", align, 
+                     "; Recognized values are ", alignRecognizedValues))
+    stop()
+  }
+  maxVarExplained = 10
+  if (nPC > maxVarExplained) 
+    warning(paste("Given nPC is too large. Will use value", 
+                  maxVarExplained))
+  nVarExplained = min(nPC, maxVarExplained)
+  modlevels = levels(factor(colors))
+  if (excludeGrey) 
+    if (sum(as.character(modlevels) != as.character(grey)) > 
+        0) {
+      modlevels = modlevels[as.character(modlevels) != 
+                              as.character(grey)]
+    }
+  else {
+    stop(paste("Color levels are empty. Possible reason: the only color is grey", 
+               "and grey module is excluded from the calculation."))
+  }
+  PrinComps = data.frame(matrix(NA, nrow = dim(expr)[[1]], 
+                                ncol = length(modlevels)))
+  averExpr = data.frame(matrix(NA, nrow = dim(expr)[[1]], 
+                               ncol = length(modlevels)))
+  varExpl = data.frame(matrix(NA, nrow = nVarExplained, ncol = length(modlevels)))
+  validMEs = rep(TRUE, length(modlevels))
+  validAEs = rep(FALSE, length(modlevels))
+  isPC = rep(TRUE, length(modlevels))
+  isHub = rep(FALSE, length(modlevels))
+  validColors = colors
+  names(PrinComps) = paste(moduleColor.getMEprefix(), modlevels, 
+                           sep = "")
+  names(averExpr) = paste("AE", modlevels, sep = "")
+  for (i in c(1:length(modlevels))) {
+    if (verbose > 1) 
+      printFlush(paste(spaces, "moduleEigengenes : Working on ME for module", 
+                       modlevels[i]))
+    modulename = modlevels[i]
+    restrict1 = as.character(colors) == as.character(modulename)
+    if (verbose > 2) 
+      printFlush(paste(spaces, " ...", sum(restrict1), 
+                       "genes"))
+    datModule = as.matrix(t(expr[, restrict1]))
+    n = dim(datModule)[1]
+    p = dim(datModule)[2]
+    pc = try({
+      if (nrow(datModule) > 1 && impute) {
+        seedSaved = FALSE
+        if (exists(".Random.seed")) {
+          saved.seed = .Random.seed
+          seedSaved = TRUE
+        }
+        if (any(is.na(datModule))) {
+          if (verbose > 5) 
+            printFlush(paste(spaces, " ...imputing missing data"))
+          datModule = impute.knn(datModule, k = min(10, 
+                                                    nrow(datModule) - 1))
+          try({
+            if (!is.null(datModule$data)) 
+              datModule = datModule$data
+          }, silent = TRUE)
+        }
+        if (seedSaved) 
+          .Random.seed <<- saved.seed
+      }
+      if (verbose > 5) 
+        printFlush(paste(spaces, " ...scaling"))
+      if (scale) 
+       datModule = t(scale(t(datModule)))
+      ############ ADDED ############ 
+      # @author: Jonatan Thompson, Perslab, rkm916@ku.dk
+      
+      if(!is.null(kIMs)) {
+        pkIMs <- kIMs[[restrict1, "modulename"]] # retrieve principal kIMs
+        pkIMs <- 1/sum(pkIMs) # normalise the principal kIMs so they sum to 1
+        mapply(function(X,y) X*y, # scale the rows (genes) of datModule by the normalised principal kIM 
+               X=datModule, 
+               y=pkIMs,
+               SIMPLIFY=T) %>% matrix(nrow=nrow(datModule)) -> datModule
+      } 
+      # the kIM-scaled datModule now replaces the original for svd and for computing average expression
+      
+      ###############################
+      if (verbose > 5) 
+        printFlush(paste(spaces, " ...calculating SVD"))
+      
+      svd1 = svd(if(!is.null(kIMs)) datModule, nu = min(n, p, nPC), nv = min(n, 
+                                                                             p, nPC))
+      
+      if (verbose > 5) 
+        printFlush(paste(spaces, " ...calculating PVE"))
+      veMat = cor(svd1$v[, c(1:min(n, p, nVarExplained))], 
+                  t(datModule), use = "p")
+      varExpl[c(1:min(n, p, nVarExplained)), i] = rowMeans(veMat^2, 
+                                                           na.rm = TRUE)
+      svd1$v[, 1]
+    }, silent = TRUE)
+    if (class(pc) == "try-error") {
+      if ((!subHubs) && (!trapErrors)) 
+        stop(pc)
+      if (subHubs) {
+        if (verbose > 0) {
+          printFlush(paste(spaces, " ..principal component calculation for module", 
+                           modulename, "failed with the following error:"))
+          printFlush(paste(spaces, "     ", pc, spaces, 
+                           " ..hub genes will be used instead of principal components."))
+        }
+        isPC[i] = FALSE
+        pc = try({
+          scaledExpr = scale(t(datModule))
+          covEx = cov(scaledExpr, use = "p")
+          covEx[!is.finite(covEx)] = 0
+          modAdj = abs(covEx)^softPower
+          kIM = (rowMeans(modAdj, na.rm = TRUE))^3
+          if (max(kIM, na.rm = TRUE) > 1) 
+            kIM = kIM - 1
+          kIM[is.na(kIM)] = 0
+          hub = which.max(kIM)
+          alignSign = sign(covEx[, hub])
+          alignSign[is.na(alignSign)] = 0
+          isHub[i] = TRUE
+          pcxMat = scaledExpr * matrix(kIM * alignSign, 
+                                       nrow = nrow(scaledExpr), ncol = ncol(scaledExpr), 
+                                       byrow = TRUE)/sum(kIM)
+          pcx = rowMeans(pcxMat, na.rm = TRUE)
+          varExpl[1, i] = mean(cor(pcx, t(datModule), 
+                                   use = "p")^2, na.rm = TRUE)
+          pcx
+        }, silent = TRUE)
+      }
+    }
+    if (class(pc) == "try-error") {
+      if (!trapErrors) 
+        stop(pc)
+      if (verbose > 0) {
+        printFlush(paste(spaces, " ..ME calculation of module", 
+                         modulename, "failed with the following error:"))
+        printFlush(paste(spaces, "     ", pc, spaces, 
+                         " ..the offending module has been removed."))
+      }
+      warning(paste("Eigengene calculation of module", 
+                    modulename, "failed with the following error \n     ", 
+                    pc, "The offending module has been removed.\n"))
+      validMEs[i] = FALSE
+      isPC[i] = FALSE
+      isHub[i] = FALSE
+      validColors[restrict1] = grey
+    }
+    else {
+      PrinComps[, i] = pc
+      ae = try({
+        if (isPC[i]) 
+          scaledExpr = scale(t(datModule))
+        averExpr[, i] = rowMeans(scaledExpr, na.rm = TRUE)
+        if (align == "along average") {
+          if (verbose > 4) 
+            printFlush(paste(spaces, " .. aligning module eigengene with average expression."))
+          corAve = cor(averExpr[, i], PrinComps[, i], 
+                       use = "p")
+          if (!is.finite(corAve)) 
+            corAve = 0
+          if (corAve < 0) 
+            PrinComps[, i] = -PrinComps[, i]
+        }
+        0
+      }, silent = TRUE)
+      if (class(ae) == "try-error") {
+        if (!trapErrors) 
+          stop(ae)
+        if (verbose > 0) {
+          printFlush(paste(spaces, " ..Average expression calculation of module", 
+                           modulename, "failed with the following error:"))
+          printFlush(paste(spaces, "     ", ae, spaces, 
+                           " ..the returned average expression vector will be invalid."))
+        }
+        warning(paste("Average expression calculation of module", 
+                      modulename, "failed with the following error \n     ", 
+                      ae, "The returned average expression vector will be invalid.\n"))
+      }
+      validAEs[i] = !(class(ae) == "try-error")
+    }
+  }
+  allOK = (sum(!validMEs) == 0)
+  if (returnValidOnly && sum(!validMEs) > 0) {
+    PrinComps = PrinComps[, validMEs]
+    averExpr = averExpr[, validMEs]
+    varExpl = varExpl[, validMEs]
+    validMEs = rep(TRUE, times = ncol(PrinComps))
+    isPC = isPC[validMEs]
+    isHub = isHub[validMEs]
+    validAEs = validAEs[validMEs]
+  }
+  allPC = (sum(!isPC) == 0)
+  allAEOK = (sum(!validAEs) == 0)
+  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, 
+       nPC = nPC, validMEs = validMEs, validColors = validColors, 
+       allOK = allOK, allPC = allPC, isPC = isPC, isHub = isHub, 
+       validAEs = validAEs, allAEOK = allAEOK)
+}
+
