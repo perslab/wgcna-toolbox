@@ -1607,7 +1607,7 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
                                          softPower = 6, scale = TRUE, verbose = 0, indent = 0) 
 {
   ############ ADDED ############ 
-  kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors) else NULL
+  kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors, verbose=verbose, excludeGrey=excludeGrey) else NULL
   ############################### 
   
   spaces = indentSpaces(indent)

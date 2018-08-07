@@ -17,6 +17,8 @@
 ################# TEST PARAMS FOR MANUAL RUNS ########################
 ######################################################################
 
+TODO = T # controls flows around broken / unfinished code
+
 if (FALSE) { 
   seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData"
   project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n05_to_n10-10/"
@@ -344,6 +346,9 @@ if (is.null(resume)) {
   
   if (fuzzyModMembership=="kIM" & scale_MEs_by_kIMs==T) scale_MEs_by_kIMs <- F
   
+  if (TODO) {
+    scale_MEs_by_kIMs = F
+  }
   ######################################################################
   ################# LOAD AND SUBSET SEURAT OBJECT ######################
   ######################################################################
@@ -2010,7 +2015,7 @@ if (resume == "checkpoint_4") {
                                              SIMPLIFY = F) 
         
         # Clear space
-        rm(list_embed_mat, list_list_datExpr_gwas, list_list_kMs_gwas)
+        rm(list_embed_mat)
         
         list_mod_metadata_corr_rho <- lapply(list_mod_metadata_corr_rho, function(x) name_for_vec(to_be_named = x, given_names = colnames(metadata), dimension = 1)) 
         
