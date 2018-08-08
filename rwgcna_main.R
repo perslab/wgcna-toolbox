@@ -100,7 +100,9 @@ option_list <- list(
   make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
               help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
   make_option("--pamStage", type="character", default="c(TRUE)",
-              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring speci???city over sensitivity (that is, tight clusters with few mis-classi???cations) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object???cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
+              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
+  make_option("--kM_reassign", type="logical", default="TRUE",
+              help = "Following hierarchical clustering, do additional k-means clustering? [default %default]"),
   make_option("--jackstrawnReplicate", type="integer", default=500L,
               help = "Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above), [default %default]."),
   make_option("--TOMnReplicate", type="integer", default=100L,
@@ -188,6 +190,8 @@ deepSplit <- eval(parse(text=opt$deepSplit))
 moduleMergeCutHeight <- eval(parse(text=opt$moduleMergeCutHeight))
 
 pamStage <- eval(parse(text=opt$pamStage))
+
+kM_reassign <- opt$kM_reassign
 
 jackstrawnReplicate <- opt$jackstrawnReplicate
 
@@ -686,8 +690,10 @@ if (is.null(resume)) {
                            "minClusterSize" = minClusterSize,
                            "deepSplit" = deepSplit,
                            "pamStage" = pamStage,
+                           "kM_reassign" = kM_reassign,
                            "moduleMergeCutHeight" = moduleMergeCutHeight,
                            "fuzzyModMembership" = fuzzyModMembership,
+                           "scale_MEs_by_kIMs" = scale_MEs_by_kIMs,
                            "jackstrawnReplicate" = jackstrawnReplicate,
                            "TOMnReplicate" = TOMnReplicate,
                            "checkPPI" = checkPPI,
@@ -747,6 +753,7 @@ if (resume == "checkpoint_1") {
   # Free up DLLs
   invisible(R.utils::gcDLLs())
   # avoid multithreading in WGCNA
+  suppressPackageStartupMessages(library(WGCNA)) 
   disableWGCNAThreads()
   
   ######################################################################
@@ -859,38 +866,36 @@ if (resume == "checkpoint_1") {
     # Set a ceiling on n_cores to avoid depleting memory
     
     cl <- makeCluster(min(n_cores,10), type = "FORK", outfile = paste0(log_dir, "log_consensusTOM.txt"))
-    list_consensus <- clusterMap(cl, function(x,y){ consensus <- consensusTOM(multiExpr = x, 
-                                                                              checkMissingData = checkMissingData,
-                                                                              maxBlockSize = maxBlockSize, 
-                                                                              blockSizePenaltyPower = blockSizePenaltyPower, 
-                                                                              randomSeed = randomSeed,
-                                                                              corType = corType,
-                                                                              maxPOutliers = maxPOutliers,
-                                                                              quickCor = quickCor,
-                                                                              pearsonFallback = pearsonFallback,
-                                                                              cosineCorrelation = cosineCorrelation,
-                                                                              replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                                                              power = list_softPower[[y]],
-                                                                              networkType = networkType,
-                                                                              TOMDenom = TOMDenom,
-                                                                              saveIndividualTOMs = saveIndividualTOMs,
-                                                                              individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
-                                                                              networkCalibration = networkCalibration,
-                                                                              sampleForCalibration = sampleForCalibration,
-                                                                              sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                                                              getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                                                              consensusQuantile = consensusQuantile,
-                                                                              useMean = useMean,
-                                                                              saveConsensusTOMs = saveConsensusTOMs,
-                                                                              consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
-                                                                              returnTOMs = F,
-                                                                              useDiskCache = T,
-                                                                              cacheDir = scratch_dir,
-                                                                              cacheBase = ".blockConsModsCache",
-                                                                              verbose = verbose,
-                                                                              indent = indent)
-    rm(x)
-    return(consensus)}, 
+    list_consensus <- clusterMap(cl, function(x,y) consensusTOM(multiExpr = x, 
+                                                                checkMissingData = checkMissingData,
+                                                                maxBlockSize = maxBlockSize, 
+                                                                blockSizePenaltyPower = blockSizePenaltyPower, 
+                                                                randomSeed = randomSeed,
+                                                                corType = corType,
+                                                                maxPOutliers = maxPOutliers,
+                                                                quickCor = quickCor,
+                                                                pearsonFallback = pearsonFallback,
+                                                                cosineCorrelation = cosineCorrelation,
+                                                                replaceMissingAdjacencies = replaceMissingAdjacencies,
+                                                                power = list_softPower[[y]],
+                                                                networkType = networkType,
+                                                                TOMDenom = TOMDenom,
+                                                                saveIndividualTOMs = saveIndividualTOMs,
+                                                                individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
+                                                                networkCalibration = networkCalibration,
+                                                                sampleForCalibration = sampleForCalibration,
+                                                                sampleForCalibrationFactor = sampleForCalibrationFactor,
+                                                                getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                                                                consensusQuantile = consensusQuantile,
+                                                                useMean = useMean,
+                                                                saveConsensusTOMs = saveConsensusTOMs,
+                                                                consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
+                                                                returnTOMs = F,
+                                                                useDiskCache = T,
+                                                                cacheDir = scratch_dir,
+                                                                cacheBase = ".blockConsModsCache",
+                                                                verbose = verbose,
+                                                                indent = indent), 
     x=list_multiExpr, 
     y=sNames, 
     SIMPLIFY=F,
@@ -1140,34 +1145,38 @@ if (resume == "checkpoint_2") {
   ###################### REASSIGN GENES BASED ON kM ####################
   ######################################################################
   # see https://bmcsystbiol.biomedcentral.com/articles/10.1186/s12918-017-0420-6
-
-  message(paste0("Reassigning genes based on ", fuzzyModMembership))
+  if (kM_reassign ==T ) {
+    message(paste0("Reassigning genes based on ", fuzzyModMembership))
+    
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_kM_reassign.txt"))
+    
+    list_list_reassign = mapply(function(a,b,c,d) parLapplyLB(cl, a, function(x) kM_reassign_fnc(colors = x,
+                                                                                             fuzzyModMembership = fuzzyModMembership,
+                                                                                             dissTOM = if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs==T) b else NULL,
+                                                                                             datExpr = if (fuzzyModMembership=="kME") c else NULL,
+                                                                                             corFnc = if (fuzzyModMembership=="kME") corFnc else NULL,
+                                                                                             verbose=verbose,
+                                                                                             max_iter = 10,
+                                                                                             celltype = d)),
+                                         a = list_list_colors,
+                                         b = list_dissTOM,
+                                         c = list_datExpr_gg,
+                                         d = names(list_list_colors),
+                                         SIMPLIFY=F)
+    
+    stopCluster(cl)
+    
+    # Extract new colors and kMs from the list of lists of lists returned by the vectorised kM_reassign 
+    list_list_colors_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$colors))
+    list_list_kMs_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$kMs))
+    list_list_reassign_log <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$log))
   
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_kM_reassign.txt"))
-  
-  list_list_reassign = mapply(function(a,b,c,d) parLapplyLB(cl, a, function(x) kM_reassign(colors = x,
-                                                                                           fuzzyModMembership = fuzzyModMembership,
-                                                                                           dissTOM = if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs==T) b else NULL,
-                                                                                           datExpr = if (fuzzyModMembership=="kME") c else NULL,
-                                                                                           corFnc = if (fuzzyModMembership=="kME") corFnc else NULL,
-                                                                                           verbose=verbose,
-                                                                                           max_iter = 10,
-                                                                                           celltype = d)),
-                                       a = list_list_colors,
-                                       b = list_dissTOM,
-                                       c = list_datExpr_gg,
-                                       d = names(list_list_colors),
-                                       SIMPLIFY=F)
-  
-  stopCluster(cl)
-  
-  # Extract new colors and kMs from the list of lists of lists returned by the vectorised kM_reassign 
-  list_list_colors_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$colors))
-  list_list_kMs_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$kMs))
-  list_list_reassign_log <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$log))
-
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
+    invisible(gc()); invisible(R.utils::gcDLLs())
+  } else {
+    list_list_colors_reassign <- list_list_colors
+    list_list_kMs_reassign <- list_list_kMs
+    list_list_reassign_log <- NULL
+  }  
   ######################################################################
   ################## extract primary kMEs / kIMs #######################
   ######################################################################
@@ -1235,6 +1244,8 @@ if (resume == "checkpoint_2") {
   ######################### REMOVE ALL-GREY RUNS #######################
   ######################################################################
   
+  message("Removing all-grey runs")
+  
   # count the grey
   list_vec_n_grey <- lapply(list_list_colors_matched, count_grey_in_list_of_vec)
   
@@ -1252,7 +1263,7 @@ if (resume == "checkpoint_2") {
   list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   list_list_colors_matched_ok <- mapply(function(x,y) x[y], x=list_list_colors_matched, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
-  list_list_reassign_log <- mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
+  list_list_reassign_log <- if (!is.null(kM_reassign)) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   
   sNames_ok <- sNames[logical_subsets_ok]
   
@@ -1420,7 +1431,7 @@ if (resume == "checkpoint_4") {
   list_PPI_vec_n_grey <- lapply(list_list_colors_PPI, count_grey_in_list_of_vec)
   
   # Order all the outputs by how many genes were assigned to a (non-grey) module
-  list_list_reassign_log_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F)
+  list_list_reassign_log_order <- if (!is.null(kM_reassign)) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
   list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_colors_matched_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_matched_ok , y = list_PPI_vec_n_grey, SIMPLIFY = F )
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
@@ -1433,15 +1444,16 @@ if (resume == "checkpoint_4") {
   
   # Eliminate a layer of nesting by selecting only the best parametrisation per celltype
   list_plot_label_final <- lapply(list_list_plot_label_ok_order, function(x) x[[1]])
-  list_reassign_log <- lapply(list_list_reassign_log_order, function(x) x[[1]])
+  list_reassign_log <- if (!is.null(kM_reassign)) lapply(list_list_reassign_log_order, function(x) x[[1]]) else NULL
   list_colors_PPI <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
   list_colors <- lapply(list_list_colors_matched_ok_order, function(x) x[[1]])
   list_module_PPI <- lapply(list_list_module_PPI_order, function(x) x[[1]])
   list_module_PPI_signif <- lapply(list_list_module_PPI_signif_order, function(x) x[[1]])
   
   # Name by cell clusters
-  names(list_plot_label_final) <- names(list_reassign_log) <- names(list_colors_PPI) <- names(list_colors) <- names(list_module_PPI) <- names(list_module_PPI_signif) <- sNames_ok
-  
+  names(list_plot_label_final) <-  names(list_colors_PPI) <- names(list_colors) <- names(list_module_PPI) <- names(list_module_PPI_signif) <- sNames_ok
+  if (!is.null(kM_reassign)) names(list_reassign_log) <-sNames_ok
+    
   # Make list of list of final parameters
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
   list_list_cutree_params_final <- lapply(list_PPI_vec_n_grey, function(x) comb_list[order(x,decreasing = F)][[1]])
@@ -2221,7 +2233,8 @@ if (resume == "checkpoint_4") {
   ##################### SAVE LOGS OF REASSIGNED GENES #######################
   ###########################################################################
   
-  invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
+  
+  if (!is.null(kM_reassign)) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
                    x = list_reassign_log, 
                    y = names(list_reassign_log), 
                    SIMPLIFY=F))
