@@ -348,7 +348,7 @@ if (is.null(resume)) {
     } 
   }
   
-  if (fuzzyModMembership=="kIM" & scale_MEs_by_kIMs==T) scale_MEs_by_kIMs <- F
+  if (fuzzyModMembership=="kIM" & scale_MEs_by_kIMs) scale_MEs_by_kIMs <- F
   
   if (TODO) {
     scale_MEs_by_kIMs = F
@@ -995,7 +995,7 @@ if (resume == "checkpoint_2") {
   invisible(gc())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parHclust.txt"))
   # Convert TOM to distance matrix
-  list_dissTOM <- parLapplyLB(cl, sNames, dissTOM_for_par)
+  list_dissTOM <- parLapplyLB(cl, sNames, function(x) dissTOM_for_par(subsetName = x,data_prefix = data_prefix))
   # Cluster
   list_geneTree <- parLapplyLB(cl, list_dissTOM, function(x) hclust(d=x, method=hclustMethod))
   stopCluster(cl)
@@ -1584,7 +1584,7 @@ if (resume == "checkpoint_4") {
   
   if (checkPPI==T) message("Computing kMs after filtering modules for significant Protein-Protein Interactions")
   
-  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs == T) {
+  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) {
   list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
   list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
   names(list_dissTOM_ok) <- sNames_ok
@@ -1600,10 +1600,10 @@ if (resume == "checkpoint_4") {
                                                                   colors=y,
                                                                   excludeGrey=T,
                                                                   scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                  dissTOM=z), 
+                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL), 
                                x = list_datExpr_PPI, 
                                y = list_colors_PPI_uniq,
-                               z = list_dissTOM_PPI,
+                               z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI))
                                SIMPLIFY = F,
                                .scheduling = c("dynamic"))
     
@@ -1920,7 +1920,7 @@ if (resume == "checkpoint_4") {
     
     message("Re-computing ", fuzzyModMembership, "s after filtering modules for MAGMA enrichment")
     
-    if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs==T) {
+    if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) {
       list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
       list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
       names(list_dissTOM_ok) <- sNames_ok
@@ -2175,7 +2175,7 @@ if (resume == "checkpoint_4") {
   
   invisible(gc())
   
-  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs==T) {
+  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) {
     list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
     list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
     names(list_dissTOM_ok) <- sNames_ok
@@ -2193,11 +2193,11 @@ if (resume == "checkpoint_4") {
                                                                        cellType = y,
                                                                        kMs = if (latentGeneType== "IM") z else NULL,
                                                                        scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                                                       dissTOM = if (scale_MEs_by_kIMs==T) a else NULL), 
+                                                                       dissTOM = if (scale_MEs_by_kIMs) a else NULL), 
                                       x = list_colors_meta, 
                                       y = names(list_colors_meta),
                                       z = list_kMs_meta,
-                                      a = if (scale_MEs_by_kIMs==T) list_dissTOM_meta else numeric(length=length(sNames_meta)),
+                                      a = if (scale_MEs_by_kIMs) list_dissTOM_meta else numeric(length=length(sNames_meta)),
                                       SIMPLIFY=F,
                                       .scheduling = c("dynamic"))
   
