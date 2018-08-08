@@ -275,7 +275,7 @@ bootstrap <- function(datExpr,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-TOM_for_par = function(datExpr, subsetName, softPower) {
+TOM_for_par = function(datExpr, subsetName, softPower, data_prefix) {
   
   ### 180503 v1.7
   disableWGCNAThreads()
@@ -293,7 +293,7 @@ TOM_for_par = function(datExpr, subsetName, softPower) {
                             verbose=verbose,
                             indent = indent)
   
-  save(consTomDS, file=sprintf("%s%s_consensusTOM-block.1.RData", scratch_dir, subsetName)) # Save TOM the way consensusTOM would have done
+  save(consTomDS, file=sprintf("%s%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, subsetName)) # Save TOM the way consensusTOM would have done
   goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
   return(goodGenesTOM_idx)
 }

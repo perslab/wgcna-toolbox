@@ -753,6 +753,13 @@ if (resume == "checkpoint_1") {
   # Free up DLLs
   invisible(R.utils::gcDLLs())
   # avoid multithreading in WGCNA
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(Biobase))
+  suppressPackageStartupMessages(library(Matrix))
+  #suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(parallel))
+  suppressPackageStartupMessages(library(reshape))
+  suppressPackageStartupMessages(library(reshape2))
   suppressPackageStartupMessages(library(WGCNA)) 
   disableWGCNAThreads()
   
@@ -881,7 +888,7 @@ if (resume == "checkpoint_1") {
                                                                 networkType = networkType,
                                                                 TOMDenom = TOMDenom,
                                                                 saveIndividualTOMs = saveIndividualTOMs,
-                                                                individualTOMFileNames = paste0(y, "_individualTOM-Set%s-Block%b.RData"),
+                                                                individualTOMFileNames = paste0(data_prefix, "_", y, "_individualTOM-Set%s-Block%b.RData"),
                                                                 networkCalibration = networkCalibration,
                                                                 sampleForCalibration = sampleForCalibration,
                                                                 sampleForCalibrationFactor = sampleForCalibrationFactor,
@@ -889,7 +896,7 @@ if (resume == "checkpoint_1") {
                                                                 consensusQuantile = consensusQuantile,
                                                                 useMean = useMean,
                                                                 saveConsensusTOMs = saveConsensusTOMs,
-                                                                consensusTOMFilePattern = paste0(y,"_consensusTOM-block.%b.RData"),
+                                                                consensusTOMFilePattern = paste0(data_prefix,"_",y,"_consensusTOM-block.%b.RData"),
                                                                 returnTOMs = F,
                                                                 useDiskCache = T,
                                                                 cacheDir = scratch_dir,
@@ -922,7 +929,8 @@ if (resume == "checkpoint_1") {
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_TOM_for_par.txt"))
     list_goodGenesTOM_idx <- clusterMap(cl, function(x,y) TOM_for_par(datExpr=x, 
                                                                       subsetName=y, 
-                                                                      softPower=list_softPower[[y]]), 
+                                                                      softPower=list_softPower[[y]],
+                                                                      data_prefix = data_prefix), 
                                         x=list_datExpr, 
                                         y=sNames, 
                                         SIMPLIFY=F,
@@ -967,6 +975,14 @@ if (resume == "checkpoint_2") {
   # Free up DLLs
   invisible(R.utils::gcDLLs())
   
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(Biobase))
+  suppressPackageStartupMessages(library(Matrix))
+  #suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(parallel))
+  suppressPackageStartupMessages(library(reshape))
+  suppressPackageStartupMessages(library(reshape2))
+  suppressPackageStartupMessages(library(WGCNA)) 
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
   ######################################################################
@@ -1145,7 +1161,7 @@ if (resume == "checkpoint_2") {
   ###################### REASSIGN GENES BASED ON kM ####################
   ######################################################################
   # see https://bmcsystbiol.biomedcentral.com/articles/10.1186/s12918-017-0420-6
-  if (kM_reassign ==T ) {
+  if (kM_reassign) {
     message(paste0("Reassigning genes based on ", fuzzyModMembership))
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_par_kM_reassign.txt"))
@@ -1263,7 +1279,7 @@ if (resume == "checkpoint_2") {
   list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   list_list_colors_matched_ok <- mapply(function(x,y) x[y], x=list_list_colors_matched, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
-  list_list_reassign_log <- if (!is.null(kM_reassign)) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
+  list_list_reassign_log <- if (kM_reassign) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   
   sNames_ok <- sNames[logical_subsets_ok]
   
@@ -1417,7 +1433,14 @@ if (resume == "checkpoint_4") {
   ######################### LOAD PACKAGES ##############################
   ######################################################################
   
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(Biobase))
+  suppressPackageStartupMessages(library(Matrix))
   suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(parallel))
+  suppressPackageStartupMessages(library(reshape))
+  suppressPackageStartupMessages(library(reshape2))
+  suppressPackageStartupMessages(library(WGCNA)) 
   suppressPackageStartupMessages(library(liger))
   suppressPackageStartupMessages(library(boot))
   
@@ -1431,7 +1454,7 @@ if (resume == "checkpoint_4") {
   list_PPI_vec_n_grey <- lapply(list_list_colors_PPI, count_grey_in_list_of_vec)
   
   # Order all the outputs by how many genes were assigned to a (non-grey) module
-  list_list_reassign_log_order <- if (!is.null(kM_reassign)) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
+  list_list_reassign_log_order <- if (kM_reassign) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
   list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_colors_matched_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_matched_ok , y = list_PPI_vec_n_grey, SIMPLIFY = F )
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
@@ -1444,7 +1467,7 @@ if (resume == "checkpoint_4") {
   
   # Eliminate a layer of nesting by selecting only the best parametrisation per celltype
   list_plot_label_final <- lapply(list_list_plot_label_ok_order, function(x) x[[1]])
-  list_reassign_log <- if (!is.null(kM_reassign)) lapply(list_list_reassign_log_order, function(x) x[[1]]) else NULL
+  list_reassign_log <- if (kM_reassign) lapply(list_list_reassign_log_order, function(x) x[[1]]) else NULL
   list_colors_PPI <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
   list_colors <- lapply(list_list_colors_matched_ok_order, function(x) x[[1]])
   list_module_PPI <- lapply(list_list_module_PPI_order, function(x) x[[1]])
@@ -1452,7 +1475,7 @@ if (resume == "checkpoint_4") {
   
   # Name by cell clusters
   names(list_plot_label_final) <-  names(list_colors_PPI) <- names(list_colors) <- names(list_module_PPI) <- names(list_module_PPI_signif) <- sNames_ok
-  if (!is.null(kM_reassign)) names(list_reassign_log) <-sNames_ok
+  if (kM_reassign) names(list_reassign_log) <-sNames_ok
     
   # Make list of list of final parameters
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
@@ -2234,7 +2257,7 @@ if (resume == "checkpoint_4") {
   ###########################################################################
   
   
-  if (!is.null(kM_reassign)) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
+  if (kM_reassign) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
                    x = list_reassign_log, 
                    y = names(list_reassign_log), 
                    SIMPLIFY=F))
