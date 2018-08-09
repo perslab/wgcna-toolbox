@@ -411,6 +411,7 @@ mergeCloseModskIM = function(datExpr,
                                      cellType=NULL,
                                      kMs=kIMs)
     
+    cellModEmbed_mat <- cellModEmbed_mat[,-grep("^grey$", colnames(cellModEmbed_mat))]
     # Cluster modules using the Pearson correlation between module cell embeddings
     mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
     mod_corr[mod_corr<0] <- 0 #only keep positive correlations
@@ -449,7 +450,7 @@ mergeCloseModskIM = function(datExpr,
     kIMs <- kIM_eachMod_norm(dissTOM = dissTOM, 
                             colors = colors,
                             verbose = 1,
-                            excludeGrey = T)
+                            excludeGrey = F)
     
   }
   
@@ -551,7 +552,7 @@ parPkMs = function(list_kMs,
   
   for (j in 1:length(list_colors)) {
     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
-    pkMs <- vector(mode="numeric",length=length(list_colors[[1]]))
+    pkMs <- vector(mode="numeric",length=length(list_colors[[j]]))
     ###
     # Loop over every gene and get its pkME
     for (i in 1:length(pkMs)) {

@@ -1121,7 +1121,7 @@ if (resume == "checkpoint_2") {
     list_list_kMs <- clusterMap(cl, function(a,b) lapply(b, function(x) kIM_eachMod_norm(dissTOM = a, 
                                                                                          colors = x,
                                                                                          verbose=verbose,
-                                                                                         excludeGrey=T)),
+                                                                                         excludeGrey=F)),
                                 a = list_dissTOM,
                                 b = list_list_colors,
                                 SIMPLIFY=F,
@@ -1603,7 +1603,7 @@ if (resume == "checkpoint_4") {
                                                                   dissTOM=if (scale_MEs_by_kIMs) z else NULL), 
                                x = list_datExpr_PPI, 
                                y = list_colors_PPI_uniq,
-                               z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI))
+                               z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
                                SIMPLIFY = F,
                                .scheduling = c("dynamic"))
     
@@ -1937,10 +1937,10 @@ if (resume == "checkpoint_4") {
                                                                      colors=y,
                                                                      excludeGrey=T,
                                                                      scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                     dissTOM=z), 
+                                                                     dissTOM= if (scale_MEs_by_kIMs) z else NULL), 
                                   x = list_datExpr_gwas, 
                                   y = list_colors_gwas, 
-                                  z = list_dissTOM_gwas,
+                                  z = if (scale_MEs_by_kIMs) list_dissTOM_gwas else numeric(length(sNames_gwas)),
                                   SIMPLIFY = F,
                                   .scheduling = c("dynamic"))
       
