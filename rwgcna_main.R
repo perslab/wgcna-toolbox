@@ -1067,7 +1067,7 @@ if (resume == "checkpoint_2") {
     list_list_merged <- parLapplyLB(cl, sNames, function(x) lapply(1:n_combs, function(y) mergeCloseModules_for_vec(cutree=list_list_cutree[[x]][[y]],
                                                                                                                     comb=comb_list[[y]],
                                                                                                                     datExpr=list_datExpr_gg[[x]],
-                                                                                                                    excludeGrey = excludeGrey,
+                                                                                                                    excludeGrey = F,
                                                                                                                     scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                                                                                                                     dissTOM = if (scale_MEs_by_kIMs==T) list_dissTOM[[x]] else NULL)))
 
