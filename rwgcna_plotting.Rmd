@@ -23,8 +23,8 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-project_dir = "/projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_5/"
-data_prefix = "mousebrain_top10"
+project_dir = "/projects/jonatan/tmp-rwgcna-tests/mouse_top10_8/"
+data_prefix = "mouse_top10"
 run_prefix = "8"
 
 p.val.threshold = 5e-2
@@ -63,6 +63,7 @@ suppressPackageStartupMessages(library(RColorBrewer))
 
 ```{r}
 networkType="signed"
+corFnc = "cor"
 source(file =  "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_params.R")
 source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
 ```
@@ -77,8 +78,10 @@ load(session_image_path)
 ## Retrieve run stats
 
 ```{r}
-sumstats_run <- read.table(sprintf("%s/%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
-sumstats_celltype <- read.table(sprintf("%s/%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+params_run <- read.table(sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+sumstats_run <- read.table(sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+sumstats_celltype <- read.table(sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+
 ```
 
 ## Plotting
@@ -301,7 +304,7 @@ ht1 <- Heatmap(cellModEmbed_mat[,],
              show_heatmap_legend = T, 
              show_row_names = F, 
              show_column_names = T,
-             heatmap_legend_param = list(title = "Expression"))
+             heatmap_legend_param = list(title = "Expression"), use_raster = T)
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht1+htra)
@@ -317,7 +320,7 @@ ht2 <- Heatmap(cellModEmbed_mat_sqrt[,],
              show_heatmap_legend = T, 
              show_row_names = F, 
              show_column_names = T,
-             heatmap_legend_param = list(title = "Expression"))
+             heatmap_legend_param = list(title = "Expression"), use_raster = T)
              #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_cellOrder_sqrt%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht2+htra)
@@ -334,7 +337,7 @@ ht3 <- Heatmap(cellModEmbed_mat[,],
                show_heatmap_legend = T, 
                show_row_names = F, 
                show_column_names = T,
-               heatmap_legend_param = list(title = "Expression"))
+               heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht3+htra)
@@ -350,7 +353,7 @@ ht4 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_heatmap_legend = T, 
                show_row_names = F, 
                show_column_names = T,
-               heatmap_legend_param = list(title = "Expression"))
+               heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_cellCluster_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht4+htra)
@@ -367,7 +370,7 @@ ht5 <- Heatmap(cellModEmbed_mat[,],
                show_heatmap_legend = T, 
                show_row_names = F, 
                show_column_names = T,
-               heatmap_legend_param = list(title = "Expression"))
+               heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht5+htra)
@@ -384,7 +387,7 @@ ht6 <- Heatmap(cellModEmbed_mat_sqrt[,],
                show_heatmap_legend = T, 
                show_row_names = F, 
                show_column_names = T,
-               heatmap_legend_param = list(title = "Expression"))
+               heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
 pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 draw(ht6+htra)

@@ -1397,7 +1397,7 @@ if (resume == "checkpoint_3") {
                               c = list_PPI_pkM_threshold,
                               SIMPLIFY=F)
   
-  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
+  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI_uniq, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
   
   list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
   list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))
@@ -1714,7 +1714,7 @@ if (resume == "checkpoint_4") {
     message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
     
     
-    magma_test_type = "full_kME_spearman" 
+    magma_test_type = "module_genes_spearman" 
     
     if (data_organism == "mmusculus") {
       invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1729,7 +1729,7 @@ if (resume == "checkpoint_4") {
                                                                    run_prefix = run_prefix,
                                                                    mapping_orthology = mapping_orthology),
                                        x=list_kMs_PPI,
-                                       y=list_colors_PPI,
+                                       y=list_colors_PPI_uniq,
                                        .scheduling = c("dynamic"))
       stopCluster(cl)
       invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1744,7 +1744,7 @@ if (resume == "checkpoint_4") {
       
     } else if (data_organism == "hsapiens") {
       list_kMs_hs <- list_kMs_PPI
-      list_colors_hs <- list_colors_PPI
+      list_colors_hs <- list_colors_PPI_uniq
       names(list_kMs_hs) <- names(list_colors_hs) <- names(list_kMs_PPI)
     }
     
@@ -2382,9 +2382,9 @@ if (resume == "checkpoint_4") {
                                      plot_label_final = unlist(x=list_plot_label_final, use.names = F),
                                      n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, nrow) else numeric(length=sNames),
                                      prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
-                                     prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
+                                     prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
-                                     n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
+                                     n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
                                      prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)), 
                                      n_modules_variants_enriched = n_modules_variants_enriched,
                                      n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames)),
