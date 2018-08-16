@@ -9,6 +9,8 @@ v2.4 - 15-08-2018
 * eval(parse(text= .. )) (default arg is 'file=')
 * gwas and metadata filtering. The kMs were not being filtered at gwas step, and list_MEs weren't either. Weird bug, seems to have been introduced since this has worked at some point.
 * When outputting metadata correlation results, use sNames_PPI rather than sNames_meta, i.e. output also metadata for celltypes where none of the correlations were significant
+* Module Eigengenes: list_..._MEs are now always the MEs$eigengenes rather than the list output by moduleEigengenes. Also removed "ME" from colnames in list_MEs_PPI - they were not being found when filtering for GWAS.  Changed parkMEs and script where required.
+* When filtering kMs and MEs for metadata correlations using mapply did not specify simplify arg so if only one module dataframe was converted to vector. Now F
 
 ### Added
 * mergeCloseModskIM which is analogous to mergeCloseModules but uses IM embeddings rather than MEs
@@ -23,6 +25,7 @@ v2.4 - 15-08-2018
 * Now output two diagnostics files: one for run-level information, one for celltype-level info
 * delete individual TOMs from drive
 * Compute idx_row_variants in any case (for stats)
+* added cell row names to list_MEs_PPI (which are used through rest of script)
 
 ### Changed
 * Changed checkPPI: renamed to PPI_filter.  Always perform the PPI analysis, but filter on colours only if filter_PPI == T
@@ -36,6 +39,7 @@ v2.4 - 15-08-2018
 * renamed use.imputed to use_imputed
 * removed 'try' around write.csv ... cellModEmbed , just because it seemed superfluous
 * delete list_dissTOM_ok and scale_data when not needed 
+* parpkMEs now just outputs 0 if the gene's module is grey
 
 v2.3 - 01-08-2018
 
