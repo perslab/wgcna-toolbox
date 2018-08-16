@@ -1353,8 +1353,9 @@ kM_magma <- function(cellType,
   
   for (col in unique_colors) {
     for (j in 1:length(gwas)) {
-
-      genes = if (test_type=="full_kME_spearman") intersect(rownames(modulekM), gwas[[j]]$gene_name) else if (test_type %in% c("module_genes_spearman", "module_genes_t")) intersect(colors_hs[colors_hs==col], gwas[[j]]$gene_name)  
+      print(col)
+      print(j)
+      genes = if (test_type=="full_kME_spearman") intersect(rownames(modulekM), gwas[[j]]$gene_name) else if (test_type %in% c("module_genes_spearman", "module_genes_t")) intersect(names(colors_hs)[colors_hs==col], gwas[[j]]$gene_name)  
 
       if (test_type %in% c("full_kME_spearman", "module_genes_spearman")) {
         x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
@@ -1380,7 +1381,7 @@ kM_magma <- function(cellType,
       } else if (test_type == "module_genes_t") {
         
         x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
-        y = -log10(gwas[[j]]$P[intersect(rownames(modulekM), gwas[[j]]$gene_name)])
+        y = -log10(gwas[[j]]$P[match(intersect(rownames(modulekM), gwas[[j]]$gene_name), gwas[[j]]$gene_name)])
         test = t.test(y,x, alternative = "g")
 
         table.kM.cor.p[col,j] <- test$p.value
