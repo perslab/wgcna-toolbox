@@ -1569,7 +1569,7 @@ if (resume == "checkpoint_4") {
   list_colors_PPI_uniq <- lapply(list_colors_PPI_uniq, function(x) ifelse(is.na(x), yes="grey", no = x))
   
   # Give gene names to vectors
-  list_colors_uniq <- mapply(function(x,y) name_for_vec(to_be_named= x, given_names = names(y), dimension=NULL), x = list_colors_uniq, y = list_colors, SIMPLIFY=F)
+  list_colors_uniq <- mapply(function(x,y) name_for_vec(to_be_named= x, given_names = names(y), dimension=NULL), x = list_colors_uniq, y = list_colors_all_PPI_ok, SIMPLIFY=F)
   list_colors_PPI_uniq <- mapply(function(x,y) name_for_vec(to_be_named= x, given_names = names(y), dimension=NULL), x = list_colors_PPI_uniq, y = list_colors_PPI, SIMPLIFY=F)
   
   ######################################################################
@@ -1699,7 +1699,7 @@ if (resume == "checkpoint_4") {
   # find row idx of modules with rare variant / mendelian gene enrichment 
   idx_row_variants <- variants_GSEA_df$q.val > -log10(pvalThreshold)
   
-  # Find celltypes with rare variant / mendelian gene enrichment
+  # count number of enriched module per celltype for summary stats
   n_modules_variants_enriched <- rep(NA, times = length(sNames))
   n_modules_variants_enriched[sNames %in% sNames_PPI] <- sapply(sNames_PPI, function(x) sum(variants_GSEA_df$celltype[idx_row_variants]==x))
   
@@ -1713,28 +1713,39 @@ if (resume == "checkpoint_4") {
     
     message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
     
+    
+    magma_test_type = "module_genes_spearman" 
+    
     if (data_organism == "mmusculus") {
       invisible(gc()); invisible(R.utils::gcDLLs())
       # map mouse to human gene orthologs  
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
       
       cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMtoHs_par.txt"))
-      list_MMtoHsmapping <- parLapplyLB(cl, list_kMs_PPI, function(x) mapMMtoHs(modulekM = x, 
-                                                                         log_dir = log_dir, 
-                                                                         data_prefix = data_prefix, 
-                                                                         run_prefix = run_prefix,
-                                                                         mapping_orthology = mapping_orthology))
+      list_MMtoHsmapping <- clusterMap(cl, function(x,y) mapMMtoHs(modulekM = x,
+                                                                   colors = y,
+                                                                   log_dir = log_dir, 
+                                                                   data_prefix = data_prefix, 
+                                                                   run_prefix = run_prefix,
+                                                                   mapping_orthology = mapping_orthology),
+                                       x=list_kMs_PPI,
+                                       y=list_colors_PPI,
+                                       .scheduling = c("dynamic"))
       stopCluster(cl)
       invisible(gc()); invisible(R.utils::gcDLLs())
       
       list_kMs_hs <- lapply(list_MMtoHsmapping, function(x) x$kM) 
+      list_colors_hs <- lapply(list_MMtoHsmapping, function(x) x$colors)  
+      
       vec_MMtoHsmapping_prop.mapped <- sapply(list_MMtoHsmapping, function(x) x$prop.mapped, simplify = T)
       
-      names(list_kMs_hs) <- names(list_kMs_PPI)
+      
+      names(list_kMs_hs) <- names(list_colors_hs) <- names(list_kMs_PPI)
       
     } else if (data_organism == "hsapiens") {
       list_kMs_hs <- list_kMs_PPI
-      names(list_kMs_hs) <- names(list_kMs_PPI)
+      list_colors_hs <- list_colors_PPI
+      names(list_kMs_hs) <- names(list_colors_hs) <- names(list_kMs_PPI)
     }
     
     # Load gene mapping and annotation files
@@ -1757,13 +1768,17 @@ if (resume == "checkpoint_4") {
       mapping = data.frame(entrez=gwas[[i]]$GENE, ensembl=mapping_hs_entrez2ensembl$ensembl_gene_id[idx])
       gwas[[i]]$gene_name = mapping$ensembl
     }
+    
     invisible(gc()); invisible(R.utils::gcDLLs())
     cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "kM_magma_par.txt"))
-    magma_results <- clusterMap(cl, function(x,y) kM_magma(cellType = x, 
+    magma_results <- clusterMap(cl, function(x,y,z) kM_magma(cellType = x, 
                                                            modulekM = y,
-                                                           gwas = gwas),
+                                                           gwas = gwas,
+                                                           test_type = magma_test_type,
+                                                           colors_hs = z),
                                 x = names(list_kMs_hs),
                                 y = list_kMs_hs,
+                                z = list_colors_hs, 
                                 SIMPLIFY=F,
                                 .scheduling = c("dynamic"))
     stopCluster(cl)
@@ -1878,6 +1893,7 @@ if (resume == "checkpoint_4") {
     magma.r.sig <- NULL #  magma.r.all
   }
   
+  # count number of enriched module per celltype for summary stats
   n_modules_gwas_enriched <- rep(NA, times = length(sNames))
   n_modules_gwas_enriched[sNames %in% sNames_PPI] <- if (!is.null(magma_gwas_dir)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
   
@@ -2128,7 +2144,10 @@ if (resume == "checkpoint_4") {
     list_MEs_meta <- list_MEs_gwas
   }
   
-  
+  # count number of enriched module per celltype for summary stats
+  n_modules_meta_enriched <- rep(NA, times=length(sNames))
+  n_modules_meta_enriched[sNames %in% sNames_gwas] <- sapply(list_idx_module_meta_sig, sum) 
+
   ######################################################################
   ############################ COMPUTE PRIMARY KMs #####################
   ######################################################################
@@ -2367,9 +2386,9 @@ if (resume == "checkpoint_4") {
                                      n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
                                      n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
                                      prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)), 
-                                     n_modules_variants_enriched = n_modules_variants_enriched
+                                     n_modules_variants_enriched = n_modules_variants_enriched,
                                      n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames)),
-                                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) ifelse(test=sNames %in% sNames_gwas, yes=sapply(list_idx_module_meta_sig, sum), no=NA) else rep(NA, length(sNames)),
+                                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) n_modules_meta_enriched else rep(NA, times=length(sNames)),
                                      row.names = NULL, stringsAsFactors = F)
                            
   sumstats_run <- c(t_start = t_start,
@@ -2379,11 +2398,11 @@ if (resume == "checkpoint_4") {
                     n_celltypes = length(subsets_ok_idx),
                     n_celltypes_used = sum(subsets_ok_idx),
                     prop_genes_mapped_to_ensembl = round(sum(!is.na(mapping$ensembl))/nrow(mapping),2),
-                    prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign),2),
-                    prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI),2),
+                    prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign, na.rm=T),2),
+                    prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI, na.rm=T),2),
                     n_modules_total = sum(sumstats_celltype_df$n_modules),
                     n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched), 
-                    prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog),2) else NA,
+                    prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA,
                     n_modules_variants_enriched = sum(sumstats_celltype_df$n_modules_variants_enriched, na.rm=T),
                     n_modules_magma_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sum(n_modules_gwas_enriched, na.rm = T) else NA,
                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) sum(sumstats_celltype_df$n_modules_meta_enriched, na.rm = T) else NA) 

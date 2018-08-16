@@ -546,7 +546,9 @@ replaceNA = function(replace_in, replace_from) {
 
 parPkMs = function(list_kMs, 
                    list_colors) {
-  
+
+  #if (!all(sapply(list_kMs, function(x) any("grey" %in% colnames(x)) ))) stop("'grey' module kMEs not found") 
+      
   list_pkMs <- list()
   list_kMs <- lapply(list_kMs, function(x) name_for_vec(to_be_named = x, given_names = gsub("kME", "", colnames(x), ignore.case =F), dimension=2))
   
@@ -557,7 +559,7 @@ parPkMs = function(list_kMs,
     # Loop over every gene and get its pkME
     for (i in 1:length(pkMs)) {
       #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
-      pkMs[i] <- list_kMs[[j]] [list_colors[[j]][i]] [i,]    
+      pkMs[i] <- if (list_colors[[j]][i]=="grey") 0 else list_kMs[[j]] [list_colors[[j]][i]] [i,]    
     }
     list_pkMs[[j]] <- pkMs 
     names(list_pkMs[[j]]) <- names(list_colors[[j]])
@@ -1268,6 +1270,7 @@ PPI_inner_for_vec <- function(color, unique_colors, colors, string_db) {
 ############################################################################################################################################################
 
 mapMMtoHs = function(modulekM,
+                     colors = NULL,
                      log_dir,
                      data_prefix,
                      run_prefix,
@@ -1285,9 +1288,16 @@ mapMMtoHs = function(modulekM,
   append = !file.exists(log_not_mapped_filepath)
   col.names = !append 
   write.table(df_not_mapped,log_not_mapped_filepath,quote=F,sep="\t", col.names = col.names, row.names=F, append=append)
-  #modulekM$symbol = mapping$symbol
+  
   modulekM$ensembl = mapping$ensembl.human
-  modulekM = na.omit(modulekM)
+  
+  # Also name colors
+  if (!is.null(colors)) {
+    colors_ens <- colors[!is.na(modulekM$ensembl)]
+    names(colors_ens) <- na.omit(mapping$ensembl.human)
+  }
+  
+  modulekM <- na.omit(modulekM)
   
   ### 180508_v.18_dev2
   #tmp = within(modulekM, rm("symbol","ensembl"))
@@ -1299,11 +1309,13 @@ mapMMtoHs = function(modulekM,
   rownames(modulekM_ens) = modulekM_ens$Group.1
   modulekM_ens = within(modulekM_ens, rm("Group.1"))
   
+  if (!is.null(colors)) colors_ens <- colors_ens[names(colors_ens) %in% rownames(modulekM_ens)] else NULL 
+  
   modulekM_ens$genes <- NULL
   
   prop.mapped <- round(sum(!is.na(mapping$ensembl.human))/nrow(mapping),2)
 
-  return(list(kM=modulekM_ens, prop.mapped=prop.mapped))
+  return(list(kM=modulekM_ens, colors=colors_ens, prop.mapped=prop.mapped))
   
 }
 
@@ -1327,39 +1339,54 @@ cor_magma_pval <- function(gwas_pvals,
 
 kM_magma <- function(cellType,
                      modulekM,
-                     gwas) {
+                     gwas,
+                     test_type = c("full_kME_spearman", "module_genes_spearman", "module_genes_t"),
+                     colors_hs = NULL) {
   # Usage: Subroutine to calculate spearman's correlation between gene module membership and GWAS gene significance
   # Args: 
   # Returns:
   
-  colors = colnames(modulekM)
-  table.kM.cor.p = table.kM.cor.r = table.kM.cor.emp.p <- matrix(NA,nrow=length(unique(colors)),ncol=length(gwas)) 
-  rownames(table.kM.cor.r) = rownames(table.kM.cor.p) = rownames(table.kM.cor.emp.p) = unique(colors)
+  unique_colors = colnames(modulekM)
+  table.kM.cor.p = table.kM.cor.r = table.kM.cor.emp.p <- matrix(NA,nrow=length(unique_colors),ncol=length(gwas)) 
+  rownames(table.kM.cor.r) = rownames(table.kM.cor.p) = rownames(table.kM.cor.emp.p) = unique_colors
   colnames(table.kM.cor.r) = colnames(table.kM.cor.p) = colnames(table.kM.cor.emp.p) = names(gwas) 
   
-  for (col in unique(colors)) {
+  for (col in unique_colors) {
     for (j in 1:length(gwas)) {
-      #col = paste("kM", m, sep="")
-      genes = intersect(rownames(modulekM),gwas[[j]]$gene_name)
-      x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
-      y = modulekM[match(genes,rownames(modulekM)), col]
-      
-      cor = cor.test(x,y,method="spearman", exact=F)
-      table.kM.cor.r[col,j] <- cor$estimate
-      table.kM.cor.p[col,j] <- cor$p.value
-      
-      # Generate 1000 (10000) permutation distribution samples and their associated correlation coefficients
-      # For a 0.05 significance threshold this gives an error of the p-value of sqrt(p(1-p)/k) ~ 0.00689202437 (0.0021794497)
-      # see https://stats.stackexchange.com/questions/80025/required-number-of-permutations-for-a-permutation-based-p-value
-      boot_out <- boot(data = y,
-                       statistic=cor_magma_pval,
-                       R=R,
-                       sim = "permutation",
-                       gwas_pvals=x,
-                       parallel = "no")
-      
-      # compute the empirical probability of the p-value - should correspond to the p-value, ideally..
-      table.kM.cor.emp.p[col,j] <- ecdf(boot_out$t)(boot_out$t0)
+
+      genes = if (test_type=="full_kME_spearman") intersect(rownames(modulekM), gwas[[j]]$gene_name) else if (test_type %in% c("module_genes_spearman", "module_genes_t")) intersect(colors_hs[colors_hs==col], gwas[[j]]$gene_name)  
+
+      if (test_type %in% c("full_kME_spearman", "module_genes_spearman")) {
+        x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
+        y = modulekM[match(genes,rownames(modulekM)), col]
+        
+        cor = cor.test(x,y,method="spearman", exact=F)
+        table.kM.cor.r[col,j] <- cor$estimate
+        table.kM.cor.p[col,j] <- cor$p.value
+        
+        # Generate 1000 (10000) permutation distribution samples and their associated correlation coefficients
+        # For a 0.05 significance threshold this gives an error of the p-value of sqrt(p(1-p)/k) ~ 0.00689202437 (0.0021794497)
+        # see https://stats.stackexchange.com/questions/80025/required-number-of-permutations-for-a-permutation-based-p-value
+        boot_out <- boot(data = y,
+                         statistic=cor_magma_pval,
+                         R=R,
+                         sim = "permutation",
+                         gwas_pvals=x,
+                         parallel = "no")
+        
+        # compute the empirical probability of the p-value - should correspond to the p-value, ideally..
+        table.kM.cor.emp.p[col,j] <- ecdf(boot_out$t)(boot_out$t0)
+        
+      } else if (test_type == "module_genes_t") {
+        
+        x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
+        y = -log10(gwas[[j]]$P[intersect(rownames(modulekM), gwas[[j]]$gene_name)])
+        test = t.test(y,x, alternative = "g")
+
+        table.kM.cor.p[col,j] <- test$p.value
+        table.kM.cor.r[col,j] <- 0
+        table.kM.cor.emp.p[col,j] <- 1        
+      }
     }
   }
   
