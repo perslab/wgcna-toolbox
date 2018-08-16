@@ -6,12 +6,12 @@
 
 # e.g.
 # export R_MAX_NUM_DLLS=999
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --checkPPI T --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --checkPPI T --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_3/  --data_prefix campbell_3 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 7  --autosave T --fuzzyModMembership kME --checkPPI T  --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_5 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10 --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 5  --autosave T --fuzzyModMembership kME --checkPPI T
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.3_dev.R  --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "c('res.0.6')" --data_prefix EP-UPF-4 --data_organism hsapiens  --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --min.cells 10 --genes_use PCA  --pca_genes all  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 10  --autosave T --fuzzyModMembership kIM --checkPPI F
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_3/  --data_prefix campbell_3 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 7  --autosave T --fuzzyModMembership kME --PPI_filter T  --resume checkpoint_2
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_5 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10 --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 5  --autosave T --fuzzyModMembership kME --PPI_filter T
+# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.3_dev.R  --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "c('res.0.6')" --data_prefix EP-UPF-4 --data_organism hsapiens  --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --min.cells 10 --genes_use PCA  --pca_genes all  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 10  --autosave T --fuzzyModMembership kIM --PPI_filter F
 
 ######################################################################
 ################# TEST PARAMS FOR MANUAL RUNS ########################
@@ -22,13 +22,14 @@ TODO = T # controls flows around broken / unfinished code
 if (FALSE) { 
   seurat_path = "/projects/jonatan/tmp-holst-hsl/RObjects/campbell_n05_to_n10.RData"
   project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-campbell-n05_to_n10-10/"
-  data_prefix = "campbell-n10_to_n10-10"
+  data_prefix = "campbell-n10_to_n10"
+  run_prefix = "10"
   resume = NULL 
   autosave = T
   metadata_subset_col = NULL
   metadata_corr_col = NULL #c("nUMI", "nGene", "percent.mito", "percent.ribo")
   metadata_corr_filter_vals = "UPF"
-  use.imputed = F
+  use_imputed = F
   regress_out = c("nUMI", "percent.mito", "percent.ribo")
   min.cells = 5
   genes_use = "PCA"
@@ -61,8 +62,10 @@ option_list <- list(
               help = "Provide full path to Rdata input file with Seurat object with lognormalized expression data in the @data slot "),
   make_option("--project_dir", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir. [default %default]"),
-  make_option("--data_prefix", type="character", default=paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_rWGCNA_run"),
-              help = "Dataset prefix for output files"),
+  make_option("--data_prefix", type="character", default="sc",
+              help = "Dataset prefix for the project, [default %default]"),
+  make_option("--run_prefix", type="character", default="run1",
+              help = "Run prefix to distinguish runs e.g. with different parameters, [default %default]"),
   make_option("--autosave", type="logical", default=T,
               help = "Autosave session images at regular intervals to resume later? [default %default]."),
   make_option("--resume", type="character", default=NULL,
@@ -75,7 +78,7 @@ option_list <- list(
               help = "Specify seurat_obj@meta.data$... column(s) for which to compute correlations with gene modules. Takes a character with a vector of seurat_obj@meta.data column names e.g. 'nUMI' or 'c('nUMI', 'Age')'. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution.  [default %default]"),
   make_option("--metadata_corr_filter_vals", type="character", default='NULL',
               help = "Specify one or more values within the seurat@meta.data$... column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of meta.data column names e.g. 'Female' or 'c('fasted', 'HFD')'. Case-insensitive [default %default]."),
-  make_option("--use.imputed", type="logical", default=F,
+  make_option("--use_imputed", type="logical", default=F,
               help="Use data in the obj@imputed slot for the computations to replace the @data slot? If the @imputed slot is empty, will revert to [default %default]"),
   make_option("--regress_out", type="character", default='c("nUMI", "percent.mito", "percent.ribo")',
               help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') (not recommended, however) [default %default]"),
@@ -97,10 +100,10 @@ option_list <- list(
               help = "Minimum genes needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector of integer values to try 'c(15,20,25)' [default %default]"),
   make_option("--deepSplit", type="character", default="3L",
               help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector of integer values between 0-4 to try, e.g. 'c(1,2,3)', [default %default]"),
-  make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
-              help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
   make_option("--pamStage", type="character", default="c(TRUE)",
               help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
+  make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
+              help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
   make_option("--kM_reassign", type="logical", default="TRUE",
               help = "Following hierarchical clustering, do additional k-means clustering? [default %default]"),
   make_option("--jackstrawnReplicate", type="integer", default=500L,
@@ -111,7 +114,7 @@ option_list <- list(
               help="Which 'fuzzy' measure of gene membership in a module should be used? Options are 'kME' (correlation between gene expression and module PC1 expression) and 'kIM' (sum of edges between a gene and genes in the module, normalized by number of genes in the module; i.e. average distance in the TOM between a gene and genes in the module [default %default]."),  
   make_option("--scale_MEs_by_kIMs", type="logical", default="F",
               help="If fuzzyModMembership == kME, should the gene weight in eigengene computation be scaled by kIM? [default %default]"),  
-  make_option("--checkPPI", type="logical", default=T,
+  make_option("--PPI_filter", type="logical", default=T,
               help="Valiate gene modules using Protein-Protein Interactions?"),
   make_option("--data_organism", type="character", default="mmusculus",
               help = "'hsapiens' or 'mmusculus', [default %default]"),
@@ -153,6 +156,8 @@ project_dir <- opt$project_dir
 
 data_prefix <- opt$data_prefix 
 
+run_prefix <- opt$run_prefix
+
 autosave <- opt$autosave
 
 resume <- opt$resume
@@ -161,13 +166,16 @@ quit_session <- opt$quit_session
 
 metadata_subset_col <- opt$metadata_subset_col
 
-metadata_corr_col <- eval(parse(text=opt$metadata_corr_col))
+metadata_corr_col <- opt$metadata_corr_col
+if (!is.null(metadata_corr_col)) metadata_corr_col <- eval(parse(text=metadata_corr_col))
 
-metadata_corr_filter_vals <- eval(parse(text=opt$metadata_corr_filter_vals))
+metadata_corr_filter_vals <- opt$metadata_corr_filter_vals
+if (!is.null(metadata_corr_filter_vals)) metadata_corr_filter_vals <- eval(parse(text=metadata_corr_filter_vals))
 
-use.imputed <- opt$use.imputed
+use_imputed <- opt$use_imputed
 
-regress_out <- eval(parse(text=opt$regress_out))
+regress_out <- opt$regress_out
+if (!is.null(regress_out)) regress_out <- eval(parse(text=regress_out))
 
 min.cells <- opt$min.cells
 
@@ -201,11 +209,12 @@ fuzzyModMembership <- opt$fuzzyModMembership
 
 scale_MEs_by_kIMs <- opt$scale_MEs_by_kIMs
    
-checkPPI <- opt$checkPPI
+PPI_filter <- opt$PPI_filter
 
 magma_gwas_dir <- opt$magma_gwas_dir 
 
-gwas_filter_traits <- eval(parse(text=opt$gwas_filter_traits))
+gwas_filter_traits <- opt$gwas_filter_traits
+if (!is.null(gwas_filter_traits)) gwas_filter_traits <- eval(parse(text=gwas_filter_traits))
 
 data_organism <- opt$data_organism
 
@@ -269,7 +278,8 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
 }
 current.dir = paste0(LocationOfThisScript(), "/")
 
-flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+#flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+t_start <- as.character(Sys.time())
 
 # Load parameter values and utility functions
 source(file = paste0(current.dir, "rwgcna_params.R"))
@@ -366,21 +376,8 @@ if (is.null(resume)) {
   ######################################################################
   
   # Use imputed data if user opted to do so 
-  if (is.null(seurat_obj@imputed) | any(dim(seurat_obj@imputed)) == FALSE) use.imputed <- F
-  if (use.imputed==T) seurat_obj@raw.data <- seurat_obj@imputed
-  
-  ######################################################################
-  ################### COMPUTE PERCENT MITO, PERCENT RIBO ###############
-  ######################################################################
-  
-  
-  # Identify mitochrondrial and ribosomal genes
-  mito.genes <- grep(pattern = "^mt-", x = rownames(x = seurat_obj@raw.data), value = TRUE, ignore.case=T)
-  ribo.genes <- grep(pattern = "^Rp[sl][[:digit:]]", x = rownames(x = seurat_obj@raw.data), value = TRUE)
-  percent.mito <- Matrix::colSums(seurat_obj@raw.data[mito.genes, ])/Matrix::colSums(seurat_obj@raw.data)
-  percent.ribo <- Matrix::colSums(seurat_obj@raw.data[ribo.genes, ])/Matrix::colSums(seurat_obj@raw.data)
-  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.mito, col.name = "percent.mito")
-  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.ribo, col.name = "percent.ribo")
+  if (is.null(seurat_obj@imputed) | any(dim(seurat_obj@imputed)) == FALSE) use_imputed <- F
+  if (use_imputed==T) seurat_obj@raw.data <- seurat_obj@imputed
   
   ######################################################################
   #################### FILTER OUT GENES IN genes_remove_dir ############
@@ -438,7 +435,7 @@ if (is.null(resume)) {
   ######################################################################
   ################# IF SYMBOL, REMAP TO ENSEMBL ID #####################
   ######################################################################
-  
+
   if (!any(grepl("ENSG|ENSMUSG",rownames(seurat_obj@raw.data)))) {
     
     if (is.null(data_organism)) {
@@ -457,7 +454,7 @@ if (is.null(resume)) {
         mapping$ensembl[ which(is.na(mapping$ensembl)) ] = mapping_synonyms$ensembl[ match( toupper(mapping$symbol[which(is.na(mapping$ensembl)) ]) , toupper(mapping_synonyms$symbol)) ]
         
         # save mapping file for reference and later use
-        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), quote = F, row.names = F)
+        write.csv(mapping, file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), quote = F, row.names = F)
         
       } else if (data_organism == "hsapiens") {
         
@@ -466,13 +463,13 @@ if (is.null(resume)) {
         mapping = data.frame(symbol=row.names(seurat_obj@raw.data), ensembl = mapping_direct$ensembl_gene_id[ match(toupper(row.names(seurat_obj@raw.data)), toupper(mapping_direct$hgnc_symbol)) ])
         
         # save mapping file for reference and later use
-        write.csv(mapping, file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), quote = F, row.names = F)
+        write.csv(mapping, file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), quote = F, row.names = F)
         
       }
       
       # Make a log of unmapped genes 
-      log_not_mapped_filepath = sprintf("%s%s_not_mapped_to_ensembl_%s", log_dir, data_prefix, flag_date,".tab")
-      log_duplicate_filepath = sprintf("%s%s_duplicate_ensembl_id_genenames_%s", log_dir, data_prefix, flag_date,".tab")
+      log_not_mapped_filepath = sprintf("%s%s_%s_not_mapped_to_ensembl.tab", log_dir, data_prefix, run_prefix)
+      log_duplicate_filepath = sprintf("%s%s_%s_duplicate_ensembl_id_genenames.tab", log_dir, data_prefix, run_prefix)
       
       df_not_mapped = mapping[is.na(mapping$ensembl),]
       write.table(df_not_mapped,log_not_mapped_filepath,quote=F,sep="\t",row.names=F)
@@ -490,18 +487,64 @@ if (is.null(resume)) {
       #rownames(seurat_obj@data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       rownames(seurat_obj@raw.data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       
-    }
-  } else if (any(grepl("ENSG", rownames(seurat_obj@raw.data)))) {
+    } 
     
-    message("Homo sapiens ensembl id gene names detected")
-    data_organism <- "hsapiens"
+  } else if (any(grepl("ENS", rownames(seurat_obj@raw.data)))) {
+    # Still do the mapping from ensembl to symbol to allows us to easily find mitochrondrial and ribosomomal genes to regress out confounding variance
+      if (any(grepl("ENSG", rownames(seurat_obj@raw.data)))) {
+        
+        message("Homo sapiens ensembl id gene names detected")
+        data_organism <- "hsapiens"
+        
+        mapping_direct = read.csv(gzfile(mapping_hs_filepath),sep="\t",header=T, stringsAsFactors = F) # columns: ensembl_gene_id, entrezgene, hgnc_symbol
+        
+        # Step 1: direct mapping
+        mapping = data.frame(ensembl=row.names(seurat_obj@raw.data), symbol = mapping_direct$hgnc_symbol[match(toupper(row.names(seurat_obj@raw.data)), toupper(mapping_direct$ensembl_gene_id)) ])
+        
+        # save mapping file for reference and later use
+        write.csv(mapping, file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), quote = F, row.names = F)
+        
+      } else if (any(grepl("ENSMUSG", rownames(seurat_obj@raw.data)))) {
+        
+        message("mus musculus ensembl id gene names detected")
+        data_organism <- "mmusculus"
+        
+        # Step 1: direct mapping
+        mapping_direct = read.table(gzfile(mapping_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
+        mapping = data.frame(ensembl=row.names(seurat_obj@raw.data), symbol = mapping_direct$gene_name_optimal[ match(toupper(row.names(seurat_obj@raw.data)), toupper(mapping_direct$ensembl_gene_id)) ])
+        
+        # Step 2: map remaining using synonyms
+        mapping_synonyms = read.delim(gzfile(mapping_mm_synonyms_filepath),sep="\t",header=T, stringsAsFactors = F)
+        mapping$symbol[ which(is.na(mapping$symbol)) ] = mapping_synonyms$symbol[ match( toupper(mapping$ensembl[which(is.na(mapping$symbol)) ]) , toupper(mapping_synonyms$ensembl)) ]
+        
+        # save mapping file for reference and later use
+        write.csv(mapping, file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), quote = F, row.names = F)
+      }
     
-  } else if (any(grepl("ENSMUSG", rownames(seurat_obj@raw.data)))) {
+    # Make a log of unmapped genes 
+    log_not_mapped_filepath = sprintf("%s%s_%s_not_mapped_to_ensembl.tab", log_dir, data_prefix, run_prefix)
+    log_duplicate_filepath = sprintf("%s%s_%s_duplicate_ensembl_id_genenames.tab", log_dir, data_prefix, run_prefix)
     
-    message("mus musculus ensembl id gene names detected")
-    data_organism <- "mmusculus"
+    df_not_mapped = mapping[is.na(mapping$symbol),]
+    write.table(df_not_mapped,log_not_mapped_filepath,quote=F,sep="\t",row.names=F)
+    
+    # Make a log of duplicate genes
+    idx_duplicate_genes <- duplicated(mapping$symbol)
+    df_duplicate <- mapping[idx_duplicate_genes,]
+    write.table(df_duplicate,log_duplicate_filepath,quote=F,sep="\t",row.names=F)
     
   }
+  
+  ######################################################################
+  ################### COMPUTE PERCENT MITO, PERCENT RIBO ###############
+  ######################################################################
+  
+  idx_mito.genes <- grepl(pattern = "^mt-", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T)
+  idx_ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T) 
+  percent.mito <- Matrix::colSums(seurat_obj@raw.data[idx_mito.genes, ])/Matrix::colSums(seurat_obj@raw.data)
+  percent.ribo <- Matrix::colSums(seurat_obj@raw.data[idx_ribo.genes, ])/Matrix::colSums(seurat_obj@raw.data)
+  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.mito, col.name = "percent.mito")
+  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.ribo, col.name = "percent.ribo")
   
   ######################################################################
   ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
@@ -524,9 +567,9 @@ if (is.null(resume)) {
   ident <- seurat_obj@ident
   
   # Save scale and regressed whole expression matrix with ensembl rownames for later use
-  save(scale_data, file = sprintf("%stmp_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix))
-  save(ident, file = sprintf("%stmp_%s_ident_%s.RData", scratch_dir, data_prefix, flag_date))
-  
+  save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
+  save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
+  rm(scale_data)  
   ######################################################################
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
   ######################################################################
@@ -621,7 +664,7 @@ if (is.null(resume)) {
       subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
-                                                             use.imputed = F, # if use.imputed=T the @imputed slot has been copied to @data
+                                                             use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
                                                              weight.by.var = F,
                                                              do.print = F,
                                                              seed.use = randomSeed,
@@ -632,7 +675,7 @@ if (is.null(resume)) {
       subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
-                                                             use.imputed = F, # if use.imputed=T the @imputed slot has been copied to @data
+                                                             use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
                                                              weight.by.var = F,
                                                              do.print = F,
                                                              seed.use = randomSeed,
@@ -660,78 +703,29 @@ if (is.null(resume)) {
   } else if (genes_use == "var.genes") {
     list_datExpr <- lapply(subsets, function(x) seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rownames(x@scale.data) %in% x@var.genes))
   } 
-  
-  ######################################################################
-  ##################### SAVE PARAMETERS TO FILE ########################
-  ######################################################################
-  
-  diagnostic_stats <- data.frame(subset = sNames, 
-                                 n_cells = sapply(subsets, function(x) ncol(x@data), simplify = T),
-                                 n_genes = sapply(list_datExpr, function(x) ncol(x), simplify=T))
-  
-  
-  userParams <- cbind(list("seurat_path" = seurat_path,
-                           "project_dir" = project_dir,
-                           "data_prefix" = data_prefix,
-                           "autosave" = autosave,
-                           "resume" = resume,
-                           "quit_session" = quit_session,
-                           "metadata_subset_col" = metadata_subset_col,
-                           "metadata_corr_col" = metadata_corr_col,
-                           "use.imputed" = use.imputed,
-                           "regress_out" = regress_out,
-                           "min.cells" = min.cells,
-                           "genes_remove_dir" = genes_remove_dir,
-                           "genes_use" = genes_use,
-                           "pca_genes" = pca_genes,
-                           "corFnc" = corFnc,
-                           "networkType" = networkType,
-                           "hclustMethod" = hclustMethod,
-                           "minClusterSize" = minClusterSize,
-                           "deepSplit" = deepSplit,
-                           "pamStage" = pamStage,
-                           "kM_reassign" = kM_reassign,
-                           "moduleMergeCutHeight" = moduleMergeCutHeight,
-                           "fuzzyModMembership" = fuzzyModMembership,
-                           "scale_MEs_by_kIMs" = scale_MEs_by_kIMs,
-                           "jackstrawnReplicate" = jackstrawnReplicate,
-                           "TOMnReplicate" = TOMnReplicate,
-                           "checkPPI" = checkPPI,
-                           "data_organism" = data_organism,
-                           "magma_gwas_dir" = magma_gwas_dir,
-                           "n_cores" = n_cores))
-  
-  builtInParams <- cbind(list("minCoreKME" = minCoreKME,
-                              "minKMEtoStay" = minKMEtoStay,
-                              "consensusQuantile" = consensusQuantile,
-                              "fraction" = fraction,
-                              "do.center" = do.center,
-                              "replace" = replace,
-                              "impute" = impute,
-                              "nPC_seurat" = nPC_seurat,
-                              "TOMType" = TOMType,
-                              "pvalThreshold" = pvalThreshold))
-  
-  # Save run params to file
-  write.csv(userParams, file=sprintf("%s%s_INFO_user_parameters_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names = T)
-  write.csv(builtInParams, file=sprintf("%s%s_INFO_built_in_parameters_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names = T)
-  
-  
+
+  # Save stats for outputting at the end
+  n_cells_subsets = sapply(list_datExpr, function(x) nrow(x), simplify = T)
+  n_genes_subsets = sapply(list_datExpr, function(x) ncol(x), simplify=T)
   
   # Clear up
-  rm(subsets, userParams, builtInParams, seurat_obj)
+  rm(subsets,  seurat_obj) #, builtInParams)
   invisible(gc())
   
+  ######################################################################
+  ########################### CHECKPOINT ###############################
+  ######################################################################
+
   # Save or load session image 
   resume = "checkpoint_1"
-  if (autosave==T) save.image(file=sprintf("%s%s_checkpoint_1_image.RData", scratch_dir, data_prefix))
+  if (autosave==T) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_1") quit(save="no")
   
 } else if (!is.null(resume)) {
   
   if (resume == "checkpoint_1") {
     
-    tryCatch({load((file=sprintf("%s%s_checkpoint_1_image.RData", scratch_dir, data_prefix)))},
+    tryCatch({load((file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix)))},
              error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
     
     source(file = paste0(current.dir, "rwgcna_params.R"))
@@ -775,64 +769,66 @@ if (resume == "checkpoint_1") {
                     type = "FORK", 
                     outfile = paste0(log_dir, "log_compute_softPowers.txt"))
   
-  list_softPower <- clusterMap(cl, function(datExpr,
-                                            subsetName) { 
-    
-    powers = c(1:30)
-    sft = pickSoftThreshold(data=datExpr,
-                            powerVector = powers,
-                            blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
-                            corFnc = corFnc,
-                            corOptions =  corOptions,
-                            networkType = networkType,
-                            verbose = verbose)
-    pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-    #par(mfrow = c(1,2));
-    cex1 = 0.9;
-    # Scale-free topology fit index as a function of the soft-thresholding power
-    plot(sft$fitIndices[,1],
-         -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-         xlab="Soft Threshold (power)",
-         ylab="Scale Free Topology Model Fit,signed R^2",
-         type="n",
-         main = paste("Scale independence"));
-    text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-         labels=powers,cex=cex1,col="red");
-    # this line corresponds to using an R^2 cut-off of 0.9
-    abline(h=0.90,col="red")
-    dev.off()
-    # Mean connectivity as a function of the soft-thresholding power
-    pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-    plot(sft$fitIndices[,1], sft$fitIndices[,5],
-         xlab="Soft Threshold (power)",
-         ylab="Mean Connectivity",
-         type="n",
-         main = paste("Mean connectivity"))
-    text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
-    dev.off()
-    
-    # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
-    # take smallest softPower; else take best fitting one
-    
-    fitIndices <- as.data.frame(sft$fitIndices)
-    fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T)) -> fitIndices_filter 
-    if (sum(fitIndices_filter$SFT.R.sq >= 0.9) > 1) {
-      softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
-    } else {
-      (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,] -> softPower 
-    }
-    return(softPower)
-  }, 
-  datExpr = list_datExpr, 
-  subsetName = sNames, 
-  SIMPLIFY=F,
-  .scheduling = c("dynamic"))
-  
+  list_sft <- clusterMap(cl, function(datExpr,
+                                            subsetName) {powers = c(1:30)
+                                                sft = pickSoftThreshold(data=datExpr,
+                                                                        powerVector = powers,
+                                                                        blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
+                                                                        corFnc = corFnc,
+                                                                        corOptions =  corOptions,
+                                                                        networkType = networkType,
+                                                                        verbose = verbose)
+                                                pdf(sprintf("%s%s_%s_%s_pickSoftThresholdSFTFit.pdf", plots_dir, data_prefix, run_prefix, subsetName),width=10,height=5)
+                                                #par(mfrow = c(1,2));
+                                                cex1 = 0.9;
+                                                # Scale-free topology fit index as a function of the soft-thresholding power
+                                                plot(sft$fitIndices[,1],
+                                                     -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+                                                     xlab="Soft Threshold (power)",
+                                                     ylab="Scale Free Topology Model Fit,signed R^2",
+                                                     type="n",
+                                                     main = paste("Scale independence"));
+                                                text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+                                                     labels=powers,cex=cex1,col="red");
+                                                # this line corresponds to using an R^2 cut-off of 0.9
+                                                abline(h=0.90,col="red")
+                                                dev.off()
+                                                # Mean connectivity as a function of the soft-thresholding power
+                                                pdf(sprintf("%s%s_%s_%s_pickSoftThresholdMeanCon.pdf", plots_dir, data_prefix, run_prefix, subsetName),width=10,height=5)
+                                                plot(sft$fitIndices[,1], sft$fitIndices[,5],
+                                                     xlab="Soft Threshold (power)",
+                                                     ylab="Mean Connectivity",
+                                                     type="n",
+                                                     main = paste("Mean connectivity"))
+                                                text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+                                                dev.off()
+                                                
+                                                # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
+                                                # take smallest softPower; else take best fitting one
+                                                
+                                                fitIndices <- as.data.frame(sft$fitIndices)
+                                                fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T)) -> fitIndices_filter 
+                                                
+                                                if (sum(fitIndices_filter$SFT.R.sq >= 0.93) > 1) {
+                                                  fitIndices_filter_2 <- fitIndices_filter[fitIndices_filter$SFT.R.sq>=0.93,] 
+                                                  list_sft <- fitIndices_filter_2[which.min(fitIndices_filter_2$Power), c(1,2,6)]
+                                                  #softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
+                                                } else {
+                                                  #(fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,] -> list_sft
+                                                  (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)))[1,c(1,2,6)] -> list_sft
+                                                }
+                                                return(list_sft)}, 
+                    datExpr = list_datExpr, 
+                    subsetName = sNames, 
+                    SIMPLIFY=F,
+                    .scheduling = c("dynamic"))
+                    
   stopCluster(cl)
+
+  names(list_sft) <- sNames
   
-  ###
+  # Clear up 
   invisible(gc()); invisible(R.utils::gcDLLs())
-  names(list_softPower) <- sNames
   
   # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
   setwd(scratch_dir)
@@ -884,11 +880,11 @@ if (resume == "checkpoint_1") {
                                                                 pearsonFallback = pearsonFallback,
                                                                 cosineCorrelation = cosineCorrelation,
                                                                 replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                                                power = list_softPower[[y]],
+                                                                power = list_sft[[y]]$Power,
                                                                 networkType = networkType,
                                                                 TOMDenom = TOMDenom,
                                                                 saveIndividualTOMs = saveIndividualTOMs,
-                                                                individualTOMFileNames = paste0(data_prefix, "_", y, "_individualTOM-Set%s-Block%b.RData"),
+                                                                individualTOMFileNames = paste0(data_prefix, "_", run_prefix, "_", y, "_individualTOM-Set%s-Block%b.RData"),
                                                                 networkCalibration = networkCalibration,
                                                                 sampleForCalibration = sampleForCalibration,
                                                                 sampleForCalibrationFactor = sampleForCalibrationFactor,
@@ -896,7 +892,7 @@ if (resume == "checkpoint_1") {
                                                                 consensusQuantile = consensusQuantile,
                                                                 useMean = useMean,
                                                                 saveConsensusTOMs = saveConsensusTOMs,
-                                                                consensusTOMFilePattern = paste0(data_prefix,"_",y,"_consensusTOM-block.%b.RData"),
+                                                                consensusTOMFilePattern = paste0(data_prefix,"_", run_prefix, "_", y,"_consensusTOM-block.%b.RData"),
                                                                 returnTOMs = F,
                                                                 useDiskCache = T,
                                                                 cacheDir = scratch_dir,
@@ -927,10 +923,22 @@ if (resume == "checkpoint_1") {
     invisible(gc()); invisible(R.utils::gcDLLs())
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_TOM_for_par.txt"))
-    list_goodGenesTOM_idx <- clusterMap(cl, function(x,y) TOM_for_par(datExpr=x, 
-                                                                      subsetName=y, 
-                                                                      softPower=list_softPower[[y]],
-                                                                      data_prefix = data_prefix), 
+    list_goodGenesTOM_idx <- clusterMap(cl, function(x,y) {adjacency = adjacency(datExpr=x, 
+                                                                                  type=type, 
+                                                                                  power = list_sft[[y]]$Power, 
+                                                                                  corFnc = corFnc, 
+                                                                                  corOptions = corOptions)
+                                                            
+                                                           consTomDS = TOMsimilarity(adjMat=adjacency,
+                                                                                      TOMType=TOMType,
+                                                                                      TOMDenom=TOMDenom,
+                                                                                      verbose=verbose,
+                                                                                      indent = indent)
+                                                            
+                                                            save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, y)) # Save TOM the way consensusTOM would have done
+                                                            goodGenesTOM_idx <- rep("TRUE", ncol(x))
+                                                            return(goodGenesTOM_idx)
+                                                          },
                                         x=list_datExpr, 
                                         y=sNames, 
                                         SIMPLIFY=F,
@@ -950,14 +958,13 @@ if (resume == "checkpoint_1") {
   ######################################################################
   
   resume="checkpoint_2"
-  
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_2_image.RData", scratch_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_2") quit(save="no")
   
 } else if (!is.null(resume)) {
   if (resume == "checkpoint_2") {
     
-    tryCatch({load((file=sprintf("%s%s_checkpoint_2_image.RData", scratch_dir, data_prefix)))},
+    tryCatch({load((file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix)))},
              error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
     
     source(file = paste0(current.dir, "rwgcna_params.R"))
@@ -983,6 +990,7 @@ if (resume == "checkpoint_2") {
   suppressPackageStartupMessages(library(reshape))
   suppressPackageStartupMessages(library(reshape2))
   suppressPackageStartupMessages(library(WGCNA)) 
+  
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
   ######################################################################
@@ -995,7 +1003,11 @@ if (resume == "checkpoint_2") {
   invisible(gc())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_parHclust.txt"))
   # Convert TOM to distance matrix
-  list_dissTOM <- parLapplyLB(cl, sNames, function(x) dissTOM_for_par(subsetName = x,data_prefix = data_prefix))
+  list_dissTOM <- parLapplyLB(cl, sNames, function(x) {consTomDS <- load_obj(f = sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, x)) # Load the consensus TOM generated by blockwiseConsensusModules
+                                                       dissTOM <- 1-as.dist(consTomDS) # Convert proximity to distance
+                                                       rm(consTomDS)
+                                                       return(dissTOM)})
+  
   # Cluster
   list_geneTree <- parLapplyLB(cl, list_dissTOM, function(x) hclust(d=x, method=hclustMethod))
   stopCluster(cl)
@@ -1077,7 +1089,7 @@ if (resume == "checkpoint_2") {
     list_list_colors <- mapply(parGetColors, list_list_merged, list_datExpr_gg, SIMPLIFY=F)
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
-    list_list_MEs <- lapply(list_list_merged, function(y) lapply(y, function(x) x$MEs)) 
+    list_list_MEs <- lapply(list_list_merged, function(y) lapply(y, function(x) x$MEs$eigengenes)) 
     
     names(list_list_MEs) <- sNames
     
@@ -1194,7 +1206,7 @@ if (resume == "checkpoint_2") {
     list_list_reassign_log <- NULL
   }  
   ######################################################################
-  ################## extract primary kMEs / kIMs #######################
+  #################### EXTRACT PRIMARY kMEs / kIMs #####################
   ######################################################################
   
   # Extract the primary kMs - i.e. those of each gene w.r.t. the module to which it belongs
@@ -1276,7 +1288,7 @@ if (resume == "checkpoint_2") {
   # If for a subset all parameters gave only grey modules, take it out of the top level list.
   list_list_plot_label_ok <- mapply(function(x,y) x[y], x = list_list_plot_label, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_cutree_ok <- mapply(function(x,y) x[y], x = list_list_cutree, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
-  list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
+  #list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   list_list_colors_matched_ok <- mapply(function(x,y) x[y], x=list_list_colors_matched, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_reassign_log <- if (kM_reassign) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
@@ -1294,16 +1306,15 @@ if (resume == "checkpoint_2") {
   discarded <- setdiff(sNames, sNames_ok)
   if (length(discarded > 0)) {
     warning(paste0(discarded, " were dropped because the script didn't find any modules  "))
-    fileConn <- file(description = sprintf("%s%s_ERROR_report_%s.txt", log_dir,  data_prefix, flag_date), open = 'a')
+    fileConn <- file(description = sprintf("%s%s_%s_ERROR_report.txt", log_dir,  data_prefix, run_prefix), open = 'a')
     writeLines(paste0(discarded, " were dropped because the script didn't find any modules"), fileConn)
     close(fileConn)
   }
   
-  # Keep dissTOM for computing kIMs (just in case, also if fuzzyModMembership = kME)
-  save(list_dissTOM_ok, file=sprintf("%s%s_list_dissTOM_ok.RData", scratch_dir, data_prefix))
+  # Keep dissTOM 
+  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) save(list_dissTOM_ok, file=sprintf("%s%s_%s_list_dissTOM_ok.RData", scratch_dir, data_prefix, run_prefix))
   
-  rm(list_datExpr, list_list_cutree, list_list_MEs, list_datExpr_gg, list_geneTree, list_list_plot_label, list_dissTOM)#, list_idx_mapped_gg)
-  if (fuzzyModMembership != "kIM")  rm(list_dissTOM_ok) # remove from memory unless we need it soon to compute kIMs
+  rm(list_datExpr, list_list_cutree, list_list_MEs, list_datExpr_gg, list_geneTree, list_list_plot_label, list_dissTOM, list_dissTOM_ok)#, list_idx_mapped_gg)
   
   invisible(gc())
   
@@ -1313,13 +1324,12 @@ if (resume == "checkpoint_2") {
   
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
-  
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_3_image.RData", scratch_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_3") quit(save="no")
   
 } else if (resume == "checkpoint_3") {
   
-  tryCatch({load(file=sprintf("%s%s_checkpoint_3_image.RData", scratch_dir, data_prefix))},
+  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))},
            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
   
   # Load parameter values and utility functions anew (in case a bug was fixed)
@@ -1339,7 +1349,13 @@ if (resume == "checkpoint_3") {
   invisible(R.utils::gcDLLs())
   # Load packages
   suppressPackageStartupMessages(library(STRINGdb))
-  
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(Biobase))
+  suppressPackageStartupMessages(library(Matrix))
+  suppressPackageStartupMessages(library(parallel))
+  suppressPackageStartupMessages(library(reshape))
+  suppressPackageStartupMessages(library(reshape2))
+
   ######################################################################
   #################### CHECK MODULES FOR PPI ENRICHMENT ################
   ######################################################################
@@ -1372,10 +1388,7 @@ if (resume == "checkpoint_3") {
                                                                                          pkMs = y,
                                                                                          STRINGdb_species = STRINGdb_species,
                                                                                          PPI_pkM_threshold = c,
-                                                                                         pvalThreshold = pvalThreshold,
-                                                                                         project_dir = project_dir,
-                                                                                         data_prefix = data_prefix,
-                                                                                         flag_date = flag_date),
+                                                                                         pvalThreshold = pvalThreshold),
                                                          x = a,
                                                          y = b,
                                                          SIMPLIFY=F, .scheduling = c("dynamic")),
@@ -1384,7 +1397,7 @@ if (resume == "checkpoint_3") {
                               c = list_PPI_pkM_threshold,
                               SIMPLIFY=F)
   
-  list_list_colors_PPI <- if (checkPPI==T) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else if (checkPPI==F) list_list_colors_matched_ok
+  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
   
   list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
   list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))
@@ -1412,13 +1425,12 @@ if (resume == "checkpoint_3") {
   
   resume = "checkpoint_4"
   message("Reached checkpoint 4, saving session image")
-  
-  if (autosave==T) save.image( file=sprintf("%s%s_checkpoint_4_image.RData", scratch_dir, data_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_4") quit(save="no")
   
 } else if (resume == "checkpoint_4") {
   
-  tryCatch({load(file=sprintf("%s%s_checkpoint_4_image.RData", scratch_dir, data_prefix))},
+  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))},
            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
   
   # Load parameter values and utility functions anew (in case a bug was fixed)
@@ -1469,12 +1481,13 @@ if (resume == "checkpoint_4") {
   list_plot_label_final <- lapply(list_list_plot_label_ok_order, function(x) x[[1]])
   list_reassign_log <- if (kM_reassign) lapply(list_list_reassign_log_order, function(x) x[[1]]) else NULL
   list_colors_PPI <- lapply(list_list_colors_PPI_order, function(x) x[[1]])
-  list_colors <- lapply(list_list_colors_matched_ok_order, function(x) x[[1]])
+  list_colors_all <- lapply(list_list_colors_matched_ok_order, function(x) x[[1]])
   list_module_PPI <- lapply(list_list_module_PPI_order, function(x) x[[1]])
   list_module_PPI_signif <- lapply(list_list_module_PPI_signif_order, function(x) x[[1]])
   
+  
   # Name by cell clusters
-  names(list_plot_label_final) <-  names(list_colors_PPI) <- names(list_colors) <- names(list_module_PPI) <- names(list_module_PPI_signif) <- sNames_ok
+  names(list_plot_label_final)  <-  names(list_colors_PPI) <- names(list_colors_all) <- names(list_module_PPI) <- names(list_module_PPI_signif) <- sNames_ok
   if (kM_reassign) names(list_reassign_log) <-sNames_ok
     
   # Make list of list of final parameters
@@ -1497,18 +1510,10 @@ if (resume == "checkpoint_4") {
   list_module_PPI_signif_ok <- list_module_PPI_signif[logical_subsets_PPI_ok]
   list_datExpr_PPI <- list_datExpr_ok[logical_subsets_PPI_ok]
   
-  list_colors <- list_colors[logical_subsets_PPI_ok]
+  list_colors_all_PPI_ok <- list_colors_all[logical_subsets_PPI_ok]
   list_list_cutree_params_final_PPI <- list_list_cutree_params_final[logical_subsets_PPI_ok]
   list_plot_label_final_PPI  <- list_plot_label_final[logical_subsets_PPI_ok]
   list_geneTree_PPI <- list_geneTree_ok[logical_subsets_PPI_ok]
-  
-  # Get proportion of assigned genes
-  diagnostic_stats$prop_genes_assign[sNames %in% sNames_ok] <- sapply(list_colors, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
-  diagnostic_stats$prop_genes_assign_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
-  
-  # Count module (minus 1 for grey)
-  diagnostic_stats$n_modules[sNames %in% sNames_ok] <- sapply(list_colors, function(x) length(unique(as.character(x)))-1, simplify=T) 
-  diagnostic_stats$n_modules_PPI[sNames %in% sNames_PPI] <- sapply(list_colors_PPI, function(x) length(unique(as.character(x)))-1, simplify=T) 
   
   ######################################################################
   ##################### MAKE MODULE COLORS UNIQUE ######################
@@ -1547,8 +1552,6 @@ if (resume == "checkpoint_4") {
   names(list_mods_uniq) <- names(list_colors_PPI)
   
   # Update color vectors
-  # TODO: review
-  
   list_colors_PPI_uniq <- mapply(function(x,y,z) z[match(x, y)],
                                  x = list_colors_PPI, 
                                  y = list_mods, 
@@ -1556,7 +1559,7 @@ if (resume == "checkpoint_4") {
   
   # Update also the old module assignment colors, but only change those that were validated by PPI (and therefore among those replaced with unique colors)
   list_colors_uniq <-  mapply(function(x,y,z) ifelse(x==y, yes=z, no = x),
-                              x = list_colors, 
+                              x = list_colors_all_PPI_ok, 
                               y = list_colors_PPI, 
                               z = list_colors_PPI_uniq,
                               SIMPLIFY = F)
@@ -1572,23 +1575,17 @@ if (resume == "checkpoint_4") {
   ######################################################################
   ########## RECOMPUTE MEs, kMs, pkMs AFTER PPI FILTER #########
   ######################################################################
-  # in:
-  #   list_colors_PPI_ok
-  #   list_datExpr_PPI_ok
-  #
-  # out:
-  #   list_Ms_PPI
-  #   list_kMs_PPI
-  
   # TODO: Surely we can just remove the grey ones?
+  # Yes but then we would have to remap colours, which would be time consuming
   
-  if (checkPPI==T) message("Computing kMs after filtering modules for significant Protein-Protein Interactions")
+  message("Computing kMs after making colors unique and computing Protein-Protein Interactions")
   
   if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) {
-  list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
-  list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
-  names(list_dissTOM_ok) <- sNames_ok
-  list_dissTOM_PPI <- list_dissTOM_ok[sNames_ok %in% sNames_PPI]
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM_ok"), full.names = T)
+    list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+    names(list_dissTOM_ok) <- sNames_ok
+    list_dissTOM_PPI <- list_dissTOM_ok[sNames_ok %in% sNames_PPI]
+    rm(list_dissTOM_ok)
   }
   
   if (fuzzyModMembership == "kME") {
@@ -1600,21 +1597,31 @@ if (resume == "checkpoint_4") {
                                                                   colors=y,
                                                                   excludeGrey=T,
                                                                   scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL), 
+                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL)$eigengenes, 
                                x = list_datExpr_PPI, 
                                y = list_colors_PPI_uniq,
                                z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
                                SIMPLIFY = F,
                                .scheduling = c("dynamic"))
     
-    list_kMs_PPI <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
-                                                           y$eigengenes,
+    list_kMs_PPI <- clusterMap(cl, function(x,y) signedKME(datExpr = as.matrix(x),
+                                                           datME = y,
                                                            outputColumnName = "",
                                                            corFnc = corFnc), 
                                x=list_datExpr_PPI, 
                                y=list_MEs_PPI,
                                SIMPLIFY=F,
                                .scheduling = c("dynamic"))
+    
+    # Remove 'ME' from eigengenes
+    list_MEs_PPI <- lapply(list_MEs_PPI, function(x) name_for_vec(to_be_named = x, given_names = gsub(pattern="ME" , replacement="", x = colnames(x), ignore.case = F), dimension = 2))
+      
+    # add cell row names
+    list_MEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = rownames(y), dimension=1), 
+                           x = list_MEs_PPI,
+                           y = list_datExpr_PPI,
+                           SIMPLIFY=F)
+    
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
     
@@ -1636,12 +1643,12 @@ if (resume == "checkpoint_4") {
     
     names(list_kMs_PPI) <- sNames_PPI
     
-    rm(list_dissTOM_PPI, list_dissTOM_ok)
-    
     list_MEs_PPI <- NULL
     
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
+  
+  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs==T ) rm(list_dissTOM_PPI)
   
   ##########################################################################
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
@@ -1689,6 +1696,13 @@ if (resume == "checkpoint_4") {
   # adjust p.vals for multiple testing
   p.adjust(variants_GSEA_df[['p.val']], method = "fdr") %>% -log10(.) -> variants_GSEA_df$q.val 
   
+  # find row idx of modules with rare variant / mendelian gene enrichment 
+  idx_row_variants <- variants_GSEA_df$q.val > -log10(pvalThreshold)
+  
+  # Find celltypes with rare variant / mendelian gene enrichment
+  n_modules_variants_enriched <- rep(NA, times = length(sNames))
+  n_modules_variants_enriched[sNames %in% sNames_PPI] <- sapply(sNames_PPI, function(x) sum(variants_GSEA_df$celltype[idx_row_variants]==x))
+  
   ##########################################################################
   ############# COMPUTE MAGMA COMMON VARIANTS GWAS ENRICHMENT ##############
   ##########################################################################
@@ -1697,7 +1711,7 @@ if (resume == "checkpoint_4") {
   
   if (!is.null(magma_gwas_dir)) {
     
-    message("Scoring enriched modules for enrichment with genes linked by GWAS to phenotypes of interest")
+    message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
     
     if (data_organism == "mmusculus") {
       invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1705,13 +1719,16 @@ if (resume == "checkpoint_4") {
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
       
       cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "mapMMtoHs_par.txt"))
-      list_kMs_hs <- parLapplyLB(cl, list_kMs_PPI, function(x) mapMMtoHs(modulekM = x, 
+      list_MMtoHsmapping <- parLapplyLB(cl, list_kMs_PPI, function(x) mapMMtoHs(modulekM = x, 
                                                                          log_dir = log_dir, 
-                                                                         flag_date = flag_date, 
                                                                          data_prefix = data_prefix, 
+                                                                         run_prefix = run_prefix,
                                                                          mapping_orthology = mapping_orthology))
       stopCluster(cl)
       invisible(gc()); invisible(R.utils::gcDLLs())
+      
+      list_kMs_hs <- lapply(list_MMtoHsmapping, function(x) x$kM) 
+      vec_MMtoHsmapping_prop.mapped <- sapply(list_MMtoHsmapping, function(x) x$prop.mapped, simplify = T)
       
       names(list_kMs_hs) <- names(list_kMs_PPI)
       
@@ -1806,26 +1823,22 @@ if (resume == "checkpoint_4") {
     magma.p.all <- NULL
     magma.emp.p.all <- NULL 
     magma.p.fdr.log <- NULL
-    
   }
   
   ##########################################################################
   ############## FILTER MODULES ON GENES WITH GWAS ENRICHMENT ##############
   ##########################################################################
   
-  # TODO: check if MAGMA needs correcting for gene length
+  # TODO: Try to replace current kME - MAGMA p-value correlation with an approach using fewer genes, e.g. only those actually assigned to the module
   # TODO: Need to add non-protein coding genes to MAGMA
   
   if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
     
-    # If filtering out non-gwas enriched modules, also retain modules with rare variant / mendelian gene enrichment 
-    idx_row_variants <- variants_GSEA_df$q.val[match(variants_GSEA_df$module, magma.p.fdr.log$module)] > -log10(pvalThreshold)
-    
     # Check if the gwas_filter_traits strings provided by the user can be found in the magma_gwas_dir files
     
-    if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(magma.p.fdr.log), ignore.case=T)), simplify = T) %>% all) {
+    if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(magma.p.fdr.log), ignore.case=T)), simplify = T) %>% any) {
       #if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(magma.p.fdr.log[,-grep("module", colnames(magma.p.fdr.log))]), ignore.case=T)), simplify = T) %>% all) {
-      
+ 
       # Identify columns to keep
       idx_col_keep <- sapply(gwas_filter_traits, function(x) grep(paste0(x,"|module|celltype"), colnames(magma.p.fdr.log), ignore.case=T), simplify = T) %>% Reduce(union,.)# %>% as.logical 
       
@@ -1839,7 +1852,7 @@ if (resume == "checkpoint_4") {
       idx_row_gwas <- apply(magma.p.fdr.log.sig[,-grep("module|celltype", colnames(magma.p.fdr.log.sig))], MARGIN = 1, max) > -log10(pvalThreshold)
       
       # rows enriched for gwas common variants and/or for rare variants
-      idx_row_keep <- idx_row_gwas | idx_row_variants
+      idx_row_keep <- idx_row_gwas | idx_row_variants[match(variants_GSEA_df$module, magma.p.fdr.log$module)]
       
       if (sum(idx_row_keep)>0) {
         
@@ -1848,22 +1861,25 @@ if (resume == "checkpoint_4") {
         
       } else if (sum(idx_row_keep)==0) { # Warn if there are no significant enrichments
         
-        gwas_filter_traits <- NULL
-        warning("No modules enriched for gwas_filter_traits or rare variants - skipping gwas significance filtering step")
+        gwas_filter_traits <- NULL # this will activate the logic in the next if statement
+        warning("No modules enriched for gwas_filter_traits or rare variants - skipping filtering step")
         
       }
     } else {
       
-      gwas_filter_traits <- NULL 
-      message("gwas_filter_traits not found in magma_gwas_dir files - skipping gwas significance filtering step")
+      gwas_filter_traits <- NULL # this will activate the logic in the next if statement 
+      message("None of gwas_filter_traits strings found in magma_gwas_dir files - skipping filtering step")
       
     }
   }  
   
   if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
-    magma.p.fdr.log.sig <- magma.p.fdr.log
-    magma.r.sig <- magma.r.all
+    magma.p.fdr.log.sig <- NULL # magma.p.fdr.log
+    magma.r.sig <- NULL #  magma.r.all
   }
+  
+  n_modules_gwas_enriched <- rep(NA, times = length(sNames))
+  n_modules_gwas_enriched[sNames %in% sNames_PPI] <- if (!is.null(magma_gwas_dir)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
   
   ######################################################################
   ####### FILTER MODULES ON GWAS SIGNIFICANCE ALSO IN OTHER FILES ######
@@ -1872,15 +1888,16 @@ if (resume == "checkpoint_4") {
   if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) { # NB: if no significant gwas correlations found in previous section, gwas_filter_traits <- NULL
     
     # get cell types with modules with gwas enrichment
-    sNames_gwas <- names(table(magma.p.fdr.log.sig$celltype))
+    sNames_gwas <- names(table(magma.p.fdr.log.sig$celltype)[table(magma.p.fdr.log.sig$celltype)>0])
     
     list_module_gwas <- vector(mode="list", length=length(sNames_gwas))
+    
     names(list_module_gwas) <- sNames_gwas
     
     # Get a list of vectors with modules per celltype
     for (name in sNames_gwas) {
       idx <- grep(pattern = name, x = magma.p.fdr.log.sig$celltype)
-      list_module_gwas[[name]] <- sapply(idx, function(j) magma.p.fdr.log.sig$module[j], simplify = T)
+      list_module_gwas[[name]] <- as.character(sapply(idx, function(j) magma.p.fdr.log.sig$module[j], simplify = T))
     }
     
     # Filter out cell types with no significant modules
@@ -1903,6 +1920,24 @@ if (resume == "checkpoint_4") {
     # remove any cell clusters without gwas enrichment: expression matrices
     list_datExpr_gwas <- list_datExpr_PPI[sNames_PPI %in% sNames_gwas, drop=F] 
     
+    # filter kMs
+    list_kMs_gwas <- list_kMs_PPI[sNames_PPI %in% sNames_gwas, drop = F]
+    list_kMs_gwas <- mapply(function(x,y) x[colnames(x) %in% y],
+                            x = list_kMs_gwas,
+                            y = list_module_gwas,
+                            SIMPLIFY=F)
+    # filter MEs
+    if (fuzzyModMembership=="kME") {
+      
+      list_MEs_gwas <- list_MEs_PPI[sNames_PPI %in% sNames_gwas, drop = F]
+      list_MEs_gwas <- mapply(function(x,y) x[colnames(x) %in% y],
+                              x = list_MEs_gwas,
+                              y = list_module_gwas,
+                              SIMPLIFY=F)
+    } else {
+      list_MEs_gwas <- NULL
+    }
+      
   } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
     
     sNames_gwas <- sNames_PPI
@@ -1910,94 +1945,13 @@ if (resume == "checkpoint_4") {
     names(list_module_gwas) <- sNames_gwas
     list_colors_gwas <- list_colors_PPI_uniq
     list_datExpr_gwas <- list_datExpr_PPI
-  }
-  
-  ######################################################################
-  #################### RECOMPUTE kMs AFTER MAGMA #######################
-  ######################################################################
-  
-  if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
-    
-    message("Re-computing ", fuzzyModMembership, "s after filtering modules for MAGMA enrichment")
-    
-    if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) {
-      list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
-      list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
-      names(list_dissTOM_ok) <- sNames_ok
-      list_dissTOM_gwas <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_gwas]
-      rm(list_dissTOM_ok)  
-    }
-    
-    if (fuzzyModMembership=="kME") {
-      
-      invisible(gc()); invisible(R.utils::gcDLLs())
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_moduleEigengenes_kMEs_magma.txt"))
-      
-      list_MEs_gwas <- clusterMap(cl, function(x,y,z) moduleEigengenes_kIM_scale(expr=as.data.frame(x,col.names=col.names(x)),
-                                                                     colors=y,
-                                                                     excludeGrey=T,
-                                                                     scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                     dissTOM= if (scale_MEs_by_kIMs) z else NULL), 
-                                  x = list_datExpr_gwas, 
-                                  y = list_colors_gwas, 
-                                  z = if (scale_MEs_by_kIMs) list_dissTOM_gwas else numeric(length(sNames_gwas)),
-                                  SIMPLIFY = F,
-                                  .scheduling = c("dynamic"))
-      
-      list_kMs_gwas <- clusterMap(cl, function(x,y) signedKME(as.matrix(x),
-                                                              y$eigengenes,
-                                                              outputColumnName = "",
-                                                              corFnc = corFnc), 
-                                  x=list_datExpr_gwas, 
-                                  y=list_MEs_gwas,
-                                  SIMPLIFY=F,
-                                  .scheduling = c("dynamic"))
-      
-      stopCluster(cl)
-      invisible(gc()); invisible(R.utils::gcDLLs())
-      
-    } else if (fuzzyModMembership=="kIM") {
-      
-
-      invisible(gc()); invisible(R.utils::gcDLLs())
-      
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, "log_kIMs_magma.txt"))
-      
-      list_kMs_gwas <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM = x, 
-                                                                     colors = y),
-                                  x = list_dissTOM_gwas, 
-                                  y = list_colors_gwas, 
-                                  SIMPLIFY=F,
-                                  .scheduling = c("dynamic"))
-      
-      stopCluster(cl)
-      invisible(gc()); invisible(R.utils::gcDLLs())
-      names(list_kMs_gwas) <- sNames_gwas
-      
-      rm(list_dissTOM_gwas)
-      
-      list_MEs_gwas <- NULL
-      
-      invisible(gc())
-      
-    }
-    
-    # Remove grey modules (if any and filter out runs with only grey (probably not possible but still))
-    list_MEs_gwas <- deleteGrey(list_MEs_gwas) %>% Filter(f=length)
-    list_kMs_gwas <- deleteGrey(list_kMs_gwas) %>% Filter(f=length)
-    
-  } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
-    
+    list_kMs_gwas <- list_kMs_PPI 
     list_MEs_gwas <- list_MEs_PPI
-    list_kMs_gwas <- list_kMs_PPI
-    
   }
-  
-  
-  ######################################################################
+ 
+  #####################################################################
   ####### COMPUTE MODULE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
-  
 
   if (!is.null(metadata_corr_col)) {
     
@@ -2005,12 +1959,12 @@ if (resume == "checkpoint_4") {
       
       message("Computing module-metadata correlation in each celltype")
       
-      list_metadata <- lapply(list_datExpr_gwas, function(x) metadata[match(rownames(x), rownames(metadata)), , drop=F]) # get list of cell * metadata
+      list_metadata <- lapply(list_datExpr_gwas, function(x) metadata[match(rownames(x), rownames(metadata)), , drop=F]) # get list of cell * metadata. The space between the commas is intentional!
       
       if (fuzzyModMembership=="kME") {
         # Compute correlation between metadata (columns) and eigengenes (columns). 
         list_mod_metadata_corr_rho <- mapply(function(x,y) cor(x=as.matrix(x), 
-                                                               y=as.matrix(y$eigengenes), 
+                                                               y=as.matrix(y), 
                                                                method = c("pearson"), 
                                                                use = 'pairwise.complete.obs'), 
                                              x=list_metadata, 
@@ -2117,13 +2071,13 @@ if (resume == "checkpoint_4") {
     if (!is.null(metadata)) {
       
       # Get a list of logical vectors indicating significant correlations
-      list_idx_module_sig <- lapply(list_mod_metadata_corr_fdr.log, function(x) apply(x, 2, function(y) any(y>-log10(pvalThreshold)))) # logical
-      
+      list_idx_module_meta_sig <- lapply(list_mod_metadata_corr_fdr.log, function(x) apply(x, 2, function(y) any(y>-log10(pvalThreshold)))) # logical
+
       # Only keep significantly correlated modules within each celltype
-      list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_sig, SIMPLIFY=F) 
+      list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_meta_sig, SIMPLIFY=F) 
       list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) 
       
-      sNames_meta <- sNames_gwas[sapply(list_idx_module_sig, any, simplify = T)]
+      sNames_meta <- sNames_gwas[sapply(list_idx_module_meta_sig, any, simplify = T)]
       
       # Filter out celltypes with no modules significantly correlated with metadata
       list_module_meta <- list_module_meta[sNames_gwas %in% sNames_meta]
@@ -2142,15 +2096,28 @@ if (resume == "checkpoint_4") {
       
       # Filter kM lists
       list_kMs_meta <- list_kMs_gwas[names(list_kMs_gwas) %in% sNames_meta, drop = F]
-      list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y],x=list_kMs_meta, y = list_module_meta) %>% Filter(f=length)
+      list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y, drop=F],x=list_kMs_meta, y = list_module_meta, SIMPLIFY=F) %>% Filter(f=length)
       
+      # Filter ME lists
+      if (fuzzyModMembership=="kME") {
+        list_MEs_meta <- list_MEs_gwas[names(list_MEs_gwas) %in% sNames_meta, drop = F]
+        list_MEs_meta <- mapply(function(x,y) x[,colnames(x) %in% y, drop=F],
+                                x = list_MEs_meta, 
+                                y = list_module_meta,
+                                SIMPLIFY=F) %>% Filter(f=length)
+      }  else {
+        list_MEs_meta <- list_MEs_gwas 
+      }
       
-    } else 
+    } else {
       
-      sNames_meta <- sNames_gwas
+    sNames_meta <- sNames_gwas
     list_colors_meta <- list_colors_gwas
     list_module_meta <- list_module_gwas
     list_kMs_meta <- list_kMs_gwas
+    list_MEs_meta <- list_MEs_gwas
+    
+    }
     
   } else if (is.null(metadata_corr_col) | is.null(metadata_corr_filter_vals)) {
     
@@ -2158,11 +2125,22 @@ if (resume == "checkpoint_4") {
     list_colors_meta <- list_colors_gwas
     list_module_meta <- list_module_gwas
     list_kMs_meta <- list_kMs_gwas 
-    # if (!is.null(magma_gwas_dir)) {
-    #   magma.p.fdr.log.sig_meta <- magma.p.fdr.log.sig
-    #   magma.r.sig_meta <- magma.r.sig
-    # }
+    list_MEs_meta <- list_MEs_gwas
   }
+  
+  
+  ######################################################################
+  ############################ COMPUTE PRIMARY KMs #####################
+  ######################################################################
+  
+  # Extract the primary kMs - i.e. those of each gene w.r.t. the module to which it belongs
+  
+  message(paste0("Computing primary "), fuzzyModMembership, "s")
+
+  list_pkMs_meta <- parPkMs(list_kMs=list_kMs_meta, 
+                       list_colors=list_colors_meta)
+
+  names(list_pkMs_meta) <- sNames_meta
   
   ######################################################################
   ##################### COMPUTE CELL x EIGENGENE MATRIX ################
@@ -2170,13 +2148,13 @@ if (resume == "checkpoint_4") {
   
   message("Computing all cell embeddings on all modules, across celltypes")
   
-  scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_scale_regr_data_ensembl"), full.names = T)
+  scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_scale_regr_data_ensembl"), full.names = T)
   load_obj(scale_data_path) %>% t -> datExpr 
   
   invisible(gc())
   
   if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) {
-    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_list_dissTOM_ok"), full.names = T)
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM_ok"), full.names = T)
     list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
     names(list_dissTOM_ok) <- sNames_ok
     list_dissTOM_meta <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_meta]
@@ -2209,7 +2187,8 @@ if (resume == "checkpoint_4") {
   
   rownames(cellModEmbed_mat) <- rownames(datExpr)
   
-  rm(list_dissTOM_meta)
+  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) rm(list_dissTOM_meta)
+  
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
@@ -2218,35 +2197,57 @@ if (resume == "checkpoint_4") {
   list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
   list_list_module_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F)
   
-  # order the gene lists by kME
-  tmp <- list_list_module_meta_genes
-  
+  # make a copy for pkMs
+  list_list_module_meta_pkMs <- list_list_module_meta_genes
+  # order the gene lists by pkM and get pkM value
+  #tmp <- tmp2 <- list_list_module_meta_genes
+
   # iterate over celltypes
   for (i in 1:length(list_list_module_meta_genes)) {
     # iterate over modules
     for (j in 1:length(list_list_module_meta_genes[[i]])) {
-      kMs <- list_kMs_meta[[i]] 
-      genes <- list_list_module_meta_genes[[i]][[j]]
-      tmp[[i]][[j]] <- genes[order(kMs[rownames(kMs) %in% genes, j], decreasing=T)]
+      pkMs = list_pkMs_meta[[i]]
+      mod_genes <- list_list_module_meta_genes[[i]][[j]]
+      mod_pkMs_sorted <- sort(pkMs[names(pkMs) %in% mod_genes, drop=F], decreasing=T)
+      #tmp[[i]][[j]] <- genes[order(pkMs[names(pkMs) %in% genes], decreasing=T)]
+      list_list_module_meta_genes[[i]][[j]] <- names(mod_pkMs_sorted) 
+      list_list_module_meta_pkMs[[i]][[j]] <- mod_pkMs_sorted
+      #tmp[[i]][[j]] <- names(pkMs_sorted) 
+      #tmp2[[i]][[j]] <- mod_pkMs_sorted
     }
   }
-  
-  list_list_module_meta_genes <- tmp
+
+  # list_list_module_meta_genes <- tmp
+  # list_list_module_meta_pkMs  <- tmp2
   
   # Prepare module genes dataframe
   cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
   module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
   ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
+  pkMs <- unlist(list_list_module_meta_pkMs, recursive = T, use.names = F)
   
-  # if we mapped from hgnc to ensembl, retrieve the hgnc symbols
-  if (file.exists(sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.RData", tables_dir, data_prefix, data_organism))) {
-    mapping <- read.csv(file=sprintf("%s%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, data_organism), stringsAsFactors = F)
-    list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
-    list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta)
-    hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
-    df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, row.names = NULL)
-  } else {
-    df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, row.names = NULL)
+  # retrieve gene hgcn symbols in mapping file
+  mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
+  list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+  list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F)
+  hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
+  df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
+  colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", "pkMs")
+
+
+  ######################################################################
+  ######################### CLEAR UP TOMS ##############################
+  ######################################################################
+  
+  for (subsetName in sNames) {
+    if (file.exists(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, subsetName))) {
+      file.remove(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, subsetName))
+    }
+    # Delete individual TOMs from disk
+    indivTOM_paths <- dir(path=scratch_dir, pattern=paste0(data_prefix, "_", run_prefix, "_", subsetName, "_individualTOM"), full.names = T)
+    for (indivTOM in indivTOM_paths) {
+      file.remove(indivTOM)
+    }
   }
   
   ##########################################################################
@@ -2255,26 +2256,25 @@ if (resume == "checkpoint_4") {
   
   ##################### SAVE LOGS OF REASSIGNED GENES #######################
   ###########################################################################
-  
-  
-  if (kM_reassign) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
-                   x = list_reassign_log, 
-                   y = names(list_reassign_log), 
-                   SIMPLIFY=F))
+  # Seems a bit unnecesssary..
+  # if (kM_reassign) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", run_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
+  #                  x = list_reassign_log, 
+  #                  y = names(list_reassign_log), 
+  #                  SIMPLIFY=F))
   
   ##################### WRITE OUT TABLES OF MODULE GENES ####################
   ###########################################################################
   
-  invisible(write.csv(df_meta_module_genes, file = sprintf("%s%s_cell_cluster_module_genes_%s.csv",tables_dir, data_prefix, flag_date), row.names = F, quote = F))
+  invisible(write.csv(df_meta_module_genes, file = sprintf("%s%s_%s_cell_cluster_module_genes.csv",tables_dir, data_prefix, run_prefix), row.names = F, quote = F))
   
-  # also output ordered gene lists
-  for (i in names(list_list_module_meta_genes)) {
-    for (j in names(list_list_module_meta_genes[[i]])) {
-      invisible(write.csv(list_list_module_meta_genes[[i]][[j]], file = sprintf("%s%s_%s_%s_module_genes.csv",tables_dir, data_prefix, i, j), row.names = F, quote = F))
-    }
-  }
+  # # also output ordered gene lists
+  # for (i in names(list_list_module_meta_genes)) {
+  #   for (j in names(list_list_module_meta_genes[[i]])) {
+  #     invisible(write.csv(list_list_module_meta_genes[[i]][[j]], file = sprintf("%s%s_%s_%s_%s_module_genes.csv",tables_dir, data_prefix, run_prefix, i, j), row.names = F, quote = F))
+  #   }
+  # }
   
-  save(list_list_module_meta_genes, file=sprintf("%s%s_list_list_module_genes.RData", RObjects_dir, data_prefix))
+  #save(list_list_module_meta_genes, file=sprintf("%s%s_%s_list_list_module_genes.RData", RObjects_dir, data_prefix, run_prefix))
   
   ####################### SAVE STRINGDB PPI OUTPUT #########################
   ##########################################################################
@@ -2295,23 +2295,23 @@ if (resume == "checkpoint_4") {
   
   # output as PPI
   
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_STRINGdb_output_all_%s.csv", tables_dir, data_prefix, y,  flag_date), row.names=T, quote = F), 
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                    x=list_module_PPI_ok, 
                    y= sNames_PPI, 
                    SIMPLIFY = F))
   
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_STRINGdb_output_signif_%s.csv", tables_dir, data_prefix, y,  flag_date), row.names=T, quote = F), 
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                    x=list_module_PPI_signif_ok, 
                    y= sNames_PPI, 
                    SIMPLIFY = F))
   
-  ################## SAVE KMs FOR BMI-ENRICHED MODULES ####################
+  ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
   
   # Prepare dfs with a gene column followed by kMEs / kIMs 
   list_kMs_meta_out <- lapply(list_kMs_meta, function(x) cbind(genes=rownames(x), x))
   rownames(list_kMs_meta) <- NULL
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%ss_meta_%s.csv", tables_dir, data_prefix, y, fuzzyModMembership, flag_date), row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
+  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, run_prefix, y, fuzzyModMembership), row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
   
   ############### OUTPUT MENDELIAN/RARE VARIANT RESULTS #####################
   ###########################################################################
@@ -2319,58 +2319,105 @@ if (resume == "checkpoint_4") {
   variants_GSEA_df <- arrange(variants_GSEA_df, desc(scaled.score))  
   
   # Full set of results
-  invisible(write.csv(variants_GSEA_df, file=sprintf("%s%s_mendelian_rareVariants_GSEA_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+  invisible(write.csv(variants_GSEA_df, file=sprintf("%s%s_%s_mendelian_rareVariants_GSEA.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
   
   ######################## OUTPUT MAGMA RESULTS #############################
   ###########################################################################
   
   if (!is.null(magma_gwas_dir)) {
-    invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_magma.fdr.log.sig_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-    invisible(write.csv(magma.r.sig, file=sprintf("%s%s_magma.r.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-    invisible(write.csv(magma.p.all, file=sprintf("%s%s_magma.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
-    invisible(write.csv(magma.emp.p.all, file=sprintf("%s%s_magma.emp.p.all_%s.csv", tables_dir, data_prefix, flag_date), row.names=F, quote = F))
+    invisible(write.csv(magma.p.all, file=sprintf("%s%s_%s_magma.p.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    invisible(write.csv(magma.emp.p.all, file=sprintf("%s%s_%s_magma.emp.p.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    invisible(write.csv(magma.p.fdr.log, file=sprintf("%s%s_%s_magma.fdr.log.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    invisible(write.csv(magma.r.all, file=sprintf("%s%s_%s_magma.r.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    
+    if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_%s_magma.fdr.log.sig.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=sprintf("%s%s_%s_magma.r.sig.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
   }
   
   ####################### OUTPUT METADATA CORRELATION RESULTS ###############
   ###########################################################################
   
   if (!is.null(metadata_corr_col) & !is.null(metadata)) {
-    invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_all_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, flag_date), row.names=T, quote = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_rho_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_mod_metadata_corr_rho, sNames_meta, SIMPLIFY = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_metadata_corr_logfdr_%s.csv", tables_dir, data_prefix, y, flag_date), row.names=T, quote = F), list_mod_metadata_corr_fdr.log, sNames_meta, SIMPLIFY = F))
+    invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_%s_all_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix), row.names=T, quote = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), list_mod_metadata_corr_rho, sNames_PPI, SIMPLIFY = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), list_mod_metadata_corr_fdr.log, sNames_PPI, SIMPLIFY = F))
   }
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  try(invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_cellModEmbed_%s.csv", tables_dir, data_prefix, fuzzyModMembership, flag_date), row.names=T, quote = F)))
+  invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=T, quote = F))
   
-  ######################## SAVE DIAGNOSTIC STATS ############################
-  ###########################################################################
+  ##################### WRITE PARAMETERS AND STATS TO FILES ################
+  ##########################################################################
   
-  write.csv(diagnostic_stats, file=sprintf("%s%s_INFO_diagnostic_stats_%s.csv", log_dir, data_prefix, flag_date), quote = F, row.names=F)
+  t_finish <- as.character(Sys.time())
   
+  sumstats_celltype_df <- data.frame(t_start = rep(t_start, times=length(sNames)),
+                                     run_prefix = rep(run_prefix, times=length(sNames)),
+                                     subset = sNames, 
+                                     n_cells = n_cells_subsets,
+                                     n_genes = n_genes_subsets,
+                                     softPower = sapply(list_sft, function(x) x$Power),
+                                     SFT.R.sq = sapply(list_sft, function(x) x$SFT.R.sq),
+                                     median.k. = sapply(list_sft, function(x) x$median.k.),
+                                     plot_label_final = unlist(x=list_plot_label_final, use.names = F),
+                                     n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, nrow) else numeric(length=sNames),
+                                     prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
+                                     prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
+                                     n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
+                                     n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
+                                     prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)), 
+                                     n_modules_variants_enriched = n_modules_variants_enriched
+                                     n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames)),
+                                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) ifelse(test=sNames %in% sNames_gwas, yes=sapply(list_idx_module_meta_sig, sum), no=NA) else rep(NA, length(sNames)),
+                                     row.names = NULL, stringsAsFactors = F)
+                           
+  sumstats_run <- c(t_start = t_start,
+                    t_finish = t_finish,
+                    mean_percent_mito = mean(percent.mito, na.rm=T),
+                    mean_percent_ribo = mean(percent.mito, na.rm=T),
+                    n_celltypes = length(subsets_ok_idx),
+                    n_celltypes_used = sum(subsets_ok_idx),
+                    prop_genes_mapped_to_ensembl = round(sum(!is.na(mapping$ensembl))/nrow(mapping),2),
+                    prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign),2),
+                    prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI),2),
+                    n_modules_total = sum(sumstats_celltype_df$n_modules),
+                    n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched), 
+                    prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog),2) else NA,
+                    n_modules_variants_enriched = sum(sumstats_celltype_df$n_modules_variants_enriched, na.rm=T),
+                    n_modules_magma_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sum(n_modules_gwas_enriched, na.rm = T) else NA,
+                    n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) sum(sumstats_celltype_df$n_modules_meta_enriched, na.rm = T) else NA) 
+  
+  params_run <- opt[-length(opt)]# all the user options/defaults
+
+  # Convert sumstats and params from list to one-row data.frame
+  matrix(unlist(sumstats_run), nrow=1, dimnames=list(NULL, c(names(sumstats_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> sumstats_run_df
+  matrix(unlist(params_run), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
+  
+  # make path strings
+  sumstats_celltype_path = sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix)
+  sumstats_run_path = sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix)
+  params_run_path = sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix)
+  
+  # set append param values
+  append_sumstats_celltype = file.exists(sumstats_celltype_path)
+  append_sumstats_run = file.exists(sumstats_run_path)
+  append_params_run = file.exists(params_run_path)
+  
+  # write to file
+  write.table(sumstats_celltype_df, file=sumstats_celltype_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_celltype, col.names = !append_sumstats_celltype)
+  write.table(sumstats_run_df, file=sumstats_run_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_run, col.names = !append_sumstats_run)
+  write.table(params_run_df, file=params_run_path, quote = F, sep = "\t", row.names=F, append = append_params_run, col.names = !append_params_run)
+  
+  ######################################################################
+  ################# SAVE SESSION IMAGE AND FINISH ######################
+  ######################################################################
+  
+  message("Saving final session image")
+  
+  save.image(file=sprintf("%s%s_%s_final_session_image.RData", RObjects_dir, data_prefix, run_prefix))
+
+  message("Script DONE!")
 }
-######################################################################
-########################### CLEAR UP #################################
-######################################################################
 
-# Delete consensus TOMs from disk
-for (subsetName in sNames) {
-  if (file.exists(sprintf("%s%s_consensusTOM-block.1.RData", scratch_dir, subsetName))) {
-    file.remove(sprintf("%s%s_consensusTOM-block.1.RData", scratch_dir, subsetName))
-  }
-}
-
-message("Saving final session image")
-
-save.image(file=sprintf("%s%s_final_session_image.RData", RObjects_dir, data_prefix, flag_date))
-
-rm(list=ls())
-invisible(gc())
-
-##########################################################################
-################################ FINISH ##################################
-##########################################################################
-
-message("Script DONE!")
   

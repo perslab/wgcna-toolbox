@@ -37,7 +37,7 @@ pearsonFallback = "individual" # in case of columns with zero MAD
 ############################## BLOCKWISEMODULES ######################
 
 #blocks = NULL # optional specification of blocks in which hierarchical clustering and module detection should be performed. If given, must be a numeric vector with one entry per gene of multiExpr giving the number of the block to which the corresponding gene belongs.
-maxBlockSize = 5e3 # integer giving maximum block size for module detection. Should be higher than the number of samples to avoid block-wise module detection. Ignored if blocks above is non-NULL. Otherwise, if the number of genes in datExpr exceeds maxBlockSize, genes will be pre-clustered into blocks whose size should not exceed maxBlockSize.
+maxBlockSize = 5e3 # integer giving maximum block size for module detection. Should be higher than the number of genes to avoid block-wise module detection. Ignored if blocks above is non-NULL. Otherwise, if the number of genes in datExpr exceeds maxBlockSize, genes will be pre-clustered into blocks whose size should not exceed maxBlockSize.
 blockSizePenaltyPower = 10 # number specifying how strongly blocks should be penalized for exceeding the maximum size. Set to a lrge number or Inf if not exceeding maximum block size is very important.
 #nPreclusteringCenters = as.integer(min(ncol(datExpr0)/20, 100*ncol(datExpr0)/maxBlockSize))
 
@@ -94,7 +94,7 @@ fraction = if (replace) 1.0 else 0.66 # TWEAKPARAM.
 ############################## BOOT #############################
 
 #Number of times to repeat the calculation on permuted data
-R = 300
+R = 5
 
 ####################### CONSENSUSCALCULATION #########################
 

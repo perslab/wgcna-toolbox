@@ -24,17 +24,8 @@ output:
 options(stringsAsFactors = F)
 
 project_dir = "/projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_5/"
-data_prefix = "mousebrain_top10_5"
-
-project_dir = "/projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/"
-data_prefix = "maca_top29_BMI_2"
-
-project_dir = "/projects/jonatan/tmp-rwgcna-tests/campbell_3/"
-data_prefix = "campbell_3"
-
-project_dir = "/projects/jonatan/tmp-rwgcna-tests/tmp-maca-pancreas-16/"
-data_prefix = "maca_pancr_16"
-
+data_prefix = "mousebrain_top10"
+run_prefix = "8"
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -81,6 +72,13 @@ source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
 ```{r}
 session_image_path <- dir(pattern = "final_session_image", path = RObjects_dir, full.names = T)
 load(session_image_path)
+```
+
+## Retrieve run stats
+
+```{r}
+sumstats_run <- read.table(sprintf("%s/%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+sumstats_celltype <- read.table(sprintf("%s/%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
 ```
 
 ## Plotting

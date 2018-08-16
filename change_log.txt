@@ -1,5 +1,42 @@
 # Change log
 
+v2.4 - 15-08-2018
+
+### Fixed
+* Do not take list_dissTOM_ok tmp file with date, to avoid several copies with different dates, which results in error when using dir() to load them
+* added lapply to deletegrey(list_list_kMs) and also added it for kIMs
+* save magma.fdr.log and magma.r, and also save sig, rather than naming the full results sig and saving them as sig
+* eval(parse(text= .. )) (default arg is 'file=')
+* gwas and metadata filtering. The kMs were not being filtered at gwas step, and list_MEs weren't either. Weird bug, seems to have been introduced since this has worked at some point.
+* When outputting metadata correlation results, use sNames_PPI rather than sNames_meta, i.e. output also metadata for celltypes where none of the correlations were significant
+
+### Added
+* mergeCloseModskIM which is analogous to mergeCloseModules but uses IM embeddings rather than MEs
+* output PPI p-values as .csv 
+* allow user to filter out genes in genes_remove_dir
+* Normalizes seurat object data - i.e. only uses raw.data (or imputed, if that option is selected)
+* compute percent.ribo and percent.mito in the script
+* kM reassign, which corresponds to k-means reclustering. 
+* added scale_MEs_by_kIMs, testing
+* produce ensembl-symbol mapping file in all cases and compute percent mito and percent ribo. 
+* added run_prefix 
+* Now output two diagnostics files: one for run-level information, one for celltype-level info
+* delete individual TOMs from drive
+* Compute idx_row_variants in any case (for stats)
+
+### Changed
+* Changed checkPPI: renamed to PPI_filter.  Always perform the PPI analysis, but filter on colours only if filter_PPI == T
+* For STRINGdb test moved clusterMap inside mapply, which will often be faster if n_cores > n celltypes
+* replaced IM embedding computation in metadata association step with the cellModEmbed function
+* changed data_prefix default to "sc_wgcna"
+* refactored TOM_for_par and dissTOM_for_par - put them back into the main script
+* Removed data_prefix, project_dir and flag_date from PPI_outer_from_vec, not used
+* Removed flag_date from all main script file saves
+* changed gwas_filter_traits test logic to do the filter if ANY rather than if ALL strings are detected
+* renamed use.imputed to use_imputed
+* removed 'try' around write.csv ... cellModEmbed , just because it seemed superfluous
+* delete list_dissTOM_ok and scale_data when not needed 
+
 v2.3 - 01-08-2018
 
 Changed

@@ -84,13 +84,14 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell-1/  --data_prefix campbell-1   --regress_out "c('percent.mito', 'percent.ribo', 'nUMI')" --min.cells 5  --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15, 25)" --deepSplit "c(2,4)" --moduleMergeCutHeight "c(0.15)" --fuzzyModMembership kIM --jackstrawnReplicate 500 --TOMnReplicate 50 --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('t1d', 't2d', 'BMI')" --n_cores 10`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell-1/  --data_prefix campbell  --run_index 1 --regress_out "c('percent.mito', 'percent.ribo', 'nUMI')" --min.cells 5  --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15, 25)" --deepSplit "c(2,4)" --moduleMergeCutHeight "c(0.15)" --fuzzyModMembership kIM --jackstrawnReplicate 500 --TOMnReplicate 50 --kM_reassign T  --PPI_filter T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('t1d', 't2d', 'BMI')" --metadata_corr_col "c('SEX', 'AGE')" --metadata_corr_filter_vals "c('male', 'p22-25')" --n_cores 10`
 
 ### Args
 
 * `seurat_path`: Path to Seurat object, preferably with some QC based on nUMI and percent.mito
 * `project_dir`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables and log will be created if they do not exist. Defaults to the directory one level up from input data dir.
-* `data_prefix`: Dataset prefix for output files. Defaults to today's date.
+* `data_prefix`: Dataset prefix for output files.
+* `run_prefix`: Run prefix for output files. 
 * `autosave`: Save at four checkpoints during the script to enable resuming the session in case of problems? Defaults to `T`.
 * `quit_session`: Specify a checkpoint (`checkpoint_1` to `checkpoint_4`) after which to quit the script. Defaults to `NULL`.
 * `resume`: Resume from a previous session image? Must have same path and data_prefix. Options are `checkpoint_1` - `checkpoint_4`. Defaults to `NULL`.
@@ -113,7 +114,7 @@ e.g.
 * `TOMnReplicate`: Number of times to permute the dataset, defaults to 100
 * `data_organism`: `hsapiens` or `mmusculus`. 
 * `fuzzyModMembership: `kME`: gene-eigengene correlation or `kIM`: average distance from gene to each module gene. Also used when computing cell embeddings on gene modules
-* `checkPPI`: Use Protein-Protein Interactions to validate modules? Defaults to TRUE
+* `PPI_filter`: Use Protein-Protein Interactions to validate modules? Defaults to TRUE
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. `body_BMI_Locke2015` or `c('BMI', 'T1D', 'T2D')`. Case-insensitive. Defaults to `NULL`
 * `n_cores`: Number of cores to use for parallelization. Defaults to 5

@@ -274,29 +274,29 @@ bootstrap <- function(datExpr,
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
-TOM_for_par = function(datExpr, subsetName, softPower, data_prefix) {
-  
-  ### 180503 v1.7
-  disableWGCNAThreads()
-  ###
-  
-  adjacency = adjacency(datExpr, 
-                        type=type, 
-                        power = softPower, 
-                        corFnc = corFnc, 
-                        corOptions = corOptions)
-  
-  consTomDS = TOMsimilarity(adjMat=adjacency,
-                            TOMType=TOMType,
-                            TOMDenom=TOMDenom,
-                            verbose=verbose,
-                            indent = indent)
-  
-  save(consTomDS, file=sprintf("%s%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, subsetName)) # Save TOM the way consensusTOM would have done
-  goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
-  return(goodGenesTOM_idx)
-}
+# refactored - no need for function here
+# TOM_for_par = function(datExpr, subsetName, softPower, data_prefix) {
+#   
+#   ### 180503 v1.7
+#   disableWGCNAThreads()
+#   ###
+#   
+#   adjacency = adjacency(datExpr, 
+#                         type=type, 
+#                         power = softPower, 
+#                         corFnc = corFnc, 
+#                         corOptions = corOptions)
+#   
+#   consTomDS = TOMsimilarity(adjMat=adjacency,
+#                             TOMType=TOMType,
+#                             TOMDenom=TOMDenom,
+#                             verbose=verbose,
+#                             indent = indent)
+#   
+#   save(consTomDS, file=sprintf("%s%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, subsetName)) # Save TOM the way consensusTOM would have done
+#   goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
+#   return(goodGenesTOM_idx)
+# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -523,7 +523,7 @@ parkMEs = function(list_MEs, datExpr) {
   
   for (j in 1:length(list_MEs)) {
     list_kMEs[[j]] = signedKME(datExpr=as.matrix(datExpr),
-                               datME=list_MEs[[j]]$eigengenes,
+                               datME=list_MEs[[j]],
                                #list_MEs[[j]],#$eigengenes,
                                outputColumnName="",
                                corFnc = corFnc )
@@ -644,11 +644,11 @@ kM_reassign_fnc = function(colors,
                                         colors = colors,
                                         excludeGrey=F,
                                         scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                        dissTOM=dissTOM)
+                                        dissTOM=dissTOM)$eigengenes
       
       message(paste0(celltype, ": Computing ", fuzzyModMembership, "s"))
       kMs <- signedKME(as.matrix(datExpr),
-                       MEs$eigengenes,
+                       MEs,
                        outputColumnName = "",
                        corFnc = corFnc)
       
@@ -729,10 +729,10 @@ kM_reassign_neg_fnc = function(Ms,
                            colors,
                            excludeGrey = excludeGrey,
                            scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                           dissTOM=dissTOM)
+                           dissTOM=dissTOM)$eigengenes
     
     kMEs = signedKME(as.matrix(datExpr),
-                     MEs$eigengenes,
+                     MEs,
                      outputColumnName = "",
                      corFnc = corFnc)
     
@@ -1179,10 +1179,7 @@ PPI_outer_for_vec = function(colors,
                              pkMs, 
                              STRINGdb_species, 
                              PPI_pkM_threshold, 
-                             pvalThreshold, 
-                             project_dir, 
-                             data_prefix, 
-                             flag_date) {
+                             pvalThreshold) {
   
   # Rather than for parallelising over modules within a set of modules, parallelise over several sets of colors (produced by comparing parameters)
   # It calls PPI_innver_for_vec as a subroutine
@@ -1192,9 +1189,6 @@ PPI_outer_for_vec = function(colors,
   #   STRINGdb_species
   #   PPI_pkM_threshold: numeric scalar
   #   pvalThreshold: numeric scalar
-  #   project_dir
-  #   data_prefix
-  #   flag_date
   #   
   # Returns: 
   #   colors_PPI: colors where modules that did not satisfy the PPI threshold are set to grey
@@ -1275,13 +1269,13 @@ PPI_inner_for_vec <- function(color, unique_colors, colors, string_db) {
 
 mapMMtoHs = function(modulekM,
                      log_dir,
-                     flag_date,
                      data_prefix,
+                     run_prefix,
                      mapping_orthology) {
   
   if (!is.null(modulekM$genes)) modulekM$genes <- NULL
   
-  log_not_mapped_filepath = paste0(log_dir,flag_date,"_genes_orthology_not_mapped_",data_prefix,"_", ".tab")
+  log_not_mapped_filepath = paste0(log_dir,"genes_orthology_not_mapped_",data_prefix,"_", run_prefix, ".tab")
   
   mapping = data.frame(ensembl.mouse=row.names(modulekM))
   # orthology mapping
@@ -1307,7 +1301,10 @@ mapMMtoHs = function(modulekM,
   
   modulekM_ens$genes <- NULL
   
-  return(modulekM_ens)
+  prop.mapped <- round(sum(!is.na(mapping$ensembl.human))/nrow(mapping),2)
+
+  return(list(kM=modulekM_ens, prop.mapped=prop.mapped))
+  
 }
 
 
@@ -1593,7 +1590,7 @@ if (FALSE) {
                                        show_column_names = T)
   #top_annotation = htca)
   #bottom_annotation = htca)
-  pdf(sprintf("%s%s_mean.celltype.eig.expr_%s.pdf", plots_dir, data_prefix, flag_date ),h=12,w=12)
+  pdf(sprintf("%s%s_%s_mean.celltype.eig.expr_%s.pdf", plots_dir, data_prefix, run_prefix, flag_date ),h=12,w=12)
   draw(ht.mean.celltype.eig.expr)
   dev.off()
 }
