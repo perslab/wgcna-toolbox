@@ -11,6 +11,7 @@ v2.4 - 15-08-2018
 * When outputting metadata correlation results, use sNames_PPI rather than sNames_meta, i.e. output also metadata for celltypes where none of the correlations were significant
 * Module Eigengenes: list_..._MEs are now always the MEs$eigengenes rather than the list output by moduleEigengenes. Also removed "ME" from colnames in list_MEs_PPI - they were not being found when filtering for GWAS.  Changed parkMEs and script where required.
 * When filtering kMs and MEs for metadata correlations using mapply did not specify simplify arg so if only one module dataframe was converted to vector. Now F
+* Fixed reference to list_colors_PPI to list_colors_PPI_uniq
 
 ### Added
 * mergeCloseModskIM which is analogous to mergeCloseModules but uses IM embeddings rather than MEs
@@ -40,7 +41,7 @@ v2.4 - 15-08-2018
 * removed 'try' around write.csv ... cellModEmbed , just because it seemed superfluous
 * delete list_dissTOM_ok and scale_data when not needed 
 * parpkMEs now just outputs 0 if the gene's module is grey
-
+* kM_magma now allows for three tests: all gene kME, module gene kME, and module gene t-test. Module gene t-test set as default (in script)
 v2.3 - 01-08-2018
 
 Changed
