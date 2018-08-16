@@ -1714,7 +1714,7 @@ if (resume == "checkpoint_4") {
     message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
     
     
-    magma_test_type = "module_genes_spearman" 
+    magma_test_type = "full_kME_spearman" 
     
     if (data_organism == "mmusculus") {
       invisible(gc()); invisible(R.utils::gcDLLs())
