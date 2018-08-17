@@ -270,7 +270,9 @@ cutreeHybrid_for_vec <- function(comb, geneTree, dissTOM, maxPamDist, useMedoids
 
 mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_MEs_by_kIMs=F, dissTOM = NULL) {
   # Utility function for more easily parallelising mergeCloseModules
-  if (any(as.logical(cutree$labels))) { # Are there any modules at all? Avoids an error
+  colors <- NULL
+  MEs <- NULL 
+  tryCatch({
     merged = mergeCloseModules(exprData=as.matrix(datExpr), 
                                colors = cutree$labels, 
                                impute =T,
@@ -280,6 +282,8 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_M
                                iterate = T,
                                getNewMEs = F,
                                getNewUnassdME = F)
+    
+
     colors = labels2colors(merged$colors)
     #MEs = merged$newMEs 
     MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
@@ -287,11 +291,11 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_M
                            excludeGrey = excludeGrey,
                            scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                            dissTOM = dissTOM)
-  }
-  else {# only grey modules
-    colors = labels2colors(cutree$labels)
-    MEs = NULL
-  }
+  
+    
+  }, error = function(c) {
+    warning(paste0("MergeCloseModules failed"))
+  })
   return(list("cols" = colors, "MEs"= MEs))
 }
 
@@ -315,7 +319,7 @@ mergeCloseModskIM = function(datExpr,
                              dissTOM = NULL,
                              moduleMergeCutHeight,
                              verbose=2,
-                             celltype) {
+                             cellType) {
   
   # Usage: compute correlations between gene module cell embeddings. 
   #         merge modules with a positive correlation > 1-moduleMergeCutHeight
@@ -337,7 +341,7 @@ mergeCloseModskIM = function(datExpr,
   #if (any(colnames(kIMs) == "grey")) kIMs[["grey"]] <- NULL
   
   while (TRUE) {
-    message(paste0(celltype, ": computing cell-module embedding matrix"))
+    message(paste0(cellType, ": computing cell-module embedding matrix"))
     cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
                                      colors=colors, 
                                      latentGeneType = "IM",
@@ -359,13 +363,13 @@ mergeCloseModskIM = function(datExpr,
     
     # At this point if corr_clust has as many unique modules as the original partition, the while loop will exit
     if(length(unique(corr_clust)) == length(unique(colors))-1) {  # minus one for the grey module, absent in corr_clust
-      message(paste0(celltype, " done"))
+      message(paste0(cellType, " done"))
       break
     }
     
     # if not we merge modules
     n_merge <-  length(unique(colors)) - 1 - length(unique(corr_clust)) # minus one for the grey module, absent in corr_clust
-    if (verbose>0) message(paste0(celltype, ": ", n_merge, " modules to be merged with others"))
+    if (verbose>0) message(paste0(cellType, ": ", n_merge, " modules to be merged with others"))
     
     merge_idx <- sapply(unique(corr_clust), function(x) sum(corr_clust==x)>1)
     
@@ -378,7 +382,7 @@ mergeCloseModskIM = function(datExpr,
     }
     
     # compute merged module kIMs 
-    message(paste0("Computing merged module kIMs for ", celltype))
+    message(paste0("Computing merged module kIMs for ", cellType))
     # Compute new kIMs
     kIMs <- kIM_eachMod_norm(dissTOM = dissTOM, 
                             colors = colors,
@@ -548,7 +552,7 @@ kM_reassign_fnc = function(colors,
                        datExpr = NULL,
                        verbose=2,
                        corFnc=NULL,
-                       max_iter=5,
+                       max_iter=3,
                        cellType,
                        scale_MEs_by_kIMs=F) {
 
@@ -576,14 +580,14 @@ kM_reassign_fnc = function(colors,
     
     if (fuzzyModMembership == "kME") {
       
-      message(paste0(celltype, ": Computing Module Eigengenes"))
+      message(paste0(cellType, ": Computing Module Eigengenes"))
       MEs <- moduleEigengenes_kIM_scale(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
                                         colors = colors,
-                                        excludeGrey=F,
+                                        excludeGrey=T,
                                         scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                                         dissTOM=dissTOM)$eigengenes
       
-      message(paste0(celltype, ": Computing ", fuzzyModMembership, "s"))
+      message(paste0(cellType, ": Computing ", fuzzyModMembership, "s"))
       kMs <- signedKME(as.matrix(datExpr),
                        MEs,
                        outputColumnName = "",
@@ -591,11 +595,10 @@ kM_reassign_fnc = function(colors,
       
     } else if (fuzzyModMembership == "kIM") {
       
-      message(paste0(celltype, ": Computing ", fuzzyModMembership, "s"))
       kMs <- kIM_eachMod_norm(dissTOM=dissTOM, 
                               colors=colors, 
                               verbose=verbose,
-                              excludeGrey=F)
+                              excludeGrey=T)
     }
     
     maxkMs <- max.col(kMs) #  integer vector of length nrow(kMs)
@@ -604,12 +607,10 @@ kM_reassign_fnc = function(colors,
   
     reassign_t <- colors_new != colors
     
-    if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break 
+    if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break #else message(paste0(cellType, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
     
     reassign_total <- reassign_total | reassign_t
 
-    message(paste0(celltype, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
-    
     names(colors_new) <- names(colors)
     colors <- colors_new
     reassign_t_1 <- reassign_t
@@ -620,11 +621,11 @@ kM_reassign_fnc = function(colors,
                    "original_module" = colors_original[reassign_total], 
                    "new_module" = colors[reassign_total], stringsAsFactors=F, row.names=NULL)
     
-  if (verbose > 0) message(paste0(celltype, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
+  if (verbose > 0) message(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
   
   
   return(list("colors" = colors, "kMs" = kMs, "log" = log))}, 
-  error = function(c) {warning(paste0("kM_reassign_fnc failed for ", cellType))})
+  error = function(c) {warning(paste0("kM_reassign_fnc failed for ", cellType, " with the following error: ", c))})
   
 }
 
