@@ -1888,6 +1888,7 @@ if (resume == "checkpoint_4") {
   n_modules_gwas_enriched <- rep(NA, times = length(sNames))
   n_modules_gwas_enriched[sNames %in% sNames_PPI] <- if (!is.null(magma_gwas_dir)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
   
+
   ######################################################################
   ####### FILTER MODULES ON GWAS SIGNIFICANCE ALSO IN OTHER FILES ######
   ######################################################################
@@ -1895,7 +1896,7 @@ if (resume == "checkpoint_4") {
   if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) { # NB: if no significant gwas correlations found in previous section, gwas_filter_traits <- NULL
     
     # get cell types with modules with gwas enrichment
-    sNames_gwas <- names(table(magma.p.fdr.log.sig$celltype)[table(magma.p.fdr.log.sig$celltype)>0])
+    sNames_gwas <- sNames_PPI[sNames_PPI %in% names(table(magma.p.fdr.log.sig$celltype)[table(magma.p.fdr.log.sig$celltype)>0])]
     
     list_module_gwas <- vector(mode="list", length=length(sNames_gwas))
     
@@ -2038,22 +2039,13 @@ if (resume == "checkpoint_4") {
                                             SIMPLIFY=F)
       
       # Convert p values into one big matrix in order to adjust p-values for the number of modules tested across *all* celltypes
-      for (j in 1:length(list_mod_metadata_corr_pval)) {
-        if (j==1) {
-          corr_pval <- as.data.frame(list_mod_metadata_corr_pval[[j]])
-          colnames(corr_pval) <- paste0(names(list_mod_metadata_corr_pval)[j], "__", colnames(corr_pval)) 
-        } else {
-          tmp <- list_mod_metadata_corr_pval[[j]]
-          colnames(tmp) <- paste0(names(list_mod_metadata_corr_pval)[j], "__", colnames(tmp)) 
-          corr_pval <- cbind(corr_pval, tmp)
-        }
-      }
+      corr_pval <- Reduce(x=list_mod_metadata_corr_pval, f = cbind)
       
       # set NAs to 1
       corr_pval[is.na(corr_pval)] <- 1
       
       # Compute the false discovery rates
-      corr_fdr <- t(apply(t(corr_pval), MARGIN=2, FUN = function(x) p.adjust(x, method = "fdr")))
+      corr_fdr <- apply(corr_pval, MARGIN=1, FUN = function(x) p.adjust(x, method = "fdr")) %>% t # apply outputs the vectors as columns
       corr_fdr.log <- -log10(corr_fdr)     
       
       # Split single dataframe back into a list of celltypes
@@ -2092,12 +2084,12 @@ if (resume == "checkpoint_4") {
 
       # Only keep significantly correlated modules within each celltype
       list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_meta_sig, SIMPLIFY=F) 
-      list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) 
+      list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) %>% Filter(f=length)
       
-      sNames_meta <- sNames_gwas[sapply(list_idx_module_meta_sig, any, simplify = T)]
+      sNames_meta <- sNames_gwas[sNames_gwas %in% names(list_module_meta)] # ordered correctly
       
-      # Filter out celltypes with no modules significantly correlated with metadata
-      list_module_meta <- list_module_meta[sNames_gwas %in% sNames_meta]
+      # Keep the order
+      list_module_meta <- list_module_meta[match(sNames_meta, names(list_module_meta))]
       
       # reassign genes of filtered out modules to grey and remove any empty cell clusters
       list_colors_meta <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
@@ -2254,7 +2246,6 @@ if (resume == "checkpoint_4") {
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
   colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", "pkMs")
 
-
   ######################################################################
   ######################### CLEAR UP TOMS ##############################
   ######################################################################
@@ -2274,14 +2265,6 @@ if (resume == "checkpoint_4") {
   ############################# OUTPUT TABLES ##############################
   ##########################################################################
   
-  ##################### SAVE LOGS OF REASSIGNED GENES #######################
-  ###########################################################################
-  # Seems a bit unnecesssary..
-  # if (kM_reassign) invisible(mapply(function(x,y) write.csv(x, file =  paste0(RObjects_dir, "_", data_prefix, "_", run_prefix, "_", y, "_list_genes_reassigned.csv"), quote = F, row.names = F), 
-  #                  x = list_reassign_log, 
-  #                  y = names(list_reassign_log), 
-  #                  SIMPLIFY=F))
-  
   ##################### WRITE OUT TABLES OF MODULE GENES ####################
   ###########################################################################
   
@@ -2300,29 +2283,34 @@ if (resume == "checkpoint_4") {
   ##########################################################################
   
   # convert the module PPI dataframe columns from list to numeric 
-  
   list_module_PPI_ok <- lapply(list_module_PPI_ok, function(x) {
-    out = sapply(X = x, FUN = as.numeric, simplify = T)
-    rownames(out) = rownames(x)
+    out = apply(X = x, FUN = as.numeric, MARGIN=2)
+    out <- matrix(out, ncol=2)
+    dimnames(out) = dimnames(x)
+    out <- data.frame(out)
     return(out)
     })
   
-  list_module_PPI_signif_ok <- lapply(list_module_PPI_signif_ok, function(x) {
-    out = sapply(X = x, FUN = as.numeric, simplify = T)
-    rownames(out) = rownames(x)
+  list_module_PPI_signif_ok %>% Filter(f=nrow) -> list_module_PPI_signif_ok_f
+  list_module_PPI_signif_ok_f <- lapply(list_module_PPI_signif_ok_f, function(x) {
+    out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
+    out <- matrix(out, ncol=2)
+    dimnames(out) = dimnames(x)
+    out <- data.frame(out)
     return(out)
   })
   
-  # output as PPI
-  
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
+  # output 
+  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                    x=list_module_PPI_ok, 
-                   y= sNames_PPI, 
+                   y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_ok)], 
                    SIMPLIFY = F))
   
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
-                   x=list_module_PPI_signif_ok, 
-                   y= sNames_PPI, 
+  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
+                                           row.names=T, 
+                                           quote = F), 
+                   x=list_module_PPI_signif_ok_f, 
+                   y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_signif_ok_f)], 
                    SIMPLIFY = F))
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
@@ -2418,7 +2406,7 @@ if (resume == "checkpoint_4") {
   sumstats_celltype_path = sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix)
   sumstats_run_path = sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix)
   params_run_path = sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix)
-  
+    
   # set append param values
   append_sumstats_celltype = file.exists(sumstats_celltype_path)
   append_sumstats_run = file.exists(sumstats_run_path)
