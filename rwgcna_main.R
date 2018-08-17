@@ -1654,7 +1654,7 @@ if (resume == "checkpoint_4") {
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
   ##########################################################################
     
-    message("Checking modules for enrichment with rare variants/mendelian genes")
+  message("Checking modules for enrichment with rare variants/mendelian genes")
     
   variants <- load_obj(f=variants_path)
   
@@ -1682,7 +1682,7 @@ if (resume == "checkpoint_4") {
                                                             function(y) {
                                                               out<-matrix(gsea(values = y, geneset = variants, plot = F, return.details=T), ncol=4)
                                                               colnames(out) <- c("p.val", "edge.score", "edge.value", "scaled.score")
-                                                              rownames(out) <- names(x)
+                                                              
                                                               return(out)}
                                                             ))
   # Returns a list (of modules) of dataframes with enrichment terms as rownames and columns: p.val, q.val, sscore and edge
