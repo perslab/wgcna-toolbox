@@ -1185,7 +1185,7 @@ if (resume == "checkpoint_2") {
                                                                                              corFnc = if (fuzzyModMembership=="kME") corFnc else NULL,
                                                                                              verbose=verbose,
                                                                                              max_iter = 10,
-                                                                                             celltype = d)),
+                                                                                             cellType = d)),
                                          a = list_list_colors,
                                          b = list_dissTOM,
                                          c = list_datExpr_gg,
@@ -1702,12 +1702,13 @@ if (resume == "checkpoint_4") {
   # count number of enriched module per celltype for summary stats
   n_modules_variants_enriched <- rep(NA, times = length(sNames))
   n_modules_variants_enriched[sNames %in% sNames_PPI] <- sapply(sNames_PPI, function(x) sum(variants_GSEA_df$celltype[idx_row_variants]==x))
-  
+
   ##########################################################################
   ############# COMPUTE MAGMA COMMON VARIANTS GWAS ENRICHMENT ##############
   ##########################################################################
   
   # MAGMA docs: http://ctg.cncr.nl/software/MAGMA/doc/manual_v1.06.pdf
+  # TODO: Need to add non-protein coding genes to MAGMA
   
   if (!is.null(magma_gwas_dir)) {
     
@@ -1795,18 +1796,11 @@ if (resume == "checkpoint_4") {
       list_magma.emp.p[[i]] <- magma_results[[i]][['emp.p.val']]
     }
     
-    # Merge each list into a single table
-    for (t in 1:length(list_magma.p)) {
-      if (t == 1) {
-        magma.r.all <- list_magma.r[[t]]
-        magma.p.all <- list_magma.p[[t]]
-        magma.emp.p.all <- list_magma.emp.p[[t]]
-      } else {
-        magma.r.all <- rbind(magma.r.all, list_magma.r[[t]] )
-        magma.p.all <- rbind(magma.p.all, list_magma.p[[t]] )
-        magma.emp.p.all <- rbind(magma.emp.p.all, list_magma.emp.p[[t]] )
-      }
-    }
+    # rowbind each list into a single table
+    magma.r.all <- Reduce(f=rbind, x = list_magma.r)
+    magma.p.all <- Reduce(f=rbind, x = list_magma.p)
+    magma.emp.p.all <- Reduce(f=rbind, x = list_magma.emp.p)
+    
     # We will plot the analytical and empirical p-values side-by-side later as a diagnostic
     
     # adjust analytical p-values for multiple testing
@@ -1843,9 +1837,6 @@ if (resume == "checkpoint_4") {
   ##########################################################################
   ############## FILTER MODULES ON GENES WITH GWAS ENRICHMENT ##############
   ##########################################################################
-  
-  # TODO: Try to replace current kME - MAGMA p-value correlation with an approach using fewer genes, e.g. only those actually assigned to the module
-  # TODO: Need to add non-protein coding genes to MAGMA
   
   if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) {
     
@@ -1969,6 +1960,14 @@ if (resume == "checkpoint_4") {
   ####### COMPUTE MODULE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
 
+  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) {
+    list_dissTOM_ok_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM_ok"), full.names = T)
+    list_dissTOM_ok <- load_obj(list_dissTOM_ok_path)
+    names(list_dissTOM_ok) <- sNames_ok
+    list_dissTOM_gwas <- list_dissTOM_ok[names(list_dissTOM_ok) %in% sNames_gwas]
+    rm(list_dissTOM_ok)  
+  }
+  
   if (!is.null(metadata_corr_col)) {
     
     if (!is.null(metadata)) {
@@ -1998,15 +1997,17 @@ if (resume == "checkpoint_4") {
         
         # compute the equivalent to eigengenes (i.e. embeddings) but using kIMs as eigenvectors on which to project each cell's gene-length vector
         #cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "list_cell_IM_embed_mat_for_meta_corr.txt"))
-        list_embed_mat <- mapply(function(a,b,c,d) cellModEmbed(datExpr=a, 
+        list_embed_mat <- mapply(function(a,b,c,d,e) cellModEmbed(datExpr=a, 
                                                      colors=b, 
                                                      latentGeneType="IM",
                                                      cellType=c,
-                                                     kMs=d),
+                                                     kMs=d,
+                                                     dissTOM=e),
                                      a = list_datExpr_gwas,
                                      b = list_colors_gwas,
                                      c = names(list_datExpr_gwas),
                                      d = list_kMs_gwas,
+                                     e = list_dissTOM_gwas,
                                      SIMPLIFY=F)
         #stopCluster(cl)
         

@@ -6,19 +6,14 @@
 ############################################################################################################################################################
 
 FilterGenes <- function(seurat_obj_sub, min.cells) {
-  #unchanged <- seurat_obj_sub
-  # EDIT 180501_4 remove tryCatch in parallelised functions
-  #tryCatch({
+
   if (min.cells > 0) {
     num.cells <- rowSums(seurat_obj_sub@data > 0)
     genes.use <- names(x = num.cells[which(x = num.cells >= min.cells)])
     seurat_obj_sub@raw.data <- seurat_obj_sub@raw.data[genes.use, ]
     seurat_obj_sub@data <- seurat_obj_sub@data[genes.use, ]
   }
-  # EDIT 180501_4 remove tryCatch in parallelised functions
-  #   }}, error = function(c) { warning("parFilterGenes produced an error - returning unchanged seurat subset")
-  #     return(seurat_obj_sub_backup)
-  # })
+
   return(seurat_obj_sub)
 }
 
@@ -156,69 +151,6 @@ seurat_to_datExpr = function(seurat_obj_sub, idx_genes_use) {
   colnames(datExpr) <- rownames(seurat_obj_sub@scale.data[idx_genes_use,])  
   return(datExpr)  
 }
-
-############################################################################################################################################################
-############################################################################################################################################################
-############################################################################################################################################################
-
-# sft_for_par <- function(datExpr, subsetName) { 
-#   softPower <- 8 # Set a default value as fall back
-#   # EDIT 180501_4 remove tryCatch in parallelised functions
-#   #tryCatch({
-#     
-#     disableWGCNAThreads()
-#     
-#     powers = c(1:30)
-#     
-#     sft = pickSoftThreshold(data=datExpr,
-#                             powerVector = powers,
-#                             blockSize = min(maxBlockSize , ncol(datExpr)), #try to prevent crashing
-#                             corFnc = corFnc,
-#                             corOptions =  corOptions,
-#                             networkType = networkType,
-#                             verbose = verbose)
-#     
-#     pdf(sprintf("%s%s_%s_pickSoftThresholdSFTFit_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-#     #par(mfrow = c(1,2));
-#     cex1 = 0.9;
-#     # Scale-free topology fit index as a function of the soft-thresholding power
-#     plot(sft$fitIndices[,1],
-#          -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-#          xlab="Soft Threshold (power)",
-#          ylab="Scale Free Topology Model Fit,signed R^2",
-#          type="n",
-#          main = paste("Scale independence"));
-#     text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-#          labels=powers,cex=cex1,col="red");
-#     # this line corresponds to using an R^2 cut-off of 0.9
-#     abline(h=0.90,col="red")
-#     dev.off()
-#     # Mean connectivity as a function of the soft-thresholding power
-#     pdf(sprintf("%s%s_%s_pickSoftThresholdMeanCon_%s.pdf", plots_dir, data_prefix, subsetName, flag_date),width=10,height=5)
-#     plot(sft$fitIndices[,1], sft$fitIndices[,5],
-#          xlab="Soft Threshold (power)",
-#          ylab="Mean Connectivity",
-#          type="n",
-#          main = paste("Mean connectivity"))
-#     text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
-#     dev.off()
-#     
-#     # Select softPower: of lower .95 percentile connectivity, if several softPowers achieve 0.9 R.sq, 
-#     # take smallest softPower; else take best fitting one
-#     
-#     fitIndices <- as.data.frame(sft$fitIndices)
-#     fitIndices_filter <- fitIndices %>% dplyr::filter(median.k. <= quantile(median.k.,0.95, na.rm=T))
-#     if (sum(fitIndices_filter$SFT.R.sq >= 0.9) > 1) {
-#       softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
-#     } else {
-#       softPower <- (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,]
-#     }
-#   # EDIT 180501_4 remove tryCatch in parallelised functions
-#   # }, error = function(c) {
-#   #   write.csv("ERROR", file=sprintf("%s%s_%s_pickSoftThreshold_ERROR_set_to_8_as_default_%s.csv", project_dir, data_prefix, subsetName, flag_date), row.names = F)
-#   # })
-#   return(softPower)
-# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -398,6 +330,7 @@ mergeCloseModskIM = function(datExpr,
   #
   # Returns: list with entries colors=colors_merged, kIMs = kIMs_merged
   
+  tryCatch({
   corr_clust <- character(length = length(unique(colors)))
   colors_original <- colors
   # Remove 'grey' (unassigned) module 
@@ -457,7 +390,8 @@ mergeCloseModskIM = function(datExpr,
 
   names(colors) = names(colors_original)
   
-  return(list(colors=colors, kIMs = kIMs))
+  return(list(colors=colors, kIMs = kIMs))},
+  error = function(c) {warning(paste0("mergeCloseModskIM failed for ", cellType))})
 }
 
 ############################################################################################################################################################
@@ -615,7 +549,7 @@ kM_reassign_fnc = function(colors,
                        verbose=2,
                        corFnc=NULL,
                        max_iter=5,
-                       celltype,
+                       cellType,
                        scale_MEs_by_kIMs=F) {
 
   # Usage: iteratively reassign genes to modules based on kIM / kME until the number to reassign <= stop_condition
@@ -631,6 +565,7 @@ kM_reassign_fnc = function(colors,
   #   list with entries "colors", "kMs" and "log". 
 
   # initialise
+  tryCatch({
   colors_original <- colors
   reassign_total  <- reassign_t_1 <- logical(length(colors))
   reassign_t <- ! logical(length(colors))
@@ -688,7 +623,8 @@ kM_reassign_fnc = function(colors,
   if (verbose > 0) message(paste0(celltype, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
   
   
-  return(list("colors" = colors, "kMs" = kMs, "log" = log))
+  return(list("colors" = colors, "kMs" = kMs, "log" = log))}, 
+  error = function(c) {warning(paste0("kM_reassign_fnc failed for ", cellType))})
   
 }
 
@@ -1346,6 +1282,7 @@ kM_magma <- function(cellType,
   # Args: 
   # Returns:
   
+  tryCatch({
   unique_colors = colnames(modulekM)
   table.kM.cor.p = table.kM.cor.r = table.kM.cor.emp.p <- matrix(NA,nrow=length(unique_colors),ncol=length(gwas)) 
   rownames(table.kM.cor.r) = rownames(table.kM.cor.p) = rownames(table.kM.cor.emp.p) = unique_colors
@@ -1394,8 +1331,8 @@ kM_magma <- function(cellType,
   
   rownames(table.kM.cor.r) <- rownames(table.kM.cor.p) <- rownames(table.kM.cor.emp.p) <- paste0(cellType, "__", rownames(table.kM.cor.p))
   
-  return(list('p.val'= table.kM.cor.p, 'corrCoef' = table.kM.cor.r, 'emp.p.val' = table.kM.cor.emp.p))
-  
+  return(list('p.val'= table.kM.cor.p, 'corrCoef' = table.kM.cor.r, 'emp.p.val' = table.kM.cor.emp.p))}, 
+  error = function(c) {warning(paste0("kM_magma failed for ", cellType))})
 }
 
 
@@ -1472,7 +1409,8 @@ mendelianGenes <- function(cellType,
       idx = match(gene.lists[[j]], names(colors))
       binaryMat$GeneSet[idx] = 1
       
-      tryCatch({glm.out <- glm(binaryMat$GeneSet~binaryMat$Module, family=binomial())
+      tryCatch({
+      glm.out <- glm(binaryMat$GeneSet~binaryMat$Module, family=binomial())
       logit.or[i,j] = exp(coefficients(glm.out)[2])  # Calculate odds ratio from logistic regression
       logit.p[i,j] = summary(glm.out)$coefficients[2,4]  # get P value for coefficient
       
@@ -1499,42 +1437,6 @@ mendelianGenes <- function(cellType,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-# cellModEmbed <- function(datExpr, 
-#                         colours=NULL, 
-#                         latentGeneType,
-#                         cellType=NULL,
-#                         kMs=NULL) {
-#   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
-#   # colors is a character vector with gene names
-#   # the genes should be ordered identically
-#   
-#   # prepare celltype character for naming columns
-#   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
-#   if (latentGeneType == "ME") { 
-#     list_datExpr <- lapply(unique(colours)[unique(colours)!="grey"], function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-#     
-#     embed_mat <- as.matrix(sapply(list_datExpr, function(x) prcomp_irlba(t(x), n=1, retx=T)$rotation, simplify = T))
-#     colnames(embed_mat) <- paste0(cellType_prefix, unique(colours)[unique(colours)!="grey"]) 
-#   } else if (latentGeneType == "IM") {
-#     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colours)[colours==x], colnames(datExpr))])
-#     list_kMs <- mapply(function(x,y) kMs[match(names(colours)[colours==y], rownames(kMs)),y],
-#                        x= kMs,
-#                        y=colnames(kMs),
-#                        SIMPLIFY=F)
-#     
-#     embed_mat <- as.matrix(mapply(function(x,y) x %*% as.matrix(y),
-#                                   x = list_datExpr,
-#                                   y = list_kMs,
-#                                   SIMPLIFY=T))
-#     # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
-#     # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
-#     colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
-#   } 
-#   rownames(embed_mat) <- rownames(datExpr)
-#   return(embed_mat)
-# }
-
-
 cellModEmbed <- function(datExpr, 
                          colors=NULL, 
                          latentGeneType,
@@ -1548,6 +1450,7 @@ cellModEmbed <- function(datExpr,
   # the genes should be ordered identically
   
   # prepare celltype character for naming columns
+  tryCatch({
   if (is.null(cellType)) cellType_prefix <- "" else cellType_prefix <- paste0(cellType, "__")
   if (latentGeneType == "ME") { 
     
@@ -1597,6 +1500,7 @@ cellModEmbed <- function(datExpr,
     rownames(embed_mat) <- rownames(datExpr)
   } 
   return(embed_mat)
+  }, error = function(c) {warning(paste0("cellModEmbed failed for ", cellType))})
 }
 
 ############################################################################################################################################################
