@@ -1081,7 +1081,7 @@ if (resume == "checkpoint_2") {
                                                                                                                     datExpr=list_datExpr_gg[[x]],
                                                                                                                     excludeGrey = F,
                                                                                                                     scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                                                                                                    dissTOM = if (scale_MEs_by_kIMs==T) list_dissTOM[[x]] else NULL)))
+                                                                                                                    dissTOM = if (scale_MEs_by_kIMs) list_dissTOM[[x]] else NULL)))
 
     names(list_list_merged) = sNames
     
@@ -1180,7 +1180,7 @@ if (resume == "checkpoint_2") {
     
     list_list_reassign = mapply(function(a,b,c,d) parLapplyLB(cl, a, function(x) kM_reassign_fnc(colors = x,
                                                                                              fuzzyModMembership = fuzzyModMembership,
-                                                                                             dissTOM = if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs==T) b else NULL,
+                                                                                             dissTOM = if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) b else NULL,
                                                                                              datExpr = if (fuzzyModMembership=="kME") c else NULL,
                                                                                              corFnc = if (fuzzyModMembership=="kME") corFnc else NULL,
                                                                                              verbose=verbose,
@@ -1648,14 +1648,14 @@ if (resume == "checkpoint_4") {
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
-  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs==T ) rm(list_dissTOM_PPI)
+  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs ) rm(list_dissTOM_PPI)
   
   ##########################################################################
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
   ##########################################################################
-  
-  message("Checking modules for enrichment with rare variants/mendelian genes")
-  
+    
+    message("Checking modules for enrichment with rare variants/mendelian genes")
+    
   variants <- load_obj(f=variants_path)
   
   # convert kMs from dataframes to lists
@@ -1679,13 +1679,18 @@ if (resume == "checkpoint_4") {
   
   list_list_variants_GSEA <- parLapplyLB(cl, list_list_kMs_PPI, 
                                          function(x) lapply(x, 
-                                                            function(y) gsea(values = y, geneset = variants, plot = F, return.details=T)))
+                                                            function(y) {
+                                                              out<-matrix(gsea(values = y, geneset = variants, plot = F, return.details=T), ncol=4)
+                                                              colnames(out) <- c("p.val", "edge.score", "edge.value", "scaled.score")
+                                                              rownames(out) <- names(x)
+                                                              return(out)}
+                                                            ))
   # Returns a list (of modules) of dataframes with enrichment terms as rownames and columns: p.val, q.val, sscore and edge
   stopCluster(cl)
   invisible(gc()); invisible(R.utils::gcDLLs())
   
   # dissolve the top level celltype list so we have a list of module enrichment vectors
-  list_variants_GSEA <- unlist(list_list_variants_GSEA, recursive = F, use.names = T) 
+  unlist(list_list_variants_GSEA, recursive = F, use.names = T)  -> list_variants_GSEA 
   #variants_GSEA_mat <- matrix(nrow=length(list_variants_GSEA), ncol=6) 
   
   celltype_col <- rep(sNames_PPI, times=sapply(list_list_variants_GSEA, length))
@@ -1832,6 +1837,7 @@ if (resume == "checkpoint_4") {
     magma.p.all <- NULL
     magma.emp.p.all <- NULL 
     magma.p.fdr.log <- NULL
+    vec_MMtoHsmapping_prop.mapped <- NULL
   }
   
   ##########################################################################
@@ -1886,8 +1892,7 @@ if (resume == "checkpoint_4") {
   
   # count number of enriched module per celltype for summary stats
   n_modules_gwas_enriched <- rep(NA, times = length(sNames))
-  n_modules_gwas_enriched[sNames %in% sNames_PPI] <- if (!is.null(magma_gwas_dir)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
-  
+  n_modules_gwas_enriched[sNames %in% sNames_PPI] <- if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
 
   ######################################################################
   ####### FILTER MODULES ON GWAS SIGNIFICANCE ALSO IN OTHER FILES ######
@@ -2338,8 +2343,10 @@ if (resume == "checkpoint_4") {
     invisible(write.csv(magma.p.fdr.log, file=sprintf("%s%s_%s_magma.fdr.log.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
     invisible(write.csv(magma.r.all, file=sprintf("%s%s_%s_magma.r.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
     
-    if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_%s_magma.fdr.log.sig.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
-    if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=sprintf("%s%s_%s_magma.r.sig.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_%s_magma.fdr.log.sig.csv", tables_dir, data_prefix, run_prefix), 
+                                                          row.names=F, quote = F))
+    if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=sprintf("%s%s_%s_magma.r.sig.csv", tables_dir, data_prefix, run_prefix), 
+                                                 row.names=F, quote = F))
   }
   
   ####################### OUTPUT METADATA CORRELATION RESULTS ###############
@@ -2347,8 +2354,12 @@ if (resume == "checkpoint_4") {
   
   if (!is.null(metadata_corr_col) & !is.null(metadata)) {
     invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_%s_all_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix), row.names=T, quote = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), list_mod_metadata_corr_rho, sNames_PPI, SIMPLIFY = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), list_mod_metadata_corr_fdr.log, sNames_PPI, SIMPLIFY = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
+                     list_mod_metadata_corr_rho, 
+                     sNames_gwas, SIMPLIFY = F))
+    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
+                     list_mod_metadata_corr_fdr.log, 
+                     sNames_gwas, SIMPLIFY = F))
   }
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
@@ -2374,7 +2385,7 @@ if (resume == "checkpoint_4") {
                                      prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
                                      n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
-                                     prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)), 
+                                     prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)) else rep(NA, length(sNames)), 
                                      n_modules_variants_enriched = n_modules_variants_enriched,
                                      n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames)),
                                      n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) n_modules_meta_enriched else rep(NA, times=length(sNames)),
@@ -2391,7 +2402,7 @@ if (resume == "checkpoint_4") {
                     prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI, na.rm=T),2),
                     n_modules_total = sum(sumstats_celltype_df$n_modules),
                     n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched), 
-                    prop_genes_mapped_to_ortholog = if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA,
+                    prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA else NA,
                     n_modules_variants_enriched = sum(sumstats_celltype_df$n_modules_variants_enriched, na.rm=T),
                     n_modules_magma_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sum(n_modules_gwas_enriched, na.rm = T) else NA,
                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) sum(sumstats_celltype_df$n_modules_meta_enriched, na.rm = T) else NA) 
