@@ -1397,7 +1397,7 @@ if (resume == "checkpoint_3") {
                               c = list_PPI_pkM_threshold,
                               SIMPLIFY=F)
   
-  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI_uniq, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
+  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
   
   list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
   list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))

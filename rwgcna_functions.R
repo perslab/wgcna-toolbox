@@ -1382,10 +1382,11 @@ kM_magma <- function(cellType,
         
         x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
         y = -log10(gwas[[j]]$P[match(intersect(rownames(modulekM), gwas[[j]]$gene_name), gwas[[j]]$gene_name)])
-        test = t.test(y,x, alternative = "g")
+        
+        test = tryCatch({t.test(y,x, alternative = "g")}, error = function(c) {return(list(p.value=1))})
 
         table.kM.cor.p[col,j] <- test$p.value
-        table.kM.cor.r[col,j] <- 0
+        table.kM.cor.r[col,j] <- 1e-5 # to avoid 0, which will lead to problems when taking sign of the correlation to adjust p-values
         table.kM.cor.emp.p[col,j] <- 1        
       }
     }
