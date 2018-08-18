@@ -1009,9 +1009,13 @@ wrapModulePreservation <- function(listDatExpr,
 load_obj <- function(f) {
   # Utility function for loading an object inside a new environment and returning it so it can
   # stored in a variable
+  if (grepl(pattern = ".RDS", x = f)) {
+    out <- readRDS(file=f)
+    out
+  } else if (grepl(pattern=".RData", x=f)) { 
   env <- new.env()
   nm <- load(f, env)[1]
-  env[[nm]]
+  env[[nm]]} 
 }
 
 ############################################################################################################################################################

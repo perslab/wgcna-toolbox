@@ -2430,9 +2430,9 @@ if (resume == "checkpoint_4") {
   matrix(unlist(params_run), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
   
   # make path strings
-  sumstats_celltype_path = sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix)
-  sumstats_run_path = sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix)
-  params_run_path = sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix)
+  sumstats_celltype_path = sprintf("%s%s_sumstats_celltype.tab", log_dir, data_prefix)
+  sumstats_run_path = sprintf("%s%s_sumstats_run.tab", log_dir, data_prefix)
+  params_run_path = sprintf("%s%s_params_run.tab", log_dir, data_prefix)
     
   # set append param values
   append_sumstats_celltype = file.exists(sumstats_celltype_path)
