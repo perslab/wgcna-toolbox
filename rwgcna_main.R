@@ -1874,13 +1874,13 @@ if (resume == "checkpoint_4") {
       } else if (sum(idx_row_keep)==0) { # Warn if there are no significant enrichments
         
         gwas_filter_traits <- NULL # this will activate the logic in the next if statement
-        warning("No modules enriched for gwas_filter_traits or rare variants - skipping filtering step")
+        warning("After filtering for GWAS enrichment no modules remain! Skipping GWAS filtering step")
         
       }
     } else {
       
       gwas_filter_traits <- NULL # this will activate the logic in the next if statement 
-      message("None of gwas_filter_traits strings found in magma_gwas_dir files - skipping filtering step")
+      warning("None of gwas_filter_traits strings found in magma_gwas_dir files! Skipping GWAS filtering step")
       
     }
   }  
@@ -2087,40 +2087,56 @@ if (resume == "checkpoint_4") {
       # Get a list of logical vectors indicating significant correlations
       list_idx_module_meta_sig <- lapply(list_mod_metadata_corr_fdr.log, function(x) apply(x, 2, function(y) any(y>-log10(pvalThreshold)))) # logical
 
-      # Only keep significantly correlated modules within each celltype
-      list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_meta_sig, SIMPLIFY=F) 
-      list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) %>% Filter(f=length)
+      if (sum(sapply(list_idx_module_meta_sig, sum))==0) {
+        
+        warning("After filtering for metadata correlations no modules remain! Skipping metadata filtering step")
+        sNames_meta <- sNames_gwas
+        list_colors_meta <- list_colors_gwas
+        list_module_meta <- list_module_gwas
+        list_kMs_meta <- list_kMs_gwas
+        list_MEs_meta <- list_MEs_gwas
+        
+        metadata_corr_filter_vals = NULL
+        metadata_corr_col = NULL        
+        metadata=NULL
+  
+      } else {
       
-      sNames_meta <- sNames_gwas[sNames_gwas %in% names(list_module_meta)] # ordered correctly
-      
-      # Keep the order
-      list_module_meta <- list_module_meta[match(sNames_meta, names(list_module_meta))]
-      
-      # reassign genes of filtered out modules to grey and remove any empty cell clusters
-      list_colors_meta <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
-                                 x = list_colors_gwas[names(list_colors_gwas) %in% sNames_meta, drop=F],
-                                 y = list_module_meta,
-                                 SIMPLIFY = F)
-      
-      # give gene names to color assignment vectors
-      list_colors_meta <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
-                                 x = list_colors_meta,
-                                 y = list_colors_gwas[names(list_colors_gwas) %in% sNames_meta, drop=F],
-                                 SIMPLIFY = F)
-      
-      # Filter kM lists
-      list_kMs_meta <- list_kMs_gwas[names(list_kMs_gwas) %in% sNames_meta, drop = F]
-      list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y, drop=F],x=list_kMs_meta, y = list_module_meta, SIMPLIFY=F) %>% Filter(f=length)
-      
-      # Filter ME lists
-      if (fuzzyModMembership=="kME") {
-        list_MEs_meta <- list_MEs_gwas[names(list_MEs_gwas) %in% sNames_meta, drop = F]
-        list_MEs_meta <- mapply(function(x,y) x[,colnames(x) %in% y, drop=F],
-                                x = list_MEs_meta, 
-                                y = list_module_meta,
-                                SIMPLIFY=F) %>% Filter(f=length)
-      }  else {
-        list_MEs_meta <- list_MEs_gwas 
+        # Only keep significantly correlated modules within each celltype
+        list_module_meta <- mapply(function(x,y) colnames(x[,y, drop=F]),x=list_mod_metadata_corr_fdr.log, y=list_idx_module_meta_sig, SIMPLIFY=F) 
+        list_module_meta <- lapply(list_module_meta, function(x) gsub("^.*__", "", x)) %>% Filter(f=length)
+        
+        sNames_meta <- sNames_gwas[sNames_gwas %in% names(list_module_meta)] # ordered correctly
+        
+        # Keep the order
+        list_module_meta <- list_module_meta[match(sNames_meta, names(list_module_meta))]
+        
+        # reassign genes of filtered out modules to grey and remove any empty cell clusters
+        list_colors_meta <- mapply(function(x,y) ifelse(x %in% y, yes = x, no = "grey"),
+                                   x = list_colors_gwas[names(list_colors_gwas) %in% sNames_meta],
+                                   y = list_module_meta,
+                                   SIMPLIFY = F)
+        
+        # give gene names to color assignment vectors
+        list_colors_meta <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = names(y), dimension = NULL), 
+                                   x = list_colors_meta,
+                                   y = list_colors_gwas[names(list_colors_gwas) %in% sNames_meta],
+                                   SIMPLIFY = F)
+        
+        # Filter kM lists
+        list_kMs_meta <- list_kMs_gwas[names(list_kMs_gwas) %in% sNames_meta, drop = F]
+        list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y, drop=F],x=list_kMs_meta, y = list_module_meta, SIMPLIFY=F) %>% Filter(f=length)
+        
+        # Filter ME lists
+        if (fuzzyModMembership=="kME") {
+          list_MEs_meta <- list_MEs_gwas[names(list_MEs_gwas) %in% sNames_meta, drop = F]
+          list_MEs_meta <- mapply(function(x,y) x[,colnames(x) %in% y, drop=F],
+                                  x = list_MEs_meta, 
+                                  y = list_module_meta,
+                                  SIMPLIFY=F) %>% Filter(f=length)
+        }  else {
+          list_MEs_meta <- list_MEs_gwas 
+        }
       }
       
     } else {
@@ -2144,7 +2160,7 @@ if (resume == "checkpoint_4") {
   
   # count number of enriched module per celltype for summary stats
   n_modules_meta_enriched <- rep(NA, times=length(sNames))
-  n_modules_meta_enriched[sNames %in% sNames_gwas] <- sapply(list_idx_module_meta_sig, sum) 
+  if (!is.null(metadata_corr_col) & !is.null(metadata_corr_filter_vals)) n_modules_meta_enriched[sNames %in% sNames_gwas] <- sapply(list_idx_module_meta_sig, sum) 
 
   ######################################################################
   ############################ COMPUTE PRIMARY KMs #####################
