@@ -2265,7 +2265,7 @@ if (resume == "checkpoint_4") {
   list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F)
   hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
-  colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", "pkMs")
+  colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", paste0("p", fuzzyModMembership))
 
   ######################################################################
   ######################### CLEAR UP TOMS ##############################
