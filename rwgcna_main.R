@@ -658,10 +658,10 @@ if (is.null(resume)) {
     
     start_time <- Sys.time()
     
-    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parPCA.txt"))
+    cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parPCA.txt"))
     
     tryCatch({
-      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
+      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                              use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
@@ -672,7 +672,7 @@ if (is.null(resume)) {
                                                              fastpath = fastpath)) 
       
     }, warning = function(c) {
-      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
+      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                              use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
@@ -1466,7 +1466,11 @@ if (resume == "checkpoint_4") {
   list_PPI_vec_n_grey <- lapply(list_list_colors_PPI, count_grey_in_list_of_vec)
   
   # Order all the outputs by how many genes were assigned to a (non-grey) module
-  list_list_reassign_log_order <- if (kM_reassign) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
+  if (kM_reassign) {
+    list_list_reassign_log_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_reassign_log, y = list_PPI_vec_n_grey, SIMPLIFY=F) 
+  } else {
+    list_list_reassign_log_order <- NULL
+  }
   list_list_plot_label_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_plot_label_ok, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_colors_matched_ok_order <- mapply(function(x,y) x[order(y, decreasing=F)], x  =  list_list_colors_matched_ok , y = list_PPI_vec_n_grey, SIMPLIFY = F )
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
@@ -2387,8 +2391,7 @@ if (resume == "checkpoint_4") {
   
   t_finish <- as.character(Sys.time())
   
-  sumstats_celltype_df <- data.frame(t_start = rep(t_start, times=length(sNames)),
-                                     run_prefix = rep(run_prefix, times=length(sNames)),
+  sumstats_celltype_df <- data.frame(run_prefix = rep(run_prefix, times=length(sNames)),
                                      subset = sNames, 
                                      n_cells = n_cells_subsets,
                                      n_genes = n_genes_subsets,
@@ -2407,7 +2410,8 @@ if (resume == "checkpoint_4") {
                                      n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) n_modules_meta_enriched else rep(NA, times=length(sNames)),
                                      row.names = NULL, stringsAsFactors = F)
                            
-  sumstats_run <- c(t_start = t_start,
+  sumstats_run <- c(run_prefix = run_prefix,
+                    t_start = t_start,
                     t_finish = t_finish,
                     mean_percent_mito = mean(percent.mito, na.rm=T),
                     mean_percent_ribo = mean(percent.mito, na.rm=T),

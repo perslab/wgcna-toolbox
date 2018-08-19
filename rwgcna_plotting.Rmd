@@ -23,9 +23,9 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-project_dir = "/projects/jonatan/tmp-rwgcna-tests/mouse_top10_8/"
-data_prefix = "mouse_top10"
-run_prefix = "8"
+project_dir = "/projects/jonatan/tmp-mousebrain/"
+data_prefix = "mousebrain"
+#run_prefix = "Immune_Class_1"
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -78,9 +78,9 @@ load(session_image_path)
 ## Retrieve run stats
 
 ```{r}
-params_run <- read.table(sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
-sumstats_run <- read.table(sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
-sumstats_celltype <- read.table(sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix), sep = "\t", quote = "", header=T)
+params_run <- read.table(sprintf("%s%s_params_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
+sumstats_run <- read.table(sprintf("%s%s_sumstats_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
+sumstats_celltype <- read.table(sprintf("%s%s_sumstats_celltype.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
 
 ```
 
