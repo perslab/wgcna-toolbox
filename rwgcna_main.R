@@ -661,7 +661,7 @@ if (is.null(resume)) {
     cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parPCA.txt"))
     
     tryCatch({
-      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
+      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                              use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
@@ -671,8 +671,8 @@ if (is.null(resume)) {
                                                              maxit = maxit, # set to 500 as default
                                                              fastpath = fastpath)) 
       
-    }, warning = function(c) {
-      subsets <- parLapply(cl, subsets, function(x) RunPCA(object = x,
+    }, error = function(c) {
+      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
                                                              pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
                                                              pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
                                                              use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
@@ -1205,10 +1205,12 @@ if (resume == "checkpoint_2") {
     list_list_kMs_reassign <- list_list_kMs
     list_list_reassign_log <- NULL
   }  
+
   ######################################################################
   #################### EXTRACT PRIMARY kMEs / kIMs #####################
   ######################################################################
-  
+ 
+   
   # Extract the primary kMs - i.e. those of each gene w.r.t. the module to which it belongs
   # We use these to filter genes that we submit to STRINGdb
 
@@ -1236,6 +1238,70 @@ if (resume == "checkpoint_2") {
                            SIMPLIFY=F)
   
   names(list_list_pkMs) <- sNames
+  
+  
+  ######################################################################
+  ########## FILTER GENES WITH INSIGNIFICANT kME or T-TEST #############
+  ######################################################################
+  
+  # TODO!
+  
+  if (!TODO) {
+    if (kM_signif_filter) {
+  
+      invisible(gc()); invisible(R.utils::gcDLLs())
+      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt"))
+      if (fuzzyModMembership=="kME") {
+        list_list_t.test.signif <- parLapplyLB(cl, list_list_pkMs, function(x) {
+          lapply(x, function(vec_rho) {
+            vec_t <- (vec_rho*sqrt(length(vec_rho)-2))/sqrt(1-vec_rho^2) # compute t.stats, for a vector of rho
+            vec_p.val <- stats::pt(q=vec_t,  
+                               lower.tail = F, 
+                               df = length(vec_rho)-2) # compute p.value of t.stats
+            vec_idx_signif <- vec_p.val < (p.val.threshold/2.0) # compute boolean significance vector
+            out <- data.frame(t=vec_t, p.val = vec_p.val, signif = vec_idx_signif)
+            out
+          })
+        })
+      } else if (fuzzyModMembership=="kIM") {
+        
+        # list_list_cellModEmbed <- clusterMap(cl, function(a,b,c,d,e) mapply(function(x,y) cellModEmbed(datExpr = a, 
+        #                                                                  colors = x,
+        #                                                                  latentGeneType = "IM",
+        #                                                                  cellType = c,
+        #                                                                  kMs = y,
+        #                                                                  excludeGrey = T,
+        #                                                                  dissTOM = e), 
+        #                                                                  x = b, 
+        #                                                                  y = d, 
+        #                                                                  SIMPLIFY=F),
+        #                                      a = list_datExpr_gg,
+        #                                      b = list_list_colors_reassign,
+        #                                      c = names(list_datExpr_gg),
+        #                                      d = list_list_kMs_reassign,
+        #                                      e = list_dissTOM, 
+        #                                      SIMPLIFY=F,
+        #                                      .scheduling = c("dynamic")) 
+        # 
+        # list_list_corr.p.val <- clusterMap(cl, function(a,b) mapply(function(x,y) {
+        #   
+        # }, 
+        # a=x
+        # b=t,
+        # SIMPLIFY=F), 
+        # x = list_datExpr)
+  
+      }  
+    } else {
+      # outputs <- inputs
+    }  
+  }
+  
+  ######################################################################
+  ################## REMOVE MODULES < minClusterSize ###################
+  ######################################################################
+  
+  # TODO
   
   ######################################################################
   ############## Match colors between parameter settings ###############
@@ -1597,17 +1663,23 @@ if (resume == "checkpoint_4") {
     invisible(gc())
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kMEs_PPI.txt"))
     
-    list_MEs_PPI <- clusterMap(cl, function(x,y,z) moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
+    list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z) moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
                                                                   colors=y,
                                                                   excludeGrey=T,
                                                                   scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL)$eigengenes, 
-                               x = list_datExpr_PPI, 
-                               y = list_colors_PPI_uniq,
-                               z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
-                               SIMPLIFY = F,
-                               .scheduling = c("dynamic"))
+                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL), 
+                                                   x = list_datExpr_PPI, 
+                                                   y = list_colors_PPI_uniq,
+                                                   z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
+                                                   SIMPLIFY = F,
+                                                   .scheduling = c("dynamic"))
+                        
+    list_MEs_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$eigengenes)
     
+    list_u_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$u)
+    
+    names(list_MEs_PPI) <- names(list_u_PPI) <- sNames_PPI
+      
     list_kMs_PPI <- clusterMap(cl, function(x,y) signedKME(datExpr = as.matrix(x),
                                                            datME = y,
                                                            outputColumnName = "",
@@ -1619,7 +1691,7 @@ if (resume == "checkpoint_4") {
     
     # Remove 'ME' from eigengenes
     list_MEs_PPI <- lapply(list_MEs_PPI, function(x) name_for_vec(to_be_named = x, given_names = gsub(pattern="ME" , replacement="", x = colnames(x), ignore.case = F), dimension = 2))
-      
+    
     # add cell row names
     list_MEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = rownames(y), dimension=1), 
                            x = list_MEs_PPI,
@@ -1648,6 +1720,7 @@ if (resume == "checkpoint_4") {
     names(list_kMs_PPI) <- sNames_PPI
     
     list_MEs_PPI <- NULL
+    list_u_PPI <- NULL
     
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
@@ -1947,12 +2020,20 @@ if (resume == "checkpoint_4") {
     if (fuzzyModMembership=="kME") {
       
       list_MEs_gwas <- list_MEs_PPI[sNames_PPI %in% sNames_gwas, drop = F]
-      list_MEs_gwas <- mapply(function(x,y) x[colnames(x) %in% y],
+      list_MEs_gwas <- mapply(function(x,y) x[colnames(x) %in% y], 
                               x = list_MEs_gwas,
                               y = list_module_gwas,
                               SIMPLIFY=F)
+      
+      list_u_gwas <- list_u_PPI[sNames_PPI %in% sNames_gwas, drop = F]
+      list_u_gwas <- mapply(function(x,y) x[names(x) %in% y],
+                              x = list_u_gwas,
+                              y = list_module_gwas,
+                              SIMPLIFY=F)
+      
     } else {
       list_MEs_gwas <- NULL
+      list_u_gwas <- NULL
     }
       
   } else if (is.null(magma_gwas_dir) | is.null(gwas_filter_traits)) {
@@ -1964,6 +2045,7 @@ if (resume == "checkpoint_4") {
     list_datExpr_gwas <- list_datExpr_PPI
     list_kMs_gwas <- list_kMs_PPI 
     list_MEs_gwas <- list_MEs_PPI
+    list_u_gwas <- list_u_PPI
   }
  
   #####################################################################
@@ -2099,6 +2181,7 @@ if (resume == "checkpoint_4") {
         list_module_meta <- list_module_gwas
         list_kMs_meta <- list_kMs_gwas
         list_MEs_meta <- list_MEs_gwas
+        list_u_meta <- list_u_gwas 
         
         metadata_corr_filter_vals = NULL
         metadata_corr_col = NULL        
@@ -2134,12 +2217,21 @@ if (resume == "checkpoint_4") {
         # Filter ME lists
         if (fuzzyModMembership=="kME") {
           list_MEs_meta <- list_MEs_gwas[names(list_MEs_gwas) %in% sNames_meta, drop = F]
-          list_MEs_meta <- mapply(function(x,y) x[,colnames(x) %in% y, drop=F],
+          list_MEs_meta <- mapply(function(x,y) x[colnames(x) %in% y, drop=F],
                                   x = list_MEs_meta, 
                                   y = list_module_meta,
                                   SIMPLIFY=F) %>% Filter(f=length)
+          
+          list_u_meta <- list_u_gwas[names(list_u_gwas) %in% sNames_meta, drop = F]
+          list_u_meta <- mapply(function(x,y) x[names(x) %in% y, drop=F],
+                                  x = list_u_meta, 
+                                  y = list_module_meta,
+                                  SIMPLIFY=F) %>% Filter(f=length)
+          
+          
         }  else {
           list_MEs_meta <- list_MEs_gwas 
+          list_u_meta <- list_u_gwas
         }
       }
       
@@ -2150,7 +2242,7 @@ if (resume == "checkpoint_4") {
     list_module_meta <- list_module_gwas
     list_kMs_meta <- list_kMs_gwas
     list_MEs_meta <- list_MEs_gwas
-    
+    list_u_meta <- list_u_gwas
     }
     
   } else if (is.null(metadata_corr_col) | is.null(metadata_corr_filter_vals)) {
@@ -2160,6 +2252,7 @@ if (resume == "checkpoint_4") {
     list_module_meta <- list_module_gwas
     list_kMs_meta <- list_kMs_gwas 
     list_MEs_meta <- list_MEs_gwas
+    list_u_meta <- list_u_gwas
   }
   
   # count number of enriched module per celltype for summary stats
@@ -2381,10 +2474,16 @@ if (resume == "checkpoint_4") {
                      list_mod_metadata_corr_fdr.log, 
                      sNames_gwas, SIMPLIFY = F))
   }
+  
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
   invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=T, quote = F))
+  
+  ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
+  ###########################################################################
+  
+  saveRDS(object = list_u_meta, file=sprintf("%s%s_%s_list_list_module_u.RDS", RObjects_dir, data_prefix, run_prefix))
   
   ##################### WRITE PARAMETERS AND STATS TO FILES ################
   ##########################################################################

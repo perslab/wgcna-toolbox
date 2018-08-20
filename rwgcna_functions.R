@@ -287,7 +287,7 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_M
     colors = labels2colors(merged$colors)
     #MEs = merged$newMEs 
     MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
-                           colors,
+                           colors=colors,
                            excludeGrey = excludeGrey,
                            scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                            dissTOM = dissTOM)
@@ -456,7 +456,6 @@ parMatchColors <- function(list_colors) {
 parkMEs = function(list_MEs, datExpr) {
   
   # Compute kMEs and pkMEs for each set of colors corresponding to distinct parameters
-  list_kMEs <- NULL
   list_kMEs <- vector(mode="list", length=length(list_MEs))
   
   for (j in 1:length(list_MEs)) {
@@ -1012,7 +1011,7 @@ load_obj <- function(f) {
   if (grepl(pattern = ".RDS", x = f)) {
     out <- readRDS(file=f)
     out
-  } else if (grepl(pattern=".RData", x=f)) { 
+  } else if (grepl(pattern=".RData|Rdata", x=f)) { 
   env <- new.env()
   nm <- load(f, env)[1]
   env[[nm]]} 
@@ -1543,7 +1542,7 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
                                          softPower = 6, scale = TRUE, verbose = 0, indent = 0) 
 {
   ############ ADDED ############ 
-  kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors, verbose=verbose, excludeGrey=excludeGrey) else NULL
+  #kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors, verbose=verbose, excludeGrey=excludeGrey) else NULL
   ############################### 
   
   spaces = indentSpaces(indent)
@@ -1583,8 +1582,7 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
   nVarExplained = min(nPC, maxVarExplained)
   modlevels = levels(factor(colors))
   if (excludeGrey) 
-    if (sum(as.character(modlevels) != as.character(grey)) > 
-        0) {
+    if (sum(as.character(modlevels) != as.character(grey)) > 0) {
       modlevels = modlevels[as.character(modlevels) != 
                               as.character(grey)]
     }
@@ -1594,8 +1592,20 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
   }
   PrinComps = data.frame(matrix(NA, nrow = dim(expr)[[1]], 
                                 ncol = length(modlevels)))
+
+  PrinComps_l = vector(mode="list", length= length(modlevels))  
+
+  # PrinComps_l = data.frame(matrix(NA, nrow = dim(expr)[[2]], 
+  #                               ncol = length(modlevels)))
+  
   averExpr = data.frame(matrix(NA, nrow = dim(expr)[[1]], 
-                               ncol = length(modlevels)))
+                                 ncol = length(modlevels)))
+  
+  averExpr_l = vector(mode="list", length= length(modlevels)) 
+  # averExpr_l = data.frame(matrix(NA, nrow = dim(expr)[[2]], 
+  #                              ncol = length(modlevels)))
+  
+
   varExpl = data.frame(matrix(NA, nrow = nVarExplained, ncol = length(modlevels)))
   validMEs = rep(TRUE, length(modlevels))
   validAEs = rep(FALSE, length(modlevels))
@@ -1604,7 +1614,11 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
   validColors = colors
   names(PrinComps) = paste(moduleColor.getMEprefix(), modlevels, 
                            sep = "")
+  names(PrinComps_l) = modlevels
+  
   names(averExpr) = paste("AE", modlevels, sep = "")
+  names(averExpr_l) = paste("AE", modlevels, sep = "")
+  
   for (i in c(1:length(modlevels))) {
     if (verbose > 1) 
       printFlush(paste(spaces, "moduleEigengenes : Working on ME for module", 
@@ -1617,7 +1631,10 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
     datModule = as.matrix(t(expr[, restrict1]))
     n = dim(datModule)[1]
     p = dim(datModule)[2]
-    pc = try({
+   
+    ######
+    
+    svd_1 = try({
       if (nrow(datModule) > 1 && impute) {
         seedSaved = FALSE
         if (exists(".Random.seed")) {
@@ -1644,31 +1661,38 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
       ############ ADDED ############ 
       # @author: Jonatan Thompson, Perslab, rkm916@ku.dk
       
-      if(!is.null(kIMs)) {
-        pkIMs <- kIMs[[restrict1, "modulename"]] # retrieve principal kIMs
-        pkIMs <- 1/sum(pkIMs) # normalise the principal kIMs so they sum to 1
-        mapply(function(X,y) X*y, # scale the rows (genes) of datModule by the normalised principal kIM 
-               X=datModule, 
-               y=pkIMs,
-               SIMPLIFY=T) %>% matrix(nrow=nrow(datModule)) -> datModule
-      } 
+      # if(!is.null(kIMs)) {
+      #   pkIMs <- kIMs[[restrict1, "modulename"]] # retrieve principal kIMs
+      #   pkIMs <- 1/sum(pkIMs) # normalise the principal kIMs so they sum to 1
+      #   mapply(function(X,y) X*y, # scale the rows (genes) of datModule by the normalised principal kIM 
+      #          X=datModule, 
+      #          y=pkIMs,
+      #          SIMPLIFY=T) %>% matrix(nrow=nrow(datModule)) -> datModule
+      # } 
       # the kIM-scaled datModule now replaces the original for svd and for computing average expression
-      
+      # doesn't work..
+      # unnecessary??
+   
       ###############################
       if (verbose > 5) 
         printFlush(paste(spaces, " ...calculating SVD"))
       
-      svd1 = svd(if(!is.null(kIMs)) datModule, nu = min(n, p, nPC), nv = min(n, 
-                                                                             p, nPC))
+      svd_1 = svd(datModule, nu = min(n, p, nPC), nv = min(n,p, nPC))
       
       if (verbose > 5) 
         printFlush(paste(spaces, " ...calculating PVE"))
-      veMat = cor(svd1$v[, c(1:min(n, p, nVarExplained))], 
+      veMat = cor(svd_1$v[, c(1:min(n, p, nVarExplained))], 
                   t(datModule), use = "p")
       varExpl[c(1:min(n, p, nVarExplained)), i] = rowMeans(veMat^2, 
                                                            na.rm = TRUE)
-      svd1$v[, 1]
+      svd_1
     }, silent = TRUE)
+    
+    pc <- svd_1$v[, 1]
+    pc_l <- svd_1$u[, 1]
+    
+    ###############################
+    
     if (class(pc) == "try-error") {
       if ((!subHubs) && (!trapErrors)) 
         stop(pc)
@@ -1752,12 +1776,39 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
                       ae, "The returned average expression vector will be invalid.\n"))
       }
       validAEs[i] = !(class(ae) == "try-error")
+      
+      ########## ADDED ##########
+      # Also left singular components
+      names(pc_l) <- rownames(datModule)
+      PrinComps_l[[i]] = pc_l
+
+      if (isPC[i]) 
+      scaledExpr_l = scale(t(datModule))
+      averExpr_l[[i]] = colMeans(scaledExpr_l, na.rm = TRUE)
+      if (align == "along average") {
+        if (verbose > 4) 
+          printFlush(paste(spaces, " .. aligning reverse module eigengene with average gene expression."))
+        corAve_l = cor(averExpr_l[[i]], PrinComps_l[[i]], 
+                     use = "p")
+        if (!is.finite(corAve_l)) 
+          corAve_l = 0
+        if (corAve_l < 0) 
+          PrinComps_l[[i]] = -PrinComps_l[[i]]
+      }
+
+      #################
     }
   }
   allOK = (sum(!validMEs) == 0)
   if (returnValidOnly && sum(!validMEs) > 0) {
     PrinComps = PrinComps[, validMEs]
+    #### ADDED #####
+    PrinComps_l = PrinComps[validMEs]
+    ################
     averExpr = averExpr[, validMEs]
+    #### ADDED #####
+    averExpr_l = averExpr_l[validMEs]
+    ################
     varExpl = varExpl[, validMEs]
     validMEs = rep(TRUE, times = ncol(PrinComps))
     isPC = isPC[validMEs]
@@ -1766,10 +1817,25 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
   }
   allPC = (sum(!isPC) == 0)
   allAEOK = (sum(!validAEs) == 0)
-  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, 
-       nPC = nPC, validMEs = validMEs, validColors = validColors, 
-       allOK = allOK, allPC = allPC, isPC = isPC, isHub = isHub, 
-       validAEs = validAEs, allAEOK = allAEOK)
+  list(eigengenes = PrinComps, 
+       ##### ADDED ####
+       u = PrinComps_l,
+       #####
+       averageExpr = averExpr, 
+       ##### ADDED ####
+       averageExpr_l = averExpr_l, 
+       ################
+       
+       varExplained = varExpl, 
+       nPC = nPC, 
+       validMEs = validMEs, 
+       validColors = validColors, 
+       allOK = allOK, 
+       allPC = allPC, 
+       isPC = isPC, 
+       isHub = isHub, 
+       validAEs = validAEs, 
+       allAEOK = allAEOK)
 }
 
 ############################################################################################################################################################
