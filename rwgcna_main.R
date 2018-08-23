@@ -1270,9 +1270,7 @@ if (resume == "checkpoint_2") {
   ######################################################################
   # TODO: test these with simple cases
   # kEM is Extramodular Connectivity
-  
-  kM_signif_filter=F
-  
+
   if (kM_signif_filter & fuzzyModMembership == "kIM") {
     
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_pkEM_kIM_var.txt"))

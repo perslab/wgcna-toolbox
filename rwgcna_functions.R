@@ -780,10 +780,12 @@ kIM_eachMod_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
 ############################################################################################################################################################
 
 pkIM_norm_var <- function(dissTOM, 
-                         colors, 
+                         colors,
+                         cellType,
                          verbose=2, 
                          excludeGrey=T) {
   
+  if (verbose>0) message(paste0(cellType, ": computing pkIM variances"))
   # compute variance of intramodularConnectivity for every gene with regard to its own
   # Args:
   #   dissTOM: distance matrix from WGCNA in sparse matrix form
@@ -797,8 +799,8 @@ pkIM_norm_var <- function(dissTOM,
   # Convert the distance matrix to a proximity matrix. Nb: It is square with 0 diagonal
   mTOM <- as.matrix(1-dissTOM)
   # make a gene * unique_colors matrix for results: each gene's degree w.r.t each color (module)
-  results <- mapply(function(gene,color) var(mTOM[gene, colors == color & names(colors) != gene] / (sum(colors == color)-1)), gene=names(colors), color=colors, SIMPLIFY=T)
-  if (verbose>0) message("Done computing pkIM variance for set of colors")
+  results <- mapply(function(gene,color) var(mTOM[names(colors)==gene, colors == color & names(colors) != gene] / (sum(colors == color)-1)), gene=names(colors), color=colors, SIMPLIFY=T)
+  if (verbose>0) message(paste0(cellType, ": Done computing pkIM variances"))
   return(results)
 }
 
@@ -806,7 +808,7 @@ pkIM_norm_var <- function(dissTOM,
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kEM_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
+kEM_norm = function(dissTOM, colors, cellType, verbose=2, excludeGrey=T) {
   # compute normalised extramodularConnectivity for every gene with regard to all genes outside its module (a single number)
   # Args:
   #   dissTOM: distance matrix from WGCNA in sparse matrix form
@@ -818,9 +820,10 @@ kEM_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
   #   i.e. the average link between each gene and all genes outside its module
 
   # Convert the distance matrix to a proximity matrix. Nb: It is square with 0 diagonal
+  message(paste0(cellType, ": Computing kEMs"))
   mTOM <- as.matrix(1-dissTOM)
-  results <- mapply(function(gene,color) sum(mTOM[gene, colors != color]) / sum(colors != color), gene=names(colors), color=colors, SIMPLIFY=T)
-  if (verbose>0) message("Done computing kEMs for set of colors")
+  results <- mapply(function(gene,color) sum(mTOM[names(colors)==gene, colors != color]) / sum(colors != color), gene=names(colors), color=colors, SIMPLIFY=T)
+  if (verbose>0) message(paste0(cellType, ": Done computing kEMs"))
   names(results) <- names(colors)
   return(results)
 }
@@ -829,21 +832,21 @@ kEM_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kEM_norm_var = function(dissTOM, colors) {
+kEM_norm_var = function(dissTOM, colors, cellType) {
   # compute variance of extramodular Connectivity for each gene
+  message(paste0(cellType, ": Computing kEM variances"))
   mTOM <- as.matrix(1-dissTOM)
   tryCatch({
-    results = mapply(function(color, gene) stats::var(x=(mTOM[ which(rownames(mTOM)==gene), -c(which(colnames(mTOM)==gene), 
-                                                                                               match(names(colors[colors==color]), colnames(mTOM)))])/sum(colors[colors!=color]), na.rm=T), 
+    results = mapply(function(color, gene) stats::var(x=(mTOM[names(colors)==gene, !colors==color])/sum(colors!=color), na.rm=T), 
                      color=colors, 
                      gene=names(colors), 
                      SIMPLIFY=T) # for gene i, compute variance of connections to other modules
     names(results) = names(colors)
   }, error = function(c) {
-    results = vector(NA_real_, length=length(colors))
-    warning("variance calculation failed, returning NA")
+    results = vector(mode="numeric", length=length(colors))
+    warning(paste0(cellType, ": kEM variance calculation failed"))
   })
-  if (verbose>0) message("Done computing normalised kEM variances for set of colors")
+  if (verbose>0) message(paste0(cellType, ": Done computing kEM variances"))
   return(results)
 }
 
