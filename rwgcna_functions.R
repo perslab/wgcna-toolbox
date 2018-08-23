@@ -453,18 +453,20 @@ parMatchColors <- function(list_colors) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-parkMEs = function(list_MEs, datExpr) {
-  
-  # Compute kMEs and pkMEs for each set of colors corresponding to distinct parameters
-  list_kMEs <- vector(mode="list", length=length(list_MEs))
-  
-  for (j in 1:length(list_MEs)) {
-    list_kMEs[[j]] = signedKME(datExpr=as.matrix(datExpr),
-                               datME=list_MEs[[j]],
-                               #list_MEs[[j]],#$eigengenes,
-                               outputColumnName="",
-                               corFnc = corFnc )
-  }
+parkMEs = function(list_MEs, datExpr, cellCluster) {
+  list_kMEs <- NULL
+  tryCatch({
+    # Compute kMEs and pkMEs for each set of colors corresponding to distinct parameters
+    list_kMEs <- vector(mode="list", length=length(list_MEs))
+    
+    for (j in 1:length(list_MEs)) {
+      list_kMEs[[j]] = signedKME(datExpr=as.matrix(datExpr),
+                                 datME=list_MEs[[j]],
+                                 #list_MEs[[j]],#$eigengenes,
+                                 outputColumnName="",
+                                 corFnc = corFnc )
+    }
+  }, error = function(cellCluster) warning(paste0("signedkME failed for ", cellCluster)))
   return(list_kMEs)
 }
 
@@ -483,24 +485,32 @@ replaceNA = function(replace_in, replace_from) {
 
 parPkMs = function(list_kMs, 
                    list_colors) {
-
+  
   #if (!all(sapply(list_kMs, function(x) any("grey" %in% colnames(x)) ))) stop("'grey' module kMEs not found") 
       
   list_pkMs <- list()
-  list_kMs <- lapply(list_kMs, function(x) name_for_vec(to_be_named = x, given_names = gsub("kME", "", colnames(x), ignore.case =F), dimension=2))
+  #if(!is.null(list_kMs)) list_kMs <- lapply(list_kMs, function(x) name_for_vec(to_be_named = x, given_names = gsub("kME", "", colnames(x), ignore.case =F), dimension=2))
   
   for (j in 1:length(list_colors)) {
+    pkMs <- NULL
     # Get the 'principal kMEs', i.e. kME of each gene to the module to which it is allocated
-    pkMs <- vector(mode="numeric",length=length(list_colors[[j]]))
-    ###
-    # Loop over every gene and get its pkME
-    for (i in 1:length(pkMs)) {
-      #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
-      pkMs[i] <- if (list_colors[[j]][i]=="grey") 0 else list_kMs[[j]] [list_colors[[j]][i]] [i,]    
+    if (!is.null(list_kMs[[j]]) & length(unique(list_colors[[j]]))>1) {
+      pkMs <- vector(mode="numeric",length=length(list_colors[[j]]))
+      ###
+      # Loop over every gene and get its pkME
+      for (i in 1:length(pkMs)) {
+        #pkMEs[i] <- list_kMEs[[j]][diffParams_colors[i,j]][i,]
+        pkMs[i] <- if (list_colors[[j]][i]=="grey") 0 else list_kMs[[j]] [list_colors[[j]][i]] [i,]    
+      }
+      
+      list_pkMs[[j]] <- pkMs 
+      names(list_pkMs[[j]]) <- names(list_colors[[j]])
+      
+    } else {
+        list_pkMs[[j]] = rep(0, length(list_colors[[j]]))
+        names(list_pkMs[[j]]) <- names(list_colors[[j]])
     }
-    list_pkMs[[j]] <- pkMs 
-    names(list_pkMs[[j]]) <- names(list_colors[[j]])
-  }
+  } 
   return(list_pkMs)
 }
 
@@ -528,6 +538,19 @@ parPkMs_2 = function(list_kMs, list_colors) {
   return(list_pkMs)
 }
 
+pkMs_fnc = function(kMs, colors) {
+    pkMs <- NULL
+    if (!is.null(kMs) & length(unique(colors))>1) {
+      for (i in 1:length(colors)) {
+        pkMs[i] <- if (colors[i]=="grey") 0 else kMs[colors[i]] [i,]
+      }
+      names(pkMs) <- names(colors)
+    } else {
+      pkMs = rep(0, length(colors))
+      names(pkMs) <- names(colors)
+    }
+  return(pkMs)
+}
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -569,63 +592,79 @@ kM_reassign_fnc = function(colors,
 
   # initialise
   tryCatch({
-  colors_original <- colors
-  reassign_total  <- reassign_t_1 <- logical(length(colors))
-  reassign_t <- ! logical(length(colors))
-  min_change = 5 # the minimum change from one iteration to the next required to continue
-  t = 1
-  
-  while(TRUE) {
+    colors_original <- colors
+    reassign_total  <- reassign_t_1 <- logical(length(colors))
+    reassign_t <- ! logical(length(colors))
+    min_change = 5 # the minimum change from one iteration to the next required to continue
+    t = 1
     
-    if (fuzzyModMembership == "kME") {
+    MEs <- NULL
+    kMs <- NULL 
+    
+    if (!is.null(colors) | length(unique(colors))>1) {
+      while(TRUE) {
+        if (fuzzyModMembership == "kME") {
+          message(paste0(cellType, ": Computing Module Eigengenes"))
+          MEs <- moduleEigengenes_kIM_scale(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
+                                            colors = colors,
+                                            excludeGrey=T,
+                                            scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                                            dissTOM=dissTOM)$eigengenes
+          
+          message(paste0(cellType, ": Computing ", fuzzyModMembership, "s"))
+          kMs <- signedKME(as.matrix(datExpr),
+                           MEs,
+                           outputColumnName = "",
+                           corFnc = corFnc)
+          
+          message(paste0(cellType, ": Computing primary "), fuzzyModMembership, "s")
+          
+        }  else if (fuzzyModMembership == "kIM") {
+        
+          kMs <- kIM_eachMod_norm(dissTOM=dissTOM, 
+                                  colors=colors, 
+                                  verbose=verbose,
+                                  excludeGrey=T)
+        }
+        
+        pkMs <- pkMs_fnc(kMs=kMs, colors=colors)
+        
+        maxkMs <- max.col(kMs, ties.method = "random") #  integer vector of length nrow(kMs)
+        # Reassign if there is a kM value to another module which is more than 1.05 times the current pkM value
+        colors_new <- mapply(function(i, j, pkM) if (kMs[i,j] > 1.05*pkM) colnames(kMs)[j] else colors[i], i = 1:length(maxkMs), j = maxkMs, pkM=pkMs, SIMPLIFY=T) # get new module assignment vector
+        colors_new[colors=="grey"] <- "grey" # Do not reallocate genes previously allocated to grey, since they are likely to get reallocated as "grey" is not a real cohesive module
+        
+        reassign_t <- colors_new != colors
+        
+        if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break #else message(paste0(cellType, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
+        
+        reassign_total <- reassign_total | reassign_t
+        
+        names(colors_new) <- names(colors)
+        colors <- colors_new
+        reassign_t_1 <- reassign_t
+        t = t+1
+      }
+  
+      log <- data.frame("gene" = names(colors)[reassign_total], 
+                     "original_module" = colors_original[reassign_total], 
+                     "new_module" = colors[reassign_total], stringsAsFactors=F, row.names=NULL)
       
-      message(paste0(cellType, ": Computing Module Eigengenes"))
-      MEs <- moduleEigengenes_kIM_scale(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
-                                        colors = colors,
-                                        excludeGrey=T,
-                                        scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                        dissTOM=dissTOM)$eigengenes
-      
-      message(paste0(cellType, ": Computing ", fuzzyModMembership, "s"))
-      kMs <- signedKME(as.matrix(datExpr),
-                       MEs,
-                       outputColumnName = "",
-                       corFnc = corFnc)
-      
-    } else if (fuzzyModMembership == "kIM") {
-      
-      kMs <- kIM_eachMod_norm(dissTOM=dissTOM, 
-                              colors=colors, 
-                              verbose=verbose,
-                              excludeGrey=T)
+      if (verbose > 0) message(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
+    
+    } else {
+      log=NULL 
+      colors=rep("grey", length(colors_original))
     }
     
-    maxkMs <- max.col(kMs) #  integer vector of length nrow(kMs)
-    colors_new <- sapply(maxkMs, function(j) colnames(kMs)[j]) # get new module assignment vector
-    colors_new[colors=="grey"] <- "grey" # Do not reallocate genes previously allocated to grey, since they are likely to get reallocated as "grey" is not a real cohesive module
-  
-    reassign_t <- colors_new != colors
-    
-    if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break #else message(paste0(cellType, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
-    
-    reassign_total <- reassign_total | reassign_t
-
-    names(colors_new) <- names(colors)
-    colors <- colors_new
-    reassign_t_1 <- reassign_t
-    t = t+1
-  }
-  
-  log <- data.frame("gene" = names(colors)[reassign_total], 
-                   "original_module" = colors_original[reassign_total], 
-                   "new_module" = colors[reassign_total], stringsAsFactors=F, row.names=NULL)
-    
-  if (verbose > 0) message(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
-  
-  
-  return(list("colors" = colors, "kMs" = kMs, "log" = log))}, 
-  error = function(c) {warning(paste0("kM_reassign_fnc failed for ", cellType, " with the following error: ", c))})
-  
+    return(list("colors" = colors, "kMs" = kMs, "log" = log))
+    }, 
+      error = function(c) {
+        warning(paste0("kM_reassign_fnc failed for ", cellType, " with the following error: ", c))
+        return(list("colors" = colors_original, 
+                    "kMs" = NULL,
+                    "log" = NULL))}
+    )
 }
 
 ############################################################################################################################################################
@@ -717,12 +756,12 @@ kIM_eachMod_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
   results = matrix(nrow=length(colors), ncol=length(unique_colors))
   
   for (j in 1:length(unique_colors)) { # modules in columns
-    
     if (verbose>2) message(paste0("Computing kIM for ", unique_colors[j]))
-    
     for (i in 1:length(colors)) { # genes in rows
-      results[i,j] <- sum(mTOM[i,colors %in% unique_colors[[j]]]) / sum(colors == unique_colors[[j]])  # for that gene, sum connections to other genes assigned to module j and divide by n genes in module
+      # -i to exclude the gene itself (mTOM[i,i]=0)
+      results[i,j] <- sum(mTOM[i, colors %in% unique_colors[[j]]]) / (sum(colors %in% unique_colors[[j]])-1)  # for that gene, sum connections to other genes assigned to module j and divide by n genes in module
     }
+    if (verbose>2) message(paste0("Done computing kIM for ", unique_colors[j]))
   }
   
   if (verbose>0) message("Done computing kIMs for set of colors")
@@ -730,6 +769,79 @@ kIM_eachMod_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
   # Output a dataframe with genes in rows and modules (colors) as columns
   results <- as.data.frame(results, row.names= names(colors))
   colnames(results) = unique_colors
+  return(results)
+}
+
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+pkIM_norm_var <- function(dissTOM, 
+                         colors, 
+                         verbose=2, 
+                         excludeGrey=T) {
+  
+  # compute variance of intramodularConnectivity for every gene with regard to its own
+  # Args:
+  #   dissTOM: distance matrix from WGCNA in sparse matrix form
+  #   colors: vector of module assignment 'color' labels with gene names
+  #   verbose: controls messages
+  #   excludeGrey: compute "grey" kME?
+  # Value:
+  #   kIMs: gene x module dataframe of normalised intramodular gene-module connectivity scores,
+  #         which are just the mean distance between the gene and every gene in that module
+  
+  # Convert the distance matrix to a proximity matrix. Nb: It is square with 0 diagonal
+  mTOM <- as.matrix(1-dissTOM)
+  # make a gene * unique_colors matrix for results: each gene's degree w.r.t each color (module)
+  results <- mapply(function(gene,color) var(mTOM[gene, colors == color & names(colors) != gene] / (sum(colors == color)-1)), gene=names(colors), color=colors, SIMPLIFY=T)
+  if (verbose>0) message("Done computing pkIM variance for set of colors")
+  return(results)
+}
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+kEM_norm = function(dissTOM, colors, verbose=2, excludeGrey=T) {
+  # compute normalised extramodularConnectivity for every gene with regard to all genes outside its module (a single number)
+  # Args:
+  #   dissTOM: distance matrix from WGCNA in sparse matrix form
+  #   colors: vector of module assignment 'color' labels with gene names
+  #   verbose: controls messages
+  #   excludeGrey: compute "grey" kME?
+  # Value:
+  #   kEMs: gene-named vector of normalised extramodular connectivity scores, 
+  #   i.e. the average link between each gene and all genes outside its module
+
+  # Convert the distance matrix to a proximity matrix. Nb: It is square with 0 diagonal
+  mTOM <- as.matrix(1-dissTOM)
+  results <- mapply(function(gene,color) sum(mTOM[gene, colors != color]) / sum(colors != color), gene=names(colors), color=colors, SIMPLIFY=T)
+  if (verbose>0) message("Done computing kEMs for set of colors")
+  names(results) <- names(colors)
+  return(results)
+}
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+kEM_norm_var = function(dissTOM, colors) {
+  # compute variance of extramodular Connectivity for each gene
+  mTOM <- as.matrix(1-dissTOM)
+  tryCatch({
+    results = mapply(function(color, gene) stats::var(x=(mTOM[ which(rownames(mTOM)==gene), -c(which(colnames(mTOM)==gene), 
+                                                                                               match(names(colors[colors==color]), colnames(mTOM)))])/sum(colors[colors!=color]), na.rm=T), 
+                     color=colors, 
+                     gene=names(colors), 
+                     SIMPLIFY=T) # for gene i, compute variance of connections to other modules
+    names(results) = names(colors)
+  }, error = function(c) {
+    results = vector(NA_real_, length=length(colors))
+    warning("variance calculation failed, returning NA")
+  })
+  if (verbose>0) message("Done computing normalised kEM variances for set of colors")
   return(results)
 }
 
@@ -1008,10 +1120,10 @@ wrapModulePreservation <- function(listDatExpr,
 load_obj <- function(f) {
   # Utility function for loading an object inside a new environment and returning it so it can
   # stored in a variable
-  if (grepl(pattern = ".RDS", x = f)) {
+  if (grepl(pattern = "\\.RDS|\\.rds", x = f)) {
     out <- readRDS(file=f)
     out
-  } else if (grepl(pattern=".RData|Rdata", x=f)) { 
+  } else if (grepl(pattern="\\.RData|\\.Rdata", x=f)) { 
   env <- new.env()
   nm <- load(f, env)[1]
   env[[nm]]} 
