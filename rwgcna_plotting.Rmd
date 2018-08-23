@@ -23,8 +23,8 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-project_dir = "/projects/jonatan/tmp-maca/"
-data_prefix = "maca"
+project_dir = "/projects/jonatan/tmp-mousebrain/"
+data_prefix = "mousebrain"
 #run_prefix = "Immune_Class_1"
 
 p.val.threshold = 5e-2

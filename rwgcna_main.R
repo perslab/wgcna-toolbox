@@ -975,6 +975,8 @@ if (resume == "checkpoint_2") {
                                                        rm(consTomDS)
                                                        return(dissTOM)})
   
+  names(list_dissTOM) <- sNames
+  
   # Cluster
   list_geneTree <- parLapplyLB(cl, list_dissTOM, function(x) hclust(d=x, method=hclustMethod))
   stopCluster(cl)
@@ -1136,7 +1138,7 @@ if (resume == "checkpoint_2") {
                                y = list_datExpr_gg,
                                SIMPLIFY=F)
     
-    list_list_colors <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = y, dimension=NULL),
+    list_list_colors <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = as.character(y), dimension=NULL),
                                x = list_list_colors,
                                y = list_list_plot_label,
                                SIMPLIFY=F)
@@ -1159,34 +1161,39 @@ if (resume == "checkpoint_2") {
                                 .scheduling = c("dynamic"))
     
 
-    list_list_merged <- mapply(function(a,b,c,d,e) clusterMap(cl, function(x,y) mergeCloseModskIM(datExpr=c,
-                                                                                        colors = x,
-                                                                                        kIMs  = y,
-                                                                                        dissTOM = d,
+    list_list_merged <- mapply(function(a,b,c,d,e) clusterMap(cl, function(x,y) mergeCloseModskIM(datExpr=datExpr,
+                                                                                        colors = colors,
+                                                                                        kIMs  = kMs,
+                                                                                        dissTOM = dissTOM,
                                                                                         moduleMergeCutHeight=moduleMergeCutHeight,
                                                                                         verbose=verbose,
-                                                                                        cellType = e),
-                                                        x = a,
-                                                        y = b,
+                                                                                        cellType = cellType),
+                                                        colors = list_colors,
+                                                        kMs = list_kMs,
                                                         SIMPLIFY=F,
                                                         .scheduling = c("dynamic")),
-                               a = list_list_colors,
-                               b = list_list_kMs,
-                               c = list_datExpr_gg,
-                               d = list_dissTOM,
-                               e = names(list_list_colors),
+                               list_colors = list_list_colors,
+                               list_kMs = list_list_kMs,
+                               datExpr = list_datExpr_gg,
+                               dissTOM = list_dissTOM,
+                               cellType = names(list_list_colors),
                                SIMPLIFY=F)
 
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
     
-    list_list_colors <- lapply(list_list_merged, function(x) lapply(x, function(y) y$colors))
-    list_list_kMs <- lapply(list_list_merged, function(x) lapply(x, function(y) y$kIMs))
+    list_list_colors <- lapply(names(list_list_merged), function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
+                                                                              error = function(c) {
+                                                                                warning(paste0(cellType, " failed"))
+                                                                              })})
+                                                                              
+    
+    list_list_colors <- lapply(list_list_merged, function(x) lapply(x, function(y) y[['colors']]))
+    list_list_kMs <- lapply(list_list_merged, function(x) lapply(x, function(y) y[['kIMs']]))
     list_list_MEs <- NULL
   }
   
   names(list_list_colors) <- names(list_list_kMs) <- sNames
-  
   
   ######################################################################
   ###################### REASSIGN GENES BASED ON kM ####################
@@ -1271,27 +1278,36 @@ if (resume == "checkpoint_2") {
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_pkEM_kIM_var.txt"))
     
     # Compute ExtraModular connectivities - one per gene
-    list_list_kEMs <- clusterMap(cl, function(x,y) {
-      lapply(list_colors, function(colors) kEM_norm(dissTOM=y, colors=colors))
+    list_list_kEMs <- clusterMap(cl, function(list_colors, dissTOM, cellType) {
+      lapply(list_colors, function(colors) kEM_norm(dissTOM=dissTOM, colors = colors, cellType = cellType))
     }, 
     list_colors = list_list_colors_reassign,
     dissTOM = list_dissTOM,
+    cellType = sNames,
     SIMPLIFY=F,
     .scheduling = c("dynamic"))
     
     # Compute ExtraModular connectivity variances - one per gene
-    list_list_kEMs_var <- clusterMap(cl, function(x,y){
-                                                      lapply(y, function(z) kEM_norm_var(dissTOM=x, 
-                                                                                    colors=z))},
-                                                      x = list_dissTOM,
-                                                      y = list_list_colors_reassign,
+    list_list_kEMs_var <- clusterMap(cl, function(dissTOM, list_colors, cellType){
+                                                      lapply(list_colors, function(colors) kEM_norm_var(dissTOM=dissTOM, 
+                                                                                    colors=colors,
+                                                                                    cellType=cellType))},
+                                                      dissTOM = list_dissTOM,
+                                                      list_colors = list_list_colors_reassign,
+                                                      cellType = sNames,
                                                       SIMPLIFY=F,
                                                       .scheduling = c("dynamic"))   
     
     # compute primary kIM variances
-    list_list_pkIMs_var <- clusterMap(cl, function(x,y) lapply(list_colors_reassign, function(colors) pkIM_norm_var(dissTOM=dissTOM, colors=colors)),
+    list_list_pkIMs_var <- clusterMap(cl, function(dissTOM, 
+                                                   list_colors, 
+                                                   cellType) lapply(list_colors, 
+                                                                    function(colors) pkIM_norm_var(dissTOM=dissTOM, 
+                                                                                                   colors=colors, 
+                                                                                                    cellType=cellType)),
                                       dissTOM=list_dissTOM, 
-                                      list_colors_reassign=list_list_colors_reassign, 
+                                      list_colors = list_list_colors_reassign, 
+                                      cellType= sNames,
                                       SIMPLIFY = F,
                                       .scheduling = c("dynamic"))
     
@@ -1334,7 +1350,6 @@ if (resume == "checkpoint_2") {
   
 
   if (kM_signif_filter) {
-
     invisible(gc()); invisible(R.utils::gcDLLs())
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt"))
     
@@ -1364,12 +1379,12 @@ if (resume == "checkpoint_2") {
     } else if (fuzzyModMembership=="kIM") {
 
       list_list_geneMod_t.test <- clusterMap(cl, 
-                                             function(a,b,c,d,e){
+                                             function(list_pkIMs,list_pkIMs_var,list_kEMs,list_kEMs_var,list_colors){
                                                mapply(function(pkIMs, pkIMs_var, kEMs, kEMs_var, colors) {
                                                  # for each gene, count how big its module is
                                                  if (!is.null(pkIMs)) {
                                                    vec_n_gene_I <- sapply(colors, function(col) sum(colors==col)) # vector of length=length(colors)
-                                                   vec_n_gene_E < -vec_n_gene_I+length(colors) # vector of length=length(colors)
+                                                   vec_n_gene_E <- -vec_n_gene_I+length(colors) # vector of length=length(colors)
                                                    vec_PEV = ((vec_n_gene_I-1)*pkIMs_var + (vec_n_gene_E-1)*kEMs_var) / (vec_n_gene_E+vec_n_gene_I-2) # vector of pooled est. of variance
                                                    vec_t = ifelse(colors!="grey", (pkIMs-kEMs)/(vec_PEV/sqrt(vec_n_gene_I+vec_n_gene_E)), 0)   # - ... TODO need total connectivity to other modules. Probably the built in function can do that. Or make weighted sum of kIMs
                                                    vec_p.val <- ifelse(colors!="grey", pt(q = vec_t, df = vec_n_gene_I+vec_n_gene_E-2, lower.tail = F), 1)
@@ -1386,10 +1401,9 @@ if (resume == "checkpoint_2") {
                                                kEMs = list_kEMs,
                                                kEMs_var = list_kEMs_var,
                                                colors = list_colors,
-                                               SIMPLIFY=F,
-                                               .scheduling = c("dynamic"))
+                                               SIMPLIFY=F)
                                              },
-                                             list_pkIMs = list_list_pkIMs,
+                                             list_pkIMs = list_list_pkMs,
                                              list_pkIMs_var = list_list_pkIMs_var,
                                              list_kEMs = list_list_kEMs,
                                              list_kEMs_var = list_list_kEMs_var,
