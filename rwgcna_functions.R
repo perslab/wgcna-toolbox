@@ -312,15 +312,15 @@ extract_and_name_colors <- function(merged, datExpr) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 ############################################################################################################################################################
-
-mergeCloseModskIM = function(datExpr,
-                             colors,
-                             kIMs,
-                             dissTOM = NULL,
-                             moduleMergeCutHeight,
-                             verbose=2,
-                             cellType) {
   
+mergeCloseModskIM = function(datExpr,
+                               colors,
+                               kIMs,
+                               dissTOM = NULL,
+                               moduleMergeCutHeight,
+                               verbose=2,
+                               cellType) {
+    
   # Usage: compute correlations between gene module cell embeddings. 
   #         merge modules with a positive correlation > 1-moduleMergeCutHeight
   #
@@ -334,68 +334,67 @@ mergeCloseModskIM = function(datExpr,
   #
   # Returns: list with entries colors=colors_merged, kIMs = kIMs_merged
   
-  tryCatch({
+
   corr_clust <- character(length = length(unique(colors)))
   colors_original <- colors
   # Remove 'grey' (unassigned) module 
   #if (any(colnames(kIMs) == "grey")) kIMs[["grey"]] <- NULL
   
-  while (TRUE) {
-    message(paste0(cellType, ": computing cell-module embedding matrix"))
-    cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
-                                     colors=colors, 
-                                     latentGeneType = "IM",
-                                     cellType=NULL,
-                                     kMs=kIMs)
-    
-    cellModEmbed_mat <- cellModEmbed_mat[,-grep("^grey$", colnames(cellModEmbed_mat))]
-    # Cluster modules using the Pearson correlation between module cell embeddings
-    mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
-    mod_corr[mod_corr<0] <- 0 #only keep positive correlations
-    corr_dist <- as.dist(m = (1-mod_corr), diag = F, upper = F) # convert to (1-corr) distance matrix
-    corr_dendro <- hclust(d = corr_dist, method = "average")
-    
-    # use a simple cut to determine clusters
-    corr_clust = cutreeStatic(dendro = corr_dendro, 
-                              cutHeight = moduleMergeCutHeight, 
-                              minSize=1)
-    names(corr_clust) =  corr_dendro$labels
-    
-    # At this point if corr_clust has as many unique modules as the original partition, the while loop will exit
-    if(length(unique(corr_clust)) == length(unique(colors))-1) {  # minus one for the grey module, absent in corr_clust
-      message(paste0(cellType, " done"))
-      break
-    }
-    
-    # if not we merge modules
-    n_merge <-  length(unique(colors)) - 1 - length(unique(corr_clust)) # minus one for the grey module, absent in corr_clust
-    if (verbose>0) message(paste0(cellType, ": ", n_merge, " modules to be merged with others"))
-    
-    merge_idx <- sapply(unique(corr_clust), function(x) sum(corr_clust==x)>1)
-    
-    # merge modules
-    for (clust in unique(corr_clust)[merge_idx]) { # loop over numeric cluster assignments 
-      new_color = names(corr_clust)[corr_clust==clust][1] # use the colors name of the first module in the cluster
-      for (color in names(corr_clust[corr_clust==clust])) { # loop over all module colors in the cluster
-        colors[colors==color] <- new_color # give them all the new colour
+  if (length(unique(colors)) > 1) { # if there is more than one non-grey module
+    while (TRUE) {
+  
+      message(paste0(cellType, ": computing cell-module embedding matrix"))
+      cellModEmbed_mat <- cellModEmbed(datExpr=datExpr, 
+                                       colors=colors, 
+                                       latentGeneType = "IM",
+                                       cellType=NULL,
+                                       kMs=kIMs)
+      
+      #cellModEmbed_mat <- cellModEmbed_mat[,-grep("^grey$", colnames(cellModEmbed_mat))]
+      # Cluster modules using the Pearson correlation between module cell embeddings
+      mod_corr <- WGCNA::cor(x=cellModEmbed_mat, method=c("pearson"), verbose=verbose)
+      mod_corr[mod_corr<0] <- 0 #only keep positive correlations
+      corr_dist <- as.dist(m = (1-mod_corr), diag = F, upper = F) # convert to (1-corr) distance matrix
+      corr_dendro <- hclust(d = corr_dist, method = "average")
+      
+      # use a simple cut to determine clusters
+      corr_clust = cutreeStatic(dendro = corr_dendro, 
+                                cutHeight = moduleMergeCutHeight, 
+                                minSize=1)
+      names(corr_clust) =  corr_dendro$labels
+      
+      # At this point if corr_clust has as many unique modules as the original partition, the while loop will exit
+      if(length(unique(corr_clust)) == length(unique(colors))) {  
+        message(paste0(cellType, " done"))
+        break
       }
+      
+      # if not we merge modules
+      n_merge <-  length(unique(colors))  - length(unique(corr_clust)) 
+      if (verbose>0) message(paste0(cellType, ": ", n_merge, " modules to be merged with others"))
+      
+      merge_idx <- sapply(unique(corr_clust), function(x) sum(corr_clust==x)>1)
+      
+      # merge modules
+      for (clust in unique(corr_clust)[merge_idx]) { # loop over numeric cluster assignments 
+        new_color = names(corr_clust)[corr_clust==clust][1] # use the colors name of the first module in the cluster
+        for (color in names(corr_clust[corr_clust==clust])) { # loop over all module colors in the cluster
+          colors[colors==color] <- new_color # give them all the new colour
+        }
+      }
+      
+      # compute merged module kIMs 
+      message(paste0("Computing merged module kIMs for ", cellType))
+      # Compute new kIMs
+      kIMs <- kIM_eachMod_norm(dissTOM = dissTOM, 
+                              colors = colors,
+                              verbose = 1,
+                              excludeGrey = F)
+      
     }
-    
-    # compute merged module kIMs 
-    message(paste0("Computing merged module kIMs for ", cellType))
-    # Compute new kIMs
-    kIMs <- kIM_eachMod_norm(dissTOM = dissTOM, 
-                            colors = colors,
-                            verbose = 1,
-                            excludeGrey = F)
-    
-  }
-  
-
   names(colors) = names(colors_original)
-  
-  return(list(colors=colors, kIMs = kIMs))},
-  error = function(c) {warning(paste0("mergeCloseModskIM failed for ", cellType))})
+  }
+  return(list(colors=colors, kIMs = kIMs))
 }
 
 ############################################################################################################################################################
@@ -590,6 +589,8 @@ kM_reassign_fnc = function(colors,
   # Value:
   #   list with entries "colors", "kMs" and "log". 
 
+  message(paste0(cellType, ": Reassigning genes to modules with better ", fuzzyModMembership))
+  
   # initialise
   tryCatch({
     colors_original <- colors
@@ -601,7 +602,7 @@ kM_reassign_fnc = function(colors,
     MEs <- NULL
     kMs <- NULL 
     
-    if (!is.null(colors) | length(unique(colors))>1) {
+    if (!is.null(colors) & length(unique(colors))>2) {
       while(TRUE) {
         if (fuzzyModMembership == "kME") {
           message(paste0(cellType, ": Computing Module Eigengenes"))
@@ -654,7 +655,8 @@ kM_reassign_fnc = function(colors,
     
     } else {
       log=NULL 
-      colors=rep("grey", length(colors_original))
+      colors <- colors_original
+      message(paste0(cellType, ": no genes assigned, nothing to reassign"))
     }
     
     return(list("colors" = colors, "kMs" = kMs, "log" = log))
@@ -1599,7 +1601,7 @@ cellModEmbed <- function(datExpr,
     
   } else if (latentGeneType == "IM") {
     
-    list_datExpr <- lapply(colnames(kMs), function(x) datExpr[,match(names(colors)[colors==x], colnames(datExpr))])
+    list_datExpr <- lapply(colnames(kMs), function(x) datExpr[ , match(names(colors[colors==x]), colnames(datExpr))])
     
     list_kMs <- mapply(function(x,y) kMs[match(names(colors)[colors==y], rownames(kMs)),y],
                        x= kMs,

@@ -1138,7 +1138,7 @@ if (resume == "checkpoint_2") {
     
     list_list_colors <- mapply(function(x,y) name_for_vec(to_be_named=x, given_names = y, dimension=NULL),
                                x = list_list_colors,
-                               y = list_plot_label,
+                               y = list_list_plot_label,
                                SIMPLIFY=F)
     
     names(list_list_colors) <- sNames
@@ -1250,7 +1250,7 @@ if (resume == "checkpoint_2") {
   
   # The pkM vectors already have gene names. Now name each vector, and each list of vectors
   list_list_pkMs <- mapply(function(x,y) name_for_vec(to_be_named = x, 
-                                                      given_names = y[[1]], 
+                                                      given_names = as.character(y), 
                                                       dimension = NULL), 
                            x=list_list_pkMs, 
                            y=list_list_plot_label, 
@@ -1332,75 +1332,75 @@ if (resume == "checkpoint_2") {
 
   # TODO: test whether ifelse statements take care of NULL kMEs / MEs
   
-  if (!TODO) {
-    if (kM_signif_filter) {
 
-      invisible(gc()); invisible(R.utils::gcDLLs())
-      cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt"))
-      
-      if (fuzzyModMembership=="kME") {
-        
-        list_list_geneMod_t.test <- clusterMap(cl, function(list_pkMs, list_colors) {
-          mapply(function(pkMs, colors) {
-            if (!is.null(pkMs)){
-              vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
-              vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
-                                 lower.tail = F, 
-                                 df = length(pkMs)-2), 1) # compute p.value of t.stats
-              vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
-              vec_idx_signif <- ifelse(colors!="grey", vec_q.val < (p.val.threshold/2.0), FALSE) # compute boolean significance vector
-              out <- data.frame("t.stat"=vec_t, "p.val" = vec_p.val, q.val = "vec_q.val", "signif" = vec_idx_signif)
-              out
-            } else {
-              NULL
-            }
-          }, pkMs=list_pkMs, colors=list_colors, SIMPLIFY=F)
-        }, 
-        list_pkMs = list_list_pkMs, 
-        list_colors = list_list_colors_reassign, 
-        SIMPLIFY=F, 
-        .scheduling = c("dynamic"))
-      
-      } else if (fuzzyModMembership=="kIM") {
+  if (kM_signif_filter) {
 
-        list_list_geneMod_t.test <- clusterMap(cl, 
-                                               function(a,b,c,d,e){
-                                                 mapply(function(pkIMs, pkIMs_var, kEMs, kEMs_var, colors) {
-                                                   # for each gene, count how big its module is
-                                                   if (!is.null(pkIMs)) {
-                                                     vec_n_gene_I <- sapply(colors, function(col) sum(colors==col)) # vector of length=length(colors)
-                                                     vec_n_gene_E < -vec_n_gene_I+length(colors) # vector of length=length(colors)
-                                                     vec_PEV = ((vec_n_gene_I-1)*pkIMs_var + (vec_n_gene_E-1)*kEMs_var) / (vec_n_gene_E+vec_n_gene_I-2) # vector of pooled est. of variance
-                                                     vec_t = ifelse(colors!="grey", (pkIMs-kEMs)/(vec_PEV/sqrt(vec_n_gene_I+vec_n_gene_E)), 0)   # - ... TODO need total connectivity to other modules. Probably the built in function can do that. Or make weighted sum of kIMs
-                                                     vec_p.val <- ifelse(colors!="grey", pt(q = vec_t, df = vec_n_gene_I+vec_n_gene_E-2, lower.tail = F), 1)
-                                                     vec_q.val <- p.adjust(vec_p.val, method="fdr")
-                                                     vec_idx_signif <- ifelse(colors!="grey", vec_q.val < (p.val.threshold/2.0), FALSE)
-                                                     out <- data.frame("t.stat"=vec_t, "p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-                                                     out 
-                                                   } else {
-                                                     NULL
-                                                   }
-                                                 }, 
-                                                 pkIMs = list_pkIMs, 
-                                                 pkIMs_var = list_pkIMs_var,
-                                                 kEMs = list_kEMs,
-                                                 kEMs_var = list_kEMs_var,
-                                                 colors = list_colors,
-                                                 SIMPLIFY=F,
-                                                 .scheduling = c("dynamic"))
-                                               },
-                                               list_pkIMs = list_list_pkIMs,
-                                               list_pkIMs_var = list_list_pkIMs_var,
-                                               list_kEMs = list_list_kEMs,
-                                               list_kEMs_var = list_list_kEMs_var,
-                                               list_colors = list_list_colors_reassign,
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt"))
+    
+    if (fuzzyModMembership=="kME") {
+      
+      list_list_geneMod_t.test <- clusterMap(cl, function(list_pkMs, list_colors) {
+        mapply(function(pkMs, colors) {
+          if (!is.null(pkMs)){
+            vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
+            vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
+                               lower.tail = F, 
+                               df = length(pkMs)-2), 1) # compute p.value of t.stats
+            vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
+            vec_idx_signif <- ifelse(colors!="grey", vec_q.val < (p.val.threshold/2.0), FALSE) # compute boolean significance vector
+            out <- data.frame("t.stat"=vec_t, "p.val" = vec_p.val, q.val = "vec_q.val", "signif" = vec_idx_signif)
+            out
+          } else {
+            NULL
+          }
+        }, pkMs=list_pkMs, colors=list_colors, SIMPLIFY=F)
+      }, 
+      list_pkMs = list_list_pkMs, 
+      list_colors = list_list_colors_reassign, 
+      SIMPLIFY=F, 
+      .scheduling = c("dynamic"))
+    
+    } else if (fuzzyModMembership=="kIM") {
+
+      list_list_geneMod_t.test <- clusterMap(cl, 
+                                             function(a,b,c,d,e){
+                                               mapply(function(pkIMs, pkIMs_var, kEMs, kEMs_var, colors) {
+                                                 # for each gene, count how big its module is
+                                                 if (!is.null(pkIMs)) {
+                                                   vec_n_gene_I <- sapply(colors, function(col) sum(colors==col)) # vector of length=length(colors)
+                                                   vec_n_gene_E < -vec_n_gene_I+length(colors) # vector of length=length(colors)
+                                                   vec_PEV = ((vec_n_gene_I-1)*pkIMs_var + (vec_n_gene_E-1)*kEMs_var) / (vec_n_gene_E+vec_n_gene_I-2) # vector of pooled est. of variance
+                                                   vec_t = ifelse(colors!="grey", (pkIMs-kEMs)/(vec_PEV/sqrt(vec_n_gene_I+vec_n_gene_E)), 0)   # - ... TODO need total connectivity to other modules. Probably the built in function can do that. Or make weighted sum of kIMs
+                                                   vec_p.val <- ifelse(colors!="grey", pt(q = vec_t, df = vec_n_gene_I+vec_n_gene_E-2, lower.tail = F), 1)
+                                                   vec_q.val <- p.adjust(vec_p.val, method="fdr")
+                                                   vec_idx_signif <- ifelse(colors!="grey", vec_q.val < (p.val.threshold/2.0), FALSE)
+                                                   out <- data.frame("t.stat"=vec_t, "p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
+                                                   out 
+                                                 } else {
+                                                   NULL
+                                                 }
+                                               }, 
+                                               pkIMs = list_pkIMs, 
+                                               pkIMs_var = list_pkIMs_var,
+                                               kEMs = list_kEMs,
+                                               kEMs_var = list_kEMs_var,
+                                               colors = list_colors,
                                                SIMPLIFY=F,
-                                               .scheduling = c("dynamic")) 
-      }
-    } else {
-      list_list_geneMod_t.test <- NULL 
-    }  
-  }
+                                               .scheduling = c("dynamic"))
+                                             },
+                                             list_pkIMs = list_list_pkIMs,
+                                             list_pkIMs_var = list_list_pkIMs_var,
+                                             list_kEMs = list_list_kEMs,
+                                             list_kEMs_var = list_list_kEMs_var,
+                                             list_colors = list_list_colors_reassign,
+                                             SIMPLIFY=F,
+                                             .scheduling = c("dynamic")) 
+    }
+  } else {
+    list_list_geneMod_t.test <- NULL 
+  }  
+  
   
   ########################################################################################
   #################### REASSIGN NON-SIGNIFICANT GENES TO "GREY" ##########################
@@ -1409,7 +1409,7 @@ if (resume == "checkpoint_2") {
   list_list_colors_t.test <- list_list_colors_reassign
   list_list_pkMs_t.test <- list_list_pkMs
   
-  if(!is.null(list_list_geneMod_t.test)) if (!all(sapply(list_list_geneMod_t.test, 
+  if(kM_signif_filter) if (!all(sapply(list_list_geneMod_t.test, 
                                                          function(list_geneMod_t.test) {
                                                            sapply(list_geneMod_t.test, function(geneMod_t.test) {
                                                              all(geneMod_t.test$signif)}
