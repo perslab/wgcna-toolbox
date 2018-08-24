@@ -589,7 +589,7 @@ kM_reassign_fnc = function(colors,
   # Value:
   #   list with entries "colors", "kMs" and "log". 
 
-  message(paste0(cellType, ": Reassigning genes to modules with better ", fuzzyModMembership))
+  print(paste0(cellType, ": Reassigning genes to modules with better ", fuzzyModMembership))
   
   # initialise
   tryCatch({
@@ -651,12 +651,12 @@ kM_reassign_fnc = function(colors,
                      "original_module" = colors_original[reassign_total], 
                      "new_module" = colors[reassign_total], stringsAsFactors=F, row.names=NULL)
       
-      if (verbose > 0) message(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
+      if (verbose > 0) print(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
     
     } else {
       log=NULL 
       colors <- colors_original
-      message(paste0(cellType, ": no genes assigned, nothing to reassign"))
+      warning(paste0(cellType, ": no genes assigned, nothing to reassign"))
     }
     
     return(list("colors" = colors, "kMs" = kMs, "log" = log))
