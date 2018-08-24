@@ -1060,24 +1060,21 @@ if (resume == "checkpoint_2") {
                                                                      iterate = T,
                                                                      getNewMEs = F,
                                                                      getNewUnassdME = F)
-                                        } else {
-                                          merged <- rep("grey", times=ncol(datExpr))
-                                        }
+                                          
                                         
-                                        if (length(unique(merged$colors))==1) {
-                                          colors = rep("grey", times=ncol(datExpr))
-                                          MEs = list(eigengenes=NULL)
-                                          warning(paste0("No modules found in celltype ", cellType))
-                                        } else {
-                                            colors = labels2colors(merged$colors)
-                                            MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
-                                                                             colors=colors,
+                                          colors = labels2colors(merged$colors)
+                                          MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
+                                                                           colors=colors,
                                                                              excludeGrey = T,
                                                                              scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                                                                              dissTOM = NULL)
-                                        }
-                                        
-                                        return(list("cols" = colors, "MEs"= MEs))
+                                          merged <- list("cols" = colors, "MEs"= MEs)
+                                          
+                                        } else {
+                                          merged <- list("cols"=rep("grey", times=ncol(datExpr)), "MEs"=NULL)
+                                          warning(paste0("No modules found in celltype ", cellType))
+                                        } 
+                                        return(merged)
                                         },
                                         cutree = list_cutree,
                                         comb = list_comb,
@@ -1089,17 +1086,16 @@ if (resume == "checkpoint_2") {
                                   SIMPLIFY=F,
                                   .scheduling = c("dynamic"))
                                    
-  
     names(list_list_merged) = sNames
     
     # Extract the colors from the list returned by mergeCloseModules
     list_list_colors <- mapply(FUN=function(x,y,z) {
-      tryCatch({
-      list_colors = lapply(x, function(a) extract_and_name_colors(merged=a, datExpr=y)) # list of merged colors
-      return(list_colors)}, error=function(c) {
-        warning(paste0("Extracting merged colors failed for ", z))
-        NULL
-        })
+      list_colors = lapply(x, function(a) {
+        colors <- merged$a
+        names(colors) = colnames(y)
+        return(colors)
+        }) # list of merged colors
+      return(list_colors)
     }, 
     x=list_list_merged, 
     y=list_datExpr_gg, 
@@ -1119,14 +1115,11 @@ if (resume == "checkpoint_2") {
                                   lapply(x, function(a) {
                                     kMEs <- NULL
                                     if (!is.null(a)) {
-                                      tryCatch({
                                       kMEs <- signedKME(datExpr=as.matrix(y),
                                                 datME=a,
                                                 outputColumnName="",
                                                 corFnc = corFnc )
-                                      return(kMEs)
-                                      }, error = function(c) {
-                                        warning(paste0("signedkME failed for ", z))})
+                                      kMEs
                                     } else NULL
                                   })}, 
                                 x=list_list_MEs,  
