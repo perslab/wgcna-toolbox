@@ -1050,31 +1050,31 @@ if (resume == "checkpoint_2") {
                                       mapply(function(comb, cutree) {
                                         colors <- NULL
                                         MEs <- NULL 
+                                        out <- list("colors"=rep("grey", times=ncol(datExpr)), "MEs" = NULL)
                                         if (length(unique(cutree$labels))>1) {
-                                          merged = mergeCloseModules(exprData=as.matrix(datExpr), 
-                                                                     colors = cutree$labels, 
-                                                                     impute =T,
-                                                                     corFnc = corFnc,
-                                                                     corOptions = corOptions,
-                                                                     cutHeight = comb[4],
-                                                                     iterate = T,
-                                                                     getNewMEs = F,
-                                                                     getNewUnassdME = F)
-                                          
-                                        
-                                          colors = labels2colors(merged$colors)
+                                          if (length(unique(cutree$labels))>2) {
+                                            merged = mergeCloseModules(exprData=as.matrix(datExpr), 
+                                                                       colors = cutree$labels, 
+                                                                       impute =T,
+                                                                       corFnc = corFnc,
+                                                                       corOptions = corOptions,
+                                                                       cutHeight = comb[4],
+                                                                       iterate = T,
+                                                                       getNewMEs = F,
+                                                                       getNewUnassdME = F)
+                                            colors = labels2colors(merged$colors)
+                                          } else {
+                                            colors = labels2colors(cutree$labels) # only one proper module
+                                          }
                                           MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
                                                                            colors=colors,
                                                                              excludeGrey = T,
                                                                              scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                                                                              dissTOM = NULL)
-                                          merged <- list("cols" = colors, "MEs"= MEs)
+                                          out <- list("colors" = colors, "MEs"= MEs)
                                           
-                                        } else {
-                                          merged <- list("cols"=rep("grey", times=ncol(datExpr)), "MEs"=NULL)
-                                          warning(paste0("No modules found in celltype ", cellType))
-                                        } 
-                                        return(merged)
+                                        } else warning(paste0("No modules found in celltype ", cellType))
+                                        return(out)
                                         },
                                         cutree = list_cutree,
                                         comb = list_comb,
@@ -1089,42 +1089,41 @@ if (resume == "checkpoint_2") {
     names(list_list_merged) = sNames
     
     # Extract the colors from the list returned by mergeCloseModules
-    list_list_colors <- mapply(FUN=function(x,y,z) {
-      list_colors = lapply(x, function(a) {
-        colors <- merged$a
-        names(colors) = colnames(y)
+    list_list_colors <- mapply(FUN=function(list_merged,datExpr,cellType) {
+      list_colors = lapply(list_merged, function(merged) {
+        colors <- merged$colors
+        names(colors) = colnames(datExpr)
         return(colors)
         }) # list of merged colors
       return(list_colors)
     }, 
-    x=list_list_merged, 
-    y=list_datExpr_gg, 
-    z=sNames,
+    list_merged=list_list_merged, 
+    datExpr=list_datExpr_gg, 
+    cellType=sNames,
     SIMPLIFY=F)
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
     list_list_MEs <- lapply(list_list_merged, 
-                            function(y) lapply(y, function(x) {
-                              if (!is.null(x$MEs)) x$MEs$eigengenes else NULL})) 
+                            function(list_merged) lapply(list_merged, function(merged) {
+                              if (!is.null(merged$MEs)) merged$MEs$eigengenes else NULL})) 
     
     names(list_list_MEs) <- sNames
     
     # Compute kMEs 
     list_list_kMs <- clusterMap(cl, 
-                                fun=function(x,y,z) {
-                                  lapply(x, function(a) {
+                                fun=function(list_MEs, datExpr) {
+                                  lapply(list_MEs, function(MEs) {
                                     kMEs <- NULL
-                                    if (!is.null(a)) {
-                                      kMEs <- signedKME(datExpr=as.matrix(y),
-                                                datME=a,
+                                    if (!is.null(MEs)) {
+                                      kMEs <- signedKME(datExpr=as.matrix(datExpr),
+                                                datME=MEs,
                                                 outputColumnName="",
                                                 corFnc = corFnc )
                                       kMEs
                                     } else NULL
                                   })}, 
-                                x=list_list_MEs,  
-                                y=list_datExpr_gg, 
-                                z=sNames, 
+                                list_MEs=list_list_MEs,  
+                                datExpr=list_datExpr_gg, 
                                 SIMPLIFY = F, 
                                 .scheduling = c("dynamic"))
   
