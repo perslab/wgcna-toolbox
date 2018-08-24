@@ -65,10 +65,10 @@ option_list <- list(
               help = "Minimum genes needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector of integer values to try 'c(15,20,25)' [default %default]"),
   make_option("--deepSplit", type="character", default="3L",
               help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector of integer values between 0-4 to try, e.g. 'c(1,2,3)', [default %default]"),
-  make_option("--pamStage", type="character", default="c(TRUE)",
-              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
   make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
               help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
+  make_option("--pamStage", type="character", default="c(TRUE)",
+              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
   make_option("--kM_reassign", type="logical", default="TRUE",
               help = "Following hierarchical clustering, do additional k-means clustering? [default %default]"),
   make_option("--kM_signif_filter", type="logical", default="TRUE",
@@ -1046,7 +1046,7 @@ if (resume == "checkpoint_2") {
   if (fuzzyModMembership=="kME") {
     
     list_list_merged <- clusterMap(cl,
-                                    function(list_comb,list_cutree, datExpr) {
+                                    function(list_comb,list_cutree, datExpr, cellType) {
                                       mapply(function(comb, cutree) {
                                         colors <- NULL
                                         MEs <- NULL 
@@ -1067,7 +1067,7 @@ if (resume == "checkpoint_2") {
                                         if (is.null(merged$colors) | length(unique(merged$colors))==1) {
                                           colors = rep("grey", times=ncol(datExpr))
                                           MEs = list(eigengenes=NULL)
-                                          warning(paste0("No modules found in celltype ", sNames[i]))
+                                          warning(paste0("No modules found in celltype ", cellType))
                                         } else {
                                             colors = labels2colors(merged$colors)
                                             MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
@@ -1085,6 +1085,7 @@ if (resume == "checkpoint_2") {
                                   list_comb=list_list_comb,
                                   list_cutree = list_list_cutree,
                                   datExpr = list_datExpr_gg,
+                                  cellType=sNames,
                                   SIMPLIFY=F,
                                   .scheduling = c("dynamic"))
                                    
