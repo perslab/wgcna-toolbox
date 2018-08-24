@@ -1061,10 +1061,10 @@ if (resume == "checkpoint_2") {
                                                                      getNewMEs = F,
                                                                      getNewUnassdME = F)
                                         } else {
-                                          merged <- list(colors=NULL)
+                                          merged <- rep("grey", times=ncol(datExpr))
                                         }
                                         
-                                        if (is.null(merged$colors) | length(unique(merged$colors))==1) {
+                                        if (length(unique(merged$colors))==1) {
                                           colors = rep("grey", times=ncol(datExpr))
                                           MEs = list(eigengenes=NULL)
                                           warning(paste0("No modules found in celltype ", cellType))
@@ -1072,7 +1072,7 @@ if (resume == "checkpoint_2") {
                                             colors = labels2colors(merged$colors)
                                             MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
                                                                              colors=colors,
-                                                                             excludeGrey = excludeGrey,
+                                                                             excludeGrey = T,
                                                                              scale_MEs_by_kIMs = scale_MEs_by_kIMs,
                                                                              dissTOM = NULL)
                                         }
@@ -1096,7 +1096,10 @@ if (resume == "checkpoint_2") {
     list_list_colors <- mapply(FUN=function(x,y,z) {
       tryCatch({
       list_colors = lapply(x, function(a) extract_and_name_colors(merged=a, datExpr=y)) # list of merged colors
-      return(list_colors)}, error=function(c) warning(paste0("Extracting merged colors failed for ", z)))
+      return(list_colors)}, error=function(c) {
+        warning(paste0("Extracting merged colors failed for ", z))
+        NULL
+        })
     }, 
     x=list_list_merged, 
     y=list_datExpr_gg, 
@@ -1104,7 +1107,9 @@ if (resume == "checkpoint_2") {
     SIMPLIFY=F)
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
-    list_list_MEs <- lapply(list_list_merged, function(y) lapply(y, function(x) x$MEs$eigengenes)) 
+    list_list_MEs <- lapply(list_list_merged, 
+                            function(y) lapply(y, function(x) {
+                              if (!is.null(x$MEs)) x$MEs$eigengenes else NULL})) 
     
     names(list_list_MEs) <- sNames
     
@@ -1119,10 +1124,10 @@ if (resume == "checkpoint_2") {
                                                 datME=a,
                                                 outputColumnName="",
                                                 corFnc = corFnc )
+                                      return(kMEs)
                                       }, error = function(c) {
                                         warning(paste0("signedkME failed for ", z))})
-                                    }
-                                    return(kMEs)
+                                    } else NULL
                                   })}, 
                                 x=list_list_MEs,  
                                 y=list_datExpr_gg, 
@@ -1354,7 +1359,7 @@ if (resume == "checkpoint_2") {
       
       list_list_geneMod_t.test <- clusterMap(cl, function(list_pkMs, list_colors) {
         mapply(function(pkMs, colors) {
-          if (!is.null(pkMs)){
+          if (length(unique(colors))>1){
             vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
             vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
                                lower.tail = F, 
@@ -1377,6 +1382,7 @@ if (resume == "checkpoint_2") {
 
         list_list_embed_mat <- clusterMap(cl, function(datExpr, list_colors, cellType, list_kMs, dissTOM) { 
                                           mapply(function(colors, kMs) {
+                                            if (length(unique(colors))>1) {
                                             message(paste0(cellType, ": Computing module kIM embeddings"))
                                             cellModEmbed(datExpr=datExpr,
                                                               colors=colors,
@@ -1384,6 +1390,9 @@ if (resume == "checkpoint_2") {
                                                               cellType=NULL, # to avoid having it in the embedding matrix column names
                                                               kMs = kMs,
                                                               dissTOM = dissTOM)
+                                            } else {
+                                              NULL
+                                            }
                                             },
                                                  colors=list_colors,
                                                  kMs = list_kMs,
@@ -1397,23 +1406,25 @@ if (resume == "checkpoint_2") {
                                           .scheduling = c("dynamic"))
           
         list_list_geneMod_t.test <- clusterMap(cl, function(datExpr, list_embed_mat, list_colors, cellType) {
-          mapply(function(embed_mat, cols){
-            message(paste0(cellType, ": Computing gene correlations with module kIM embeddings"))
-            vec_p.val <- numeric(length=length(cols))
-            names(vec_p.val) <- names(cols)
-            for (color in names(table(cols))) {
-              vec_p.val[cols==color] <- apply(X = datExpr[,cols==color], MARGIN = 2, FUN = function(x) cor.test(x, embed_mat[, color,drop=F], 
-                                                                                                                alternative = "greater", 
-                                                                                                                method = "pearson", 
-                                                                                                                conf.level = 1-pvalThreshold)$p.value)
-            }
-            vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
-            vec_idx_signif <- ifelse(cols!="grey", vec_q.val < pvalThreshold, TRUE) # compute boolean significance vector. Set "grey" to TRUE so we don't count them
-            out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-            out
+          mapply(function(embed_mat, colors){
+            if (length(unique(colors))>1) {
+              message(paste0(cellType, ": Computing gene correlations with module kIM embeddings"))
+              vec_p.val <- numeric(length=length(colors))
+              names(vec_p.val) <- names(colors)
+              for (color in names(table(colors))) {
+                vec_p.val[colors==color] <- apply(X = datExpr[,colors==color], MARGIN = 2, FUN = function(x) cor.test(x, embed_mat[, color,drop=F], 
+                                                                                                                  alternative = "greater", 
+                                                                                                                  method = "pearson", 
+                                                                                                                  conf.level = 1-pvalThreshold)$p.value)
+              }
+              vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
+              vec_idx_signif <- ifelse(colors!="grey", vec_q.val < pvalThreshold, TRUE) # compute boolean significance vector. Set "grey" to TRUE so we don't count them
+              out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
+              out } else NULL
+          
           },
           embed_mat=list_embed_mat,
-          cols=list_colors,
+          colors=list_colors,
           SIMPLIFY=F) 
         }, 
         datExpr = list_datExpr_gg,
@@ -1457,6 +1468,7 @@ if (resume == "checkpoint_2") {
       #                                        SIMPLIFY=F,
       #                                        .scheduling = c("dynamic")) 
     } 
+  stopCluster(cl)
   } else {
     list_list_geneMod_t.test <- NULL 
   }  
@@ -1471,7 +1483,7 @@ if (resume == "checkpoint_2") {
   if(kM_signif_filter) if (!all(sapply(list_list_geneMod_t.test, 
                                                          function(list_geneMod_t.test) {
                                                            sapply(list_geneMod_t.test, function(geneMod_t.test) {
-                                                             all(geneMod_t.test$signif)}
+                                                             if (!is.null(geneMod_t.test)) all(geneMod_t.test$signif) else T}
                                                              , simplify=T)}, simplify=T))) {
     
     invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1487,7 +1499,7 @@ if (resume == "checkpoint_2") {
           colors_t.test[!geneMod_t.test] <- rep("grey", times=sum(!geneMod_t.test))
           return(colors_t.test)
         } else {
-          NULL 
+          colors_reassign
         }
       }, colors_reassign = list_colors_reassign, 
       geneMod_t.test = list_geneMod_t.test, 
@@ -1497,6 +1509,7 @@ if (resume == "checkpoint_2") {
     list_geneMod_t.test = list_list_geneMod_t.test,
     SIMPLIFY=F,
     .scheduling = c("dynamic"))
+    
     list_list_pkMs_t.test <- clusterMap(cl, function(list_pkMs, list_geneMod_t.test) {
       
       mapply(function(pkMs, geneMod_t.test) {

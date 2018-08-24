@@ -598,11 +598,11 @@ kM_reassign_fnc = function(colors,
     reassign_t <- ! logical(length(colors))
     min_change = 5 # the minimum change from one iteration to the next required to continue
     t = 1
-    
     MEs <- NULL
     kMs <- NULL 
+    log=NULL 
     
-    if (!is.null(colors) & length(unique(colors))>2) {
+    if (!is.null(colors) & length(unique(colors))>1) {
       while(TRUE) {
         if (fuzzyModMembership == "kME") {
           message(paste0(cellType, ": Computing Module Eigengenes"))
@@ -654,11 +654,8 @@ kM_reassign_fnc = function(colors,
       if (verbose > 0) print(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
     
     } else {
-      log=NULL 
-      colors <- colors_original
-      warning(paste0(cellType, ": no genes assigned, nothing to reassign"))
+      warning(paste0(cellType, ": one or no modules, nothing to reassign"))
     }
-    
     return(list("colors" = colors, "kMs" = kMs, "log" = log))
     }, 
       error = function(c) {
