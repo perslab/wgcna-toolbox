@@ -627,28 +627,42 @@ if (is.null(resume)) {
     
     cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parPCA.txt"))
     
-    tryCatch({
-      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
-                                                             pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
-                                                             pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
-                                                             use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
-                                                             weight.by.var = F,
-                                                             do.print = F,
-                                                             seed.use = randomSeed,
-                                                             maxit = maxit, # set to 500 as default
-                                                             fastpath = fastpath)) 
-      
-    }, error = function(c) {
-      subsets <- parLapplyLB(cl, subsets, function(x) RunPCA(object = x,
-                                                             pc.genes = if (pca_genes == 'all') rownames(x@data) else x@var.genes,
-                                                             pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(x@data) else length(x@var.genes)) %/% 2, ncol(x@data) %/% 2),
-                                                             use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
-                                                             weight.by.var = F,
-                                                             do.print = F,
-                                                             seed.use = randomSeed,
-                                                             maxit = maxit*2, # set to 500 as default
-                                                             fastpath = F))
-    })
+      subsets <- clusterMap(cl, function(seurat_obj, name) {
+        tryCatch({
+          RunPCA(object = seurat_obj,
+          pc.genes = if (pca_genes == 'all') rownames(seurat_obj@data) else seurat_obj@var.genes,
+          pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes)) %/% 2, ncol(seurat_obj@data) %/% 2),
+          use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
+          weight.by.var = F,
+          do.print = F,
+          seed.use = randomSeed,
+          maxit = maxit, # set to 500 as default
+          fastpath = fastpath)
+          }, error = function(err) {
+           message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
+           message("Trying RunPCA with fewer dimensions, double max iterations and fastpath == F")
+           tryCatch({
+           RunPCA(object = seurat_obj,
+                  pc.genes = if (pca_genes == 'all') rownames(seurat_obj@data) else seurat_obj@var.genes,
+                  pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes)) %/% 2, ncol(seurat_obj@data) %/% 2),
+                  use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
+                  weight.by.var = F,
+                  do.print = F,
+                  seed.use = randomSeed,
+                  maxit = maxit*2, # set to 500 as default
+                  fastpath = F)})
+          }, error = function(err1) {
+            message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
+            message("Returning the original Seurat object with empty dr$pca slot")
+            seurat_obj
+            }
+          )
+      },
+      seurat_obj = subsets,
+      name = names(subsets), 
+      SIMPLIFY=F,
+      .scheduling = c("dynamic")) 
+    
     ### 
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
@@ -660,7 +674,21 @@ if (is.null(resume)) {
     # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
     if (jackstrawnReplicate > 0 & genes_use == "PCA") message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstrawnReplicate))
-    list_datExpr <- lapply(subsets, function(x) wrapJackStraw(seurat_obj_sub = x, n_cores = n_cores, jackstrawnReplicate = jackstrawnReplicate, pvalThreshold = pvalThreshold))
+    list_datExpr <- mapply(function(seurat_obj) {
+      tryCatch({
+      wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                    n_cores = n_cores, 
+                    jackstrawnReplicate = jackstrawnReplicate, 
+                    pvalThreshold = pvalThreshold)
+      }, error = function(err) {
+        message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
+        message("using var.genes instead")
+        datExpr <- seurat_to_datExpr(seurat_obj_sub = seurat_obj, idx_genes_use = rownames(seurat_obj@scale.data) %in% seurat_obj@var.genes)
+      })
+      },
+      seurat_obj = subsets, 
+      name = names(subsets),
+      SIMPLIFY=F)
     
     invisible(gc())
     
@@ -833,9 +861,9 @@ if (resume == "checkpoint_1") {
     
     invisible(gc())
     
-    # Set a ceiling on n_cores to avoid depleting memory
+    # Set a ceiling on n_cores to reduce risk of depleting memory
     
-    cl <- makeCluster(min(n_cores,10), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt"))
+    cl <- makeCluster(min(n_cores,20), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt"))
     list_consensus <- clusterMap(cl, function(x,y) consensusTOM(multiExpr = x, 
                                                                 checkMissingData = checkMissingData,
                                                                 maxBlockSize = maxBlockSize, 
@@ -1048,7 +1076,7 @@ if (resume == "checkpoint_2") {
     list_list_merged <- clusterMap(cl,
                                     function(list_comb,list_cutree, datExpr, cellType) {
                                       mapply(function(comb, cutree) {
-                                        colors <- "colors"=rep("grey", times=ncol(datExpr))
+                                        "colors"<- rep("grey", times=ncol(datExpr))
                                         MEs <- NULL 
                                         out <- list("colors"= colors, "MEs" = MEs)
                                         if (length(unique(cutree$labels))>1) {
@@ -1366,20 +1394,20 @@ if (resume == "checkpoint_2") {
     if (fuzzyModMembership=="kME") {
       
       list_list_geneMod_t.test <- clusterMap(cl, function(list_pkMs, list_colors) {
-        if (length(unique(colors))>1){
+
           mapply(function(pkMs, colors) {
-            vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
-            vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
-                               lower.tail = F, 
-                               df = length(pkMs)-2), 1) # compute p.values. We are genuinely only interested in upper tail 
-            vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
-            vec_idx_signif <- ifelse(colors!="grey", vec_q.val < pvalThreshold, TRUE) # compute boolean significance vector. Set "grey" to TRUE so we don't count them
-            out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-            out}, 
-        pkMs=list_pkMs, 
-        colors=list_colors, 
-        SIMPLIFY=F)} else out <- NULL
-      }, 
+            if (length(unique(colors))>1){
+              vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
+              vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
+                                 lower.tail = F, 
+                                 df = length(pkMs)-2), 1) # compute p.values. We are genuinely only interested in upper tail 
+              vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
+              vec_idx_signif <- ifelse(colors!="grey", vec_q.val < pvalThreshold, TRUE) # compute boolean significance vector. Set "grey" to TRUE so we don't count them
+              out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
+              out } else out <- NULL},
+            pkMs=list_pkMs, 
+            colors=list_colors, 
+            SIMPLIFY=F)},
       list_pkMs = list_list_pkMs, 
       list_colors = list_list_colors_reassign, 
       SIMPLIFY=F, 
@@ -1413,8 +1441,8 @@ if (resume == "checkpoint_2") {
                                           .scheduling = c("dynamic"))
           
         list_list_geneMod_t.test <- clusterMap(cl, function(datExpr, list_embed_mat, list_colors, cellType) {
-          if (length(unique(colors))>1) {
-            mapply(function(embed_mat, colors){
+          mapply(function(embed_mat, colors){
+            if (length(unique(colors))>1) {
             message(paste0(cellType, ": Computing gene correlations with module kIM embeddings"))
             vec_p.val <- numeric(length=length(colors))
             names(vec_p.val) <- names(colors)
@@ -1427,12 +1455,10 @@ if (resume == "checkpoint_2") {
             vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
             vec_idx_signif <- ifelse(colors!="grey", vec_q.val < pvalThreshold, TRUE) # compute boolean significance vector. Set "grey" to TRUE so we don't count them
             out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-            out },
-            embed_mat=list_embed_mat,
-            colors=list_colors,
-            SIMPLIFY=F) 
-            } else out <- NULL
-          }, 
+            out } else out <- NULL},
+          embed_mat=list_embed_mat,
+          colors=list_colors,
+          SIMPLIFY=F)}, 
         datExpr = list_datExpr_gg,
         list_embed_mat = list_list_embed_mat,
         list_colors = list_list_colors_reassign,
