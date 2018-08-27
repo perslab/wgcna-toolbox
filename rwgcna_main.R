@@ -94,6 +94,46 @@ option_list <- list(
 )
 
 ######################################################################
+################# TEST PARAMS FOR MANUAL RUNS ########################
+######################################################################
+
+if (FALSE) { 
+  seurat_path = "/projects/jonatan/tmp-mousebrain/RObjects/L5_Neurons.RDS"
+  project_dir = "/projects/jonatan/tmp-mousebrain/"
+  data_prefix = "mousebrain"
+  run_prefix =  "Neurons_ClusterName_1b"
+  autosave = T
+  resume = NULL 
+  quit_session = NULL
+  metadata_subset_col = "ClusterName"
+  metadata_corr_col = NULL 
+  metadata_corr_filter_vals = NULL
+  use.imputed = F
+  regress_out = c("nUMI", "percent.mito", "percent.ribo")
+  min.cells = 10
+  genes_remove_dir = NULL
+  genes_use = "PCA"
+  pca_genes = 'all'
+  corFnc = "cor"
+  networkType = "signed_hybrid"
+  hclustMethod = "average"
+  minClusterSize = c(15)
+  deepSplit = c(3)
+  moduleMergeCutHeight = c(0.25)
+  pamStage = c(TRUE)
+  kM_reassign = T
+  kM_signif_filter = T
+  jackstrawnReplicate = 0
+  TOMnReplicate = 0
+  fuzzyModMembership = "kIM"
+  scale_MEs_by_kIMs = F
+  PPI_filter = F
+  data_organism = "mmusculus"
+  magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
+  gwas_filter_traits <- NULL
+  n_cores = 53
+}
+######################################################################
 ############################## PACKAGES #############################
 ######################################################################
 
@@ -334,7 +374,7 @@ if (is.null(resume)) {
   ################# LOAD AND SUBSET SEURAT OBJECT ######################
   ######################################################################
   
-  message("Loading and subsetting seurat object..")
+  message("Loading seurat object..")
   
   seurat_obj <- load_obj(f=seurat_path)
   
@@ -351,6 +391,7 @@ if (is.null(resume)) {
   ######################################################################
   
   if (!is.null(genes_remove_dir)) {
+    
     genes_remove_paths <- dir(genes_remove_dir, pattern = "\\.csv|\\.tab|\\.txt", full.names = T)
     
     if (length(genes_remove_paths) > 0) {
@@ -406,9 +447,12 @@ if (is.null(resume)) {
   if (!any(grepl("ENSG|ENSMUSG",rownames(seurat_obj@raw.data)))) {
     
     if (is.null(data_organism)) {
+      
       stop("Error: seurat object gene names are not in ensembl ID format. To remap from hgnc to ensembl, please provide a data_organism 'mmusculus' or 'hsapiens'")
       
     } else if (!is.null(data_organism)) {
+      
+      message("Mapping genes from hgcn to ensembl")
       
       if (data_organism == "mmusculus") { 
         
@@ -457,7 +501,11 @@ if (is.null(resume)) {
     } 
     
   } else if (any(grepl("ENS", rownames(seurat_obj@raw.data)))) {
+    
     # Still do the mapping from ensembl to symbol to allows us to easily find mitochrondrial and ribosomomal genes to regress out confounding variance
+    
+    message("Mapping genes from ensembl to hcgn")
+    
       if (any(grepl("ENSG", rownames(seurat_obj@raw.data)))) {
         
         message("Homo sapiens ensembl id gene names detected")
@@ -505,6 +553,8 @@ if (is.null(resume)) {
   ######################################################################
   ################### COMPUTE PERCENT MITO, PERCENT RIBO ###############
   ######################################################################
+ 
+  message("Computing percent.mito and percent.ribo")
   
   idx_mito.genes <- grepl(pattern = "^mt-", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T)
   idx_ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T) 
@@ -517,18 +567,22 @@ if (is.null(resume)) {
   ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
   ######################################################################
   
+  message("Normalizing and scaling full expression matrix")
+  
   # Normalise 
   seurat_obj <- NormalizeData(object = seurat_obj, display.progress = T)
   
   # Scale and regress out confounders
   vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  
   seurat_obj <- ScaleData(object = seurat_obj, 
                           vars.to.regress = vars.to.regress,
                           model.use="linear",
                           do.par=T,
                           num.cores = min(n_cores, detectCores()-1),
                           do.scale=T,
-                          do.center=T)
+                          do.center=T,
+                          display.progress = T)
   
   scale_data <- seurat_obj@scale.data
   ident <- seurat_obj@ident
@@ -537,6 +591,7 @@ if (is.null(resume)) {
   save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
   save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
   rm(scale_data)  
+  
   ######################################################################
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
   ######################################################################
@@ -570,53 +625,76 @@ if (is.null(resume)) {
   ######################################################################
   
   # Subset the seurat object
-  # NB: We avoid parallel subsetting due to the RAM considerations
+  # NB: We reduce n_cores our of  RAM considerations
   
-  subsets <- lapply(sNames, function(x) SubsetData(seurat_obj,
-                                                   ident.use = x, 
+  message("Subsetting the dataset")
+  
+  cl <- makeCluster(min(n_cores, 15), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "subsetData.txt"))
+  
+  subsets <- parLapply(cl, sNames, function(name) SubsetData(seurat_obj,
+                                                   ident.use = name, 
                                                    do.scale = F, 
                                                    do.center = F,
                                                    subset.raw = T,
                                                    do.clean = F))
-  
+  stopCluster(cl)
   ### Filter out cell types that have too few cells (<20).
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
+  invisible(gc())
   
-  subsets_ok_idx <- sapply(subsets, function(x) {
-    if(ncol(x@data)<=20) {
-      warning(sprintf("%s cell cluster filtered out because it contains <20 cells",unique(as.character(x@ident))[1] ))
+  cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
+  
+  subsets_ok_idx <- parSapply(cl, subsets, function(seurat_obj) {
+    if(ncol(seurat_obj@data)<=20) {
+      warning(sprintf("%s cell cluster filtered out because it contains <20 cells",unique(as.character(seurat_obj@ident))[1] ))
       return(FALSE)
-    } else {
-      return(TRUE)
-    }
+    } else return(TRUE)
   }, simplify = T)
   
   subsets <- subsets[subsets_ok_idx]
   sNames <- sNames[subsets_ok_idx]
   names(subsets) <- sNames 
   
+  message("Filtering genes with few cells")
+  
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
-  subsets <- lapply(subsets, function(x) FilterGenes(x, min.cells = min.cells))
+  subsets <- parLapply(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
+  
+  message("Scaling and regressing data subsets")
   
   # Scale data and regress out confounders
   vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
   
-  subsets <- lapply(subsets, function(x) ScaleData(object = x,
-                                                   vars.to.regress = vars.to.regress,
-                                                   model.use="linear",
-                                                   do.par=T,
-                                                   num.cores = min(n_cores, detectCores()-1),
-                                                   do.scale=T,
-                                                   do.center=do.center))
+  subsets <- clusterMap(cl, function(seurat_obj, name) {
+   tryCatch({
+     ScaleData(object = seurat_obj,
+               vars.to.regress = vars.to.regress,
+               model.use="linear",
+               do.par=F,
+               #num.cores = min(n_cores, detectCores()-1),
+               do.scale=T,
+               do.center=do.center)}, 
+     error = function(err) {
+       message(paste0(name,": ScaleData failed with the error: ", err))
+       seurat_obj
+     })
+    },
+    seurat_obj = subsets,
+    name = sNames,
+    SIMPLIFY=F,
+    .scheduling = c("dynamic"))
   
-  subsets <- lapply(subsets, function(x) FindVariableGenes(object = x,
+  message("Finding variable genes")
+  
+  subsets <- parLapply(cl, subsets, function(seurat_obj) FindVariableGenes(object = seurat_obj,
                                                            x.low.cutoff = 0.0125,
                                                            x.high.cutoff = 8,
                                                            y.cutoff = 1,
                                                            do.plot=F,
                                                            display.progress=F))
   ###
+  stopCluster(cl)
   invisible(gc())
   
   if (grepl("PCA", genes_use, ignore.case = T)) {
@@ -650,13 +728,12 @@ if (is.null(resume)) {
                   do.print = F,
                   seed.use = randomSeed,
                   maxit = maxit*2, # set to 500 as default
-                  fastpath = F)})
-          }, error = function(err1) {
+                  fastpath = F)
+             }, error = function(err1) {
             message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
             message("Returning the original Seurat object with empty dr$pca slot")
-            seurat_obj
-            }
-          )
+            return(seurat_obj)}) 
+            })
       },
       seurat_obj = subsets,
       name = names(subsets), 
