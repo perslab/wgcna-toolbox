@@ -628,24 +628,22 @@ if (is.null(resume)) {
   # NB: We reduce n_cores our of  RAM considerations
   
   message("Subsetting the dataset")
-  
-  cl <- makeCluster(min(n_cores, 15), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "subsetData.txt"))
-  
-  subsets <- parLapply(cl, sNames, function(name) SubsetData(seurat_obj,
+
+  subsets <- lapply(sNames, function(name) SubsetData(seurat_obj,
                                                    ident.use = name, 
                                                    do.scale = F, 
                                                    do.center = F,
                                                    subset.raw = T,
                                                    do.clean = F))
-  stopCluster(cl)
   ### Filter out cell types that have too few cells (<20).
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
   invisible(gc())
   
+  message("Filtering out subsets with fewer than 20 cells")
   cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
   
-  subsets_ok_idx <- parSapply(cl, subsets, function(seurat_obj) {
+  subsets_ok_idx <- parSapplyLB(cl, subsets, function(seurat_obj) {
     if(ncol(seurat_obj@data)<=20) {
       warning(sprintf("%s cell cluster filtered out because it contains <20 cells",unique(as.character(seurat_obj@ident))[1] ))
       return(FALSE)
@@ -656,10 +654,10 @@ if (is.null(resume)) {
   sNames <- sNames[subsets_ok_idx]
   names(subsets) <- sNames 
   
-  message("Filtering genes with few cells")
+  message(paste0("Filtering out genes expressed in fewer than ", min.cells, " cells"))
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
-  subsets <- parLapply(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
+  subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
   
   message("Scaling and regressing data subsets")
   
@@ -687,7 +685,7 @@ if (is.null(resume)) {
   
   message("Finding variable genes")
   
-  subsets <- parLapply(cl, subsets, function(seurat_obj) FindVariableGenes(object = seurat_obj,
+  subsets <- parLapplyLB(cl, subsets, function(seurat_obj) FindVariableGenes(object = seurat_obj,
                                                            x.low.cutoff = 0.0125,
                                                            x.high.cutoff = 8,
                                                            y.cutoff = 1,
@@ -751,10 +749,10 @@ if (is.null(resume)) {
     # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
     if (jackstrawnReplicate > 0 & genes_use == "PCA") message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstrawnReplicate))
-    list_datExpr <- mapply(function(seurat_obj) {
+    list_datExpr <- clusterMap(cl, function(seurat_obj) {
       tryCatch({
       wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                    n_cores = n_cores, 
+                    n_cores = 1, 
                     jackstrawnReplicate = jackstrawnReplicate, 
                     pvalThreshold = pvalThreshold)
       }, error = function(err) {
@@ -765,7 +763,8 @@ if (is.null(resume)) {
       },
       seurat_obj = subsets, 
       name = names(subsets),
-      SIMPLIFY=F)
+      SIMPLIFY=F,
+      .scheduling = c("dynamic"))
     
     invisible(gc())
     
@@ -975,14 +974,16 @@ if (resume == "checkpoint_1") {
     y=sNames, 
     SIMPLIFY=F,
     .scheduling = c("dynamic"))
+ 
+    # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
+    list_goodGenesTOM_idx <- parLapplyLB(cl,list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
+    
+    # Use the goodGenesTOM_idx to filter the datExpr matrices
+    list_datExpr_gg <- clusterMap(cl, function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F,.scheduling = c("dynamic"))
+    
     stopCluster(cl)
     invisible(gc()); invisible(R.utils::gcDLLs())
     
-    # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
-    list_goodGenesTOM_idx <- lapply(list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
-    
-    # Use the goodGenesTOM_idx to filter the datExpr matrices
-    list_datExpr_gg <- mapply(FUN=function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F)
     
   } else if (TOMnReplicate==0) {
     
@@ -1208,7 +1209,7 @@ if (resume == "checkpoint_2") {
     .scheduling = c("dynamic"))
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
-    list_list_MEs <- parLapply(cl, list_list_merged, 
+    list_list_MEs <- parLapplyLB(cl, list_list_merged, 
                             function(list_merged) lapply(list_merged, function(merged) {
                               if (!is.null(merged$MEs)) merged$MEs$eigengenes else NULL})) 
     
@@ -1235,7 +1236,7 @@ if (resume == "checkpoint_2") {
     
   } else if (fuzzyModMembership=="kIM") { 
     
-    list_list_colors <- parLapply(cl, list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
+    list_list_colors <- parLapplyLB(cl, list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
     
     list_list_colors <- clusterMap(cl, function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names = colnames(y), dimension=NULL)),
                                x = list_list_colors,
@@ -1282,14 +1283,14 @@ if (resume == "checkpoint_2") {
                                .scheduling = c("dynamic"))
 
 
-    list_list_colors <- parLapply(cl, names(list_list_merged), function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
+    list_list_colors <- parLapplyLB(cl, names(list_list_merged), function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
                                                                               error = function(c) {
                                                                                 warning(paste0(cellType, " failed"))
                                                                               })})
                                                                               
     
-    list_list_colors <- parLapply(cl, list_list_merged, function(x) lapply(x, function(y) y[['colors']]))
-    list_list_kMs <- parLapply(cl, list_list_merged, function(x) lapply(x, function(y) y[['kIMs']]))
+    list_list_colors <- parLapplyLB(cl, list_list_merged, function(x) lapply(x, function(y) y[['colors']]))
+    list_list_kMs <- parLapplyLB(cl, list_list_merged, function(x) lapply(x, function(y) y[['kIMs']]))
     list_list_MEs <- NULL
   }
   
@@ -1367,20 +1368,21 @@ if (resume == "checkpoint_2") {
                                                         colors=list_colors, SIMPLIFY=F), 
                                list_kMs = list_list_kMs_reassign, 
                                list_colors = list_list_colors_reassign, 
-                               SIMPLIFY = F)
+                               SIMPLIFY = F, .scheduling = c("dynamic"))
   
-  stopCluster(cl)
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
+
   # The pkM vectors already have gene names. Now name each vector, and each list of vectors
-  list_list_pkMs <- mapply(function(x,y) name_for_vec(to_be_named = x, 
+  list_list_pkMs <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
                                                       given_names = as.character(y), 
                                                       dimension = NULL), 
                            x=list_list_pkMs, 
                            y=list_list_plot_label, 
-                           SIMPLIFY=F)
+                           SIMPLIFY=F, .scheduling = c("dynamic"))
   
   names(list_list_pkMs) <- sNames
+  
+  stopCluster(cl)
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   ######################################################################
   ### COMPUTE kEMs and kIMs VARIANCE FOR GENE-MODULE INCLUSION T.TEST ##
@@ -1651,20 +1653,22 @@ if (resume == "checkpoint_2") {
   invisible(gc()); invisible(R.utils::gcDLLs())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parMatchColors.txt"))
   list_list_colors_matched <- parLapplyLB(cl, list_list_colors_t.test, function(x) parMatchColors(list_colors = x))
-  stopCluster(cl)
-  invisible(gc()); invisible(R.utils::gcDLLs())
   
   # Rename highest level list entries (cell clusters)
   names(list_list_colors_matched) = sNames
   
   # Name each entry of the vectors of color assignments with the corresponding genes
-  list_list_colors_matched <- mapply(function(x,y) lapply(x, 
+  list_list_colors_matched <- clusterMap(cl, function(x,y) lapply(x, 
                                                           function(z) name_for_vec(to_be_named=z, 
                                                                                    given_names=colnames(y), 
                                                                                    dimension = NULL)), 
                                      x=list_list_colors_matched, 
                                      y=list_datExpr_gg, 
-                                     SIMPLIFY=F)
+                                     SIMPLIFY=F,
+                                     .scheduling = c("dynamic"))
+  
+  stopCluster(cl)
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   invisible(gc())
   
@@ -2013,7 +2017,7 @@ if (resume == "checkpoint_4") {
                         
     list_MEs_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$eigengenes)
     
-    list_u_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$u)
+    list_u_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$u) # u is actually a list, since the left eigenvectors have different lengths depending on the number of genes in the module
     
     names(list_MEs_PPI) <- names(list_u_PPI) <- sNames_PPI
       
@@ -2057,8 +2061,10 @@ if (resume == "checkpoint_4") {
     names(list_kMs_PPI) <- sNames_PPI
     
     list_MEs_PPI <- NULL
-    list_u_PPI <- NULL
     
+    # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
+    list_u_PPI <- lapply(list_kMs_PPI, function(kMs) lapply(colnames(kMs), function(module) kMs[match(names(colors)[colors==module], rownames(kMs)),module]))
+                       
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
@@ -2353,6 +2359,15 @@ if (resume == "checkpoint_4") {
                             x = list_kMs_gwas,
                             y = list_module_gwas,
                             SIMPLIFY=F)
+    
+    # Filter left eigenvectors / kIMs
+    list_u_gwas <- list_u_PPI[sNames_PPI %in% sNames_gwas, drop = F]
+    
+    list_u_gwas <- mapply(function(x,y) x[names(x) %in% y],
+                          x = list_u_gwas,
+                          y = list_module_gwas,
+                          SIMPLIFY=F)
+    
     # filter MEs
     if (fuzzyModMembership=="kME") {
       
@@ -2361,13 +2376,7 @@ if (resume == "checkpoint_4") {
                               x = list_MEs_gwas,
                               y = list_module_gwas,
                               SIMPLIFY=F)
-      
-      list_u_gwas <- list_u_PPI[sNames_PPI %in% sNames_gwas, drop = F]
-      list_u_gwas <- mapply(function(x,y) x[names(x) %in% y],
-                              x = list_u_gwas,
-                              y = list_module_gwas,
-                              SIMPLIFY=F)
-      
+
     } else {
       list_MEs_gwas <- NULL
       list_u_gwas <- NULL
@@ -2550,6 +2559,13 @@ if (resume == "checkpoint_4") {
         # Filter kM lists
         list_kMs_meta <- list_kMs_gwas[names(list_kMs_gwas) %in% sNames_meta, drop = F]
         list_kMs_meta <- mapply(function(x,y) x[,colnames(x)%in%y, drop=F],x=list_kMs_meta, y = list_module_meta, SIMPLIFY=F) %>% Filter(f=length)
+        
+        # Filter left eigenvectors / kIMs 
+        list_u_meta <- list_u_gwas[names(list_u_gwas) %in% sNames_meta, drop = F]
+        list_u_meta <- mapply(function(x,y) x[names(x) %in% y, drop=F],
+                              x = list_u_meta, 
+                              y = list_module_meta,
+                              SIMPLIFY=F) %>% Filter(f=length)
         
         # Filter ME lists
         if (fuzzyModMembership=="kME") {

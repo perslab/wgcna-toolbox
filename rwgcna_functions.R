@@ -8,10 +8,9 @@
 FilterGenes <- function(seurat_obj_sub, min.cells) {
 
   if (min.cells > 0) {
-    num.cells <- rowSums(seurat_obj_sub@data > 0)
+    num.cells <- rowSums(seurat_obj_sub@raw.data > 0)
     genes.use <- names(x = num.cells[which(x = num.cells >= min.cells)])
     seurat_obj_sub@raw.data <- seurat_obj_sub@raw.data[genes.use, ]
-    seurat_obj_sub@data <- seurat_obj_sub@data[genes.use, ]
   }
 
   return(seurat_obj_sub)
@@ -41,8 +40,8 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
                                 num.pc = pcs.compute,
                                 num.replicate = jackstrawnReplicate, 
                                 display.progress = T,
-                                do.par = T,
-                                num.cores = n_cores,
+                                do.par = F,
+                                #num.cores = n_cores,
                                 prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
     
     
@@ -1603,10 +1602,7 @@ cellModEmbed <- function(datExpr,
     
     list_datExpr <- lapply(colnames(kMs), function(x) datExpr[ , match(names(colors[colors==x]), colnames(datExpr))])
     
-    list_kMs <- mapply(function(x,y) kMs[match(names(colors)[colors==y], rownames(kMs)),y],
-                       x= kMs,
-                       y=colnames(kMs),
-                       SIMPLIFY=F)
+    list_kMs <- lapply(colnames(kMs), function(module) kMs[match(names(colors)[colors==module], rownames(kMs)),module])
     
     embed_mat <- as.matrix(mapply(function(x,y) x %*% as.matrix(y),
                                   x = list_datExpr,
