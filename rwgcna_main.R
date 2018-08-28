@@ -1626,7 +1626,7 @@ if (resume == "checkpoint_2") {
         
         if (!is.null(geneMod_t.test)) {
           colors_t.test <- colors_reassign
-          colors_t.test[!geneMod_t.test] <- rep("grey", times=sum(!geneMod_t.test))
+          colors_t.test[!geneMod_t.test$signif] <- rep("grey", times=sum(!geneMod_t.test$signif))
           return(colors_t.test)
         } else {
           colors_reassign
@@ -1644,7 +1644,7 @@ if (resume == "checkpoint_2") {
       
       mapply(function(pkMs, geneMod_t.test) {
         pkMs_t.test <- pkMs
-        pkMs_t.test[!geneMod_t.test] <- rep(0, times=sum(!geneMod_t.test))
+        pkMs_t.test[!geneMod_t.test$signif] <- rep(0, times=sum(!geneMod_t.test$signif))
         return(pkMs_t.test)
         
       }, pkMs = list_pkMs, 
@@ -1697,7 +1697,9 @@ if (resume == "checkpoint_2") {
   message("Removing all-grey runs")
   
   # count the grey
-  list_vec_n_grey <- lapply(list_list_colors_matched, count_grey_in_list_of_vec)
+  list_vec_n_grey <- lapply(X=list_list_colors_matched, 
+                            FUN = function(list_colors) sapply(X = list_colors, 
+                                                               FUN=function(colors) sum(as.numeric(colors=="grey")), simplify = T))
   
   # For any parameter setting, does the number of genes assigned to grey correspond to the length of the vector of assignments? If not, it's ok.
   list_logical_params_ok <- mapply(function(x,y) as.logical(mapply(function(a,b) a!=length(b), a=x, b=y, SIMPLIFY=F)), 
