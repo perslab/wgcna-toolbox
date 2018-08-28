@@ -1779,6 +1779,8 @@ if (resume == "checkpoint_3") {
   suppressPackageStartupMessages(library(parallel))
   suppressPackageStartupMessages(library(reshape))
   suppressPackageStartupMessages(library(reshape2))
+  suppressPackageStartupMessages(library(parallel))
+  
 
   ######################################################################
   #################### CHECK MODULES FOR PPI ENRICHMENT ################
@@ -1806,20 +1808,23 @@ if (resume == "checkpoint_3") {
   
   invisible(gc()); invisible(R.utils::gcDLLs())
   
-  cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt"))
+  cl <- makeCluster(n_cores, 
+                    type = "FORK", 
+                    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt"))
   
-  list_list_PPI <- clusterMap(cl, function(a,b,c) mapply( function(x,y) PPI_outer_for_vec(colors = x,
-                                                                                         pkMs = y,
+  list_list_PPI <- clusterMap(cl, function(list_colors,list_pkMs,PPI_pkME_threshold) mapply(function(colors,pkMs) PPI_outer_for_vec(colors = colors,
+                                                                                         pkMs = pkMs,
                                                                                          STRINGdb_species = STRINGdb_species,
-                                                                                         PPI_pkM_threshold = c,
+                                                                                         PPI_pkM_threshold = PPI_pkME_threshold,
                                                                                          pvalThreshold = pvalThreshold),
-                                                         x = a,
-                                                         y = b),
-                              a = list_list_colors_matched_ok,
-                              b = list_list_pkMs_ok,
-                              c = list_PPI_pkM_threshold,
-  
-                              SIMPLIFY=F, .scheduling = c("dynamic"))
+                                                         colors = list_colors,
+                                                         pkMs = list_pkMs,
+                                                         SIMPLIFY=F),
+                              list_colors = list_list_colors_matched_ok,
+                              list_pkMs = list_list_pkMs_ok,
+                              PPI_pkME_threshold = list_PPI_pkM_threshold,
+                              SIMPLIFY=F, 
+                              .scheduling = c("dynamic"))
   
   list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
   
@@ -1827,6 +1832,7 @@ if (resume == "checkpoint_3") {
   list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))
   
   stopCluster(cl)
+  
   invisible(gc()); invisible(R.utils::gcDLLs())
   
   names(list_list_colors_PPI) <- names(list_list_module_PPI) <- names(list_list_module_PPI_signif) <- list_list_colors_matched_ok 
