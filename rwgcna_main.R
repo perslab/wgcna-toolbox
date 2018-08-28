@@ -584,6 +584,9 @@ if (is.null(resume)) {
                           do.center=T,
                           display.progress = T)
   
+  # Make sure we close socket workers
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  
   scale_data <- seurat_obj@scale.data
   ident <- seurat_obj@ident
   
@@ -638,14 +641,13 @@ if (is.null(resume)) {
   ### Filter out cell types that have too few cells (<20).
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
-  invisible(gc())
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   message("Filtering out subsets with fewer than 20 cells")
-  cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
   
-  subsets_ok_idx <- parSapplyLB(cl, subsets, function(seurat_obj) {
-    if(ncol(seurat_obj@data)<=20) {
-      warning(sprintf("%s cell cluster filtered out because it contains <20 cells",unique(as.character(seurat_obj@ident))[1] ))
+  subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
+    if(ncol(seurat_obj@raw.data)<=20) {
+      warning(sprintf("%s cell cluster filtered out because it contains <20 cells", unique(as.character(seurat_obj@ident))[1] ))
       return(FALSE)
     } else return(TRUE)
   }, simplify = T)
@@ -655,6 +657,8 @@ if (is.null(resume)) {
   names(subsets) <- sNames 
   
   message(paste0("Filtering out genes expressed in fewer than ", min.cells, " cells"))
+  
+  cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
   subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
@@ -693,7 +697,8 @@ if (is.null(resume)) {
                                                            display.progress=F))
   ###
   stopCluster(cl)
-  invisible(gc())
+
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   if (grepl("PCA", genes_use, ignore.case = T)) {
     
@@ -740,7 +745,9 @@ if (is.null(resume)) {
     
     ### 
     stopCluster(cl)
+    
     invisible(gc()); invisible(R.utils::gcDLLs())
+    
     end_time <- Sys.time()
     
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
@@ -766,7 +773,8 @@ if (is.null(resume)) {
       SIMPLIFY=F,
       .scheduling = c("dynamic"))
     
-    invisible(gc())
+    # Make sure we close socket workers
+    invisible(gc()); invisible(R.utils::gcDLLs())
     
   } else if (genes_use == "all") {
     list_datExpr <- lapply(subsets, function(x) 
@@ -2063,7 +2071,12 @@ if (resume == "checkpoint_4") {
     list_MEs_PPI <- NULL
     
     # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
-    list_u_PPI <- lapply(list_kMs_PPI, function(kMs) lapply(colnames(kMs), function(module) kMs[match(names(colors)[colors==module], rownames(kMs)),module]))
+    list_u_PPI <- lapply(list_kMs_PPI, 
+                         function(kMs) lapply(colnames(kMs), function(module) {
+                            u <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
+                            names(u) = rownames(kMs)
+                            return(u)
+                            }))
                        
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
