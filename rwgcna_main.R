@@ -1804,7 +1804,7 @@ if (resume == "checkpoint_3") {
     list_PPI_pkM_threshold <- lapply(list_list_pkMs_ok, function(x) quantile(unlist(x, use.names = F), probs = c(0.05), names=F))
   }
   
-  invisible(gc()); invisible(R.utils::gcDLLs())I
+  invisible(gc()); invisible(R.utils::gcDLLs())
   
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt"))
   
