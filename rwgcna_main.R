@@ -599,6 +599,9 @@ if (is.null(resume)) {
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
   ######################################################################
   
+  # Use this for testing 
+  metadat_names <- colnames(seurat_obj@meta.data)
+  
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
   if (!is.null(metadata_corr_col)) {
     if (any(colnames(seurat_obj@meta.data) %in% metadata_corr_col)) {
@@ -638,11 +641,15 @@ if (is.null(resume)) {
                                                    do.center = F,
                                                    subset.raw = T,
                                                    do.clean = F))
+  
+  
+  # Free up space - this may be crucial for parallelising, since "FORK" pushes all the global environment variables to every worker
+  rm(seurat_obj)
+  invisible(gc()); invisible(R.utils::gcDLLs())
+  
   ### Filter out cell types that have too few cells (<20).
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
   message("Filtering out subsets with fewer than 20 cells")
   
   subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
@@ -658,7 +665,9 @@ if (is.null(resume)) {
   
   message(paste0("Filtering out genes expressed in fewer than ", min.cells, " cells"))
   
-  cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
+  cl <- makeCluster(spec=n_cores, 
+                    type="FORK", 
+                    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
   subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
@@ -666,7 +675,7 @@ if (is.null(resume)) {
   message("Scaling and regressing data subsets")
   
   # Scale data and regress out confounders
-  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% metadat_names] else NULL
   
   subsets <- clusterMap(cl, function(seurat_obj, name) {
    tryCatch({
@@ -744,10 +753,6 @@ if (is.null(resume)) {
       .scheduling = c("dynamic")) 
     
     ### 
-    stopCluster(cl)
-    
-    invisible(gc()); invisible(R.utils::gcDLLs())
-    
     end_time <- Sys.time()
     
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
@@ -755,27 +760,29 @@ if (is.null(resume)) {
     # Select significant PCs using empirical p-value based on JackStraw resampling
     # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
+    
     if (jackstrawnReplicate > 0 & genes_use == "PCA") message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstrawnReplicate))
-    list_datExpr <- clusterMap(cl, function(seurat_obj) {
-      tryCatch({
-      wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                    n_cores = 1, 
-                    jackstrawnReplicate = jackstrawnReplicate, 
-                    pvalThreshold = pvalThreshold)
-      }, error = function(err) {
-        message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
-        message("using var.genes instead")
-        datExpr <- seurat_to_datExpr(seurat_obj_sub = seurat_obj, idx_genes_use = rownames(seurat_obj@scale.data) %in% seurat_obj@var.genes)
-      })
-      },
-      seurat_obj = subsets, 
-      name = names(subsets),
-      SIMPLIFY=F,
-      .scheduling = c("dynamic"))
+      list_datExpr <- clusterMap(cl, function(seurat_obj, name) {
+        tryCatch({
+        wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                      n_cores = 1, 
+                      jackstrawnReplicate = jackstrawnReplicate, 
+                      pvalThreshold = pvalThreshold)
+        }, error = function(err) {
+          message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
+          message("using var.genes instead")
+          datExpr <- seurat_to_datExpr(seurat_obj_sub = seurat_obj, idx_genes_use = rownames(seurat_obj@scale.data) %in% seurat_obj@var.genes)
+        })
+        },
+        seurat_obj = subsets, 
+        name = names(subsets),
+        SIMPLIFY=F,
+        .scheduling = c("dynamic"))
     
-    # Make sure we close socket workers
+    stopCluster(cl)
+      
     invisible(gc()); invisible(R.utils::gcDLLs())
-    
+   
   } else if (genes_use == "all") {
     list_datExpr <- lapply(subsets, function(x) 
       seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rep(TRUE, nrow(x@scale.data))))
@@ -788,7 +795,7 @@ if (is.null(resume)) {
   n_genes_subsets = sapply(list_datExpr, function(x) ncol(x), simplify=T)
   
   # Clear up
-  rm(subsets,  seurat_obj) #, builtInParams)
+  rm(subsets) #, builtInParams)
   invisible(gc())
   
   ######################################################################
@@ -2073,9 +2080,9 @@ if (resume == "checkpoint_4") {
     # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
     list_u_PPI <- lapply(list_kMs_PPI, 
                          function(kMs) lapply(colnames(kMs), function(module) {
-                            u <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
-                            names(u) = rownames(kMs)
-                            return(u)
+                            out <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
+                            names(out) = rownames(kMs)
+                            return(out)
                             }))
                        
     invisible(gc()); invisible(R.utils::gcDLLs())
