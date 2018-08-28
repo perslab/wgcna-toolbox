@@ -208,6 +208,8 @@ pamStage <- eval(parse(text=opt$pamStage))
 
 kM_reassign <- opt$kM_reassign
 
+kM_signif_filter <- opt$kM_signif_filter
+
 jackstrawnReplicate <- opt$jackstrawnReplicate
 
 TOMnReplicate <- opt$TOMnReplicate
@@ -1480,6 +1482,7 @@ if (resume == "checkpoint_2") {
   ##### FILTER OUT GENES WITH INSIGNIFICANT GENE-MOD CORRELATION #######
   ######################################################################
   # Module expression as defined by ME - Module Eigengene or IM - IntraModular connectivity embedding
+  
   if (kM_signif_filter) {
     message("Computing gene-module correlation p-values")
     invisible(gc()); invisible(R.utils::gcDLLs())
