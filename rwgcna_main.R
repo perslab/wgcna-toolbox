@@ -2082,20 +2082,24 @@ if (resume == "checkpoint_4") {
                                SIMPLIFY=F, 
                                .scheduling = c("dynamic"))
     
-    stopCluster(cl)
-    
+
     names(list_kMs_PPI) <- sNames_PPI
     
     list_MEs_PPI <- NULL
     
     # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
-    list_u_PPI <- lapply(list_kMs_PPI, 
-                         function(kMs) lapply(colnames(kMs), function(module) {
+    list_u_PPI <- clusterMap(cl, function(kMs, colors) lapply(colnames(kMs), function(module) {
                             out <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
-                            names(out) = rownames(kMs)
+                            names(out) = rownames(kMs)[colors==module]
                             return(out)
-                            }))
+                            }),
+                         kMs = list_kMs_PPI,
+                         colors = list_colors_PPI_uniq,
+                         SIMPLIFY=F,
+                         .scheduling = c("dynamic"))
                        
+    stopCluster(cl)
+    
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
@@ -2882,7 +2886,7 @@ if (resume == "checkpoint_4") {
                                      median.k. = sapply(list_sft, function(x) x$median.k.),
                                      plot_label_final = unlist(x=list_plot_label_final, use.names = F),
                                      n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, nrow) else numeric(length=sNames),
-                                     prop_genes_t.test_fail = if (kM_signif_filter) sapply(list_geneMod_t.test, function(x) sum(!x$signif)/nrow(x), simplify =F) else rep(NA, times=length(sNames)),
+                                     prop_genes_t.test_fail = if (kM_signif_filter) sapply(list_geneMod_t.test, function(x) sum(!x$signif)/length(x$signif), simplify =T) else rep(NA, times=length(sNames)),
                                      prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
@@ -2903,7 +2907,7 @@ if (resume == "checkpoint_4") {
                     prop_genes_mapped_to_ensembl = round(sum(!is.na(mapping$ensembl))/nrow(mapping),2),
                     prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign, na.rm=T),2),
                     prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI, na.rm=T),2),
-                    prop_genes_t.test_fail_mean = if (kM_signif_filter) sum(sapply(list_geneMod_t.test, function(x) sum(!x$signif)))/ sum(sapply(list_geneMod_t.test, nrow, simplify =F)) else NA,
+                    prop_genes_t.test_fail_mean = if (kM_signif_filter) sum(sapply(list_geneMod_t.test, function(x) sum(!x$signif), simplify=T))/ sum(sapply(list_geneMod_t.test, function(x) length(x$signif), simplify =T)) else NA,
                     n_modules_total = sum(sumstats_celltype_df$n_modules),
                     n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched), 
                     prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA else NA,
