@@ -249,7 +249,11 @@ ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_
 
 ```
 
-#### Plot cell x eigengene embedding matrix
+
+
+
+
+#### Plot cell x eigengene embedding matrix for a single run
 
 ```{r}
 
@@ -512,7 +516,6 @@ list_colors_merge <- lapply(list_colors_merge,as.factor)
 ```
 
 ### Compute eigen embedding of the merged modules on all cells
-Can only do eigen embedding as otherwise we need to compute the full matrix TOM and then get the kIMs
 
 ```{r}
 

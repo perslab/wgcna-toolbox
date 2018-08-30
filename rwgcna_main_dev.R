@@ -2829,6 +2829,7 @@ if (resume == "checkpoint_4") {
   #   })
   
   list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
+  
   # list_module_PPI_signif_uniq_f <- lapply(list_module_PPI_signif_uniq_f, function(x) {
   #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
   #   out <- matrix(out, ncol=3)
@@ -2843,12 +2844,14 @@ if (resume == "checkpoint_4") {
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_uniq)], 
                    SIMPLIFY = F))
   
+  if (length(list_module_PPI_signif_uniq_f) > 0) {
   invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
                                            row.names=F, 
                                            quote = F), 
                    x=list_module_PPI_signif_uniq_f, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_signif_uniq_f)], 
                    SIMPLIFY = F))
+  }
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################

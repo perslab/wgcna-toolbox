@@ -1107,7 +1107,6 @@ if (resume == "checkpoint_2") {
   suppressPackageStartupMessages(library(Biobase))
   suppressPackageStartupMessages(library(Matrix))
   #suppressPackageStartupMessages(library(Seurat))
-
   suppressPackageStartupMessages(library(parallel))
   suppressPackageStartupMessages(library(reshape))
   suppressPackageStartupMessages(library(reshape2))
@@ -1119,6 +1118,7 @@ if (resume == "checkpoint_2") {
 
   list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
   list_dissTOM <- load_obj(list_dissTOM_path)
+  names(list_dissTOM) <- sNames
   
   invisible(gc())
   cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parHclust.txt"))
@@ -1192,41 +1192,33 @@ if (resume == "checkpoint_2") {
     list_list_merged <- clusterMap(cl,
                                     function(list_comb,list_cutree, datExpr, cellType) {
                                       mapply(function(comb, cutree) {
-                                        colors <- rep("grey", times=ncol(datExpr))
+                                        "colors"<- rep("grey", times=ncol(datExpr))
                                         MEs <- NULL 
                                         out <- list("colors"= colors, "MEs" = MEs)
                                         if (length(unique(cutree$labels))>1) {
                                           if (length(unique(cutree$labels))>2) {
-                                            merged <- try({mergeCloseModules(exprData=as.matrix(datExpr), 
-                                                                             colors = cutree$labels, 
-                                                                             impute =T,
-                                                                             corFnc = corFnc,
-                                                                             corOptions = corOptions,
-                                                                             cutHeight = comb[4],
-                                                                             iterate = T,
-                                                                             getNewMEs = F,
-                                                                             getNewUnassdME = F)
-                                            })
-                                            if (class(merged)=="try-error") {
-                                              colors = rep("grey", times=ncol(datExpr))
-                                            } else {
-                                              colors = labels2colors(merged$colors)
-                                            }
+                                            merged = mergeCloseModules(exprData=as.matrix(datExpr), 
+                                                                       colors = cutree$labels, 
+                                                                       impute =T,
+                                                                       corFnc = corFnc,
+                                                                       corOptions = corOptions,
+                                                                       cutHeight = comb[4],
+                                                                       iterate = T,
+                                                                       getNewMEs = F,
+                                                                       getNewUnassdME = F)
+                                            colors = labels2colors(merged$colors)
                                           } else {
-                                            warning(paste0(cellType, ": Only one proper module found, nothing to merge"))
-                                            colors = labels2colors(cutree$labels) 
+                                            colors = labels2colors(cutree$labels) # only one proper module
                                           }
-                                          MEs <- try(moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
-                                                                               colors=colors,
-                                                                               excludeGrey = T,
-                                                                               scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                                                               dissTOM = NULL))
-                                          if (class(MEs)=="try-error") MEs <- NULL
-                                        } else {
-                                          warning(paste0(cellType, ": No modules found"))
-                                        }
-                                        out <- list("colors" = colors, "MEs"= MEs)
-                                        out
+                                          MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
+                                                                           colors=colors,
+                                                                             excludeGrey = T,
+                                                                             scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                                                                             dissTOM = NULL)
+                                          out <- list("colors" = colors, "MEs"= MEs)
+                                          
+                                        } else warning(paste0("No modules found in celltype ", cellType))
+                                        return(out)
                                         },
                                         cutree = list_cutree,
                                         comb = list_comb,
@@ -1234,7 +1226,7 @@ if (resume == "checkpoint_2") {
                                   list_comb=list_list_comb,
                                   list_cutree = list_list_cutree,
                                   datExpr = list_datExpr_gg,
-                                  cellType = names(list_datExpr_gg),
+                                  cellType=sNames,
                                   SIMPLIFY=F,
                                   .scheduling = c("dynamic"))
                                    
@@ -1416,6 +1408,7 @@ if (resume == "checkpoint_2") {
                                list_colors = list_list_colors_reassign, 
                                SIMPLIFY = F, .scheduling = c("dynamic"))
   
+
   # The pkM vectors already have gene names. Now name each vector, and each list of vectors
   list_list_pkMs <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
                                                       given_names = as.character(y), 
@@ -1631,7 +1624,6 @@ if (resume == "checkpoint_2") {
   }  
 
   rm(list_dissTOM)
-  
   ########################################################################################
   #################### REASSIGN NON-SIGNIFICANT GENES TO "GREY" ##########################
   ########################################################################################
@@ -1804,6 +1796,7 @@ if (resume == "checkpoint_3") {
   suppressPackageStartupMessages(library(dplyr))
   suppressPackageStartupMessages(library(Biobase))
   suppressPackageStartupMessages(library(Matrix))
+  suppressPackageStartupMessages(library(parallel))
   suppressPackageStartupMessages(library(reshape))
   suppressPackageStartupMessages(library(reshape2))
   suppressPackageStartupMessages(library(parallel))
@@ -1839,32 +1832,28 @@ if (resume == "checkpoint_3") {
                     type = "FORK", 
                     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt"))
   
-  list_list_PPI <- clusterMap(cl, function(list_colors,list_pkMs,PPI_pkME_threshold) {
-    #tryCatch({
-      mapply(function(colors,pkMs) PPI_outer_for_vec(colors = colors,
-                                                   pkMs = pkMs,
-                                                   STRINGdb_species = STRINGdb_species,
-                                                   PPI_pkM_threshold = PPI_pkME_threshold,
-                                                   pvalThreshold = pvalThreshold),
-     colors = list_colors,
-     pkMs = list_pkMs,
-     SIMPLIFY=F)
-      #}, error = function(c) {warning(paste0(name, ": PPI check failed with the error: ",c))}
-     #) 
-    },
-  list_colors = list_list_colors_matched_ok,
-  list_pkMs = list_list_pkMs_ok,
-  PPI_pkME_threshold = list_PPI_pkM_threshold,
-  SIMPLIFY=F, 
-  .scheduling = c("dynamic"))
- 
+  list_list_PPI <- clusterMap(cl, function(list_colors,list_pkMs,PPI_pkME_threshold) mapply(function(colors,pkMs) PPI_outer_for_vec(colors = colors,
+                                                                                         pkMs = pkMs,
+                                                                                         STRINGdb_species = STRINGdb_species,
+                                                                                         PPI_pkM_threshold = PPI_pkME_threshold,
+                                                                                         pvalThreshold = pvalThreshold),
+                                                         colors = list_colors,
+                                                         pkMs = list_pkMs,
+                                                         SIMPLIFY=F),
+                              list_colors = list_list_colors_matched_ok,
+                              list_pkMs = list_list_pkMs_ok,
+                              PPI_pkME_threshold = list_PPI_pkM_threshold,
+                              SIMPLIFY=F, 
+                              .scheduling = c("dynamic"))
+  
+  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
+  
+  list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
+  list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))
+  
   stopCluster(cl)
   
   invisible(gc()); invisible(R.utils::gcDLLs())
-  
-  list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
-  list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
-  list_list_module_PPI_signif <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI_signif, stringsAsFactors = F)))
   
   names(list_list_colors_PPI) <- names(list_list_module_PPI) <- names(list_list_module_PPI_signif) <- list_list_colors_matched_ok 
   
@@ -2040,20 +2029,20 @@ if (resume == "checkpoint_4") {
   
   # Update list_module_PPI_ok colors
   list_module_PPI_uniq <-  mapply(function(colors, colors_uniq, module_PPI) {
-    module_PPI$colors <- colors_uniq[match(module_PPI$colors, colors)]
+    rownames(module_PPI) <- colors_uniq[match(rownames(module_PPI), colors)]
     module_PPI
     },
-    colors = list_colors_PPI, 
-    colors_uniq = list_colors_PPI_uniq,
+    colors_PPI = list_colors_PPI, 
+    colors_PPI_uniq = list_colors_PPI_uniq,
     module_PPI = list_module_PPI_ok,
     SIMPLIFY = F)
   
-  list_module_PPI_signif_uniq <-  mapply(function(colors, colors_uniq, module_PPI_signif) {
-    module_PPI_signif$colors <- colors_uniq[match(module_PPI_signif$colors, colors)]
+  list_module_PPI_uniq <-  mapply(function(colors, colors_uniq, module_PPI_signif) {
+    rownames(module_PPI_signif) <- colors_uniq[match(rownames(module_PPI_signif), colors)]
     module_PPI_signif
   },
-  colors = list_colors_PPI, 
-  colors_uniq = list_colors_PPI_uniq,
+  colors_PPI = list_colors_PPI, 
+  colors_PPI_uniq = list_colors_PPI_uniq,
   module_PPI_signif = list_module_PPI_signif_ok,
   SIMPLIFY = F)
   
@@ -2068,6 +2057,7 @@ if (resume == "checkpoint_4") {
   if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) {
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
+    names(list_dissTOM) <- sNames
     list_dissTOM_PPI <- list_dissTOM[names(list_dissTOM) %in% sNames_PPI]
     rm(list_dissTOM)
   }
@@ -2483,6 +2473,7 @@ if (resume == "checkpoint_4") {
   if (scale_MEs_by_kIMs) {
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
+    names(list_dissTOM) <- sNames
     list_dissTOM_gwas <- list_dissTOM[names(list_dissTOM) %in% sNames_gwas]
     rm(list_dissTOM)  
   }
@@ -2721,6 +2712,7 @@ if (resume == "checkpoint_4") {
   if (scale_MEs_by_kIMs) {
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
+    names(list_dissTOM) <- sNames
     list_dissTOM_meta <- list_dissTOM[names(list_dissTOM) %in% sNames_meta]
     rm(list_dissTOM)  
   }
@@ -2820,31 +2812,31 @@ if (resume == "checkpoint_4") {
   ##########################################################################
   
   # convert the module PPI dataframe columns from list to numeric 
-  # list_module_PPI_uniq <- lapply(list_module_PPI_uniq, function(x) {
-  #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
-  #   out <- matrix(out, ncol=3)
-  #   colnames(out) = colnames(x)
-  #   out <- data.frame(out)
-  #   return(out)
-  #   })
+  list_module_PPI_uniq <- lapply(list_module_PPI_uniq, function(x) {
+    out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
+    out <- matrix(out, ncol=2)
+    dimnames(out) = dimnames(x)
+    out <- data.frame(out)
+    return(out)
+    })
   
   list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
-  # list_module_PPI_signif_uniq_f <- lapply(list_module_PPI_signif_uniq_f, function(x) {
-  #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
-  #   out <- matrix(out, ncol=3)
-  #   colnames(out) = colnames(x)
-  #   out <- data.frame(out)
-  #   return(out)
-  # })
+  list_module_PPI_signif_uniq_f <- lapply(list_module_PPI_signif_uniq_f, function(x) {
+    out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
+    out <- matrix(out, ncol=2)
+    dimnames(out) = dimnames(x)
+    out <- data.frame(out)
+    return(out)
+  })
   
   # output 
-  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F), 
+  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                    x=list_module_PPI_uniq, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_uniq)], 
                    SIMPLIFY = F))
   
   invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
-                                           row.names=F, 
+                                           row.names=T, 
                                            quote = F), 
                    x=list_module_PPI_signif_uniq_f, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_signif_uniq_f)], 
