@@ -2195,7 +2195,7 @@ if (resume == "checkpoint_4") {
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
-  if (scale_MEs_by_kIMs ) rm(list_dissTOM_PPI)
+  if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) rm(list_dissTOM_PPI)
   
   ##########################################################################
   ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
@@ -2525,7 +2525,7 @@ if (resume == "checkpoint_4") {
   ####### COMPUTE MODULE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
 
-  if (scale_MEs_by_kIMs) {
+  if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) {
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
     list_dissTOM_gwas <- list_dissTOM[names(list_dissTOM) %in% sNames_gwas]
@@ -2634,7 +2634,7 @@ if (resume == "checkpoint_4") {
     metadata = NULL
   }
   
-  if (scale_MEs_by_kIMs) rm(list_dissTOM_gwas)
+  if (scale_MEs_by_kIMs | fuzzyModMembership=="kIM" ) rm(list_dissTOM_gwas)
   
   ##########################################################################
   #### FILTER COLORS VECS, GENE AND KME LISTS FOR METADATA CORRELATIONS ####
@@ -2747,9 +2747,12 @@ if (resume == "checkpoint_4") {
 
   message(paste0("Computing primary "), fuzzyModMembership, "s")
 
-  list_pkMs_meta <- mapply(function(colors, kMs) pkMs_fnc(kMs=kMs, colors=colors), 
-                           kMs = list_kMs_meta, colors=list_colors_meta, SIMPLIFY=F)
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "list_pkMs_meta.txt"))
+  
+  list_pkMs_meta <- clusterMap(cl, function(colors, kMs) pkMs_fnc(kMs=kMs, colors=colors), 
+                           kMs = list_kMs_meta, colors=list_colors_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
 
+  stopCluster(cl)
   names(list_pkMs_meta) <- sNames_meta
   
   ######################################################################
@@ -2800,15 +2803,54 @@ if (resume == "checkpoint_4") {
     if (scale_MEs_by_kIMs) rm(list_dissTOM_meta)
     
   }
+  
+  ######################################################################
+  ############################# CHECKPOINT #############################
+  ######################################################################
+  
+  resume = "checkpoint_5"
+  message("Reached checkpoint 5, saving session image")
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (!is.null(quit_session)) if (quit_session=="checkpoint_5") quit(save="no")
+} else if (resume == "checkpoint_5") {
+  
+  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))},
+           error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+  
+  # Load parameter values and utility functions anew (in case a bug was fixed)
+  source(file = paste0(current.dir, "rwgcna_params.R"))
+  source(file = paste0(current.dir, "rwgcna_functions.R"))
+  options(stringsAsFactors = F)
+}  
+
+if (resume == "checkpoint_5") {
+  
+  ##########################################################################
+  ############################ (UN)LOAD PACKAGES ############################
+  ##########################################################################
+
+  invisible(R.utils::gcDLLs())
+
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(Biobase))
+  suppressPackageStartupMessages(library(Matrix))
+  suppressPackageStartupMessages(library(parallel))
+  suppressPackageStartupMessages(library(reshape))
+  suppressPackageStartupMessages(library(reshape2))
+  
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
   
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "write_outputs.txt"))
+  
   message("Preparing outputs")
   
   # prepare nested lists of module genes
-  list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
-  list_list_module_meta_genes <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F)
+  list_list_module_meta_genes <- clusterMap(cl,function(a,b) lapply(b, function(x) names(a)[a==x]), 
+                                            a=list_colors_meta, b=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
+  list_list_module_meta_genes <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), 
+                                            x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
   
   # make a copy for pkMs
   list_list_module_meta_pkMs <- list_list_module_meta_genes
@@ -2843,8 +2885,10 @@ if (resume == "checkpoint_4") {
   
   # retrieve gene hgcn symbols in mapping file
   mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
-  list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
-  list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F)
+  list_list_module_meta_genes_hgnc <- parLapply(cl, list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+  list_list_module_meta_genes_hgnc <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
+                                                                        given_names = y, 
+                                                                        dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
   hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
   
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
@@ -2893,27 +2937,28 @@ if (resume == "checkpoint_4") {
   # })
   
   # output 
-  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F), 
+  invisible(clusterMap(cl, function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F), 
                    x=list_module_PPI_uniq, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_uniq)], 
-                   SIMPLIFY = F))
+                   SIMPLIFY = F, .scheduling = c("dynamic")))
   
   if (length(list_module_PPI_signif_uniq_f) > 0) {
-  invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
+  invisible(clusterMap(cl, function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
                                            row.names=F, 
                                            quote = F), 
                    x=list_module_PPI_signif_uniq_f, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_signif_uniq_f)], 
-                   SIMPLIFY = F))
+                   SIMPLIFY = F, .scheduling = c("dynamic")))
   }
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
   
   # Prepare dfs with a gene column followed by kMEs / kIMs 
-  list_kMs_meta_out <- lapply(list_kMs_meta, function(x) cbind(genes=rownames(x), x))
+  list_kMs_meta_out <- parLapplyLB(cl, list_kMs_meta, function(x) cbind(genes=rownames(x), x))
   rownames(list_kMs_meta) <- NULL
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, run_prefix, y, fuzzyModMembership), row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
+  invisible(clusterMap(cl, function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, run_prefix, y, fuzzyModMembership), 
+                                                   row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F, .scheduling = c("dynamic")))
   
   ############### OUTPUT MENDELIAN/RARE VARIANT RESULTS #####################
   ###########################################################################
@@ -2943,12 +2988,12 @@ if (resume == "checkpoint_4") {
   
   if (!is.null(metadata_corr_col) & !is.null(metadata)) {
     invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_%s_all_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix), row.names=T, quote = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
+    invisible(clusterMap(cl, function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                      list_mod_metadata_corr_rho, 
-                     sNames_gwas, SIMPLIFY = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
+                     sNames_gwas, SIMPLIFY = F, .scheduling = c("dynamic")))
+    invisible(clusterMap(cl, function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
                      list_mod_metadata_corr_fdr.log, 
-                     sNames_gwas, SIMPLIFY = F))
+                     sNames_gwas, SIMPLIFY = F, .scheduling = c("dynamic")))
   }
   
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
@@ -2975,8 +3020,8 @@ if (resume == "checkpoint_4") {
                                      SFT.R.sq = sapply(list_sft, function(x) x$SFT.R.sq),
                                      median.k. = sapply(list_sft, function(x) x$median.k.),
                                      plot_label_final = unlist(x=list_plot_label_final, use.names = F),
-                                     n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, nrow) else numeric(length=sNames),
-                                     prop_genes_t.test_fail = if (kM_signif_filter) sapply(list_geneMod_t.test, function(x) sum(!x$signif)/length(x$signif), simplify =T) else rep(NA, times=length(sNames)),
+                                     n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T) else numeric(length=sNames),
+                                     prop_genes_t.test_fail = if (kM_signif_filter) ifelse(test= sNames %in% sNames_ok, yes=sapply(list_geneMod_t.test, function(x) sum(!x$signif)/length(x$signif), simplify =T), no=NA) else rep(NA, times=length(sNames)),
                                      prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),

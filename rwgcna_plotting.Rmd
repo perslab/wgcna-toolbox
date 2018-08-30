@@ -23,8 +23,8 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-project_dir = "/projects/jonatan/tmp-mousebrain/"
-data_prefix = "mousebrain"
+project_dir = "/projects/jonatan/tmp-maca/"
+data_prefix = "maca"
 #run_prefix = "Immune_Class_1"
 
 p.val.threshold = 5e-2
@@ -82,6 +82,7 @@ load(session_image_path)
 params_run <- read.table(sprintf("%s%s_params_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
 sumstats_run <- read.table(sprintf("%s%s_sumstats_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
 sumstats_celltype <- read.table(sprintf("%s%s_sumstats_celltype.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
+
 
 ```
 
