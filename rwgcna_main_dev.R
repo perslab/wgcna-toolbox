@@ -1937,7 +1937,8 @@ if (resume == "checkpoint_4") {
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_module_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_module_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_module_PPI_signif_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_module_PPI_signif, y = list_PPI_vec_n_grey, SIMPLIFY=F)
-  list_list_geneMod_t.test_order <- if (kM_signif_filter) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_geneMod_t.test, y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
+  list_list_geneMod_t.test_order <- if (kM_signif_filter) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_geneMod_t.test[sNames %in% sNames_ok], y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
+  
   ######################################################################
   ##### FOR EACH SUBSET SELECT PARAMETERS WITH BEST PPI ENRICHMENT #####
   ######################################################################
@@ -1988,7 +1989,17 @@ if (resume == "checkpoint_4") {
   message("Making module colors unique across cell clusters")
   
   # Get nested list of modules
-  list_mods <- lapply(list_colors_PPI, function(x) names(table(x))[-grep("^grey$", names(table(x)))])
+  # list_mods <- lapply(list_colors_PPI, function(x) names(table(x))[-grep("^grey$", names(table(x)))])
+  list_mods <- lapply(list_colors_PPI, function(x) names(table(x)))
+  
+  list_mods <- lapply(list_mods, function(mods) {
+    if (any(grepl("^grey$", mods))) {
+      mods <- mods[mods!="grey"] 
+    } else {
+      mods
+    }
+  })
+  
   mods <- unlist(list_mods)
   names(mods) <- NULL
   
@@ -2001,19 +2012,32 @@ if (resume == "checkpoint_4") {
   } else if (length(mods) > length(all_cols_nogrey_uniq) & length(mods) < length(all_cols_nogrey) ) { # if there aren't enough unique colors unless they have numbers added
     mods_uniq <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(mods), replace=F)]
   } else if (length(mods) > length(all_cols_nogrey)) { # if there aren't enough unique colors in R
-    fakeCols <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods) - length(all_cols_nogrey)))
-    mods_uniq <- mods
-    mods_uniq[1:length(all_cols_nogrey)] <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(all_cols_nogrey), replace=F)]
-    mods_uniq[(length(all_cols_nogrey)+1):length(mods_uniq)] <- fakeCols[sample(x=1:length(fakeCols), size=length(mods_uniq)-length(all_cols_nogrey), replace=F)]
+    #fakeCols <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods) - length(all_cols_nogrey)))
+    mods_uniq <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods)))
+    #fakeCols <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods)))
+    #mods_uniq <- mods
+    #mods_uniq[1:length(all_cols_nogrey)] <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(all_cols_nogrey), replace=F)]
+    #mods_uniq[(length(all_cols_nogrey)+1):length(mods_uniq)] <- fakeCols[sample(x=1:length(fakeCols), size=length(mods_uniq)-length(all_cols_nogrey), replace=F)]
+    #mods_uniq <- fakeCols[sample(x=1:length(fakeCols), size=length(mods_uniq), replace=F)]
   }
   
-  # Nest the modules by celltype
-  k = 0
   list_mods_uniq <- vector(mode="list", length=length(list_mods))
-  for (i in 1:length(list_mods)) {
-    list_mods_uniq[[i]] <- mods_uniq[(k+1):(k+length(list_mods[[i]]))]
-    k <- k+length(list_mods[[i]])
+  
+  k=1
+  for (j in 1:length(list_mods)) {
+    for (i in 1:length(list_mods[[j]])) {
+      list_mods_uniq[[j]][i] <- mods_uniq[k]
+        k = k+1
+    }
   }
+
+  # Nest the modules by celltype
+  # k = 0
+  # list_mods_uniq <- vector(mode="list", length=length(list_mods))
+  # for (i in 1:length(list_mods)) {
+  #   list_mods_uniq[[i]] <- mods_uniq[(k+1):(k+length(list_mods[[i]]))]
+  #   k <- k+length(list_mods[[i]])
+  # }
   
   names(list_mods_uniq) <- names(list_colors_PPI)
   
@@ -2077,7 +2101,7 @@ if (resume == "checkpoint_4") {
     invisible(gc())
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kMEs_PPI.txt"))
     
-    list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z) {
+    list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z,cellType) {
       out <- try({
         moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
                                 colors=y,
@@ -2086,6 +2110,7 @@ if (resume == "checkpoint_4") {
                                 dissTOM=if (scale_MEs_by_kIMs) z else NULL)
         })
         if (class(out) == "try-error"){
+          warning(paste0(cellType, ": moduleEigengenes failed with the error: ", out))
           out <- list(eigengenes=NULL, u = NULL)
         } else {
           out
@@ -2094,6 +2119,7 @@ if (resume == "checkpoint_4") {
      x = list_datExpr_PPI, 
      y = list_colors_PPI_uniq,
      z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
+     cellType = names(list_datExpr_PPI),
      SIMPLIFY = F,
      .scheduling = c("dynamic"))
                         
@@ -2730,51 +2756,55 @@ if (resume == "checkpoint_4") {
   ##################### COMPUTE CELL x EIGENGENE MATRIX ################
   ######################################################################
   
-  message("Computing all cell embeddings on all modules, across celltypes")
-  
-  scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_scale_regr_data_ensembl"), full.names = T)
-  load_obj(scale_data_path) %>% t -> datExpr 
-  
-  invisible(gc())
-  
-  if (scale_MEs_by_kIMs) {
-    list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
-    list_dissTOM <- load_obj(list_dissTOM_path)
-    list_dissTOM_meta <- list_dissTOM[names(list_dissTOM) %in% sNames_meta]
-    rm(list_dissTOM)  
+  if (FALSE) { 
+    message("Computing all cell embeddings on all modules, across celltypes")
+    
+    scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_scale_regr_data_ensembl"), full.names = T)
+    load_obj(scale_data_path) %>% t -> datExpr 
+    
+    invisible(gc())
+    
+    if (scale_MEs_by_kIMs) {
+      list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
+      list_dissTOM <- load_obj(list_dissTOM_path)
+      list_dissTOM_meta <- list_dissTOM[names(list_dissTOM) %in% sNames_meta]
+      rm(list_dissTOM)  
+    }
+    
+    latentGeneType <- if (fuzzyModMembership == "kME") "ME" else if (fuzzyModMembership=="kIM") "IM"
+    
+    cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "make_cell_embed_mat.txt"))
+    
+    list_cellModEmbed_mat <- clusterMap(cl, function(x,y,z,a) cellModEmbed(datExpr = datExpr, 
+                                                                         colors = x,
+                                                                         latentGeneType = latentGeneType,
+                                                                         cellType = y,
+                                                                         kMs = if (latentGeneType== "IM") z else NULL,
+                                                                         scale_MEs_by_kIMs = scale_MEs_by_kIMs,
+                                                                         dissTOM = if (scale_MEs_by_kIMs) a else NULL), 
+                                        x = list_colors_meta, 
+                                        y = names(list_colors_meta),
+                                        z = list_kMs_meta,
+                                        a = if (scale_MEs_by_kIMs) list_dissTOM_meta else numeric(length=length(sNames_meta)),
+                                        SIMPLIFY=F,
+                                        .scheduling = c("dynamic"))
+    
+    stopCluster(cl)
+    
+    invisible(gc()); invisible(R.utils::gcDLLs())
+    
+    list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
+    
+    rownames(cellModEmbed_mat) <- rownames(datExpr)
+    
+    if (scale_MEs_by_kIMs) rm(list_dissTOM_meta)
+    
   }
-  
-  latentGeneType <- if (fuzzyModMembership == "kME") "ME" else if (fuzzyModMembership=="kIM") "IM"
-  
-  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "make_cell_embed_mat.txt"))
-  
-  list_cellModEmbed_mat <- clusterMap(cl, function(x,y,z,a) cellModEmbed(datExpr = datExpr, 
-                                                                       colors = x,
-                                                                       latentGeneType = latentGeneType,
-                                                                       cellType = y,
-                                                                       kMs = if (latentGeneType== "IM") z else NULL,
-                                                                       scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                                                       dissTOM = if (scale_MEs_by_kIMs) a else NULL), 
-                                      x = list_colors_meta, 
-                                      y = names(list_colors_meta),
-                                      z = list_kMs_meta,
-                                      a = if (scale_MEs_by_kIMs) list_dissTOM_meta else numeric(length=length(sNames_meta)),
-                                      SIMPLIFY=F,
-                                      .scheduling = c("dynamic"))
-  
-  stopCluster(cl)
-  
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
-  list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
-  
-  rownames(cellModEmbed_mat) <- rownames(datExpr)
-  
-  if (scale_MEs_by_kIMs) rm(list_dissTOM_meta)
-  
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
+  
+  message("Preparing outputs")
   
   # prepare nested lists of module genes
   list_list_module_meta_genes <- mapply(function(a,b) lapply(b, function(x) names(a)[a==x]), a=list_colors_meta, b=list_module_meta, SIMPLIFY=F)
@@ -2785,6 +2815,7 @@ if (resume == "checkpoint_4") {
   # order the gene lists by pkM and get pkM value
   #tmp <- tmp2 <- list_list_module_meta_genes
 
+  message("Preparing sorted gene lists")
   # iterate over celltypes
   for (i in 1:length(list_list_module_meta_genes)) {
     # iterate over modules
@@ -2803,7 +2834,8 @@ if (resume == "checkpoint_4") {
   # list_list_module_meta_genes <- tmp
   # list_list_module_meta_pkMs  <- tmp2
   
-  # Prepare module genes dataframe
+  message("Preparing module genes dataframe")
+  
   cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
   module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
   ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
@@ -2814,12 +2846,15 @@ if (resume == "checkpoint_4") {
   list_list_module_meta_genes_hgnc <- lapply(list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
   list_list_module_meta_genes_hgnc <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F)
   hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
+  
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
   colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", paste0("p", fuzzyModMembership))
 
   ##########################################################################
   ############################# OUTPUT TABLES ##############################
   ##########################################################################
+
+  message("Writing outputs to disk")
   
   ##################### WRITE OUT TABLES OF MODULE GENES ####################
   ###########################################################################
@@ -2919,8 +2954,9 @@ if (resume == "checkpoint_4") {
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=T, quote = F))
-  
+  if (FALSE) {
+    invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=T, quote = F))
+  }
   ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
   ########################################################################### 
   
