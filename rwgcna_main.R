@@ -2878,14 +2878,14 @@ if (resume == "checkpoint_5") {
   
   message("Preparing module genes dataframe")
   
-  cell_cluster <- rep(sNames_meta, times=unlist(sapply(list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
-  module <- unlist(sapply(list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
+  cell_cluster <- rep(sNames_meta, times=unlist(parSapplyLB(cl, list_list_module_meta_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)), simplify=T)))
+  module <- unlist(parSapplyLB(cl, list_list_module_meta_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T)), simplify=T), use.names = F)
   ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
   pkMs <- unlist(list_list_module_meta_pkMs, recursive = T, use.names = F)
   
   # retrieve gene hgcn symbols in mapping file
   mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
-  list_list_module_meta_genes_hgnc <- parLapply(cl, list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+  list_list_module_meta_genes_hgnc <- parLapplyLB(cl, list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
   list_list_module_meta_genes_hgnc <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
                                                                         given_names = y, 
                                                                         dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
@@ -3019,8 +3019,8 @@ if (resume == "checkpoint_5") {
                                      softPower = sapply(list_sft, function(x) x$Power),
                                      SFT.R.sq = sapply(list_sft, function(x) x$SFT.R.sq),
                                      median.k. = sapply(list_sft, function(x) x$median.k.),
-                                     plot_label_final = unlist(x=list_plot_label_final, use.names = F),
-                                     n_genes_reassign = if (kM_reassign) sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T) else numeric(length=sNames),
+                                     plot_label_final = ifelse(test=sNames %in% sNames_ok, yes= unlist(x=list_plot_label_final, use.names = F), no=NA),
+                                     n_genes_reassign = if (kM_reassign) ifelse(test=sNames %in% sNames_ok, yes = sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T), no = 0) else numeric(length=sNames),
                                      prop_genes_t.test_fail = if (kM_signif_filter) ifelse(test= sNames %in% sNames_ok, yes=sapply(list_geneMod_t.test, function(x) sum(!x$signif)/length(x$signif), simplify =T), no=NA) else rep(NA, times=length(sNames)),
                                      prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
                                      prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
@@ -3070,6 +3070,8 @@ if (resume == "checkpoint_5") {
   write.table(sumstats_celltype_df, file=sumstats_celltype_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_celltype, col.names = !append_sumstats_celltype)
   write.table(sumstats_run_df, file=sumstats_run_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_run, col.names = !append_sumstats_run)
   write.table(params_run_df, file=params_run_path, quote = F, sep = "\t", row.names=F, append = append_params_run, col.names = !append_params_run)
+  
+  stopCluster(cl)
   
   ######################################################################
   ################# SAVE SESSION IMAGE AND FINISH ######################
