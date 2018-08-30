@@ -1277,7 +1277,7 @@ PPI_outer_for_vec = function(colors,
     module_PPI$expected.interactions <- as.numeric(module_PPI$expected.interactions)
 
   } else {
-    module_PPI <- NULL 
+    module_PPI <- data.frame(colors= "grey", q.value=1, expected.interactions=0)
   }
   # FILTER MODULES ON PPI ENRICHMENT  
   

@@ -2077,16 +2077,25 @@ if (resume == "checkpoint_4") {
     invisible(gc())
     cl <- makeCluster(n_cores, type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kMEs_PPI.txt"))
     
-    list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z) moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
-                                                                  colors=y,
-                                                                  excludeGrey=T,
-                                                                  scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                                                  dissTOM=if (scale_MEs_by_kIMs) z else NULL), 
-                                                   x = list_datExpr_PPI, 
-                                                   y = list_colors_PPI_uniq,
-                                                   z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
-                                                   SIMPLIFY = F,
-                                                   .scheduling = c("dynamic"))
+    list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z) {
+      out <- try({
+        moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
+                                colors=y,
+                                excludeGrey=T,
+                                scale_MEs_by_kIMs=scale_MEs_by_kIMs,
+                                dissTOM=if (scale_MEs_by_kIMs) z else NULL)
+        })
+        if (class(out) == "try-error"){
+          out <- list(eigengenes=NULL, u = NULL)
+        } else {
+          out
+        }
+      }, 
+     x = list_datExpr_PPI, 
+     y = list_colors_PPI_uniq,
+     z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
+     SIMPLIFY = F,
+     .scheduling = c("dynamic"))
                         
     list_MEs_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$eigengenes)
     
@@ -2094,17 +2103,25 @@ if (resume == "checkpoint_4") {
     
     names(list_MEs_PPI) <- names(list_u_PPI) <- sNames_PPI
       
-    list_kMs_PPI <- clusterMap(cl, function(x,y) signedKME(datExpr = as.matrix(x),
-                                                           datME = y,
-                                                           outputColumnName = "",
-                                                           corFnc = corFnc), 
-                               x=list_datExpr_PPI, 
-                               y=list_MEs_PPI,
-                               SIMPLIFY=F,
-                               .scheduling = c("dynamic"))
+    list_kMs_PPI <- clusterMap(cl, function(x,y) {
+        if(!is.null(y)) {
+          signedKME(datExpr = as.matrix(x),
+                   datME = y,
+                   outputColumnName = "",
+                   corFnc = corFnc)
+        } else {
+          NULL  
+        }
+      }, 
+     x=list_datExpr_PPI, 
+     y=list_MEs_PPI,
+     SIMPLIFY=F,
+     .scheduling = c("dynamic"))
     
     # Remove 'ME' from eigengenes
-    list_MEs_PPI <- lapply(list_MEs_PPI, function(x) name_for_vec(to_be_named = x, given_names = gsub(pattern="ME" , replacement="", x = colnames(x), ignore.case = F), dimension = 2))
+    list_MEs_PPI <- lapply(list_MEs_PPI, function(x) {
+      if (!is.null(x)) name_for_vec(to_be_named = x, given_names = gsub(pattern="ME" , replacement="", x = colnames(x), ignore.case = F), dimension = 2) else NULL
+      })
     
     # add cell row names
     list_MEs_PPI <- mapply(function(x,y) name_for_vec(to_be_named = x, given_names = rownames(y), dimension=1), 
@@ -2829,6 +2846,7 @@ if (resume == "checkpoint_4") {
   #   })
   
   list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
+  
   # list_module_PPI_signif_uniq_f <- lapply(list_module_PPI_signif_uniq_f, function(x) {
   #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
   #   out <- matrix(out, ncol=3)
@@ -2843,12 +2861,14 @@ if (resume == "checkpoint_4") {
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_uniq)], 
                    SIMPLIFY = F))
   
+  if (length(list_module_PPI_signif_uniq_f) > 0) {
   invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
                                            row.names=F, 
                                            quote = F), 
                    x=list_module_PPI_signif_uniq_f, 
                    y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_signif_uniq_f)], 
                    SIMPLIFY = F))
+  }
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
