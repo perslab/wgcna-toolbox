@@ -17,19 +17,19 @@ suppressPackageStartupMessages(library(parallel))
 ########################## SET PARAMS ################################
 ######################################################################
 
-source(file = paste0(current.dir, "rwgcna_params.R"))
-source(file = paste0(current.dir, "rwgcna_functions.R"))
+source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_params.R")
+source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
 options(stringsAsFactors = F)
 
 ######################################################################
 ######################### SET CONSTANTS ##############################
 ######################################################################
 seurat_path <- "/projects/jonatan/tmp-mousebrain/RObjects/L5.RDS"
-project_dir <- "/projects/jonatan/tmp-rwgcna-tests/maca-pancreas-test/"
-data_prefix <- "maca_pancr"
-vec_wgcna_run_prefix <- c("test_1")
-n_cores = 10
-metadata_subset_col <- NULL
+project_dir <- "/projects/jonatan/tmp-mousebrain/"
+data_prefix <- "mousebrain"
+vec_wgcna_run_prefix <- c("Neurons_ClusterName_2")
+n_cores = 20
+metadata_subset_col <- "ClusterName"
 
 # if specified output directory doesn't exist, create it 
 if (!file.exists(project_dir)) {
@@ -57,12 +57,12 @@ scratch_dir = "/scratch/tmp-wgcna/"
 
 run_cellType_module_u <- list()
 for (run in vec_wgcna_run_prefix) {
-  run_cellType_module_u[[run]] <- load_obj(f = sprintf("%s/%s_%s_list_list_module_u.RDS", RObjects_dir, data_prefix, run))
+  run_cellType_module_u[[run]] <- load_obj(f = sprintf("%s%s_%s_list_list_module_u.RDS", RObjects_dir, data_prefix, run))
 }
 
 cellType_module_u <- unlist(x = run_cellType_module_u, recursive = F, use.names = T) # TODO: Does this give names as desired?
 module_u <- unlist(x = cellType_module_u, recursive = F, use.names = T)
-names(module_u) <- paste0(wgcna_data_prefix, ".", names(module_u))
+names(module_u) <- paste0(data_prefix, ".", names(module_u))
 
 ######################################################################
 ######################### LOAD EXPRESSION MATRIX #####################
@@ -82,10 +82,11 @@ if (grepl(pattern = "\\.loom", seurat_path)) {
 ######################### PREPARE DATA ###############################
 ######################################################################
 
-if (fileType="RObject") {
-  datExpr_colnames <- colnames(datExpr)
+if (fileType=="RObject") {
+  
   datExpr <- data_obj@scale.data 
-  rm(data_obj)
+  datExpr_colnames <- colnames(datExpr)
+  
   if (!is.null(metadata_subset_col)) {
     ident = as.character(data_obj@meta.data[[metadata_subset_col]])
     names(ident) = rownames(data_obj@meta.data)
@@ -94,7 +95,7 @@ if (fileType="RObject") {
     ident <- as.character(data_obj@ident)
     ident <- ident[match(names(ident), colnames(datExpr))]
   }
-
+  rm(data_obj)
 } else {
   # TODO for loom
 }

@@ -2841,6 +2841,8 @@ if (resume == "checkpoint_5") {
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
+  # retrieve gene hgcn symbols in mapping file
+  mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
   
   cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "write_outputs.txt"))
   
@@ -2883,12 +2885,14 @@ if (resume == "checkpoint_5") {
   ensembl <- unlist(list_list_module_meta_genes, recursive = T, use.names = F)
   pkMs <- unlist(list_list_module_meta_pkMs, recursive = T, use.names = F)
   
-  # retrieve gene hgcn symbols in mapping file
-  mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
   list_list_module_meta_genes_hgnc <- parLapplyLB(cl, list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
+  
   list_list_module_meta_genes_hgnc <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
                                                                         given_names = y, 
-                                                                        dimension = NULL), x=list_list_module_meta_genes_hgnc, y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
+                                                                        dimension = NULL), 
+                                                 x=list_list_module_meta_genes_hgnc, 
+                                                 y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
+  
   hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
   
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
