@@ -38,9 +38,10 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Compute consensus TOM across resampled expression matrices
 * Run hclust to find clusters in the (inverse) TOM 
 * Run cutreeHybrid cut out modules in the distance matrices (iterate over different sets of parameters if given)
-* merge close modules
-* filter out runs with only grey modules
-* compute fuzzy module membership for every gene-module pair, either Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. 'own' module); or intramodular k (kIMs), which are average distance between a gene and each gene in the module
+* Merge close modules iteratively using kIMs or kMEs
+* Compute fuzzy module membership for every gene-module pair, either Module Eigengenes (MEs), kMEs ('fuzzy' module membership) and primary kMEs (kME w.r.t. 'own' module); or intramodular k (kIMs), which are average distance between a gene and each gene in the module
+* Perform an addition k-means-like reclustering step, reassigning genes to modules if the kME/kIM is more than 1.05 times higher
+* Filter out genes without a significant gene-module expression profile correlation using a t-test
 * Match modules between different parameter settings
 
 #### Find Protein-Protein Interactions (PPI)
@@ -50,8 +51,8 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 #### Find genetic enrichment
 * Make colors unique across celltypes
-* Compute rare variant enrichment
-* Compute MAGMA gwas enrichment
+* Compute rare variant and mendelian gene enrichment using Gene Set Enrichment Analysis
+* Compute MAGMA gwas enrichment using a paired samples t-test on module gene versus all MAGMA gene p-values
 * Re-compute MEs and kMEs after MAGMA GWAS filter; remove any celltypes without significant modules if desired
 
 #### Compute eigengene - metadata correlations
@@ -59,15 +60,15 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Compute p value for the correlations, adjusted for multiple testing across all cell types
 * If desired, filter modules and cell types to retain only those significantly correlated with metadata
 
-#### Compute cell module embedding matrix for whole dataset
-* Project every cell in the dataset onto the 'latent gene' of each module
-
 #### Compute and output tables
+* Run parameters
+* Run summary statistics
+* Per cell subset summary statistics
 * Module gene lists ordered by kME/kIM
-* Module-module correlations and clustering
-* Compute cell x eigengene cell embedding matrix across all celltypes and modules
-* Prepare dataframe with columns cell type, module, gene ensembl id and, if available, gene symbol 
-* Output kMEs / kIM tables as csv
+* Module-module correlations and clustering 
+* Dataframe with columns cell type, module, gene ensembl id and, if available, gene symbol 
+* kMEs / kIM tables as csv
+* Module eigenvectors ('u' of Singular Value Decomposition), of length n genes of each module, for computing cell embeddings later
 
 #### Plotting - separate notebook
 * Module assignment under different parameters
@@ -84,7 +85,7 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
 e.g.
 
-`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell-1/  --data_prefix campbell  --run_index 1 --regress_out "c('percent.mito', 'percent.ribo', 'nUMI')" --min.cells 5  --genes_use PCA --pca_genes all --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15, 25)" --deepSplit "c(2,4)" --moduleMergeCutHeight "c(0.15)" --fuzzyModMembership kIM --jackstrawnReplicate 500 --TOMnReplicate 50 --kM_reassign T  --PPI_filter T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('t1d', 't2d', 'BMI')" --metadata_corr_col "c('SEX', 'AGE')" --metadata_corr_filter_vals "c('male', 'p22-25')" --n_cores 10`
+`time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_clust_all.RData --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell-1/  --data_prefix campbell  --run_index 1 --regress_out "c('percent.mito', 'percent.ribo', 'nUMI')" --min.cells 5  --genes_use PCA --pca_genes pca.genes --corFnc cor --networkType signed --hclustMethod average --minClusterSize "c(15, 25)" --deepSplit "c(2,4)" --moduleMergeCutHeight "c(0.2)" --fuzzyModMembership kIM --jackstrawnReplicate 0 --TOMnReplicate 50 --kM_reassign T --kM_signif_filter T  --PPI_filter T --data_organism mmusculus --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --gwas_filter_traits "c('t1d', 't2d', 'BMI')" --metadata_corr_col "c('SEX', 'AGE')" --metadata_corr_filter_vals "c('male', 'p22-25')" --n_cores 10`
 
 ### Args
 
