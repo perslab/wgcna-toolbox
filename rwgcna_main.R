@@ -38,7 +38,7 @@ option_list <- list(
   make_option("--quit_session", type="character", default=NULL,
               help = "Quit after saving session image at a checkpoint? Options are 'checkpoint_1' - 'checkpoint_4'"),
   make_option("--metadata_subset_col", type="character", default=NULL,
-              help = "Specify a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL (default) uses the @ident slot."),
+              help = "Specify a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL uses the @ident slot. [default %default]"),
   make_option("--metadata_corr_col", type="character", default='NULL',
               help = "Specify seurat_obj@meta.data$... column(s) for which to compute correlations with gene modules. Takes a character with a vector of seurat_obj@meta.data column names e.g. 'nUMI' or 'c('nUMI', 'Age')'. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution.  [default %default]"),
   make_option("--metadata_corr_filter_vals", type="character", default='NULL',
@@ -406,18 +406,18 @@ if (is.null(resume)) {
         
         if (grepl(pattern = "\\.gz", x = path)) {
           if (grepl(pattern = "\\.csv", x = path)) {
-            geneset <- read.csv(file=gzfile(geneset),sep="\t", stringsAsFactors = F) 
+            geneset <- read.csv(file=gzfile(geneset), stringsAsFactors = F, quote="", header=T) 
           } else if (grepl(pattern = "\\.tab", x = path)) {
-            geneset <- read.table(file=gzfile(geneset),sep="\t", stringsAsFactors = F)
+            geneset <- read.table(file=gzfile(geneset), sep="\t", stringsAsFactors = F, header = T, quote="")
           } else if (grepl(pattern = "\\.txt", x = path)) {
-            geneset <- read.delim(file=gzfile(geneset), sep = "\t", stringsAsFactors = F)
+            geneset <- read.delim(file=gzfile(geneset), stringsAsFactors = F, quote = "", header=T)
           }
         } else if (grepl(pattern = "\\.csv", x = path)) {
-          geneset <- read.csv(file=geneset,sep="\t", stringsAsFactors = F) 
+          geneset <- read.csv(file=geneset, stringsAsFactors = F, quote="", header=T)
         } else if (grepl(pattern = "\\.tab", x = path)) {
-          geneset <- read.table(file=geneset,sep="\t", stringsAsFactors = F)
+          geneset <- read.table(file=geneset,sep="\t", stringsAsFactors = F, quote="", header=T)
         } else if (grepl(pattern = "\\.txt", x = path)) {
-          geneset <- read.delim(file=geneset,sep="\t", stringsAsFactors = F)
+          geneset <- read.delim(file=geneset, stringsAsFactors = F, quote="", header=T)
         }
         
         if (!is.null(geneset)) {
