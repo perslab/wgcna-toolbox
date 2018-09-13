@@ -9,15 +9,14 @@
 # usage: 
 # export R_MAX_NUM_DLLS=999
 # time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-mousebrain/ --dir_project_data /projects/jonatan/tmp-mousebrain/ --path_data /projects/jonatan/tmp-mousebrain/RObjects/L5.RDS --prefixes_WGCNA_run 'c("Neurons_ClusterName_2")' --prefix_out mousebrain_neuronMods_1 --metadata_subset_col ClusterName --scale_data F --n_cores 20
-# time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-maca/ --dir_project_data /projects/jonatan/tmp-maca/ --path_data /data/pub-others/tabula_muris/figshare/180126-facs/maca.seurat_obj.facs.figshare_180126.RData --prefixes_WGCNA_run 'c("tissue_cell_type_kME")' --prefix_out maca_mods_1 --metadata_subset_col tissue_cell_type --scale_data F --n_cores 30
-# time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-mousebrain/ --dir_project_data /projects/jonatan/tmp-mousebrain/ --path_data /projects/jonatan/tmp-mousebrain/RObjects/L5.RDS --prefixes_WGCNA_run 'c("Neurons_ClusterName_2")' --prefix_out mousebrain_neuronMods_scale_1 --metadata_subset_col ClusterName --scale_data T --n_cores 20
-# time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-maca/ --dir_project_data /projects/jonatan/tmp-maca/ --path_data /data/pub-others/tabula_muris/figshare/180126-facs/maca.seurat_obj.facs.figshare_180126.RData --prefixes_WGCNA_run 'c("tissue_cell_type_kME")' --prefix_out maca_mods_scaled_1 --metadata_subset_col tissue_cell_type --scale_data T --n_cores 20
-# time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-maca/ --dir_project_data /projects/jonatan/tmp-maca/ --path_data /projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata --prefixes_WGCNA_run 'c("tissue_cell_type_kME")' --prefix_out test_heatmap_1 --scale_data T --n_cores 7
 
 # TODO: Pull metadata from loom object?
 # TODO: Normalize and scale data in loom object?
 # TODO: Use sqroot transform to bring out colors?
 # TODO: Add column annotation (get it to work..)
+# TODO: Use 'key' rather than transposing? http://linnarssonlab.org/loompy/fullapi/combine.html
+# TODO: Select a good size to quality graphics device, e.g. via Cairo
+# TODO: Need SetCalcParams before NormalizeData and ScaleData to get these functions to work on loom objects!
 
 suppressPackageStartupMessages(library(optparse))
 
@@ -85,7 +84,6 @@ add_variant_enrichment <- opt$add_variant_enrichment
 add_magma_enrichment <- opt$add_magma_enrichment
 add_metadata_corr <- opt$add_metadata_corr
 n_cores <- opt$n_cores
- 
 
 ######################################################################
 ######################### SET OPTIONS (DEV) ##########################
@@ -94,13 +92,12 @@ n_cores <- opt$n_cores
 if (FALSE) { 
   dir_project_WGCNA <- "/projects/jonatan/tmp-mousebrain/" 
   path_data <- "/projects/jonatan/tmp-mousebrain/RObjects/L5.RDS"
+  #path_data <- "/data/pub-others/zeisel-biorxiv-2018/data/l5_all.loom"
   path_metadata <- NULL
   dir_project_data <- "/projects/jonatan/tmp-mousebrain/"
-  prefixes_WGCNA_run <- c("Neurons_ClusterName_1b")
-
-  #prefixes_WGCNA_run <- c("Vascular_ClusterName_1", "PeripheralGlia_ClusterName_1", "Oligos_ClusterName_1", "Neurons_ClusterName_1b", "Immune_ClusterName_1", "Ependymal_ClusterName_1", "Astrocytes_ClusterName_1") 
-  prefix_out <- "mousebrain_mods"
-  metadata_subset_col <- "ClusterName" 
+  prefixes_WGCNA_run <- c("Astrocytes_ClusterName_2","Ependymal_ClusterName_2","Immune_ClusterName_2","Neurons_ClusterName_2","Oligos_ClusterName_2","PeripheralGlia_ClusterName_2","Vascular_ClusterName_2")
+  prefix_out <- "mousebrain_mod_cell_kME_1"
+  metadata_subset_col <- NULL #"tissue_cell_type" 
   scale_data <- T
   add_PPI_enrichment = F
   add_variant_enrichment = F
@@ -246,7 +243,7 @@ if (grepl(pattern = "\\.loom", path_data)) {
   fileType = "RObject"
 }
 
-if (fileType == "loom" & scale_data) warning("Currently unable to scale and regress data from a loom file")
+#if (fileType == "loom" & scale_data) warning("Currently unable to scale and regress data from a loom file")
 # Check that metadata and data cell names match
 
 metadata <- NULL 
@@ -303,18 +300,11 @@ if (scale_data) {
 ######################################################################
 ######################### PREPARE DATA ###############################
 ######################################################################
-# If scale_data == T, use scale.data or run ScaleData
 
-if (file.exists(paste0(dir_scratch, prefix_out, "_datExpr.loom"))) file.remove(paste0(dir_scratch, prefix_out, "_datExpr.loom"))
-  # message(paste0("Existing loom file found under ", paste0(dir_scratch, prefix_out, "_datExpr.loom"), ". Using that data"))
-  # data_obj <- loomR::connect(filename = paste0(dir_scratch, prefix_out, "_datExpr.loom"), mode = "r+")
-  # 
-#} else {
-  
 if (fileType=="RObject") {
   # get ident
-  ident <- if (!is.null(metadata_subset_col)) as.character(data_obj@meta.data[[metadata_subset_col]]) else as.character(data_obj@ident)
-  
+  ident <- try(if (!is.null(metadata_subset_col)) as.character(data_obj@meta.data[[metadata_subset_col]]) else as.character(data_obj@ident))
+
   # get metadata
   if (!is.null(data_obj@meta.data)) {
     metadata <- if (!is.null(path_metadata)) data.frame(metadata, data_obj@meta.data) else data_obj@meta.data
@@ -329,30 +319,36 @@ if (fileType=="RObject") {
   
   # ScaleData
   if (scale_data) {
-    message("Scaling the data and regressing out confounders")
     if (is.null(data_obj@scale.data)) {
-      
+      message("Scaling the data and regressing out confounders percent.mito, percent.ribo and nUMI")
       data_obj <- ScaleData(object = data_obj, 
                             vars.to.regress = c("percent.mito", "percent.ribo", "nUMI"), 
                             do.scale = T, do.center=T, 
                             display.progress = T, 
                             do.par = T, 
                             num.cores = n_cores)
+      
+      invisible(gc())
+      invisible(R.utils::gcDLLs())
+      
       datExpr <- data_obj@scale.data 
-    
     } else {
-      datExpr <- if(is.null(data_obj@data)) data_obj@data else data_obj@raw.data
+      message("scale data detected")
+      datExpr <- data_obj@scale.data 
     }
   } else {
-    datExpr <- if(is.null(data_obj@data)) data_obj@data else data_obj@raw.data
+    datExpr <- data_obj@data
   }
+  
   # Save as loomR
+  if (file.exists(paste0(dir_scratch, prefix_out, "_datExpr.loom"))) file.remove(paste0(dir_scratch, prefix_out, "_datExpr.loom"))
   data_obj <- create(filename = paste0(dir_scratch, prefix_out, "_datExpr.loom"), 
                      data = datExpr, 
                      #gene.attrs = list(gene_names = rownames(datExpr)),
                      #cell.attrs = list(cell_names = colnames(datExpr)),
                      display.progress = T, 
-                     calc.numi = if (scale_data) T else F)
+                     calc.numi = if (scale_data) T else F,
+                     overwrite=T)
 
   #data_obj$add.col.attribute(attribute = list(cell_names = colnames(datExpr)))
   data_obj$add.col.attribute(attribute = list(ident = ident), overwrite = TRUE)
@@ -362,13 +358,16 @@ if (fileType=="RObject") {
 
 } else if (fileType=="loom") {
   
-  ident <- as.character(data_obj[[paste0("col_attrs/", metadata_subset_col)]][])
-  data_obj$add.row.attribute(list(ident = ident), overwrite = TRUE)  
+  ident <- if (!is.null(metadata_subset_col)) as.character(data_obj[[paste0("col_attrs/", metadata_subset_col)]][]) else try(data_obj[["col_attrs/ident"]][])
+  
+  if (class(ident) == "try-error") stop("ident not found in loom object")
+
+  if (!is.null(metadata_subset_col)) data_obj$add.col.attribute(list(ident = ident), overwrite = TRUE)  
   # NB: cannot pull all metadata from loom object without specific names?
-   
+    
   #TODO: use add.layer?
   message("Normalising the data")
-  tryCatch({NormalizeData(data_obj)
+  tryCatch({NormalizeData(object=data_obj)
     }, error = function(err) warning("NormalizeData call on loom file failed")) # may fail if data is already normalized. #TODO does the loom object hold different versions of the data? E.g. layers?
   
   if (scale_data) {
@@ -379,10 +378,13 @@ if (fileType=="RObject") {
     tryCatch({
     ScaleData(object = data_obj,
               genes.use = hv.genes,
-              chunk.size = 500,
+              chunk.size = 10000,
               display.progress = FALSE,
               vars.to.regress = "percent_mito")
     }, error = function(err) warning("ScaleData call on loom file failed"))
+    
+    invisible(gc())
+    invisible(R.utils::gcDLLs())
   }
 
 }
@@ -397,7 +399,7 @@ message("Computing cell module embeddings")
 
 ncell <- dim(data_obj[["matrix"]][,])[1] # NB: the matrix is stored transposed
 
-cell_chunk_idx <- c(seq(from=0, to = ncell, by=10000), ncell)
+cell_chunk_idx <- c(seq(from=0, to = ncell, by=3000), ncell)
 
 cl <- makeCluster(spec=n_cores, type="FORK", outfile = paste0(dir_log_data, prefix_out,"_", "cell_x_module_matrix.txt"))
 
@@ -415,65 +417,107 @@ for (i in 1:(length(cell_chunk_idx)-1)) { # loop over chunks of cell
   rownames(subEmbed) <- data_obj[["col_attrs/cell_names"]][(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]
   colnames(subEmbed) <- names(module_u)
   
-  if (file.exists(paste0(dir_RObjects_data, 
-                         prefix_out, "_cellModEmbed_chunk.loom"))) file.remove(paste0(dir_RObjects_data, 
-                                                                                      prefix_out, "_cellModEmbed_chunk.loom"))
-  
-  cellModEmbed_loom_chunk <- loomR::create(filename = paste0(dir_RObjects_data, 
-                                                             prefix_out, "_cellModEmbed_chunk.loom"), 
-                                           data = t(subEmbed), 
-                                           #gene.attrs = list(gene_names = rownames(subEmbed), ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]),
-                                           #cell.attrs = list(cell_names = colnames(subEmbed)),
-                                           display.progress = T, 
-                                           calc.numi = F)
-  
-  # NB: We flit dimensions again since the embeddings are cell * module
-  #cellModEmbed_loom_chunk$add.row.attribute(list(cell_names = rownames(subEmbed)), overwrite = TRUE)
-  #cellModEmbed_loom_chunk$add.row.attribute(list(ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]), overwrite = TRUE)
-  #cellModEmbed_loom_chunk$add.col.attribute(list(module = colnames(subEmbed)), overwrite = TRUE)
   
   if (i==1) {
-    if (file.exists(paste0(dir_RObjects_data, 
-                           prefix_out, "_cellModEmbed.loom"))) file.remove(paste0(dir_RObjects_data, 
-                                                                                        prefix_out, "_cellModEmbed.loom"))
     
-    cellModEmbed_loom <- create(filename=paste0(dir_RObjects_data, 
-                                                prefix_out, "_cellModEmbed.loom"), 
-                                data=cellModEmbed_loom_chunk[["matrix"]][,], 
-                                display.progress=T, 
-                                calc.numi=F)
+    if (file.exists(paste0(dir_scratch, 
+                           prefix_out, "_cellModEmbed.loom"))) invisible(file.remove(paste0(dir_scratch, prefix_out, "_cellModEmbed.loom")))
+    
+    cellModEmbed_loom <- loomR::create(filename = paste0(dir_scratch, 
+                                                               prefix_out, "_cellModEmbed.loom"), 
+                                             data = t(subEmbed), 
+                                             #gene.attrs = list(gene_names = rownames(subEmbed), ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]),
+                                             #cell.attrs = list(cell_names = colnames(subEmbed)),
+                                             display.progress = T, 
+                                             calc.numi = F,
+                                             overwrite=T)
+    
+    # NB: We flit dimensions again since the embeddings are cell * module
+    #cellModEmbed_loom_chunk$add.row.attribute(list(cell_names = rownames(subEmbed)), overwrite = TRUE)
+    
+    cellModEmbed_loom$add.col.attribute(list(ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]), overwrite = TRUE)
+    #cellModEmbed_loom_chunk$add.row.attribute(list(gene_names = colnames(subEmbed)), overwrite = TRUE)
+    cellModEmbed_loom$add.row.attribute(list(module = colnames(subEmbed)), overwrite = TRUE)
+    
   } else {
-    cellModEmbed_loom <- loomR::combine(list(cellModEmbed_loom, 
-                                             cellModEmbed_loom_chunk), 
-                                        filename=paste0(dir_RObjects_data, prefix_out, "_cellModEmbed.loom"), 
+    
+    cellModEmbed_loom_chunk <- loomR::create(filename = paste0(dir_scratch, 
+                                                               prefix_out, "_cellModEmbed_chunk.loom"), 
+                                             data = t(subEmbed), 
+                                             #gene.attrs = list(gene_names = rownames(subEmbed), ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]),
+                                             #cell.attrs = list(cell_names = colnames(subEmbed)),
+                                             display.progress = T, 
+                                             calc.numi = F,
+                                             overwrite=T)
+
+    cellModEmbed_loom_chunk$add.col.attribute(list(ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]), overwrite = TRUE)
+    cellModEmbed_loom_chunk$add.row.attribute(list(module = colnames(subEmbed)), overwrite = TRUE)
+    
+    try({
+      cellModEmbed_loom$close_all()
+      cellModEmbed_loom_chunk$close_all()
+    })
+    
+    cellModEmbed_comb <- loomR::combine(looms=list(paste0(dir_scratch, 
+                                                          prefix_out, "_cellModEmbed.loom"), 
+                                                   paste0(dir_scratch, 
+                                                          prefix_out, "_cellModEmbed_chunk.loom")), 
+                                        filename=paste0(dir_scratch, prefix_out, "_cellModEmbed_comb.loom"), 
                                         chunk.size=1000, 
                                         overwrite=T, 
                                         display.progress=T)
+    
+
+    file.remove(paste0(dir_scratch, 
+                       prefix_out, "_cellModEmbed.loom"), 
+                paste0(dir_scratch, 
+                       prefix_out, "_cellModEmbed_chunk.loom"))
+    
+      cellModEmbed_loom <- loomR::create(filename=paste0(dir_scratch, 
+                                                         prefix_out, "_cellModEmbed.loom"), 
+                                         data = t(cellModEmbed_comb[["matrix"]][,])
+                                         #gene.attrs = list(modules= cellModEmbed_comb[["row_attrs/gene_names"]]),
+                                         #cell.attrs = list(ident= cellModEmbed_comb[["col_attrs/ident"]])
+      )
+      cellModEmbed_loom$add.row.attribute(list(gene_names=cellModEmbed_comb[["row_attrs/gene_names"]][]), overwrite = TRUE)
+      cellModEmbed_loom$add.row.attribute(list(module=cellModEmbed_comb[["row_attrs/module"]][]), overwrite = TRUE)
+      cellModEmbed_loom$add.col.attribute(list(cell_names=cellModEmbed_comb[["col_attrs/cell_names"]][]), overwrite = TRUE)
+      cellModEmbed_loom$add.col.attribute(list(ident=cellModEmbed_comb[["col_attrs/ident"]][]), overwrite = TRUE)
+
+      try({
+        cellModEmbed_comb$close_all()
+        invisible(file.remove(paste0(dir_scratch, prefix_out, "_cellModEmbed_comb.loom")))
+      })
+      
   }
   
-  cellModEmbed_loom$add.col.attribute(list(module = colnames(subEmbed)), overwrite = TRUE)
-  cellModEmbed_loom$add.row.attribute(list(cell_name = rownames(subEmbed)), overwrite = TRUE)
-  
-  try({
-    cellModEmbed_loom_chunk$close_all()
-    invisible(file.remove(paste0(dir_RObjects_data, prefix_out, "_cellModEmbed_chunk.loom")))
-    })
+
   
 
   rm(submat, subEmbed)
 }
 
+stopCluster(cl)
+# cellModEmbed_loom <- connect(filename=paste0(dir_scratch,
+#                                              prefix_out, "_cellModEmbed.loom"), mode="r+")
+
+## ERROR : TODO : check attrs here
+
 # AVERAGE EMBEDDINGS FOR EACH CELLTYPE 
+
+message("Computing celltype mean expression")
+
+cl <- makeCluster(spec=n_cores, type="FORK", outfile = paste0(dir_log_data, prefix_out,"_", "cellType_x_module_matrix.txt"))
 
 for (i in 1:length(sort(unique(ident)))) {
 
   # cellModEmbed_loom$apply(name = paste0("row_attrs/",unique(ident)[i]), FUN = colMeans, MARGIN = 1, index.use = which(ident==unique(ident)[i]),
   #             dataset.use = "matrix", display.progress = FALSE, overwrite = TRUE)
   # 
-  subEmbed <- t(cellModEmbed_loom[["matrix"]][,ident==sort(unique(ident))[i]])
+  subEmbed <- cellModEmbed_loom[["matrix"]][ident==sort(unique(ident))[i],]
   meanExpr <- matrix(parApply(cl, X=subEmbed, FUN=mean, MARGIN=2), nrow=1)
   rownames(meanExpr) <- sort(unique(ident))[i]
-  colnames(meanExpr) <- cellModEmbed_loom[["col_attrs/module"]][]
+  colnames(meanExpr) <- cellModEmbed_loom[["row_attrs/module"]][]
   # it might be ok to do this w/o parallelising
   if (i==1) cellTypeModEmbed <- meanExpr else cellTypeModEmbed <- rbind(cellTypeModEmbed, meanExpr)
 }
@@ -490,67 +534,222 @@ saveRDS(cellTypeModEmbed, file=paste0(dir_RObjects_data, prefix_out, "_cellTypeM
 ######################## PLOT CELL*MODULE MATRIX #####################
 ######################################################################
 message("Plotting")
+
 # make row annotation: random colors for celltypes
 colors_uniq <- gsub("\\d", "", colors()) %>% unique
 
-htra_colors <-   sample(if (length(ident)<length(colors_uniq)) colors_uniq else colors(), size=length(unique(ident)), replace=F) 
+htra_cellCluster_colors <-   sample(if(length(unique(ident))<length(colors_uniq)) colors_uniq else colors(), size=length(unique(ident)), replace=F) 
+names(htra_cellCluster_colors) <- sort(unique(ident), decreasing=F)
 
-names(htra_colors) <- sort(unique(ident), decreasing=T)
+htra <- rowAnnotation(cellCluster = sort(ident, decreasing=F),
+                      #annotation_legend_param = list(cellCluster = list(nrow = length(unique(ident)), title = "Cell cluster", title_position = "topcenter")),
+                      col=list(cellCluster = htra_colors),
+                      width = unit(5, "mm"),
+                      show_legend=F,
+                      #annotation_legend_param = list(show_legend = F), 
+                      show_annotation_name = F)#,
+                      #annotation_name_offset = unit(5,"mm"),
+                      #annotation_name_rot = 0)
 
-htra <- rowAnnotation(cellcluster = sort(ident, decreasing=T),
-                    annotation_legend_param = list(cellcluster = list(nrow = 7, title = "Cell cluster", title_position = "topcenter")),
-                    col=list(cellcluster = htra_colors),
-                    width = unit(5, "mm"))
-
-# htca_colors <- sample( if (length(cellType_module_u)<length(colors_uniq)) colors_uniq else colors(), size=length(cellType_module_u), replace=F) 
-# 
-# names(htca_colors) <- names(cellType_module_u)
-#   
-# htca <- columnAnnotation(df = data.frame(WGCNA_cluster = names(cellType_module_u), row.names = htca_colors, stringsAsFactors = F),
-#                          annotation_legend_param = list(WGCNA_cluster = list(nrow=7, title="WGCNA_cluster", title_position = "topcenter")),
-#                          col = list(WGCNA_cluster=htca_colors),
-#                          height = unit(5,"mm"))
+# make row annotation labels as a separate row annotation
+htra_labels <- sort(unique(ident), decreasing=F)
+htra_label_pos <- cumsum(table(ident)) - as.integer(round(table(ident)/2,0))
   
-ht1 <- Heatmap(t(cellModEmbed_loom[["matrix"]][,order(ident, 1:ncol(cellModEmbed_loom[["matrix"]][,]), decreasing=T)]), 
+#label_pos = vector(length=length(labels), mode="integer")
+
+
+htra_link <- rowAnnotation(link = anno_link(which= "row",
+                                            at = htra_label_pos, 
+                                            labels = htra_labels,
+                                            link_width = unit(3, "mm"),
+                                            labels_gp=gpar(fontsize=8), padding=0.5), 
+                                            width = unit(5, "mm") + max_text_width(labels, gp=gpar(fontsize=8)))
+
+# Prepare WGCNA run column annotation
+WGCNA_run <- mapply(function(names_run, cellType_module_u) rep(names_run, times= length(unlist(cellType_module_u, recursive = F))), names_run=names(run_cellType_module_u), cellType_module_u=run_cellType_module_u, SIMPLIFY=T)
+htca_WGCNA_run_colors <- sample(if(length(run_cellType_module_u)<length(colors_uniq)) colors_uniq else colors(), size=length(run_cellType_module_u), replace=F) 
+names(htca_WGCNA_run_colors) <- sort(unique(WGCNA_run, decreasing=F))
+
+# Prepare WGCNA celltype column annotation
+WGCNA_cellCluster <- rep(gsub(pattern = paste0(paste0(names(run_cellType_module_u), collapse = "|"),"\\."), "", names(cellType_module_u)), sapply(cellType_module_u, length))
+
+htca_WGCNA_cellCluster_colors <- sample(if (length(unique(WGCNA_cellCluster))<length(colors_uniq)) colors_uniq else colors(), size=length(unique(WGCNA_cellCluster)), replace=F) 
+names(htca_WGCNA_cellCluster_colors) <- sort(unique(WGCNA_cellCluster), decreasing=F) # no need to sort?
+
+# Prepare WGCNA celltype column annotation labels as separate column annotation
+htca_labels <- sort(unique(WGCNA_cellCluster), decreasing=F)
+htca_label_pos <- cumsum(table(WGCNA_cellCluster)) - as.integer(round(table(WGCNA_cellCluster)/2,0))
+
+# If there are common celltypes between the data and the WGCNA module celltypes, they get the same heatmap annotation colors
+match_cellType_idx <- match(names(htca_WGCNA_cellCluster_colors), names(htra_cellCluster_colors), nomatch = NA)
+new_colors_tmp <- htra_cellCluster_colors[na.omit(match_cellType_idx)]
+if (length(new_colors_tmp) > 0) htca_WGCNA_cellCluster_colors[names(htca_WGCNA_cellCluster_colors) %in% names(htra_cellCluster_colors)] <- new_colors_tmp
+
+htca <- columnAnnotation(WGCNA_run=sort(WGCNA_run,  1:length(WGCNA_run), decreasing=F),
+                         WGCNA_cellCluster=sort(WGCNA_cellCluster, decreasing=F),
+                         show_legend=F,
+                         link = anno_link(which = c("column"),
+                                          at = htca_label_pos, 
+                                          labels = htca_labels, 
+                                          link_width = unit(0, "mm"),
+                                          labels_gp=gpar(fontsize=8), 
+                                          padding=0.3),  
+                         col = list(WGCNA_run = htca_WGCNA_run_colors, WGCNA_cellCluster = htca_WGCNA_cellCluster_colors),
+                         annotation_height = unit.c(unit(1, "cm"), unit(1,"cm"), unit(7, "cm")))
+
+htca_noLabel <- columnAnnotation(WGCNA_run=sort(WGCNA_run,  1:length(WGCNA_run), decreasing=F),
+                         WGCNA_cellCluster=sort(WGCNA_cellCluster, decreasing=F),
+                         show_legend=F,
+                         col = list(WGCNA_run = htca_WGCNA_run_colors, WGCNA_cellCluster = htca_WGCNA_cellCluster_colors),
+                         annotation_height = unit.c(unit(1, "cm"), unit(1,"cm")))
+
+# Make plots
+
+ht1 <- Heatmap(cellModEmbed_loom[["matrix"]][order(ident, 1:nrow(cellModEmbed_loom[["matrix"]][,]), decreasing=F),order(WGCNA_run,  1:length(WGCNA_run), decreasing=F)], 
                cluster_rows = F,
-               #row_order = ,
                cluster_columns = F, 
-               #show_row_dend = F, 
-               show_column_dend = F, 
-               show_heatmap_legend = T, 
+               show_heatmap_legend = T,
                show_row_names = F, 
                show_column_names = F,
-               heatmap_legend_param = list(title = "Expression"), 
-               #bottom_annotation = htca,
-               #bottom_annotation_height = unit(5, "mm"),
-               use_raster = T)
-#top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_cellModEmbed_cellOrder.pdf", dir_plots_data, prefix_out), h=max(10, ncol(cellModEmbed_loom[["matrix"]][,]) %/% 5000), w=min(20, nrow(cellModEmbed_loom[["matrix"]][,]) %/% 2))
-draw(ht1+htra)#+htca)
+               bottom_annotation = htca,
+               use_raster=T,
+               raster_device = c("png"),
+               raster_quality = 1,
+               heatmap_legend_param = list(title = "Expression"))
+pdf(sprintf("%s%s_cellModEmbed.pdf", dir_plots_data, prefix_out), h=max(25, min(40, nrow(cellModEmbed_loom[["matrix"]][,]) %/% 2000)), w=max(25, min(40, ncol(cellModEmbed_loom[["matrix"]][,]) %/% 50)))
+draw(ht1+htra+htra_link)
+dev.off()
+
+ht1_cellClust <- Heatmap(cellModEmbed_loom[["matrix"]][order(ident, 1:nrow(cellModEmbed_loom[["matrix"]][,]), decreasing=F),order(WGCNA_run,  1:length(WGCNA_run), decreasing=F)], 
+               cluster_rows = T,
+               cluster_columns = F, 
+               show_row_dend = F, 
+               show_heatmap_legend = T,
+               show_row_names = F, 
+               show_column_names = F,
+               bottom_annotation = htca,
+               use_raster=T,
+               raster_device = c("png"),
+               raster_quality = 1,
+               heatmap_legend_param = list(title = "Expression"))
+pdf(sprintf("%s%s_cellModEmbed_cell_clust.pdf", dir_plots_data, prefix_out), h=max(25, min(40, nrow(cellModEmbed_loom[["matrix"]][,]) %/% 2000)), w=max(25, min(40, ncol(cellModEmbed_loom[["matrix"]][,]) %/% 50)))
+draw(ht1_cellClust+htra)#+htra_link)
+dev.off()
+
+ht1_modClust <- Heatmap(cellModEmbed_loom[["matrix"]][order(ident, 1:nrow(cellModEmbed_loom[["matrix"]][,]), decreasing=F),order(WGCNA_run,  1:length(WGCNA_run), decreasing=F)], 
+                         cluster_rows = F,
+                         cluster_columns = T, 
+                         show_column_dend = F, 
+                         show_heatmap_legend = T,
+                         show_row_names = F, 
+                         show_column_names = F,
+                         bottom_annotation = htca_noLabel,
+                         use_raster=T,
+                         raster_device = c("png"),
+                         raster_quality = 1,
+                         heatmap_legend_param = list(title = "Expression"))#,
+pdf(sprintf("%s%s_cellModEmbed_mod_clust.pdf", dir_plots_data, prefix_out), h=max(25, min(40, nrow(cellModEmbed_loom[["matrix"]][,]) %/% 2000)), w=max(25, min(40, ncol(cellModEmbed_loom[["matrix"]][,]) %/% 50)))
+draw(ht1_modClust+htra+htra_link)
+dev.off()
+
+ht1_cellModClust <- Heatmap(cellModEmbed_loom[["matrix"]][order(ident, 1:nrow(cellModEmbed_loom[["matrix"]][,]), decreasing=F),order(WGCNA_run,  1:length(WGCNA_run), decreasing=F)], 
+                        cluster_rows = T,
+                        cluster_columns = T, 
+                        show_row_dend = F, 
+                        show_column_dend = F, 
+                        show_heatmap_legend = T,
+                        show_row_names = F, 
+                        show_column_names = F,
+                        bottom_annotation = htca_noLabel,
+                        use_raster=T,
+                        raster_device = c("png"),
+                        raster_quality = 1,
+                        heatmap_legend_param = list(title = "Expression"))
+pdf(sprintf("%s%s_cellModEmbed_cell_mod_clust.pdf", dir_plots_data, prefix_out), h=max(25, min(40, nrow(cellModEmbed_loom[["matrix"]][,]) %/% 2000)), w=max(25, min(40, ncol(cellModEmbed_loom[["matrix"]][,]) %/% 50)))
+draw(ht1_cellModClust+htra)#+htra_link)
 dev.off()
 
 ht2 <- Heatmap(cellTypeModEmbed[,], 
                cluster_rows = F,
-               #row_order = ,
                cluster_columns = F, 
-               #show_row_dend = F, 
-               show_column_dend = F, 
                show_heatmap_legend = T, 
                show_row_names = T, 
                show_column_names = F,
-               heatmap_legend_param = list(title = "Expression"), 
-               use_raster = T)#
-               #top_annotation = htca)
-#top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-pdf(sprintf("%s%s_cellTypeModEmbed.pdf", dir_plots_data, prefix_out), h=min(6, nrow(cellTypeModEmbed) %/% 2), w=min(20, ncol(cellTypeModEmbed) %/% 2))
+               bottom_annotation = htca,
+               use_raster=T,
+               raster_device = c("png"),
+               raster_quality = 2,
+               heatmap_legend_param = list(title = "Expression"))
+pdf(sprintf("%s%s_cellTypeModEmbed.pdf", dir_plots_data, prefix_out), h=max(10, min(40, nrow(cellTypeModEmbed) %/% 4)), w=max(10, min(40, ncol(cellTypeModEmbed) %/% 50)))
 draw(ht2)
+dev.off()
+
+ht2_cellTypeClust <- Heatmap(cellTypeModEmbed[,], 
+               cluster_rows = T,
+               cluster_columns = F, 
+               show_row_dend = F, 
+               show_heatmap_legend = T, 
+               show_row_names = T, 
+               show_column_names = F,
+               bottom_annotation = htca,
+               use_raster=T,
+               raster_device = c("png"),
+               raster_quality = 2,
+               heatmap_legend_param = list(title = "Expression"))#
+pdf(sprintf("%s%s_cellTypeModEmbed_cellType_clust.pdf", dir_plots_data, prefix_out), h=max(10, min(40, nrow(cellTypeModEmbed) %/% 4)), w=max(10, min(40, ncol(cellTypeModEmbed) %/% 50)))
+draw(ht2_cellTypeClust)
+dev.off()
+
+ht2_modClust <- Heatmap(cellTypeModEmbed[,], 
+                         cluster_rows = F,
+                         cluster_columns = T, 
+                         show_column_dend = F, 
+                         show_heatmap_legend = T, 
+                         show_row_names = T, 
+                         show_column_names = F,
+                         bottom_annotation = htca_noLabel,
+                         use_raster=T,
+                         raster_device = c("png"),
+                         raster_quality = 2,
+                         heatmap_legend_param = list(title = "Expression"))
+
+pdf(sprintf("%s%s_cellTypeModEmbed_mod_clust.pdf", dir_plots_data, prefix_out), h=max(10, min(40, nrow(cellTypeModEmbed) %/% 4)), w=max(10, min(40, ncol(cellTypeModEmbed) %/% 50)))
+draw(ht2_modClust)
+dev.off()
+
+ht2_cellModClust <- Heatmap(cellTypeModEmbed[,], 
+                        cluster_rows = T,
+                        cluster_columns = T, 
+                        show_row_dend = F, 
+                        show_column_dend = F, 
+                        show_heatmap_legend = T, 
+                        show_row_names = T, 
+                        show_column_names = F,
+                        bottom_annotation = htca_noLabel,
+                        use_raster=T,
+                        raster_device = c("png"),
+                        raster_quality = 2,
+                        heatmap_legend_param = list(title = "Expression"))#
+pdf(sprintf("%s%s_cellTypeModEmbed_cellType_mod_clust.pdf", dir_plots_data, prefix_out), h=max(10, min(40, nrow(cellTypeModEmbed) %/% 4)), w=max(10, min(40, ncol(cellTypeModEmbed) %/% 50)))
+draw(ht2_cellModClust)
 dev.off()
 
 ######################################################################
 ############################# WRAP UP ################################
 ######################################################################
-rm(cellModEmbed)
-data_obj$close_all()
-cellModEmbed_loom$close_all()
+rm(cellTypeModEmbed) # already saved as .RDS
 
+try(data_obj$close_all())
+if (file.exists(paste0(dir_scratch, prefix_out, "_datExpr.loom"))) try(invisible(file.remove(paste0(dir_scratch, prefix_out, "_datExpr.loom"))))
+
+if (file.exists(paste0(dir_scratch, 
+                       prefix_out, "_cellModEmbed_chunk.loom"))) try(invisible(file.remove(paste0(dir_scratch, 
+                                                                                                  prefix_out, "_cellModEmbed_chunk.loom"))))                  
+try(cellModEmbed_loom$close_all())
+#if (file.exists(paste0(dir_scratch, 
+#                       prefix_out, "_cellModEmbed.loom"))) try(invisible(file.remove(paste0(dir_scratch, 
+#                                                                                              prefix_out, "_cellModEmbed.loom"))))
+             
+date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+save.image(paste0(dir_scratch, prefix_out, "_", date, "_session_image.RData"))                                                                     
 message("DONE!")

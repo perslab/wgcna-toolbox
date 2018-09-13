@@ -1119,15 +1119,32 @@ wrapModulePreservation <- function(listDatExpr,
 ############################################################################################################################################################
 
 load_obj <- function(f) {
-  # Utility function for loading an object inside a new environment and returning it so it can
-  # stored in a variable
+  # Utility function for loading an object stored in any of 
+  # .RData, .RDS, .loom, .csv, .txt, .tab, .delim
+  # File may be gzip compressed 
+  
+  compressed = F
+  
+  if (grepl(pattern = "\\.gz|\\.gzip", x=f))  {
+    compressed <- T
+    f = paste0("gzfile('",f,"')")
+  }
+  
   if (grepl(pattern = "\\.RDS|\\.rds", x = f)) {
-    out <- readRDS(file=f)
-    out
+    readRDS(file=if(compressed) eval(parse(text=f)) else f)
   } else if (grepl(pattern="\\.RData|\\.Rdata", x=f)) { 
-  env <- new.env()
-  nm <- load(f, env)[1]
-  env[[nm]]} 
+    env <- new.env()
+    nm <- load(f, env)[1]
+    env[[nm]]
+  } else if (grepl(pattern="\\.loom", x=f)) {
+    connect(filename=f, mode = "r+")
+  } else if (grepl(pattern = "\\.csv", x=f)) {
+    read.csv(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+  } else if (grepl(pattern = "\\.tab", x=f)) {
+    read.table(file=if(compressed) eval(parse(text=f)) else f, sep="\t", stringsAsFactors = F, quote="", header=T) 
+  } else if (grepl(pattern = "\\.txt", x=f)) {
+    read.delim(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+  }
 }
 
 ############################################################################################################################################################
@@ -1448,9 +1465,11 @@ kM_magma <- function(cellType,
       } else if (test_type == "module_genes_t") {
         
         x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
-        y = -log10(gwas[[j]]$P[match(intersect(rownames(modulekM), gwas[[j]]$gene_name), gwas[[j]]$gene_name)])
+        shared_genes_tmp <- intersect(rownames(modulekM), gwas[[j]]$gene_name)
+        #shared_genes_tmp <- shared_genes_tmp[!shared_genes_tmp %in% genes]
+        y = -log10(gwas[[j]]$P[match(shared_genes_tmp, gwas[[j]]$gene_name)])
         
-        test = tryCatch({t.test(y,x, alternative = "g")}, error = function(c) {return(list(p.value=1))})
+        test = tryCatch({t.test(x=x,y=y, alternative = "g")}, error = function(c) {return(list(p.value=1))})
 
         table.kM.cor.p[col,j] <- test$p.value
         table.kM.cor.r[col,j] <- 1e-5 # to avoid 0, which will lead to problems when taking sign of the correlation to adjust p-values

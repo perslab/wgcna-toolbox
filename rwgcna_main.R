@@ -27,8 +27,10 @@ option_list <- list(
               help = "Provide full path to Rdata input file with Seurat object with lognormalized expression data in the @data slot "),
   make_option("--project_dir", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir. [default %default]"),
-  make_option("--data_prefix", type="character", default="sc",
+  make_option("--data_prefix", type="character", default="sc_WGCNA",
               help = "Dataset prefix for the project, [default %default]"),
+  make_option("--data_type", type="character", default="sc",
+              help = "Expression data type, one of 'sc' or 'bulk', [default %default]"),
   make_option("--run_prefix", type="character", default="run1",
               help = "Run prefix to distinguish runs e.g. with different parameters, [default %default]"),
   make_option("--autosave", type="logical", default=T,
@@ -40,9 +42,9 @@ option_list <- list(
   make_option("--metadata_subset_col", type="character", default=NULL,
               help = "Specify a seurat@meta.data$... column to use for subsetting the Seurat object. If NULL uses the @ident slot. [default %default]"),
   make_option("--metadata_corr_col", type="character", default='NULL',
-              help = "Specify seurat_obj@meta.data$... column(s) for which to compute correlations with gene modules. Takes a character with a vector of seurat_obj@meta.data column names e.g. 'nUMI' or 'c('nUMI', 'Age')'. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution.  [default %default]"),
+              help = "Specify seurat_obj@meta.data$... column(s) for which to compute correlations with gene modules. Takes a character with a vector in single (double) quotes of seurat_obj@meta.data column names in double (single) quotes, without whitspace, e.g. 'nUMI' or 'c('Sex','Age')'. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution.  [default %default]"),
   make_option("--metadata_corr_filter_vals", type="character", default='NULL',
-              help = "Specify one or more values within the seurat@meta.data$... column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of meta.data column names e.g. 'Female' or 'c('fasted', 'HFD')'. Case-insensitive [default %default]."),
+              help = "Specify one or more values within the seurat@meta.data$... column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of meta.data column names without whitespace, e.g. 'Female' or 'c('fasted', 'HFD')'. Case-insensitive [default %default]."),
   make_option("--use_imputed", type="logical", default=F,
               help="Use data in the obj@imputed slot for the computations to replace the @data slot? If the @imputed slot is empty, will revert to [default %default]"),
   make_option("--regress_out", type="character", default='c("nUMI", "percent.mito", "percent.ribo")',
@@ -62,13 +64,13 @@ option_list <- list(
   make_option("--hclustMethod", type="character", default="average",
               help = "Hierarchical clustering agglomeration method. One of 'ward.D', 'ward.D2', 'single', 'complete', 'average' (= UPGMA), 'mcquitty' (= WPGMA), 'median' (= WPGMC) or 'centroid' (= UPGMC). See hclust() documentation for further information. [default %default]"),
   make_option("--minClusterSize", type="character", default="15L",
-              help = "Minimum genes needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector of integer values to try 'c(15,20,25)' [default %default]"),
+              help = "Minimum genes needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector, without whitespace, of integer values to try 'c(15,20,25)' [default %default]"),
   make_option("--deepSplit", type="character", default="3L",
-              help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector of integer values between 0-4 to try, e.g. 'c(1,2,3)', [default %default]"),
+              help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector, without whitespace, of integer values between 0-4 to try, e.g. 'c(1,2,3)', [default %default]"),
   make_option("--moduleMergeCutHeight", type="character", default="c(0.1)",
-              help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
+              help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector, without whitespace, of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
   make_option("--pamStage", type="character", default="c(TRUE)",
-              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
+              help = "cutreeHybrid. Perform additional Partition Around Medroids step? Users favoring specificity over sensitivity (that is, tight clusters with few mis-classifications) should set pamStage = FALSE, or at least specify the maximum allowable object-cluster dissimilarity to be zero (in which case objects are assigned to clusters only if the object-cluster dissimilarity is smaller than the radius of the cluster). Takes a character with a vector, without whitespace, of logicals to try, e.g. 'c(TRUE,FALSE)', [default %default]"),
   make_option("--kM_reassign", type="logical", default="TRUE",
               help = "Following hierarchical clustering, do additional k-means clustering? [default %default]"),
   make_option("--kM_signif_filter", type="logical", default="TRUE",
@@ -88,7 +90,7 @@ option_list <- list(
   make_option("--magma_gwas_dir", type="character", default = NULL,
               help = "MAGMA input GWAS data directory, e.g. '/projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/', '/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/'. NULL skips the magma GWAS step [default %default]"),
   make_option("--gwas_filter_traits", type="character", default = NULL,
-              help = "Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector of character names to match within the filename of the GWAS , e.g. 'body_BMI_Locke2015' or 'c('BMI', 'T1D', 'T2D')'. Case-insensitive. [default %default]"),
+              help = "Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector, without whitespace, of character names to match within the filename of the GWAS , e.g. 'body_BMI_Locke2015' or 'c('BMI', 'T1D', 'T2D')'. Case-insensitive. [default %default]"),
   make_option("--n_cores", type="integer", default=5,
               help = "Number of cores to use for parallelization [default %default]")
 )
@@ -101,6 +103,7 @@ if (FALSE) {
   seurat_path = "/projects/jonatan/tmp-mousebrain/RObjects/L5_Neurons.RDS"
   project_dir = "/projects/jonatan/tmp-mousebrain/"
   data_prefix = "mousebrain"
+  data_type = "sc"
   run_prefix =  "Neurons_ClusterName_1b"
   autosave = T
   resume = NULL 
@@ -162,6 +165,8 @@ seurat_path <- opt$seurat_path
 project_dir <- opt$project_dir
 
 data_prefix <- opt$data_prefix 
+
+data_type = opt$data_type
 
 run_prefix <- opt$run_prefix
 
@@ -372,6 +377,9 @@ if (is.null(resume)) {
   if (TODO) {
     scale_MEs_by_kIMs = F
   }
+  
+  if (!data_type %in% c("sc", "bulk")) stop("data_type must be 'sc' or 'bulk'")
+  
   ######################################################################
   ################# LOAD AND SUBSET SEURAT OBJECT ######################
   ######################################################################
@@ -569,39 +577,39 @@ if (is.null(resume)) {
   ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
   ######################################################################
   
-  message("Normalizing and scaling full expression matrix")
-  
-  # Normalise 
-  seurat_obj <- NormalizeData(object = seurat_obj, display.progress = T)
-  
-  # Scale and regress out confounders
-  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
-  
-  seurat_obj <- ScaleData(object = seurat_obj, 
-                          vars.to.regress = vars.to.regress,
-                          model.use="linear",
-                          do.par=T,
-                          num.cores = min(n_cores, detectCores()-1),
-                          do.scale=T,
-                          do.center=T,
-                          display.progress = T)
-  
-  # Make sure we close socket workers
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
-  scale_data <- seurat_obj@scale.data
-  ident <- seurat_obj@ident
-  
-  # Save scale and regressed whole expression matrix with ensembl rownames for later use
-  save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
-  save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
-  rm(scale_data)  
-  
+  # message("Normalizing and scaling full expression matrix")
+  # 
+  # # Normalise 
+  # seurat_obj <- NormalizeData(object = seurat_obj, display.progress = T)
+  # 
+  # # Scale and regress out confounders
+  # vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  # 
+  # seurat_obj <- ScaleData(object = seurat_obj, 
+  #                         vars.to.regress = vars.to.regress,
+  #                         model.use="linear",
+  #                         do.par=T,
+  #                         num.cores = min(n_cores, detectCores()-1),
+  #                         do.scale=T,
+  #                         do.center=T,
+  #                         display.progress = T)
+  # 
+  # # Make sure we close socket workers
+  # invisible(gc()); invisible(R.utils::gcDLLs())
+  # 
+  # scale_data <- seurat_obj@scale.data
+  # ident <- seurat_obj@ident
+  # 
+  # # Save scale and regressed whole expression matrix with ensembl rownames for later use
+  # save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
+  # save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
+  # rm(scale_data)  
+    
+
   ######################################################################
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
   ######################################################################
   
-  # Use this for testing 
   metadat_names <- colnames(seurat_obj@meta.data)
   
   # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
@@ -631,10 +639,7 @@ if (is.null(resume)) {
   ######################################################################
   ######## DO SEURAT PROCESSING ON SUBSETTED EXPRESSION MATRICES #######
   ######################################################################
-  
-  # Subset the seurat object
-  # NB: We reduce n_cores our of  RAM considerations
-  
+
   message("Subsetting the dataset")
 
   subsets <- lapply(sNames, function(name) SubsetData(seurat_obj,
@@ -654,12 +659,16 @@ if (is.null(resume)) {
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
   message("Filtering out subsets with fewer than 20 cells")
   
-  subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
-    if(ncol(seurat_obj@raw.data)<=20) {
-      warning(sprintf("%s cell cluster filtered out because it contains <20 cells", unique(as.character(seurat_obj@ident))[1] ))
-      return(FALSE)
-    } else return(TRUE)
-  }, simplify = T)
+  if (data_type=="sc") {
+    subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
+      if(ncol(seurat_obj@raw.data)<=20) {
+        warning(sprintf("%s cell cluster filtered out because it contains <20 cells", unique(as.character(seurat_obj@ident))[1] ))
+        return(FALSE)
+      } else return(TRUE)
+    }, simplify = T)
+  } else if (datatype=="bulk") { # no need to filter out any subsets
+    subsets_ok_idx = !logical(length = length(unique(seurat_obj@ident)))
+  }
   
   subsets <- subsets[subsets_ok_idx]
   sNames <- sNames[subsets_ok_idx]
@@ -672,12 +681,12 @@ if (is.null(resume)) {
                     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
-  subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
+  if (data_type=="sc") subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
   
   message("Scaling and regressing data subsets")
   
   # Scale data and regress out confounders
-  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% metadat_names] else NULL
+  vars.to.regress = if (!is.null(regress_out) & data_type=="sc") regress_out[regress_out %in% metadat_names] else NULL
   
   subsets <- clusterMap(cl, function(seurat_obj, name) {
    tryCatch({
@@ -685,7 +694,6 @@ if (is.null(resume)) {
                vars.to.regress = vars.to.regress,
                model.use="linear",
                do.par=F,
-               #num.cores = min(n_cores, detectCores()-1),
                do.scale=T,
                do.center=do.center)}, 
      error = function(err) {
@@ -706,7 +714,6 @@ if (is.null(resume)) {
                                                            y.cutoff = 1,
                                                            do.plot=F,
                                                            display.progress=F))
-  ###
   stopCluster(cl)
 
   invisible(gc()); invisible(R.utils::gcDLLs())
@@ -1918,7 +1925,7 @@ if (resume == "checkpoint_4") {
   suppressPackageStartupMessages(library(boot))
   
   ######################################################################
-  ########### ORDER PARAMETER SETS BY PPI ENRICHMENT AND PLOT ##########
+  ################ ORDER PARAMETER SETS BY PPI ENRICHMENT ##############
   ######################################################################
   
   message("Selecting parameters with the highest number of genes assigned to modules significantly enriched for Protein-Protein Interactions")
@@ -2265,7 +2272,6 @@ if (resume == "checkpoint_4") {
   if (!is.null(magma_gwas_dir)) {
     
     message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
-    
     
     magma_test_type = "module_genes_t" 
     
