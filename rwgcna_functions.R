@@ -40,8 +40,8 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
                                 num.pc = pcs.compute,
                                 num.replicate = jackstrawnReplicate, 
                                 display.progress = T,
-                                do.par = F,
-                                #num.cores = n_cores,
+                                do.par = T,
+                                num.cores = n_cores,
                                 prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
     
     
@@ -72,8 +72,8 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
     }
     
     PC_select_idx <- which(score.df$Score < pvalThreshold)
-    
-    if (nrow(pAll) == length(seurat_obj_sub@var.genes)) {
+
+    if (nrow(pAll) == length(seurat_obj_sub@var.genes) | length(PC_select_idx)<5) {
       
       seurat_obj_sub <- ProjectPCA(seurat_obj_sub, 
                                    do.print = F, 
@@ -87,7 +87,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
       max_loadings <- apply(loadings, 1, function(x) max(x))
       names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:5000]
       
-    } else if (nrow(pAll) > length(seurat_obj_sub@var.genes)) {
+    } else if (nrow(pAll) > length(seurat_obj_sub@var.genes) & length(PC_select_idx)>=5) {
       
       pAll[,sapply(pAll, function(x) class(x)!="numeric")] <- NULL # remove the column of gene names
       row_min <- apply(pAll[,PC_select_idx, drop=F], MARGIN = 1, FUN = function(x) min(x))
@@ -1130,9 +1130,9 @@ load_obj <- function(f) {
     f = paste0("gzfile('",f,"')")
   }
   
-  if (grepl(pattern = "\\.RDS|\\.rds", x = f)) {
+  if (grepl(pattern = "\\.RDS", x = f, ignore.case = T)) {
     readRDS(file=if(compressed) eval(parse(text=f)) else f)
-  } else if (grepl(pattern="\\.RData|\\.Rdata", x=f)) { 
+  } else if (grepl(pattern="\\.RData|\\.rda", x=f, ignore.case = T)) { 
     env <- new.env()
     nm <- load(f, env)[1]
     env[[nm]]
@@ -1380,7 +1380,7 @@ mapMMtoHs = function(modulekM,
     names(colors_ens) <- na.omit(mapping$ensembl.human)
   }
   
-  modulekM <- na.omit(modulekM)
+  modulekM <- na.omit(modulekM) # does this not produce a na.omit out object?
   
   ### 180508_v.18_dev2
   #tmp = within(modulekM, rm("symbol","ensembl"))
@@ -1424,6 +1424,7 @@ kM_magma <- function(cellType,
                      modulekM,
                      gwas,
                      test_type = c("full_kME_spearman", "module_genes_spearman", "module_genes_t"),
+                     genes_background_ensembl_hs,
                      colors_hs = NULL) {
   # Usage: Subroutine to calculate spearman's correlation between gene module membership and GWAS gene significance
   # Args: 
@@ -1465,7 +1466,7 @@ kM_magma <- function(cellType,
       } else if (test_type == "module_genes_t") {
         
         x = -log10(gwas[[j]]$P[match(genes, gwas[[j]]$gene_name)])
-        shared_genes_tmp <- intersect(rownames(modulekM), gwas[[j]]$gene_name)
+        shared_genes_tmp <- intersect(genes_background_ensembl_hs, gwas[[j]]$gene_name)
         #shared_genes_tmp <- shared_genes_tmp[!shared_genes_tmp %in% genes]
         y = -log10(gwas[[j]]$P[match(shared_genes_tmp, gwas[[j]]$gene_name)])
         

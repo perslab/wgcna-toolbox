@@ -6,12 +6,12 @@
 
 # e.g.
 # export R_MAX_NUM_DLLS=999
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
+# time Rscript /projects/jonatan/tools/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
 
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_3/  --data_prefix campbell_3 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 7  --autosave T --fuzzyModMembership kME --PPI_filter T  --resume checkpoint_2
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_5 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10 --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 5  --autosave T --fuzzyModMembership kME --PPI_filter T
-# time Rscript /projects/jonatan/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.3_dev.R  --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "c('res.0.6')" --data_prefix EP-UPF-4 --data_organism hsapiens  --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --min.cells 10 --genes_use PCA  --pca_genes all  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 10  --autosave T --fuzzyModMembership kIM --PPI_filter F
+# time Rscript /projects/jonatan/tools/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /raid5/projects/timshel/sc-genetics/sc-genetics/src/GE-wgcna_modules/maca.seurat_obj.facs.figshare_180126.top29_BMI.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/maca_top29_BMI_2/  --data_prefix maca_top29_BMI_2  --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 13 --autosave T --fuzzyModMembership kME --PPI_filter T --resume checkpoint_2
+# time Rscript /projects/jonatan/tools/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/jonatan/tmp-holst-hsl/RObjects/campbell_all_author_ids.RData   --project_dir /projects/jonatan/tmp-rwgcna-tests/campbell_3/  --data_prefix campbell_3 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10  --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 7  --autosave T --fuzzyModMembership kME --PPI_filter T  --resume checkpoint_2
+# time Rscript /projects/jonatan/tools/wgcna-src/rwgcna-pipeline/rwgcna_main.R  --seurat_path /projects/timshel/sc-genetics/sc-genetics/src/GE-mousebrain/mousebrain-L5.top10_cts.seurat_obj.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/mousebrain_top10_4/ --metadata_subset_col ClusterName --data_prefix mousebrain_top10_5 --data_organism mmusculus  --magma_gwas_dir /projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/ --min.cells 10 --genes_use PCA  --pca_genes var.genes  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(3)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 5  --autosave T --fuzzyModMembership kME --PPI_filter T
+# time Rscript /projects/jonatan/tools/wgcna-src/rwgcna-pipeline/rwgcna_main_v2.3_dev.R  --seurat_path /projects/jonatan/tmp-epilepsy/RObjects/seurat_obj_filter_ensembl_UPF.RData  --project_dir /projects/jonatan/tmp-rwgcna-tests/tmp-epilepsy-UPF-4/ --metadata_subset_col "c('res.0.6')" --data_prefix EP-UPF-4 --data_organism hsapiens  --magma_gwas_dir /projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/ --min.cells 10 --genes_use PCA  --pca_genes all  --corFnc cor  --networkType signed  --hclustMethod average  --minClusterSize "c(15)"  --deepSplit "c(2)"  --pamStage "c(TRUE)"  --moduleMergeCutHeight "c(0.1)"  --jackstrawnReplicate 500  --TOMnReplicate 0  --n_cores 10  --autosave T --fuzzyModMembership kIM --PPI_filter F
 
 TODO = T # controls flows around broken / unfinished code
 
@@ -24,7 +24,7 @@ suppressPackageStartupMessages(library(optparse))
 option_list <- list(
   
   make_option("--seurat_path", type="character",
-              help = "Provide full path to Rdata input file with Seurat object with lognormalized expression data in the @data slot "),
+              help = "Provide full path to input file in .RData or .RDS format, optionally gzip compressed, containing Seurat object with raw RNA counts in the @raw.data slot "),
   make_option("--project_dir", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir. [default %default]"),
   make_option("--data_prefix", type="character", default="sc_WGCNA",
@@ -46,7 +46,7 @@ option_list <- list(
   make_option("--metadata_corr_filter_vals", type="character", default='NULL',
               help = "Specify one or more values within the seurat@meta.data$... column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). Takes a character with a vector of meta.data column names without whitespace, e.g. 'Female' or 'c('fasted', 'HFD')'. Case-insensitive [default %default]."),
   make_option("--use_imputed", type="logical", default=F,
-              help="Use data in the obj@imputed slot for the computations to replace the @data slot? If the @imputed slot is empty, will revert to [default %default]"),
+              help="Use data in the obj@imputed slot for the computations to replace the @raw.data slot? If the @imputed slot is empty, will revert to [default %default]"),
   make_option("--regress_out", type="character", default='c("nUMI", "percent.mito", "percent.ribo")',
               help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') (not recommended, however) [default %default]"),
   make_option("--min.cells", type="integer", default=5L,
@@ -100,15 +100,15 @@ option_list <- list(
 ######################################################################
 
 if (FALSE) { 
-  seurat_path = "/projects/jonatan/tmp-mousebrain/RObjects/L5_Neurons.RDS"
-  project_dir = "/projects/jonatan/tmp-mousebrain/"
-  data_prefix = "mousebrain"
+  seurat_path = "/projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata"
+  project_dir = "/projects/jonatan/tmp-maca/"
+  data_prefix = "maca_pancreas"
   data_type = "sc"
-  run_prefix =  "Neurons_ClusterName_1b"
+  run_prefix =  "test_gwas_f_t"
   autosave = T
   resume = NULL 
   quit_session = NULL
-  metadata_subset_col = "ClusterName"
+  metadata_subset_col = "cell_ontology_class"
   metadata_corr_col = NULL 
   metadata_corr_filter_vals = NULL
   use.imputed = F
@@ -118,24 +118,63 @@ if (FALSE) {
   genes_use = "PCA"
   pca_genes = 'all'
   corFnc = "cor"
-  networkType = "signed_hybrid"
+  networkType = "signed"
   hclustMethod = "average"
-  minClusterSize = c(15)
+  minClusterSize = c(20)
   deepSplit = c(3)
-  moduleMergeCutHeight = c(0.25)
+  moduleMergeCutHeight = c(0.2)
   pamStage = c(TRUE)
   kM_reassign = T
   kM_signif_filter = T
   jackstrawnReplicate = 0
-  TOMnReplicate = 0
+  TOMnReplicate = 10
   fuzzyModMembership = "kIM"
   scale_MEs_by_kIMs = F
-  PPI_filter = F
+  PPI_filter = T
+  data_organism = "mmusculus"
+  magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
+  gwas_filter_traits <- c("t1d", "BMI", "t2d")
+  n_cores = 7
+}
+
+if (F) {
+  seurat_path = "/projects/jonatan/archs4_lachmann_2018/RObjects/180831_mouse_hypothalamus_archs4_seurat.RDS.gz"
+  project_dir = "/projects/jonatan/archs4_lachmann_2018/"
+  data_prefix = "archs4"
+  data_type = "bulk"
+  run_prefix =  "all_1"
+  autosave = T
+  resume = NULL 
+  quit_session = NULL
+  metadata_subset_col = "cluster"
+  metadata_corr_col = NULL 
+  metadata_corr_filter_vals = NULL
+  use.imputed = F
+  regress_out = NULL#c("nUMI", "percent.mito", "percent.ribo")
+  min.cells = 10
+  genes_remove_dir = NULL
+  genes_use = "PCA"
+  pca_genes = 'var.genes'
+  corFnc = "cor"
+  networkType = "signed"
+  hclustMethod = "average"
+  minClusterSize = c(20)
+  deepSplit = c(1,2,3)
+  moduleMergeCutHeight = c(0.2)
+  pamStage = c(TRUE)
+  kM_reassign = T
+  kM_signif_filter = T
+  jackstrawnReplicate = 0
+  TOMnReplicate = 100
+  fuzzyModMembership = "kIM"
+  scale_MEs_by_kIMs = F
+  PPI_filter = T
   data_organism = "mmusculus"
   magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
   gwas_filter_traits <- NULL
-  n_cores = 53
+  n_cores = 10
 }
+
 ######################################################################
 ############################## PACKAGES #############################
 ######################################################################
@@ -355,8 +394,8 @@ if (is.null(resume)) {
   if (min(moduleMergeCutHeight) < 0 | max(moduleMergeCutHeight) > 1) stop("moduleMergeCutHeight must be a vector of doubles between 0 and 1, recommended range is between 0.1 and 0.2")
   
   if (!fuzzyModMembership %in% c("kME", "kIM")) {
-    warning("Invalid fuzzeModuleMembership value -  reset to kME (default)")
-    fuzzyModMembership <- "kME"
+    warning("Invalid fuzzeModuleMembership value -  reset to kIM (default)")
+    fuzzyModMembership <- "kIM"
   }
   
   if (! (jackstrawnReplicate >= 0)) stop("jackstrawnReplicate must be 0 or higher")
@@ -387,7 +426,7 @@ if (is.null(resume)) {
   message("Loading seurat object..")
   
   seurat_obj <- load_obj(f=seurat_path)
-  
+
   ######################################################################
   ######################## USE IMPUTED DATA? ###########################
   ######################################################################
@@ -438,7 +477,7 @@ if (is.null(resume)) {
     }
     seurat_obj@raw.data <- seurat_obj@raw.data[!remove_idx,]
   }
-  
+
   ######################################################################
   #################### SET SEURAT IDENT AND SUBSET NAMES ###############
   ######################################################################
@@ -501,11 +540,9 @@ if (is.null(resume)) {
       write.table(df_duplicate,log_duplicate_filepath,quote=F,sep="\t",row.names=F)
       
       # Filter out unmapped and duplicate genes from Seurat object
-      #seurat_obj@data <- seurat_obj@data[!is.na(mapping$ensembl) & !idx_duplicate_genes,]
       seurat_obj@raw.data <- seurat_obj@raw.data[!is.na(mapping$ensembl) & !idx_duplicate_genes,]
       
       # rename Seurat object rows where mapping was successful to ensembl ID
-      #rownames(seurat_obj@data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       rownames(seurat_obj@raw.data) <- mapping$ensembl[!is.na(mapping$ensembl) & !idx_duplicate_genes]
       
     } 
@@ -557,7 +594,6 @@ if (is.null(resume)) {
     idx_duplicate_genes <- duplicated(mapping$symbol)
     df_duplicate <- mapping[idx_duplicate_genes,]
     write.table(df_duplicate,log_duplicate_filepath,quote=F,sep="\t",row.names=F)
-    
   }
   
   ######################################################################
@@ -566,45 +602,14 @@ if (is.null(resume)) {
  
   message("Computing percent.mito and percent.ribo")
   
-  idx_mito.genes <- grepl(pattern = "^mt-", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T)
-  idx_ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T) 
-  percent.mito <- Matrix::colSums(seurat_obj@raw.data[idx_mito.genes, ])/Matrix::colSums(seurat_obj@raw.data)
-  percent.ribo <- Matrix::colSums(seurat_obj@raw.data[idx_ribo.genes, ])/Matrix::colSums(seurat_obj@raw.data)
-  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.mito, col.name = "percent.mito")
-  seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.ribo, col.name = "percent.ribo")
-  
-  ######################################################################
-  ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
-  ######################################################################
-  
-  # message("Normalizing and scaling full expression matrix")
-  # 
-  # # Normalise 
-  # seurat_obj <- NormalizeData(object = seurat_obj, display.progress = T)
-  # 
-  # # Scale and regress out confounders
-  # vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
-  # 
-  # seurat_obj <- ScaleData(object = seurat_obj, 
-  #                         vars.to.regress = vars.to.regress,
-  #                         model.use="linear",
-  #                         do.par=T,
-  #                         num.cores = min(n_cores, detectCores()-1),
-  #                         do.scale=T,
-  #                         do.center=T,
-  #                         display.progress = T)
-  # 
-  # # Make sure we close socket workers
-  # invisible(gc()); invisible(R.utils::gcDLLs())
-  # 
-  # scale_data <- seurat_obj@scale.data
-  # ident <- seurat_obj@ident
-  # 
-  # # Save scale and regressed whole expression matrix with ensembl rownames for later use
-  # save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
-  # save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
-  # rm(scale_data)  
-    
+  if (data_type=="sc") {
+    idx_mito.genes <- grepl(pattern = "^mt-", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T)
+    idx_ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = mapping$symbol[match(rownames(x = seurat_obj@raw.data), mapping$ensembl)], ignore.case=T) 
+    percent.mito <- Matrix::colSums(seurat_obj@raw.data[idx_mito.genes, ])/Matrix::colSums(seurat_obj@raw.data)
+    percent.ribo <- Matrix::colSums(seurat_obj@raw.data[idx_ribo.genes, ])/Matrix::colSums(seurat_obj@raw.data)
+    seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.mito, col.name = "percent.mito")
+    seurat_obj <- AddMetaData(object = seurat_obj, metadata = percent.ribo, col.name = "percent.ribo")
+  }
 
   ######################################################################
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
@@ -641,14 +646,20 @@ if (is.null(resume)) {
   ######################################################################
 
   message("Subsetting the dataset")
-
+  
   subsets <- lapply(sNames, function(name) SubsetData(seurat_obj,
                                                    ident.use = name, 
                                                    do.scale = F, 
                                                    do.center = F,
                                                    subset.raw = T,
-                                                   do.clean = F))
+                                                   do.clean = T))
   
+  cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "addMetadata_to_subsets.txt"))
+  subsets <- parLapplyLB(cl, subsets, function(obj) {
+    obj <- AddMetaData(obj, metadata = seurat_obj@meta.data[match(colnames(obj@raw.data), rownames(seurat_obj@meta.data)),])
+    return(obj)
+  })
+  stopCluster(cl)
   
   # Free up space - this may be crucial for parallelising, since "FORK" pushes all the global environment variables to every worker
   rm(seurat_obj)
@@ -657,43 +668,51 @@ if (is.null(resume)) {
   ### Filter out cell types that have too few cells (<20).
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
-  message("Filtering out subsets with fewer than 20 cells")
-  
+   
   if (data_type=="sc") {
+    message("Filtering out subsets with fewer than 20 cells")
     subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
       if(ncol(seurat_obj@raw.data)<=20) {
         warning(sprintf("%s cell cluster filtered out because it contains <20 cells", unique(as.character(seurat_obj@ident))[1] ))
         return(FALSE)
       } else return(TRUE)
     }, simplify = T)
-  } else if (datatype=="bulk") { # no need to filter out any subsets
-    subsets_ok_idx = !logical(length = length(unique(seurat_obj@ident)))
+  } else if (data_type=="bulk") { # no need to filter out any subsets
+    subsets_ok_idx = !logical(length = length(subsets))
   }
   
   subsets <- subsets[subsets_ok_idx]
   sNames <- sNames[subsets_ok_idx]
   names(subsets) <- sNames 
   
-  message(paste0("Filtering out genes expressed in fewer than ", min.cells, " cells"))
+  vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% metadat_names] else NULL  
   
   cl <- makeCluster(spec=n_cores, 
                     type="FORK", 
-                    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_ScaleData_FindVariableGenes.txt"))
+                    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FilterGenes_Normalize.txt"))
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
-  if (data_type=="sc") subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
+  if (data_type=="sc") {
+
+    message(paste0("Filtering out genes expressed in fewer than ", min.cells, " cells"))
+    subsets <- parLapplyLB(cl, subsets, function(x) FilterGenes(x, min.cells = min.cells))
+    
+    subsets <- parLapplyLB(cl, subsets, function(seurat_obj) {
+      NormalizeData(object = seurat_obj) 
+    })
+  }
+  
+  stopCluster(cl)
   
   message("Scaling and regressing data subsets")
   
   # Scale data and regress out confounders
-  vars.to.regress = if (!is.null(regress_out) & data_type=="sc") regress_out[regress_out %in% metadat_names] else NULL
-  
-  subsets <- clusterMap(cl, function(seurat_obj, name) {
+  subsets <- mapply(function(seurat_obj, name) {
    tryCatch({
      ScaleData(object = seurat_obj,
-               vars.to.regress = vars.to.regress,
+               vars.to.regress = if (data_type=="sc" & length(vars.to.regress)>0) vars.to.regress else NULL,
                model.use="linear",
-               do.par=F,
+               do.par=T, num.cores = n_cores,
                do.scale=T,
                do.center=do.center)}, 
      error = function(err) {
@@ -702,11 +721,14 @@ if (is.null(resume)) {
      })
     },
     seurat_obj = subsets,
-    name = sNames,
-    SIMPLIFY=F,
-    .scheduling = c("dynamic"))
+    name = names(subsets),
+    SIMPLIFY=F)
   
   message("Finding variable genes")
+  
+  cl <- makeCluster(spec=n_cores, 
+                    type="FORK", 
+                    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "FindVariableGenes.txt"))
   
   subsets <- parLapplyLB(cl, subsets, function(seurat_obj) FindVariableGenes(object = seurat_obj,
                                                            x.low.cutoff = 0.0125,
@@ -725,36 +747,56 @@ if (is.null(resume)) {
     start_time <- Sys.time()
     
     cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parPCA.txt"))
-    
       subsets <- clusterMap(cl, function(seurat_obj, name) {
-        tryCatch({
-          RunPCA(object = seurat_obj,
-          pc.genes = if (pca_genes == 'all') rownames(seurat_obj@data) else seurat_obj@var.genes,
-          pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes)) %/% 2, ncol(seurat_obj@data) %/% 2),
-          use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
-          weight.by.var = F,
-          do.print = F,
-          seed.use = randomSeed,
-          maxit = maxit, # set to 500 as default
-          fastpath = fastpath)
-          }, error = function(err) {
-           message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
-           message("Trying RunPCA with fewer dimensions, double max iterations and fastpath == F")
-           tryCatch({
-           RunPCA(object = seurat_obj,
-                  pc.genes = if (pca_genes == 'all') rownames(seurat_obj@data) else seurat_obj@var.genes,
-                  pcs.compute = min(nPC_seurat, (if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes)) %/% 2, ncol(seurat_obj@data) %/% 2),
-                  use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
-                  weight.by.var = F,
-                  do.print = F,
-                  seed.use = randomSeed,
-                  maxit = maxit*2, # set to 500 as default
-                  fastpath = F)
-             }, error = function(err1) {
-            message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
-            message("Returning the original Seurat object with empty dr$pca slot")
-            return(seurat_obj)}) 
-            })
+          seurat_tmp <- tryCatch({ 
+              RunPCA(object = seurat_obj,
+              pc.genes = if (pca_genes == 'all') rownames(seurat_obj@data) else if (pca_genes == "var.genes") seurat_obj@var.genes,
+              pcs.compute = min(nPC_seurat, min(if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes) %/% 2, ncol(seurat_obj@data) %/% 2)),
+              use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
+              weight.by.var = F,
+              do.print = F,
+              seed.use = randomSeed,
+              maxit = maxit, # set to 500 as default
+              fastpath = fastpath) }, 
+            error = function(err) {
+              message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
+              message("Trying RunPCA with var.genes, half the number of components, double max iterations and fastpath == F")
+                tryCatch({
+    
+                # tmp_pca <- fast.prcomp(x=t(seurat_obj@scale.data[match(seurat_obj@var.genes, rownames(seurat_obj@scale.data)),]),
+                #                                  center=F,
+                #                                  scale=F,
+                #                                  retx=F,
+                #                                  tol = 0.01)#sqrt(.Machine$double.eps))
+                #                                  #nv = min(nPC_seurat, ncol(seurat_obj@scale.data) %/% 2),
+                #                                  #nu = min(nPC_seurat, min(if (pca_genes == 'all') nrow(seurat_obj@data) else length(seurat_obj@var.genes) %/% 2, ncol(seurat_obj@data) %/% 2)) %/% 2)
+                # 
+                # #
+                # seurat_obj@dr$pca@gene.loadings <- tmp_pca$rotation
+                # 
+                # seurat_obj
+                RunPCA(object = seurat_obj,
+                 pc.genes = seurat_obj@var.genes,
+                 pcs.compute = min(nPC_seurat, min(length(seurat_obj@var.genes) %/% 2, ncol(seurat_obj@data) %/% 2))%/%2,
+                 use.imputed = F, # if use_imputed=T the @imputed slot has been copied to @data
+                 weight.by.var = F,
+                 do.print = F,
+                 seed.use = randomSeed,
+                 maxit = maxit*2, # set to 500 as default
+                 fastpath = F)
+    
+                }, error = function(err1) {
+                  message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
+                  message("Returning the original Seurat object with empty dr$pca slot")
+                  return(seurat_obj)}) 
+              })
+              
+          if (pca_genes == "all") {
+            seurat_tmp@dr$pca@gene.loadings.full <- seurat_tmp@dr$pca@gene.loadings
+          }
+          
+          return(seurat_tmp)
+
       },
       seurat_obj = subsets,
       name = names(subsets), 
@@ -764,6 +806,8 @@ if (is.null(resume)) {
     ### 
     end_time <- Sys.time()
     
+    stopCluster(cl)
+    
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
     
     # Select significant PCs using empirical p-value based on JackStraw resampling
@@ -771,30 +815,31 @@ if (is.null(resume)) {
     # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs based on the p-values of gene loadings
     
     if (jackstrawnReplicate > 0 & genes_use == "PCA") message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", jackstrawnReplicate))
-      list_datExpr <- clusterMap(cl, function(seurat_obj, name) {
-        tryCatch({
-        wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                      n_cores = 1, 
-                      jackstrawnReplicate = jackstrawnReplicate, 
-                      pvalThreshold = pvalThreshold)
-        }, error = function(err) {
-          message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
-          message("using var.genes instead")
-          datExpr <- seurat_to_datExpr(seurat_obj_sub = seurat_obj, idx_genes_use = rownames(seurat_obj@scale.data) %in% seurat_obj@var.genes)
-        })
-        },
-        seurat_obj = subsets, 
-        name = names(subsets),
-        SIMPLIFY=F,
-        .scheduling = c("dynamic"))
+    #cl <- makeCluster(min(n_cores, detectCores()-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parJackstraw.txt"))
     
-    stopCluster(cl)
+    list_datExpr <- mapply(function(seurat_obj, name) {
+      tryCatch({
+      wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                    n_cores = n_cores, 
+                    jackstrawnReplicate = jackstrawnReplicate, 
+                    pvalThreshold = pvalThreshold)
+      }, error = function(err) {
+        message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
+        message("using var.genes instead")
+        datExpr <- seurat_to_datExpr(seurat_obj_sub = seurat_obj, idx_genes_use = rownames(seurat_obj@scale.data) %in% seurat_obj@var.genes)
+      })
+      },
+      seurat_obj = subsets, 
+      name = names(subsets),
+      SIMPLIFY=F)
+    
+   # stopCluster(cl)
       
     invisible(gc()); invisible(R.utils::gcDLLs())
    
   } else if (genes_use == "all") {
     list_datExpr <- lapply(subsets, function(x) 
-      seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rep(TRUE, nrow(x@scale.data))))
+    seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rep(TRUE, nrow(x@scale.data))))
   } else if (genes_use == "var.genes") {
     list_datExpr <- lapply(subsets, function(x) seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rownames(x@scale.data) %in% x@var.genes))
   } 
@@ -2273,22 +2318,24 @@ if (resume == "checkpoint_4") {
     
     message("Scoring modules for enrichment with genes linked by GWAS to phenotypes of interest")
     
-    magma_test_type = "module_genes_t" 
+    magma_test_type = "module_genes_t" # TODO: make this an argument?
     
     if (data_organism == "mmusculus") {
+  
       invisible(gc()); invisible(R.utils::gcDLLs())
+      
       # map mouse to human gene orthologs  
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
       
       cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "mapMMtoHs_par.txt"))
-      list_MMtoHsmapping <- clusterMap(cl, function(x,y) mapMMtoHs(modulekM = x,
-                                                                   colors = y,
+      list_MMtoHsmapping <- clusterMap(cl, function(modulekM,colors_PPI_uniq) mapMMtoHs(modulekM = modulekM,
+                                                                   colors = colors_PPI_uniq,
                                                                    log_dir = log_dir, 
                                                                    data_prefix = data_prefix, 
                                                                    run_prefix = run_prefix,
                                                                    mapping_orthology = mapping_orthology),
-                                       x=list_kMs_PPI,
-                                       y=list_colors_PPI_uniq,
+                                       modulekM = list_kMs_PPI,
+                                       colors_PPI_uniq =list_colors_PPI_uniq,
                                        .scheduling = c("dynamic"))
       stopCluster(cl)
       invisible(gc()); invisible(R.utils::gcDLLs())
@@ -2298,13 +2345,21 @@ if (resume == "checkpoint_4") {
       
       vec_MMtoHsmapping_prop.mapped <- sapply(list_MMtoHsmapping, function(x) x$prop.mapped, simplify = T)
       
-      
       names(list_kMs_hs) <- names(list_colors_hs) <- names(list_kMs_PPI)
       
+      # Also map all 10x genes to homo sapiens
+      
+      genes_background_ensembl_mm <- read.csv(sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism))[["ensembl"]]
+      genes_background_ensembl_hs <- mapping_orthology$ensembl_gene_id[match(genes_background_ensembl_mm, mapping_orthology$mmusculus_homolog_ensembl_gene)]
+      genes_background_ensembl_hs <- as.character(na.omit(genes_background_ensembl_hs)) 
+      
     } else if (data_organism == "hsapiens") {
+      
       list_kMs_hs <- list_kMs_PPI
       list_colors_hs <- list_colors_PPI_uniq
       names(list_kMs_hs) <- names(list_colors_hs) <- names(list_kMs_PPI)
+      genes_background_ensembl_hs <- read.csv(sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism))[["ensembl"]]
+      
     }
     
     # Load gene mapping and annotation files
@@ -2328,13 +2383,15 @@ if (resume == "checkpoint_4") {
       gwas[[i]]$gene_name = mapping$ensembl
     }
     
+             
     invisible(gc()); invisible(R.utils::gcDLLs())
     cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "kM_magma_par.txt"))
     magma_results <- clusterMap(cl, function(x,y,z) kM_magma(cellType = x, 
                                                            modulekM = y,
                                                            gwas = gwas,
                                                            test_type = magma_test_type,
-                                                           colors_hs = z),
+                                                           colors_hs = z,
+                                                           genes_background_ensembl_hs = genes_background_ensembl_hs),#add as arg to fnc
                                 x = names(list_kMs_hs),
                                 y = list_kMs_hs,
                                 z = list_colors_hs, 
@@ -2543,7 +2600,7 @@ if (resume == "checkpoint_4") {
     if (!is.null(metadata)) {
       
       message("Computing module-metadata correlation in each celltype")
-      
+      # TODO: Shouldn't it be colnames(x)?
       list_metadata <- lapply(list_datExpr_gwas, function(x) metadata[match(rownames(x), rownames(metadata)), , drop=F]) # get list of cell * metadata. The space between the commas is intentional!
       
       if (fuzzyModMembership=="kME") {

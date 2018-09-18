@@ -3,20 +3,12 @@
 
 # loomR:
 # Introduction to loomR: https://satijalab.org/loomR/loomR_tutorial.html
-# MCA tutorial: https://satijalab.org/seurat/mca_loom.html
+# loomR MCA tutorial: https://satijalab.org/seurat/mca_loom.html
 # loom file specification: http://linnarssonlab.org/loompy/format/index.html
 
 # usage: 
 # export R_MAX_NUM_DLLS=999
 # time Rscript /projects/jonatan/wgcna-src/wgcna-toolbox/cellType_x_module_embedding_heatmap.R --dir_project_WGCNA /projects/jonatan/tmp-mousebrain/ --dir_project_data /projects/jonatan/tmp-mousebrain/ --path_data /projects/jonatan/tmp-mousebrain/RObjects/L5.RDS --prefixes_WGCNA_run 'c("Neurons_ClusterName_2")' --prefix_out mousebrain_neuronMods_1 --metadata_subset_col ClusterName --scale_data F --n_cores 20
-
-# TODO: Pull metadata from loom object?
-# TODO: Normalize and scale data in loom object?
-# TODO: Use sqroot transform to bring out colors?
-# TODO: Add column annotation (get it to work..)
-# TODO: Use 'key' rather than transposing? http://linnarssonlab.org/loompy/fullapi/combine.html
-# TODO: Select a good size to quality graphics device, e.g. via Cairo
-# TODO: Need SetCalcParams before NormalizeData and ScaleData to get these functions to work on loom objects!
 
 suppressPackageStartupMessages(library(optparse))
 
@@ -257,139 +249,123 @@ if (!is.null(path_metadata)) {
 }
 
 ######################################################################
+########################## SET UP LOOM OBJECT ########################
+######################################################################
+
+# Convert temporarily to Seurat object to get NormalizeData and ScaleData to work. 
+# Need to set CalcParams and not clear how to do so directly in loom object if not converted from Seurat object
+if (fileType=="loom") {
+  metadata_subset <- if (!is.null(metadata_subset_col)) as.character(data_obj[[paste0("col_attrs/", metadata_subset_col)]][]) else NULL 
+  data_obj <- Seurat::Convert(from = data_obj, to="seurat")
+}
+
+if (!is.null(metadata_subset)) data_obj <- AddMetaData(object=data_obj, metadata = data.frame(metadata_subset_col=metadata_subset, row.names = colnames(data_obj@raw.data)))
+if (!is.null(metadata_subset)) data_obj <- SetAllIdent(object = data_obj, id = metadata_subset_col)
+
+ident <- as.character(data_obj@ident)
+
+# get metadata
+metadata <- if (!is.null(path_metadata)) data.frame(metadata, data_obj@meta.data) else data_obj@meta.data
+
+# Convert (back) to loom
+if (file.exists(paste0(dir_scratch, prefix_out, "_data_obj.loom"))) file.remove(paste0(dir_scratch, prefix_out, "_data_obj.loom"))
+data_obj <- Seurat::Convert(from=data_obj, to="loom", chunk.size = 5000, filename = paste0(dir_scratch, prefix_out, "_data_obj.loom"), display.progress=T)
+
+data_obj$add.col.attribute(attribute = list(ident = ident), overwrite = TRUE)
+######################################################################
 ####################### COUNT PERCENT RIBO, MITO #####################
 ######################################################################
 # todo: make sure row/column is correct: matrix is transposed
 
-if (scale_data) {
-  message("Counting percent ribo and percent mito")
-  if (fileType =="loom") {
-    if (FALSE) { # TODO
-      mito.genes <- grepl(pattern = "^mt-", x = data_obj[["row_attrs/gene_names"]][], ignore.case=T)
-      ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = data_obj[["row_attrs/gene_names"]][], ignore.case=T)
-      
-      
-      data_obj$apply(name = "col_attrs/percent_mito", FUN = function(mat) {
-        return(rowSums(x = mat[, mito.genes])/rowSums(x = mat))
-      }, MARGIN = 2, dataset.use = "matrix")
-      
-  
-      data_obj$apply(name = "col_attrs/percent_ribo", FUN = function(mat) {
-        return(rowSums(x = mat[, ribo.genes])/rowSums(x = mat))
-      }, MARGIN = 2, dataset.use = "matrix")
-    }
-    # sum.mito <- data_obj$map(FUN = function(x) rowSums(x[,mito.genes_idx]), MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
-    #                       display.progress = FALSE)
-    # sum.ribo <- data_obj$map(FUN = function(x) rowSums(x[,ribo.genes_idx]), MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
-    #                          display.progress = FALSE)
-    # sum.all <- data_obj$map(FUN = function(x) rowSums, MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
-    #                         display.progress = FALSE)
-    # percent.mito <- sum.mito/sum.all
-    # percent.ribo <- sum.ribo/sum.all
-    # data_obj <- lfile$add.col.attribute(list(percent.mito=percent.mito), overwrite = TRUE)
-    # data_obj <- lfile$add.col.attribute(list(percent.ribo=percent.ribo), overwrite = TRUE)
-  } else if (fileType == "RObject") {
-    mito.genes <- grep(pattern = "^mt-", x = rownames(x = data_obj@data), value = TRUE, ignore.case=T)
-    ribo.genes <- grep(pattern = "^Rp[sl][[:digit:]]", x = rownames(x = data_obj@data), value = TRUE)
-    percent.mito <- Matrix::colSums(data_obj@raw.data[mito.genes, ])/Matrix::colSums(data_obj@raw.data)
-    percent.ribo <- Matrix::colSums(data_obj@raw.data[ribo.genes, ])/Matrix::colSums(data_obj@raw.data)
-    data_obj <- AddMetaData(object = data_obj, metadata = percent.mito, col.name = "percent.mito")
-    data_obj <- AddMetaData(object = data_obj, metadata = percent.ribo, col.name = "percent.ribo")
-  }
-}
+ message("Counting percent ribo and percent mito")
+
+mito.genes <- grepl(pattern = "^mt-", x = data_obj[["row_attrs/gene_names"]][], ignore.case=T)
+ribo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = data_obj[["row_attrs/gene_names"]][], ignore.case=T)
+
+
+data_obj$apply(name = "col_attrs/percent_mito", FUN = function(mat) {
+  return(rowSums(x = mat[, mito.genes])/rowSums(x = mat))
+}, MARGIN = 2, dataset.use = "matrix")
+
+
+data_obj$apply(name = "col_attrs/percent_ribo", FUN = function(mat) {
+  return(rowSums(x = mat[, ribo.genes])/rowSums(x = mat))
+}, MARGIN = 2, dataset.use = "matrix")
+    
+# sum.mito <- data_obj$map(FUN = function(x) rowSums(x[,mito.genes_idx]), MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
+#                       display.progress = FALSE)
+# sum.ribo <- data_obj$map(FUN = function(x) rowSums(x[,ribo.genes_idx]), MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
+#                          display.progress = FALSE)
+# sum.all <- data_obj$map(FUN = function(x) rowSums, MARGIN = 2, chunk.size = 500, dataset.use = "matrix", 
+#                         display.progress = FALSE)
+# percent.mito <- sum.mito/sum.all
+# percent.ribo <- sum.ribo/sum.all
+# data_obj <- lfile$add.col.attribute(list(percent.mito=percent.mito), overwrite = TRUE)
+# data_obj <- lfile$add.col.attribute(list(percent.ribo=percent.ribo), overwrite = TRUE)
+# } else if (fileType == "RObject") {
+#   mito.genes <- grep(pattern = "^mt-", x = rownames(x = data_obj@data), value = TRUE, ignore.case=T)
+#   ribo.genes <- grep(pattern = "^Rp[sl][[:digit:]]", x = rownames(x = data_obj@data), value = TRUE)
+#   percent.mito <- Matrix::colSums(data_obj@raw.data[mito.genes, ])/Matrix::colSums(data_obj@raw.data)
+#   percent.ribo <- Matrix::colSums(data_obj@raw.data[ribo.genes, ])/Matrix::colSums(data_obj@raw.data)
+#   data_obj <- AddMetaData(object = data_obj, metadata = percent.mito, col.name = "percent.mito")
+#   data_obj <- AddMetaData(object = data_obj, metadata = percent.ribo, col.name = "percent.ribo")
+# }
+
 ######################################################################
 ######################### PREPARE DATA ###############################
 ######################################################################
 
-if (fileType=="RObject") {
-  # get ident
-  ident <- try(if (!is.null(metadata_subset_col)) as.character(data_obj@meta.data[[metadata_subset_col]]) else as.character(data_obj@ident))
+message("Normalising the data")
+NormalizeData(object=data_obj, chunk.size = 5000, scale.factor = 10000, display.progress = T)
+FindVariableGenes(object = data_obj)
+message("Scaling the data and regressing out confounders percent.mito, percent.ribo and nUMI")
+ScaleData(genes.use = hv.genes, chunk.size = 500, display.progress = FALSE, vars.to.regress = c("percent_mito", "nUMI", "percent.ribo"), display.progress= T, do.par=T, num.cores=n_cores)
+# # NormalizeData
+# if (is.null(data_obj@data)) {
+#   message("Normalising the data")
+#   NormalizeData(object=data_obj, display.progress = T)
+# } else {
+#   message("Normalised data detected")
+# }
 
-  # get metadata
-  if (!is.null(data_obj@meta.data)) {
-    metadata <- if (!is.null(path_metadata)) data.frame(metadata, data_obj@meta.data) else data_obj@meta.data
-  }
-  
-  # NormalizeData
-  #if (is.null(data_obj@data)) data_obj <- NormalizeData(object=data_obj, display.progress = T)
-  # If needed, normalize
-  message("Normalising the data")
-  
-  data_obj <- NormalizeData(object=data_obj, display.progress = T)
-  
-  # ScaleData
-  if (scale_data) {
-    if (is.null(data_obj@scale.data)) {
-      message("Scaling the data and regressing out confounders percent.mito, percent.ribo and nUMI")
-      data_obj <- ScaleData(object = data_obj, 
-                            vars.to.regress = c("percent.mito", "percent.ribo", "nUMI"), 
-                            do.scale = T, do.center=T, 
-                            display.progress = T, 
-                            do.par = T, 
-                            num.cores = n_cores)
-      
-      invisible(gc())
-      invisible(R.utils::gcDLLs())
-      
-      datExpr <- data_obj@scale.data 
-    } else {
-      message("scale data detected")
-      datExpr <- data_obj@scale.data 
-    }
-  } else {
-    datExpr <- data_obj@data
-  }
-  
-  # Save as loomR
-  if (file.exists(paste0(dir_scratch, prefix_out, "_datExpr.loom"))) file.remove(paste0(dir_scratch, prefix_out, "_datExpr.loom"))
-  data_obj <- create(filename = paste0(dir_scratch, prefix_out, "_datExpr.loom"), 
-                     data = datExpr, 
-                     #gene.attrs = list(gene_names = rownames(datExpr)),
-                     #cell.attrs = list(cell_names = colnames(datExpr)),
-                     display.progress = T, 
-                     calc.numi = if (scale_data) T else F,
-                     overwrite=T)
+# ScaleData
+# if (scale_data) {
+#   if (is.null(data_obj@scale.data)) {
+#     message("Scaling the data and regressing out confounders percent.mito, percent.ribo and nUMI")
+#     data_obj <- ScaleData(object = data_obj, 
+#                           vars.to.regress = c("percent.mito", "percent.ribo", "nUMI"), 
+#                           do.scale = T, do.center=T, 
+#                           display.progress = T, 
+#                           do.par = T, 
+#                           num.cores = n_cores)
+#     
+#     invisible(gc())
+#     invisible(R.utils::gcDLLs())
+#     
+#     datExpr <- data_obj@scale.data 
+#   } else {
+#     message("scale data detected")
+#     datExpr <- data_obj@scale.data 
+#   }
+# } else {
+#   datExpr <- data_obj@data
+# }
 
-  #data_obj$add.col.attribute(attribute = list(cell_names = colnames(datExpr)))
-  data_obj$add.col.attribute(attribute = list(ident = ident), overwrite = TRUE)
-  #data_obj$add.row.attribute(attribute = list(gene_names = rownames(datExpr)))
+# Save as loomR
+#if (file.exists(paste0(dir_scratch, prefix_out, "_data_obj.loom"))) file.remove(paste0(dir_scratch, prefix_out, "_data_obj.loom"))
+# data_obj <- create(filename = paste0(dir_scratch, prefix_out, "_data_obj.loom"), 
+#                    data = datExpr, 
+#                    #gene.attrs = list(gene_names = rownames(datExpr)),
+#                    #cell.attrs = list(cell_names = colnames(datExpr)),
+#                    display.progress = T, 
+#                    calc.numi = if (scale_data) T else F,
+#                    overwrite=T)
+#data_obj$add.col.attribute(attribute = list(cell_names = colnames(datExpr)))
+#data_obj$add.col.attribute(attribute = list(ident = ident), overwrite = TRUE)
+#data_obj$add.row.attribute(attribute = list(gene_names = rownames(datExpr)))
+#rm(datExpr)
 
-  rm(datExpr)
-
-} else if (fileType=="loom") {
-  
-  ident <- if (!is.null(metadata_subset_col)) as.character(data_obj[[paste0("col_attrs/", metadata_subset_col)]][]) else try(data_obj[["col_attrs/ident"]][])
-  
-  if (class(ident) == "try-error") stop("ident not found in loom object")
-
-  if (!is.null(metadata_subset_col)) data_obj$add.col.attribute(list(ident = ident), overwrite = TRUE)  
-  # NB: cannot pull all metadata from loom object without specific names?
-    
-  #TODO: use add.layer?
-  message("Normalising the data")
-  tryCatch({NormalizeData(object=data_obj)
-    }, error = function(err) warning("NormalizeData call on loom file failed")) # may fail if data is already normalized. #TODO does the loom object hold different versions of the data? E.g. layers?
-  
-  if (scale_data) {
-
-    tryCatch({
-    FindVariableGenes(object = data_obj)
-    }, error = function(err) warning("FindVariableGenes call on loom file failed"))
-    tryCatch({
-    ScaleData(object = data_obj,
-              genes.use = hv.genes,
-              chunk.size = 10000,
-              display.progress = FALSE,
-              vars.to.regress = "percent_mito")
-    }, error = function(err) warning("ScaleData call on loom file failed"))
-    
-    invisible(gc())
-    invisible(R.utils::gcDLLs())
-  }
-
-}
-#}
-
+invisible(gc()); invisible(R.utils::gcDLLs())
 
 ######################################################################
 ################ COMPUTE CELL MODULE EMBEDDINGS ######################
@@ -530,6 +506,27 @@ stopCluster(cl)
 
 saveRDS(cellTypeModEmbed, file=paste0(dir_RObjects_data, prefix_out, "_cellTypeModEmbed.RDS"))
 
+######################################################################
+######################## CLUSTER CELLS, MODULES  #####################
+######################################################################
+
+modDist <- dist(x=t(cellModEmbed_loom[["matrix"]][,]), method="euclidean", diag=F, upper=F) 
+modDendro <- hclust(d=modDist, method="average")
+modClust_order <- modDendro$order
+
+cellDist <- dist(x=cellModEmbed_loom[["matrix"]][,], method="euclidean", diag=F, upper=F) 
+cellDendro <- hclust(d=cellDist, method="average")
+cellClust_order <- cellDendro$order
+
+cellType_modDist <- dist(x=t(cellTypeModEmbed), method="euclidean", diag=F, upper=F) 
+cellType_modDendro <- hclust(d=cellType_modDist, method="average")
+cellType_modClust_order <- cellType_modDendro$order
+
+cellType_cellDist <- dist(x=cellTypeModEmbed, method="euclidean", diag=F, upper=F) 
+cellType_cellDendro <- hclust(d=cellType_modDist, method="average")
+cellType_cellClust_order <- cellType_cellDendro$order
+
+# TODO GOT TO HERE
 ######################################################################
 ######################## PLOT CELL*MODULE MATRIX #####################
 ######################################################################
@@ -740,7 +737,7 @@ dev.off()
 rm(cellTypeModEmbed) # already saved as .RDS
 
 try(data_obj$close_all())
-if (file.exists(paste0(dir_scratch, prefix_out, "_datExpr.loom"))) try(invisible(file.remove(paste0(dir_scratch, prefix_out, "_datExpr.loom"))))
+if (file.exists(paste0(dir_scratch, prefix_out, "_data_obj.loom"))) try(invisible(file.remove(paste0(dir_scratch, prefix_out, "_data_obj.loom"))))
 
 if (file.exists(paste0(dir_scratch, 
                        prefix_out, "_cellModEmbed_chunk.loom"))) try(invisible(file.remove(paste0(dir_scratch, 
