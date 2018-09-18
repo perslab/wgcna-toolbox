@@ -101,10 +101,10 @@ option_list <- list(
 
 if (FALSE) { 
   seurat_path = "/projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata"
-  project_dir = "/projects/jonatan/tmp-maca/"
-  data_prefix = "maca_pancreas"
+  project_dir = "/projects/jonatan/tools/tmp-rwgcna-tests/maca-pancreas-test/"
+  data_prefix = "maca_pancr"
   data_type = "sc"
-  run_prefix =  "test_gwas_f_t"
+  run_prefix =  "test_corr_f_v"
   autosave = T
   resume = NULL 
   quit_session = NULL
