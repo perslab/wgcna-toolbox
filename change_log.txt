@@ -1,5 +1,66 @@
 # Change log
+v2.5 - 19-10-2018
 
+### Fixed
+* list_list_PPI_uniq now just list_list_PPI
+* sNames_gwas and sNames_meta now ordered the same as sNames and sNames_PPI!
+* Fixed PPI test output writing to disk  -needed to convert to matrix first
+* Removed double celltype name from metadata correlation matrices
+* logical check for gwas_filter_vals when counting enriched modules and outputting sumstats
+* fix cellType, not celltype, in mergeCloseModskIM and kM_reassign_fnc
+* added logical condition on computing n_modules_meta_enriched, only if using metadata
+* cellModEmbed with kIM: if no grey, was returning a 0 dimension matrix
+* issues with kM_reassign grey-handling
+* FilterGenes now looks in, and filters only, raw.data
+* mergeCloseModules with kME now more robust with try() statements. "colors" was wrongly being assigned to.
+* Add logic in case there were no significant PPI modules to write to csv
+* PPI_outer_for_vec outputs a one-row dataframe even if there was only the grey module
+* added [sNames %in% sNames_ok] when ordering list_list_geneMod_t.test_order
+* In making colors uniqe, found rare bug when trying to subset modules by removing grey with list_mods [-grep("grey" ... ] when there are no genes assigned to grey! -> do a logical test first.
+* remove list_dissTOM_PPI after re-computing kM and pkM after PPI if fuzzyModMembership == kIM. Load it when needed for kIM
+* When computing prop genes reassigned, if reassign_log is NULL, output 0 for sumstats. Reliably output columns of length(sNames) with NAs or 0s as required
+* MAGMA t.test was running the wrong test.
+* Added back normalizeData, was missing..?
+* If re-running PCA due to an error, only use var genes
+* if fewer than five PCs show up as significant, use top loading genes rather than significant loading genes
+* Fixed issue where scaledata would fail due to assigning vars.to.regress after setting up cluster workings, so seurat subset objects would contain the full dataset scale data instead.
+* Corrected hgcn to hgnc 
+* kIM module u (eigenvector) vectors were being output without module names, unlike their kME equivalents
+
+### Changed
+* outfile logs from parallel processes now named with data_prefix and run_prefix
+* replaced for loops with Reduce when concatenating data frames / matrices
+* Set do.center = T even for bicor
+* set excludeGrey = T always since we anyway set pkME of genes in grey module to 0. This saves a lot of computations.
+* kM_reassign has a improvement threshold for reassigning of 1.05 to avoid cycling over small differences
+* made parpKms into pkMs_fnc
+* moves some WGCNA functions into the main script mapply etc calls
+* always save dissTOM, also for fuzzyModMembership==kME, for reproducibility
+* added better tryCatch errror reporting and handling for RunPCA and Jackstraw
+* throttle consensusTOM function at 20 cores rather than 10
+* parallelised jackstraw in clusterMap since 1. this means activating the workers only once rather than for each subset 2. if jackstrawnReplicate == 0, we call projectPCA inside the function - serially before!
+* changed all parLapply to parLapplyLB; made clusterMap for pkMs with dynamic scheduling
+* Made PPI_inner_for_vec output p.values and expected interactions as.numeric;
+ PPI_outer_for_vec now uses data.frame rather than as.data.frame on the output
+* Do not name list_dissTOM after loading from scratch
+* Parallelise final outputs e.g. kMs, faster
+* Do not compute embedding matrix, instead output u vectors and compute afterwards
+* Updated readme to mention no whitespace in parameter vectors and clarify quotes
+* added loom to load_obj
+* Removed step of normalizing and scaling the full expression matrix. Can be done in the cell x module heatmap script. 
+* empty @scale.data and @data slots from seurat_obj before subsetting.
+* Updated load_obj utility function
+* output kMs with filename kMs.csv rather than fuzzyModMembership (easier to search for in other scripts)
+* resume now loads session image before setting constants, which means that the user may use resume and give new parameters
+
+### Added
+* moduleEigengenes now outputs left eigenvectors (svd$u) of length gene. These can be used to compute eigenvector cell embeddings across any other data
+* filter genes from modules based on kME t.test
+* Delete checkpoint images after saving final session image
+* cell x module heatmap script
+* load_obj now handles most common text formats plus loom, including if they are compressed with gzip
+* flag data_type, either "sc" or "bulk"
+* added back the matrix with module embeddings as it is useful for plotting the modules on cell plots
 v2.4 - 15-08-2018
 
 ### Fixed
