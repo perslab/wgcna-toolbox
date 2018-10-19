@@ -166,7 +166,7 @@ run_prefix <- opt$run_prefix
 
 # load saved image?
 if (!is.null(resume)) {
-    tryCatch({load(file=sprintf("%s%s_%s_%s_image.RData", scratch_dir, data_prefix, run_prefix, resume))},
+    tryCatch({load_obj(file=sprintf("%s%s_%s_%s_image.RData", scratch_dir, data_prefix, run_prefix, resume))},
              error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
 }
 
@@ -608,7 +608,7 @@ if (is.null(resume)) {
     #ident <- seurat_obj@ident
   
    # Save scale and regressed whole expression matrix with ensembl rownames for later use
-    save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
+    saveRDS(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
     #save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
     rm(scale_data)
    
@@ -863,7 +863,7 @@ if (is.null(resume)) {
 
   # Save or load session image 
   resume = "checkpoint_1"
-  if (autosave==T) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (autosave==T) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   if (!is.null(quit_session)) if (quit_session=="checkpoint_1") quit(save="no")
   
 } 
@@ -1084,7 +1084,7 @@ if (resume == "checkpoint_1") {
                                                                                       verbose=verbose,
                                                                                       indent = indent)
                                                             
-                                                            save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, y)) # Save TOM the way consensusTOM would have done
+                                                            saveRDS(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, y), compress = "gzip") # Save TOM the way consensusTOM would have done
                                                             goodGenesTOM_idx <- rep("TRUE", ncol(x))
                                                             return(goodGenesTOM_idx)
                                                           },
@@ -1119,7 +1119,7 @@ if (resume == "checkpoint_1") {
   
   # Save list_dissTOM to harddisk
   names(list_dissTOM) <- sNames
-  saveRDS(list_dissTOM, file=sprintf("%s%s_%s_list_dissTOM.RDS", scratch_dir, data_prefix, run_prefix))
+  saveRDS(list_dissTOM, file=sprintf("%s%s_%s_list_dissTOM.RDS", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   
   ######################################################################
   ######################### CLEAR UP TOMS IN MEMORY AND HD #############
@@ -1143,7 +1143,7 @@ if (resume == "checkpoint_1") {
   ######################################################################
   
   resume="checkpoint_2"
-  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   if (!is.null(quit_session)) if (quit_session=="checkpoint_2") quit(save="no")
   
 } 
@@ -1844,7 +1844,7 @@ if (resume == "checkpoint_2") {
   
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
-  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   if (!is.null(quit_session)) if (quit_session=="checkpoint_3") quit(save="no")
 } 
 # else if (resume == "checkpoint_3") {
@@ -1959,7 +1959,7 @@ if (resume == "checkpoint_3") {
   
   resume = "checkpoint_4"
   message("Reached checkpoint 4, saving session image")
-  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   if (!is.null(quit_session)) if (quit_session=="checkpoint_4") quit(save="no")
   
 } 
@@ -2905,7 +2905,7 @@ if (resume == "checkpoint_4") {
   
   resume = "checkpoint_5"
   message("Reached checkpoint 5, saving session image")
-  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))
+  if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   if (!is.null(quit_session)) if (quit_session=="checkpoint_5") quit(save="no")
 } 
 # else if (resume == "checkpoint_5") {
@@ -3109,7 +3109,7 @@ if (resume == "checkpoint_5") {
   ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
   ########################################################################### 
   
-  saveRDS(object = list_u_meta, file=sprintf("%s%s_%s_list_list_module_u.RDS", RObjects_dir, data_prefix, run_prefix))
+  saveRDS(object = list_u_meta, file=sprintf("%s%s_%s_list_list_module_u.RDS", RObjects_dir, data_prefix, run_prefix), compress = "gzip")
   
   ##################### WRITE PARAMETERS AND STATS TO FILES ################
   ##########################################################################
@@ -3183,7 +3183,7 @@ if (resume == "checkpoint_5") {
   
   message("Saving final session image")
   
-  save.image(file=sprintf("%s%s_%s_final_session_image.RData", RObjects_dir, data_prefix, run_prefix))
+  save.image(file=sprintf("%s%s_%s_final_session_image.RData", RObjects_dir, data_prefix, run_prefix), compress = "gzip")
   
   checkpoint_paths <- dir(path = scratch_dir, pattern = sprintf("%s_%s_checkpoint_?_image", data_prefix, run_prefix), full.names = T)
   if (length(checkpoint_paths)>0) for (ch in checkpoint_paths) if (file.exists(ch)) file.remove(ch)
