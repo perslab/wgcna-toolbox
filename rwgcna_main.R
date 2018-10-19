@@ -60,7 +60,7 @@ option_list <- list(
   make_option("--corFnc", type="character", default="bicor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). [default %default]"), 
   make_option("--networkType", type="character", default = "signed",
-              help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); 'signed hybrid' sets negative correlations to zero. [default %default]"),
+              help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); ''c('signed hybrid')'' (quoted vector) sets negative correlations to zero. [default %default]"),
   make_option("--hclustMethod", type="character", default="average",
               help = "Hierarchical clustering agglomeration method. One of 'ward.D', 'ward.D2', 'single', 'complete', 'average' (= UPGMA), 'mcquitty' (= WPGMA), 'median' (= WPGMC) or 'centroid' (= UPGMC). See hclust() documentation for further information. [default %default]"),
   make_option("--minClusterSize", type="character", default="15L",
@@ -96,99 +96,58 @@ option_list <- list(
 )
 
 ######################################################################
-################# TEST PARAMS FOR MANUAL RUNS ########################
-######################################################################
-
-if (FALSE) { 
-  seurat_path = "/projects/jonatan/tmp-maca/RObjects/maca_seurat_pancreas.Rdata"
-  project_dir = "/projects/jonatan/tools/tmp-rwgcna-tests/maca-pancreas-test/"
-  data_prefix = "maca_pancr"
-  data_type = "sc"
-  run_prefix =  "test_corr_f_v"
-  autosave = T
-  resume = NULL 
-  quit_session = NULL
-  metadata_subset_col = "cell_ontology_class"
-  metadata_corr_col = NULL 
-  metadata_corr_filter_vals = NULL
-  use.imputed = F
-  regress_out = c("nUMI", "percent.mito", "percent.ribo")
-  min.cells = 10
-  genes_remove_dir = NULL
-  genes_use = "PCA"
-  pca_genes = 'all'
-  corFnc = "cor"
-  networkType = "signed"
-  hclustMethod = "average"
-  minClusterSize = c(20)
-  deepSplit = c(3)
-  moduleMergeCutHeight = c(0.2)
-  pamStage = c(TRUE)
-  kM_reassign = T
-  kM_signif_filter = T
-  jackstrawnReplicate = 0
-  TOMnReplicate = 10
-  fuzzyModMembership = "kIM"
-  scale_MEs_by_kIMs = F
-  PPI_filter = T
-  data_organism = "mmusculus"
-  magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
-  gwas_filter_traits <- c("t1d", "BMI", "t2d")
-  n_cores = 7
-}
-
-if (F) {
-  seurat_path = "/projects/jonatan/archs4_lachmann_2018/RObjects/180831_mouse_hypothalamus_archs4_seurat.RDS.gz"
-  project_dir = "/projects/jonatan/archs4_lachmann_2018/"
-  data_prefix = "archs4"
-  data_type = "bulk"
-  run_prefix =  "all_1"
-  autosave = T
-  resume = NULL 
-  quit_session = NULL
-  metadata_subset_col = "cluster"
-  metadata_corr_col = NULL 
-  metadata_corr_filter_vals = NULL
-  use.imputed = F
-  regress_out = NULL#c("nUMI", "percent.mito", "percent.ribo")
-  min.cells = 10
-  genes_remove_dir = NULL
-  genes_use = "PCA"
-  pca_genes = 'var.genes'
-  corFnc = "cor"
-  networkType = "signed"
-  hclustMethod = "average"
-  minClusterSize = c(20)
-  deepSplit = c(1,2,3)
-  moduleMergeCutHeight = c(0.2)
-  pamStage = c(TRUE)
-  kM_reassign = T
-  kM_signif_filter = T
-  jackstrawnReplicate = 0
-  TOMnReplicate = 100
-  fuzzyModMembership = "kIM"
-  scale_MEs_by_kIMs = F
-  PPI_filter = T
-  data_organism = "mmusculus"
-  magma_gwas_dir = "/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/"
-  gwas_filter_traits <- NULL
-  n_cores = 10
-}
-
-######################################################################
 ############################## PACKAGES #############################
 ######################################################################
 
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(Biobase))
-suppressPackageStartupMessages(library(Matrix))
-suppressPackageStartupMessages(library(Seurat))
-suppressPackageStartupMessages(library(parallel))
-suppressPackageStartupMessages(library(reshape))
-suppressPackageStartupMessages(library(reshape2))
-suppressPackageStartupMessages(library(WGCNA)) 
+# install and require packages using a function (allows for automation)
+ipak <- function(pkgs){
+  new.pkgs <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(new.pkgs)) {
+    sapply(new.pkgs, function(pkg) {
+      tryCatch({
+        install.packages(pkg, dependencies = TRUE)
+      }, warning = function(war) {
+        tryCatch({
+          source("https://bioconductor.org/biocLite.R")
+          biocLite(pkg, suppressUpdates = T)
+        }, error = function(err1) {
+          warning(paste0(pkg, " encountered the error: ", err1))
+          dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+          ipak(dependency)
+        })
+      } ,
+      error = function(err)
+      {
+        dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+        ipak(dependency)
+      })
+    })
+  }
+  suppressPackageStartupMessages(sapply(pkgs, require, character.only = TRUE))
+  failed <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(failed)>0) warning(paste0(paste0(failed, collapse = " "), " failed to install"))
+}
+
+pkgs <- c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA")
+
+ipak(pkgs)
+
+# suppressPackageStartupMessages(library(dplyr))
+# suppressPackageStartupMessages(library(Biobase))
+# suppressPackageStartupMessages(library(Matrix))
+# suppressPackageStartupMessages(library(Seurat))
+# suppressPackageStartupMessages(library(parallel))
+# suppressPackageStartupMessages(library(reshape))
+# suppressPackageStartupMessages(library(reshape2))
+# suppressPackageStartupMessages(library(WGCNA)) 
 
 message("Packages loaded")
+
+######################################################################
+########################## SET SCRATCH DIR ###########################
+######################################################################
+
+scratch_dir = "/scratch/tmp-wgcna/"
 
 ######################################################################
 ################### GET COMMAND LINE OPTIONS #########################
@@ -199,19 +158,25 @@ message("Packages loaded")
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
+resume <- opt$resume
+
+data_prefix <- opt$data_prefix 
+
+run_prefix <- opt$run_prefix
+
+# load saved image?
+if (!is.null(resume)) {
+    tryCatch({load(file=sprintf("%s%s_%s_%s_image.RData", scratch_dir, data_prefix, run_prefix, resume))},
+             error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+}
+
 seurat_path <- opt$seurat_path 
 
 project_dir <- opt$project_dir
 
-data_prefix <- opt$data_prefix 
-
 data_type = opt$data_type
 
-run_prefix <- opt$run_prefix
-
 autosave <- opt$autosave
-
-resume <- opt$resume
 
 quit_session <- opt$quit_session
 
@@ -239,6 +204,9 @@ pca_genes <- opt$pca_genes
 corFnc <- opt$corFnc 
 
 networkType <- opt$networkType
+if (grepl("hybrid", networkType)) {
+  networkType <- eval(parse(text=opt$networkType))
+}
 
 hclustMethod <- opt$hclustMethod
 
@@ -304,8 +272,6 @@ if (!file.exists(RObjects_dir)) dir.create(RObjects_dir)
 log_dir = paste0(project_dir,"log/")
 if (!file.exists(log_dir)) dir.create(log_dir)
 
-scratch_dir = "/scratch/tmp-wgcna/"
-
 LocationOfThisScript = function() # Function LocationOfThisScript returns the location of this .R script (may be needed to source other files in same dir)
 {
   this.file = NULL
@@ -362,6 +328,8 @@ if (data_organism == "mmusculus") {
 }
 
 try(disableWGCNAThreads())
+
+options(stringsAsFactors = F)
 
 if (is.null(resume)) {
   
@@ -501,7 +469,7 @@ if (is.null(resume)) {
       
     } else if (!is.null(data_organism)) {
       
-      message("Mapping genes from hgcn to ensembl")
+      message("Mapping genes from hgnc to ensembl")
       
       if (data_organism == "mmusculus") { 
         
@@ -612,6 +580,40 @@ if (is.null(resume)) {
   }
 
   ######################################################################
+  ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
+  ######################################################################
+  
+  #if (FALSE) {
+    message("Normalizing, scaling and saving full expression matrix")
+    
+   # Normalise
+    seurat_obj <- NormalizeData(object = seurat_obj, display.progress = T)
+  
+   # Scale and regress out confounders
+    vars.to.regress = if (!is.null(regress_out)) regress_out[regress_out %in% names(seurat_obj@meta.data)] else NULL
+  
+    seurat_obj <- ScaleData(object = seurat_obj,
+                           vars.to.regress = vars.to.regress,
+                           model.use="linear",
+                           do.par=T,
+                           num.cores = min(n_cores, detectCores()-1),
+                           do.scale=T,
+                           do.center=T,
+                           display.progress = T)
+  
+   # Make sure we close socket workers
+    invisible(gc()); invisible(R.utils::gcDLLs())
+  
+    scale_data <- seurat_obj@scale.data
+    #ident <- seurat_obj@ident
+  
+   # Save scale and regressed whole expression matrix with ensembl rownames for later use
+    save(scale_data, file = sprintf("%s%s_%s_scale_regr_data_ensembl.RData", scratch_dir, data_prefix, run_prefix))
+    #save(ident, file = sprintf("%s%s_%s_ident.RData", scratch_dir, data_prefix, run_prefix))
+    rm(scale_data)
+   
+  #} 
+  ######################################################################
   ######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
   ######################################################################
   
@@ -641,6 +643,7 @@ if (is.null(resume)) {
     } else metadata <- NULL
   } else metadata <- NULL
   
+
   ######################################################################
   ######## DO SEURAT PROCESSING ON SUBSETTED EXPRESSION MATRICES #######
   ######################################################################
@@ -757,7 +760,8 @@ if (is.null(resume)) {
               do.print = F,
               seed.use = randomSeed,
               maxit = maxit, # set to 500 as default
-              fastpath = fastpath) }, 
+              fastpath = fastpath, 
+              verbose=T) }, 
             error = function(err) {
               message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
               message("Trying RunPCA with var.genes, half the number of components, double max iterations and fastpath == F")
@@ -783,7 +787,8 @@ if (is.null(resume)) {
                  do.print = F,
                  seed.use = randomSeed,
                  maxit = maxit*2, # set to 500 as default
-                 fastpath = F)
+                 fastpath = F,
+                 verbose=T)
     
                 }, error = function(err1) {
                   message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
@@ -861,19 +866,20 @@ if (is.null(resume)) {
   if (autosave==T) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_1") quit(save="no")
   
-} else if (!is.null(resume)) {
-  
-  if (resume == "checkpoint_1") {
-    
-    tryCatch({load((file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix)))},
-             error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
-    
-    source(file = paste0(current.dir, "rwgcna_params.R"))
-    source(file = paste0(current.dir, "rwgcna_functions.R"))
-    options(stringsAsFactors = F)
-    disableWGCNAThreads() 
-  }
-}
+} 
+# else if (!is.null(resume)) {
+#   
+#   if (resume == "checkpoint_1") {
+#     
+#     tryCatch({load((file=sprintf("%s%s_%s_checkpoint_1_image.RData", scratch_dir, data_prefix, run_prefix)))},
+#              error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+#     
+#     source(file = paste0(current.dir, "rwgcna_params.R"))
+#     source(file = paste0(current.dir, "rwgcna_functions.R"))
+#     options(stringsAsFactors = F)
+#     disableWGCNAThreads() 
+#   }
+# }
 
 if (resume == "checkpoint_1") {
   
@@ -886,15 +892,19 @@ if (resume == "checkpoint_1") {
   
   # Free up DLLs
   invisible(R.utils::gcDLLs())
-  # avoid multithreading in WGCNA
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(Biobase))
-  suppressPackageStartupMessages(library(Matrix))
-  #suppressPackageStartupMessages(library(Seurat))
-  suppressPackageStartupMessages(library(parallel))
-  suppressPackageStartupMessages(library(reshape))
-  suppressPackageStartupMessages(library(reshape2))
-  suppressPackageStartupMessages(library(WGCNA)) 
+  
+  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
+  
+  ipak(pkgs)
+  
+  # suppressPackageStartupMessages(library(dplyr))
+  # suppressPackageStartupMessages(library(Biobase))
+  # suppressPackageStartupMessages(library(Matrix))
+  # #suppressPackageStartupMessages(library(Seurat))
+  # suppressPackageStartupMessages(library(parallel))
+  # suppressPackageStartupMessages(library(reshape))
+  # suppressPackageStartupMessages(library(reshape2))
+  # suppressPackageStartupMessages(library(WGCNA)) 
   disableWGCNAThreads()
   
   ######################################################################
@@ -1044,11 +1054,12 @@ if (resume == "checkpoint_1") {
     SIMPLIFY=F,
     .scheduling = c("dynamic"))
  
+    stopCluster(cl)
     # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
-    list_goodGenesTOM_idx <- parLapplyLB(cl,list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
+    list_goodGenesTOM_idx <- lapply(list_consensus, function(x) as.logical(x$goodSamplesAndGenes$goodGenes))
     
     # Use the goodGenesTOM_idx to filter the datExpr matrices
-    list_datExpr_gg <- clusterMap(cl, function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F,.scheduling = c("dynamic"))
+    list_datExpr_gg <- mapply(function(x,y) x[,y], x=list_datExpr, y=list_goodGenesTOM_idx, SIMPLIFY=F)
     
   } else if (TOMnReplicate==0) {
     
@@ -1093,7 +1104,8 @@ if (resume == "checkpoint_1") {
   
   rm(list_datExpr)
   # Convert TOM to distance matrix
-
+  
+  cl <- makeCluster(spec=n_cores, type="FORK")
   list_dissTOM <- parLapplyLB(cl, sNames, function(x) {
     consTomDS <- load_obj(f = sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, x)) # Load the consensus TOM generated by blockwiseConsensusModules
   dissTOM <- 1-as.dist(consTomDS) # Convert proximity to distance
@@ -1134,17 +1146,18 @@ if (resume == "checkpoint_1") {
   if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_2") quit(save="no")
   
-} else if (!is.null(resume)) {
-  if (resume == "checkpoint_2") {
-    
-    tryCatch({load((file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix)))},
-             error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
-    
-    source(file = paste0(current.dir, "rwgcna_params.R"))
-    source(file = paste0(current.dir, "rwgcna_functions.R"))
-    options(stringsAsFactors = F)
-  }
-}
+} 
+# else if (!is.null(resume)) {
+#   if (resume == "checkpoint_2") {
+#     
+#     tryCatch({load((file=sprintf("%s%s_%s_checkpoint_2_image.RData", scratch_dir, data_prefix, run_prefix)))},
+#              error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+#     
+#     source(file = paste0(current.dir, "rwgcna_params.R"))
+#     source(file = paste0(current.dir, "rwgcna_functions.R"))
+#     options(stringsAsFactors = F)
+#   }
+# }
 
 if (resume == "checkpoint_2") {
   
@@ -1155,15 +1168,17 @@ if (resume == "checkpoint_2") {
   # Free up DLLs
   invisible(R.utils::gcDLLs())
   
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(Biobase))
-  suppressPackageStartupMessages(library(Matrix))
-  #suppressPackageStartupMessages(library(Seurat))
-
-  suppressPackageStartupMessages(library(parallel))
-  suppressPackageStartupMessages(library(reshape))
-  suppressPackageStartupMessages(library(reshape2))
-  suppressPackageStartupMessages(library(WGCNA)) 
+  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
+  
+  ipak(pkgs)
+  
+  # suppressPackageStartupMessages(library(dplyr))
+  # suppressPackageStartupMessages(library(Biobase))
+  # suppressPackageStartupMessages(library(Matrix))
+  # suppressPackageStartupMessages(library(parallel))
+  # suppressPackageStartupMessages(library(reshape))
+  # suppressPackageStartupMessages(library(reshape2))
+  # suppressPackageStartupMessages(library(WGCNA)) 
   
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
@@ -1831,16 +1846,17 @@ if (resume == "checkpoint_2") {
   message("Reached checkpoint 3, saving session image")
   if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_3") quit(save="no")
-} else if (resume == "checkpoint_3") {
-  
-  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))},
-           error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
-  
-  # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = paste0(current.dir, "rwgcna_params.R"))
-  source(file = paste0(current.dir, "rwgcna_functions.R"))
-  options(stringsAsFactors = F)
-}  
+} 
+# else if (resume == "checkpoint_3") {
+#   
+#   tryCatch({load(file=sprintf("%s%s_%s_checkpoint_3_image.RData", scratch_dir, data_prefix, run_prefix))},
+#            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+#   
+#   # Load parameter values and utility functions anew (in case a bug was fixed)
+#   source(file = paste0(current.dir, "rwgcna_params.R"))
+#   source(file = paste0(current.dir, "rwgcna_functions.R"))
+#   options(stringsAsFactors = F)
+# }  
   
 if (resume == "checkpoint_3") {
   
@@ -1852,13 +1868,18 @@ if (resume == "checkpoint_3") {
   #try(detach("package:STRINGdb", unload=TRUE))
   invisible(R.utils::gcDLLs())
   # Load packages
-  suppressPackageStartupMessages(library(STRINGdb))
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(Biobase))
-  suppressPackageStartupMessages(library(Matrix))
-  suppressPackageStartupMessages(library(reshape))
-  suppressPackageStartupMessages(library(reshape2))
-  suppressPackageStartupMessages(library(parallel))
+  
+  pkgs <- c("STRINGdb", "dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2")
+  
+  ipak(pkgs)
+  
+  # suppressPackageStartupMessages(library(STRINGdb))
+  # suppressPackageStartupMessages(library(dplyr))
+  # suppressPackageStartupMessages(library(Biobase))
+  # suppressPackageStartupMessages(library(Matrix))
+  # suppressPackageStartupMessages(library(reshape))
+  # suppressPackageStartupMessages(library(reshape2))
+  # suppressPackageStartupMessages(library(parallel))
   
 
   ######################################################################
@@ -1941,16 +1962,17 @@ if (resume == "checkpoint_3") {
   if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_4") quit(save="no")
   
-} else if (resume == "checkpoint_4") {
-  
-  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))},
-           error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
-  
-  # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = paste0(current.dir, "rwgcna_params.R"))
-  source(file = paste0(current.dir, "rwgcna_functions.R"))
-  options(stringsAsFactors = F)
-}
+} 
+# else if (resume == "checkpoint_4") {
+#   
+#   tryCatch({load(file=sprintf("%s%s_%s_checkpoint_4_image.RData", scratch_dir, data_prefix, run_prefix))},
+#            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+#   
+#   # Load parameter values and utility functions anew (in case a bug was fixed)
+#   source(file = paste0(current.dir, "rwgcna_params.R"))
+#   source(file = paste0(current.dir, "rwgcna_functions.R"))
+#   options(stringsAsFactors = F)
+# }
 
 if (resume == "checkpoint_4") {
   
@@ -1958,16 +1980,20 @@ if (resume == "checkpoint_4") {
   ######################### LOAD PACKAGES ##############################
   ######################################################################
   
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(Biobase))
-  suppressPackageStartupMessages(library(Matrix))
-  suppressPackageStartupMessages(library(Seurat))
-  suppressPackageStartupMessages(library(parallel))
-  suppressPackageStartupMessages(library(reshape))
-  suppressPackageStartupMessages(library(reshape2))
-  suppressPackageStartupMessages(library(WGCNA)) 
-  suppressPackageStartupMessages(library(liger))
-  suppressPackageStartupMessages(library(boot))
+  pkgs <- c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA", "liger", "boot")
+  # TODO: do we actually use Seurat? 
+  ipak(pkgs)
+  
+  # suppressPackageStartupMessages(library(dplyr))
+  # suppressPackageStartupMessages(library(Biobase))
+  # suppressPackageStartupMessages(library(Matrix))
+  # suppressPackageStartupMessages(library(Seurat))
+  # suppressPackageStartupMessages(library(parallel))
+  # suppressPackageStartupMessages(library(reshape))
+  # suppressPackageStartupMessages(library(reshape2))
+  # suppressPackageStartupMessages(library(WGCNA)) 
+  # suppressPackageStartupMessages(library(liger))
+  # suppressPackageStartupMessages(library(boot))
   
   ######################################################################
   ################ ORDER PARAMETER SETS BY PPI ENRICHMENT ##############
@@ -2232,18 +2258,24 @@ if (resume == "checkpoint_4") {
     list_MEs_PPI <- NULL
     
     # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
-    list_u_PPI <- clusterMap(cl, function(kMs, colors) lapply(colnames(kMs), function(module) {
+    list_u_PPI <- clusterMap(cl, function(kMs, colors) {
+      
+      u <- lapply(colnames(kMs), function(module) {
                             out <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
                             names(out) = rownames(kMs)[colors==module]
                             return(out)
-                            }),
-                         kMs = list_kMs_PPI,
-                         colors = list_colors_PPI_uniq,
-                         SIMPLIFY=F,
-                         .scheduling = c("dynamic"))
+                            })
+      names(u) <- colnames(kMs)
+      return(u)
+      },
+     kMs = list_kMs_PPI,
+     colors = list_colors_PPI_uniq,
+     SIMPLIFY=F,
+     .scheduling = c("dynamic"))
                        
     stopCluster(cl)
-    
+
+      
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
@@ -2822,7 +2854,7 @@ if (resume == "checkpoint_4") {
   ##################### COMPUTE CELL x EIGENGENE MATRIX ################
   ######################################################################
   
-  if (FALSE) { 
+  #if (FALSE) { 
     message("Computing all cell embeddings on all modules, across celltypes")
     
     scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_scale_regr_data_ensembl"), full.names = T)
@@ -2865,7 +2897,7 @@ if (resume == "checkpoint_4") {
     
     if (scale_MEs_by_kIMs) rm(list_dissTOM_meta)
     
-  }
+  #}
   
   ######################################################################
   ############################# CHECKPOINT #############################
@@ -2875,16 +2907,17 @@ if (resume == "checkpoint_4") {
   message("Reached checkpoint 5, saving session image")
   if (autosave==T) save.image( file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))
   if (!is.null(quit_session)) if (quit_session=="checkpoint_5") quit(save="no")
-} else if (resume == "checkpoint_5") {
-  
-  tryCatch({load(file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))},
-           error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
-  
-  # Load parameter values and utility functions anew (in case a bug was fixed)
-  source(file = paste0(current.dir, "rwgcna_params.R"))
-  source(file = paste0(current.dir, "rwgcna_functions.R"))
-  options(stringsAsFactors = F)
-}  
+} 
+# else if (resume == "checkpoint_5") {
+#   
+#   tryCatch({load(file=sprintf("%s%s_%s_checkpoint_5_image.RData", scratch_dir, data_prefix, run_prefix))},
+#            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+#   
+#   # Load parameter values and utility functions anew (in case a bug was fixed)
+#   source(file = paste0(current.dir, "rwgcna_params.R"))
+#   source(file = paste0(current.dir, "rwgcna_functions.R"))
+#   options(stringsAsFactors = F)
+# }  
 
 if (resume == "checkpoint_5") {
   
@@ -2894,17 +2927,21 @@ if (resume == "checkpoint_5") {
 
   invisible(R.utils::gcDLLs())
 
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(Biobase))
-  suppressPackageStartupMessages(library(Matrix))
-  suppressPackageStartupMessages(library(parallel))
-  suppressPackageStartupMessages(library(reshape))
-  suppressPackageStartupMessages(library(reshape2))
+  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2")
+  # TODO: do we actually use Seurat? 
+  ipak(pkgs)
+  
+  # suppressPackageStartupMessages(library(dplyr))
+  # suppressPackageStartupMessages(library(Biobase))
+  # suppressPackageStartupMessages(library(Matrix))
+  # suppressPackageStartupMessages(library(parallel))
+  # suppressPackageStartupMessages(library(reshape))
+  # suppressPackageStartupMessages(library(reshape2))
   
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
-  # retrieve gene hgcn symbols in mapping file
+  # retrieve gene hgnc symbols in mapping file
   mapping <- read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F)
   
   cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "write_outputs.txt"))
@@ -2959,7 +2996,7 @@ if (resume == "checkpoint_5") {
   hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F)
   
   df_meta_module_genes <- data.frame(cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
-  colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgcn", paste0("p", fuzzyModMembership))
+  colnames(df_meta_module_genes) <- c("cell_cluster", "module", "ensembl", "hgnc", paste0("p", fuzzyModMembership))
 
   ##########################################################################
   ############################# OUTPUT TABLES ##############################
@@ -3024,7 +3061,7 @@ if (resume == "checkpoint_5") {
   # Prepare dfs with a gene column followed by kMEs / kIMs 
   list_kMs_meta_out <- parLapplyLB(cl, list_kMs_meta, function(x) cbind(genes=rownames(x), x))
   rownames(list_kMs_meta) <- NULL
-  invisible(clusterMap(cl, function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_%s.csv", tables_dir, data_prefix, run_prefix, y, fuzzyModMembership), 
+  invisible(clusterMap(cl, function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_kMs.csv", tables_dir, data_prefix, run_prefix, y), 
                                                    row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F, .scheduling = c("dynamic")))
   
   ############### OUTPUT MENDELIAN/RARE VARIANT RESULTS #####################
@@ -3066,9 +3103,9 @@ if (resume == "checkpoint_5") {
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  if (FALSE) {
+  #if (FALSE) {
     invisible(write.csv(cellModEmbed_mat, file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=T, quote = F))
-  }
+  #}
   ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
   ########################################################################### 
   

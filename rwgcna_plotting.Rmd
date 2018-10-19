@@ -23,9 +23,9 @@ output:
 ```{r}
 options(stringsAsFactors = F)
 
-project_dir = "/projects/jonatan/tmp-maca/"
-data_prefix = "maca"
-#run_prefix = "Immune_Class_1"
+dir_project = "/projects/jonatan/tmp-epilepsy/"
+prefix_data = "EP_UPF"
+prefix_run = "1"
 
 p.val.threshold = 5e-2
 flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
@@ -33,31 +33,11 @@ flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 ```
 
 ```{r}
-tables_dir <- paste0(project_dir, "tables/") 
-log_dir <- paste0(project_dir, "log/") 
-RObjects_dir <- paste0(project_dir, "RObjects/") 
-plots_dir <- paste0(project_dir, "plots/")
-scratch_dir <- "/scratch/tmp-wgcna/"
-```
-
-## Load libraries 
-
-```{r}
-
-suppressPackageStartupMessages(library(reshape))
-suppressPackageStartupMessages(library(reshape2))
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(WGCNA))
-suppressPackageStartupMessages(library(Seurat))
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(ComplexHeatmap))
-suppressPackageStartupMessages(library(corrplot))
-suppressPackageStartupMessages(library(RColorBrewer))
-suppressPackageStartupMessages(library(parallel))
-
-
-#suppressPackageStartupMessages(library(clusterProfiler))
-
+dir_tables <- paste0(dir_project, "tables/") 
+dir_log <- paste0(dir_project, "log/") 
+dir_RObjects <- paste0(dir_project, "RObjects/") 
+dir_plots <- paste0(dir_project, "plots/")
+dir_scratch <- "/scratch/tmp-wgcna/"
 ```
 
 ## Load functions and constants
@@ -65,24 +45,36 @@ suppressPackageStartupMessages(library(parallel))
 ```{r}
 networkType="signed" # set by hand to what it was for run - needed for rwgcna_params.R
 corFnc = "cor" # set by hand to what it was for run - needed for rwgcna_params.R
-source(file =  "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_params.R")
-source(file = "/projects/jonatan/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
+source(file =  "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/rwgcna_params.R")
+source(file = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/rwgcna_functions.R")
+source(file="/projects/jonatan/tools/functions-src/utility_functions.R")
+
+```
+
+## Load libraries 
+
+```{r}
+
+ipak("dplyr", "WGCNA", "Seurat", "ggplot2", "reshape", "reshape2", "parallel") # ComplexHeatmap? corrplot? RcolorBrewer?
+
 ```
 
 # Load session image
 
 ```{r}
-session_image_path <- dir(pattern = "final_session_image", path = RObjects_dir, full.names = T)
+session_image_path <- dir(pattern = paste0(data_prefix, "_", run_prefix,"_final_session_image"), path = dir_RObjects, full.names = T)
 load(session_image_path)
 ```
 
 ## Retrieve run stats
 
 ```{r}
-params_run <- read.table(sprintf("%s%s_params_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
-sumstats_run <- read.table(sprintf("%s%s_sumstats_run.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
-sumstats_celltype <- read.table(sprintf("%s%s_sumstats_celltype.tab", log_dir, data_prefix), sep = "\t", quote = "", header=T)
-
+params_path <- dir(path=dir_log, pattern = paste0(prefix_data,"_params_run\\.tab"), full.names = T)
+params_run <- read.table(params_path, sep = "\t", quote = "", header=T)
+sumstats_run_path <- dir(path=dir_log, pattern = paste0(prefix_data,"_sumstats_run\\.tab"), full.names = T)
+sumstats_run <- read.table(sumstats_run_path, sep = "\t", quote = "", header=T)
+sumstats_celltype_path <- dir(path=dir_log, pattern = paste0(prefix_data,"_sumstats_celltype\\.tab"), full.names = T)
+sumstats_celltype <- read.table(sumstats_celltype_path, sep = "\t", quote = "", header=T)
 
 ```
 
@@ -173,9 +165,9 @@ invisible(mapply(function(a,b,c) plotDendro_for_vec(list_colors=a,
 
 ```{r}
 
-vec_magma.fdr.log.path <- dir(path = tables_dir, pattern = "magma.fdr.log", full.names = T, recursive = F)
+vec_magma.fdr.log.path <- dir(path = dir_tables, pattern = "magma.fdr.log", full.names = T, recursive = F)
 list_magma.fdr.log <- list()
-vec_run_prefix <- sapply(vec_magma.fdr.log.path, function(x) gsub(paste0(tables_dir, "/", "|", data_prefix, "_","|_magma.fdr.log.csv"), "", x)) 
+vec_run_prefix <- sapply(vec_magma.fdr.log.path, function(x) gsub(paste0(dir_tables, "/", "|", data_prefix, "_","|_magma.fdr.log.csv"), "", x)) 
 names(vec_magma.fdr.log.path) <- vec_run_prefix
 
 cl <- makeCluster(spec = 10, type = "FORK")
@@ -192,7 +184,7 @@ invisible(parLapply(cl, vec_run_prefix, function(run_pref) {
       geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
       theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
 
-  ggsave(p, filename = paste0(plots_dir, data_prefix, "_", run_pref, "_magma.fdr.log.pdf") ,width=45,height=12)
+  ggsave(p, filename = paste0(dir_plots, data_prefix, "_", run_pref, "_magma.fdr.log.pdf") ,width=45,height=12)
 
   magma.fdr.log.sig <- magma.fdr.log[, grep("module|celltype|BMI|scz|t1d|t2d", colnames(magma.fdr.log), ignore.case = T)]
   magma.fdr.log.sig <- magma.fdr.log.sig[apply(magma.fdr.log.sig[,-grep("module|celltype", colnames(magma.fdr.log.sig))], FUN = function(y) max(y) > -log10(p.val.threshold), MARGIN=1),]
@@ -205,7 +197,7 @@ invisible(parLapply(cl, vec_run_prefix, function(run_pref) {
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-  ggsave(p, filename = paste0(plots_dir, data_prefix, "_", run_pref,"_magma.fdr.log.signif.pdf") ,width=45,height=12)
+  ggsave(p, filename = paste0(dir_plots, data_prefix, "_", run_pref,"_magma.fdr.log.signif.pdf") ,width=45,height=12)
 
 }))
 
@@ -219,9 +211,9 @@ stopCluster(cl)
 
 # TODO: Update for GSEA, doesn't work at present
 
-vec_rareVariants.path <- dir(path = tables_dir, pattern = "mendelian_rareVariants_GSEA.csv", full.names = T, recursive = F)
+vec_rareVariants.path <- dir(path = dir_tables, pattern = "mendelian_rareVariants_GSEA.csv", full.names = T, recursive = F)
 list_rareVariants <- lapply(vec_rareVariants.path, function(x) read.csv(file=x, header=T, quote=""))
-vec_run_prefix <- sapply(vec_rareVariants.path, function(x) gsub(paste0(tables_dir, "/", "|", data_prefix, "_","|_mendelian_rareVariants_GSEA.csv"), "", x)) 
+vec_run_prefix <- sapply(vec_rareVariants.path, function(x) gsub(paste0(dir_tables, "/", "|", data_prefix, "_","|_mendelian_rareVariants_GSEA.csv"), "", x)) 
 # TODO: Error in FUN(X[[i]], ...) : object 'variable' not found
 for (run_pref in vec_run_prefix) {
 
@@ -233,7 +225,7 @@ for (run_pref in vec_run_prefix) {
       geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
       theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
     
-  ggsave(p1, filename = paste0(plots_dir, data_prefix, "_", run_pref, "_rareVariants_mendelian.pdf") ,width=45,height=12)
+  ggsave(p1, filename = paste0(dir_plots, data_prefix, "_", run_pref, "_rareVariants_mendelian.pdf") ,width=45,height=12)
 }
 
 # TODO only significant
@@ -246,7 +238,7 @@ p2=ggplot(melt(dat2, value.name="value"), aes(x=variable, y=value, fill = module
     geom_abline(intercept=-log10(0.05),slope=0,lty=2) + labs(x="",y="log10(P.fdr)") +
     theme(axis.text.x=element_text(angle=50, size=10, hjust=1))
   
-ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_", flag_date, ".pdf") ,width=45,height=12)
+ggsave(p2, filename = paste0(dir_plots, data_prefix, "_", "_rareVariants_signif_", flag_date, ".pdf") ,width=45,height=12)
 
 ```
 
@@ -262,11 +254,11 @@ ggsave(p2, filename = paste0(plots_dir, data_prefix, "_", "_rareVariants_signif_
 fuzzyModMembership ="kME"
 
 # Find cell module embedding matrix 
-vec_cellModEmbed_path <- dir(path = tables_dir, pattern=paste0(fuzzyModMembership, "_cellModEmbed"), full.names = T, ignore.case = T)
-vec_run_prefix <- sapply(vec_cellModEmbed_path, function(x) gsub(paste0(tables_dir, "/", "|", data_prefix, "_","|_", fuzzyModMembership, "_cellModEmbed.csv"), "", x)) 
+vec_cellModEmbed_path <- dir(path = dir_tables, pattern=paste0(fuzzyModMembership, "_cellModEmbed"), full.names = T, ignore.case = T)
+vec_run_prefix <- sapply(vec_cellModEmbed_path, function(x) gsub(paste0(dir_tables, "/", "|", data_prefix, "_","|_", fuzzyModMembership, "_cellModEmbed.csv"), "", x)) 
 list_cellModEmbed_mat <- lapply(vec_cellModEmbed_path, function(x) read.csv(file = x, header = T, quote = ""))
 names(list_cellModEmbed_mat) <- vec_run_prefix
-vec_ident_path <- sapply(vec_run_prefix, function(x) dir(path=scratch_dir, pattern=paste0(data_prefix, "_", x, "_ident"), full.names=T))
+vec_ident_path <- sapply(vec_run_prefix, function(x) dir(path=dir_scratch, pattern=paste0(data_prefix, "_", x, "_ident"), full.names=T))
 
 cl <- makeCluster(spec = 10, type = "FORK")
 
@@ -279,9 +271,9 @@ invisible(parLapply(cl, vec_run_prefix, function(i) {
   cellModEmbed_mat[,1] <- NULL
   
   #colnames(cellModEmbed_mat) <- gsub("^X", "", colnames(cellModEmbed_mat), ignore.case = F)
-  #scale_data <- load_obj(f=sprintf("%s%s_scale_regr_data_ensembl_%s.RData", scratch_dir, data_prefix, flag_date))
+  #scale_data <- load_obj(f=sprintf("%s%s_scale_regr_data_ensembl_%s.RData", dir_scratch, data_prefix, flag_date))
   
-  # scale_data_path <- dir(path = scratch_dir, pattern = "scale_regr_data_ensembl", full.names = T)
+  # scale_data_path <- dir(path = dir_scratch, pattern = "scale_regr_data_ensembl", full.names = T)
   # scale_data <- load_obj(scale_data_path) 
   
   #seurat_obj <- SetAllIdent(seurat_obj, id = "ClusterName")
@@ -316,7 +308,7 @@ invisible(parLapply(cl, vec_run_prefix, function(i) {
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellOrder.pdf", plots_dir, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellOrder.pdf", dir_plots, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
   draw(ht1+htra)
   dev.off()
     
@@ -332,7 +324,7 @@ invisible(parLapply(cl, vec_run_prefix, function(i) {
                show_column_names = T,
                heatmap_legend_param = list(title = "Expression"), use_raster = T)
                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellOrder_sqrt.pdf", plots_dir, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellOrder_sqrt.pdf", dir_plots, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
   draw(ht2+htra)
   dev.off()
     
@@ -349,7 +341,7 @@ invisible(parLapply(cl, vec_run_prefix, function(i) {
                  show_column_names = T,
                  heatmap_legend_param = list(title = "Expression"), use_raster = T)
                  #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellCluster.pdf", plots_dir, data_prefix, run_prefix, fuzzyModMembership), h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+  pdf(sprintf("%s%s_%s_%s_cellModEmbed_cellCluster.pdf", dir_plots, data_prefix, run_prefix, fuzzyModMembership), h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
   draw(ht3+htra)
   dev.off()
   
@@ -365,7 +357,7 @@ invisible(parLapply(cl, vec_run_prefix, function(i) {
                  show_column_names = T,
                  heatmap_legend_param = list(title = "Expression"), use_raster = T)
                  #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-  pdf(sprintf("%s%s_%s_%s_cellModEmbed_sqrt_cellCluster.pdf", plots_dir, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+  pdf(sprintf("%s%s_%s_%s_cellModEmbed_sqrt_cellCluster.pdf", dir_plots, data_prefix, run_prefix, fuzzyModMembership),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
   draw(ht4+htra)
   dev.off()
 
@@ -386,7 +378,7 @@ stopCluster(cl)
 #                show_column_names = T,
 #                heatmap_legend_param = list(title = "Expression"), use_raster = T)
 #                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-# pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+# pdf(sprintf("%s%s_%s_cellModEmbed_RowColOrder_%s.pdf", dir_plots, data_prefix, fuzzyModMembership,  flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 # draw(ht5+htra)
 # dev.off()  
 # 
@@ -403,7 +395,7 @@ stopCluster(cl)
 #                show_column_names = T,
 #                heatmap_legend_param = list(title = "Expression"), use_raster = T)
 #                #top_annotation = eval(parse(text = paste0("list_htca_fdr", "[[", 1:length(list_htca_fdr),"]]"))))
-# pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", plots_dir, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
+# pdf(sprintf("%s%s_%s_cellModEmbed_sqrt_RowColOrder_%s.pdf", dir_plots, data_prefix, fuzzyModMembership, flag_date ),h=max(10, nrow(cellModEmbed_mat) %/% 1000), w=max(8, ncol(cellModEmbed_mat) %/% 2))
 # draw(ht6+htra)
 # dev.off()  
 ```
@@ -435,7 +427,7 @@ names(corr_clust) <- gsub(" |\\.","_",names(corr_clust))
 
 ```{r}
 
-pdf(sprintf("%s%s_mod_corr_%s.pdf", plots_dir, data_prefix, flag_date), width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8,ncol(cellModEmbed_mat) %/% 3))
+pdf(sprintf("%s%s_mod_corr_%s.pdf", dir_plots, data_prefix, flag_date), width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8,ncol(cellModEmbed_mat) %/% 3))
 
 corrplot(corr = mod_corr, 
          method = "color",
@@ -460,7 +452,7 @@ invisible(dev.off())
 
 ```{r, fig.height=10, fig.width=10}
 
-pdf(sprintf("%s%s_module_cluster_%s.pdf", plots_dir, data_prefix, flag_date),width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8, ncol(cellModEmbed_mat) %/% 3))
+pdf(sprintf("%s%s_module_cluster_%s.pdf", dir_plots, data_prefix, flag_date),width=max(8,ncol(cellModEmbed_mat) %/% 3),height=max(8, ncol(cellModEmbed_mat) %/% 3))
 
 plotDendroAndColors(dendro=corr_dendro,
                     colors = corr_clust,
@@ -475,7 +467,7 @@ dev.off()
 # Merge close modules - genelists
 
 ```{r}
-genelist_path <- dir(pattern = paste0(data_prefix, "_list_list_module_genes"), path = RObjects_dir, full.names = T)
+genelist_path <- dir(pattern = paste0(data_prefix, "_list_list_module_genes"), path = dir_RObjects, full.names = T)
 list_list_module_genes <- load_obj(f=genelist_path)
   
 ######################################################################
@@ -506,7 +498,7 @@ names(list_module_genes_merge) <- paste0(tmp_cellTypes_merge, "__", tmp_cols_mer
 
 ```{r}
 # for every module, make a colors vector where the genes are coloured, within the whole range of genes in the dissTOM
-scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_scale_regr_data_ensembl"), full.names = T)
+scale_data_path <- dir(path = dir_scratch, pattern = paste0(data_prefix, "_scale_regr_data_ensembl"), full.names = T)
 load_obj(scale_data_path) %>% t -> datExpr 
 
 allGenes <- colnames(datExpr)
@@ -524,7 +516,7 @@ invisible(gc())
   
 latentGeneType <- "ME" 
 
-cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "merged_mod_cell_embed_mat.txt"))
+cl <- makeCluster(n_cores, type="FORK", outfile = paste0(dir_log, "merged_mod_cell_embed_mat.txt"))
 
 list_cellModEmbed_mat <- clusterMap(cl, function(x,y) cellModEmbed(datExpr = datExpr, 
                                                                      colours = x,
@@ -579,7 +571,7 @@ rownames(cellModEmbed_mat) <- rownames(datExpr)
 
 if (!is.null(metadata)) {
   for (cell in names(list_mod_metadata_corr_rho)){
-    pdf(sprintf("%s%s_%s_mod_corr_metadata_%s.pdf", plots_dir, data_prefix, cell, flag_date), w=max(8, ncol(list_mod_metadata_corr_rho[[cell]]) %/% 2), h=max(8, nrow(list_mod_metadata_corr_rho[[cell]]) %/% 2)) # TODO: adapt this dynamically
+    pdf(sprintf("%s%s_%s_mod_corr_metadata_%s.pdf", dir_plots, data_prefix, cell, flag_date), w=max(8, ncol(list_mod_metadata_corr_rho[[cell]]) %/% 2), h=max(8, nrow(list_mod_metadata_corr_rho[[cell]]) %/% 2)) # TODO: adapt this dynamically
     corrplot(corr = as.matrix(list_mod_metadata_corr_rho[[cell]]),
              add = F,
              addCoef.col = "black",
@@ -606,14 +598,14 @@ if (!is.null(metadata)) {
 ### Plot t-SNE of cell clusters
 
 ```{r, fig.height=10, fig.width=10}
-#seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",RObjects_dir))
+#seurat_obj <- load_obj(f=sprintf("%sseurat_obj_ensembl.RData",dir_RObjects))
 seurat_obj <- load_obj(f=seurat_path)
 
 if (is.null(seurat_obj@dr$pca)) seurat_obj <- RunPCA(object=seurat_obj, pc.genes = var.genes, pcs.compute = 20, do.print = F)
 if (is.null(seurat_obj@dr$tsne)) seurat_obj <- RunTSNE(object = seurat_obj, reduction.use = PCA, dims.use = 1:20)
 TSNEPlot(seurat_obj, do.label = T, label.size = 8)
 #TSNEPlot(seurat_obj, colors.use = htra_colors, do.label = T)
-ggsave(paste0(plots_dir,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),w=12, h=10)
+ggsave(paste0(dir_plots,data_prefix, "_TSNE_cell_clusters_", flag_date, ".pdf"),w=12, h=10)
 
 ```
 
@@ -627,7 +619,7 @@ seurat_obj <- AddMetaData(seurat_obj, as.data.frame(metadata))
 for (feat in names(seurat_obj@meta.data)) {
   color_to_plot <- "blue4"
   FeaturePlot(seurat_obj, features.plot = feat, cols.use = c("grey85", color_to_plot))#, min.cutoff = c("q25"))
-  ggsave(paste0(plots_dir,data_prefix,"_featplot_", feat, flag_date, ".pdf"),w=12, h=10)
+  ggsave(paste0(dir_plots,data_prefix,"_featplot_", feat, flag_date, ".pdf"),w=12, h=10)
 }
 
 ```
@@ -642,7 +634,7 @@ seurat_obj <- AddMetaData(seurat_obj, cellModEmbed_mat[match(rownames(seurat_obj
 for (mod in names(seurat_obj@meta.data)) {
   color_to_plot <- "blue4"
   FeaturePlot(seurat_obj, features.plot = mod, cols.use = c("grey85", color_to_plot), min.cutoff = c("q25"))
-  ggsave(paste0(plots_dir,flag_date,"_",data_prefix,"_featplot_mod_", mod, ".pdf"),w=12, h=10)
+  ggsave(paste0(dir_plots,flag_date,"_",data_prefix,"_featplot_mod_", mod, ".pdf"),w=12, h=10)
 }
 
 ```

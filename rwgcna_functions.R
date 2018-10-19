@@ -993,52 +993,63 @@ wrapModulePreservation <- function(listDatExpr,
                                    verbose, 
                                    indent) {
   
+  # STATUS: 181010: Doesn't work due to a bug in WGCNA::modulePreservation (https://www.biostars.org/p/339950/)
   # @Usage: Wrapper for the WGCNA modulePreservation function to make it easier to use for single and multiple datasets.
-  #        modulePreservation performs two distinct tasks:
+  #         The wrapper puts datasets and module assignment (colors) into the correct multiData and multiColor formats.
+  #        
+  #         WGCNA::modulePreservation performs two distinct tasks:
+  #
   #           1. evaluates the quality of one or more sets of module assignments in a single dataset
-  #           2. evaluates the preservation of a single set of colors in multiple datasets 
-  #         However, in each case, modulePreservation function  requires 'reference' and 'test datasets regardless.
+  #           2. evaluates the preservation of a single set of colors in multiple datasets
+  #         
+  #           Multiple colors in multiple datasets is not supported.
+  #
+  #         In each case, modulePreservation function  requires 'reference' and 'test datasets regardless.
   #         The function also requires the data to be presented in a multiExpr format (see WGCNA function checkSets).
-  #         In the first case, this wrapper function makes 'test' datasets just by copying the original to satisfy the required modulePreservation args.
-  #         In the second case, this wrapper assumes that the first dataset is the reference and the rest are test sets, 
+  #
+  #         In case 1 (multiple module assignments, one dataset) this wrapper function makes 'test' datasets just by copying the original to satisfy the required modulePreservation args.
+  #         As the colors may come from a different dataset, the function uses the gene intersect to match each set of colors to the dataset
+  # 
+  #         In the case 2 (one set of module assignments, multiple datasaets), this wrapper assumes that the first dataset is the reference and the rest are test sets, 
   #         and calls modulePreservation do do pairwise ref-test comparisons.
-  #         The wrapper puts datasets into the correct multiExpr format.
+  #         
+  #         TODO: How to match genes between 1 set of colors and multiple datasets?
   #
   # @args: 
   #         listDatExpr: a vector(list) of expression data (genes in columns, cells in rows). If the list contains a single dataset the function outputs the 
   #                     quality statistics only. Assumes that the first entry holds the reference dataset and the rest hold test sets, if relevant.
   #                     If the list entries are names the function uses them as labels by default unless a list of labels is provided.
-  #         listColors: a vector(list) of color assignment vectors? TODO If given a single set of colors for multiple datasets the function 
-  #                     cannot compute hypergeometric stats ? TODO
-  #         labels:     a vector of character entries, one per set of colors. If not given, defaults to names(listColors); if these are NULL, defaults to integers
+  #         listColors: list of color assignment vectors with gene names
+  #                     TODO If given a single set of colors for multiple datasets the function cannot compute hypergeometric stats ? 
+  #         labels:     a vector of character, one per set of colors. If not given, defaults to names(listColors); if these are NULL, defaults to integers
   #         ...         (see modulePreservation)
   #
   # @return: 
-  #         result:     a list of list of dataframes? TODO, each nested list corresponds to a pairwise evaluation     
+  #         result:     a list of list of dataframes? 
+  #                     TODO, each nested list corresponds to a pairwise evaluation     
   # @author: Jonatan Thompson jjt3f2188@gmail.com
   # @date: 180316
   
   stopifnot(is.null(dim(listDatExpr)) & typeof(listDatExpr) == "list" & length(listDatExpr) >= 1 & is.null(dim(listColors)) & typeof(listColors)=="list" & length(listColors) >= 1) # basic input format checks
   stopifnot(length(listDatExpr) == 1 | length(listColors) == 1) # Cannot have many datasets and many colourings so at least one list must have length 1
   
-  referenceNetworks = c(1:length(listColors)) # 
-  testNetworks = as.list(rep(length(listColors)+1, length(listColors)))
+  # Average duplicate genes
+  # listDatExpr <- lapply(listDatExpr, function(datExpr) {
+  #   if (any(duplicated(colnames(datExpr)))) datExpr <- aggregate(datExpr, by=list(colnames(datExpr)), FUN=mean, na.rm=TRUE)
+  #   return(datExpr)
+  #   })
   
-  if (verbose >= 1) {
-    if (length(listDatExpr) == 1) {
-      if (length(listColors) == 1) {
-        print("Measuring the quality of a module assignment on a dataset..")
-      }
-      else if (length(listColors) > 1) {
-        print("Measuring the quality of several module assignments on a dataset..")
-      }
-    }
+  if (length(listDatExpr) == 1) {
+    
+    referenceNetworks = c(1:length(listColors)) # 
+    testNetworks = as.list(rep(length(listColors)+1, length(listColors)))
     
     # Set up the multi-set format (see WGCNA checkSets() ). The modulePreservation function requires test datasets even when evaluating module assignments in a single dataset,
     # so we create a multi-set format list with length(colors)+1 copies of the dataset, where the extra acts as test set.
     # the reason for this memory-inefficient copying of datasets is that modulePreservation requires a dataset to match each set of colors.
     
-    multiExpr <- vector("list", length=length(listColors)+1)  # make a list of copies of the expression data, number of colourings to evaluate + test set
+    multiExpr <- vector("list", length=length(listColors)+1)  # make a list of copies of the expression data, length = number of colourings to evaluate + 1 for 'test set'
+    
     for (i in 1:length(multiExpr)) {
       multiExpr[[i]]$data  <- as.matrix(listDatExpr[[1]]) # NB: this whole section only runs if there is just one dataset
     }
@@ -1047,15 +1058,25 @@ wrapModulePreservation <- function(listDatExpr,
     
     multiColor <- vector("list", length = length(listColors)+1) # make a matching list with the colors to evaluate. 
     
-    multiColor[[length(multiColor)]] <- vector("character", length = length(listColors[[1]])) # set last set of colors to empty strings 
+    multiColor[[length(multiColor)]] <- vector("character", length = ncol(multiExpr[[1]]$data))# length(listColors[[1]])) # set last set of colors to empty strings 
+    names(multiColor[[length(multiColor)]]) <- colnames(multiExpr[[1]]$data)
     
+    # Cut module assignment genes down to the dataset genes
     for (i in 1:(length(multiColor)-1)) {
-      multiColor[[i]] <- as.array(listColors[[i]])
+      colors_tmp <- vector(mode="character", length=ncol(multiExpr[[i]]$data))
+      names(colors_tmp) <- colnames(multiExpr[[i]]$data)
+      # TODO: can this handle NAs?
+
+      colors_tmp[match(names(listColors[[i]]), names(colors_tmp))] <- listColors[[i]][names(listColors[[i]]) %in% names(colors_tmp)]
+      colors_tmp[nchar(colors_tmp)==0] <- "grey"
+      multiColor[[i]] <- colors_tmp
     }
     #  Individual expression sets and their module labels are matched using names of the corresponding components in multiExpr and multiColor
     names(multiColor) <- names(multiExpr) # i.e. =  c(labels, "test")
     
   } else if (length(listDatExpr) > 1) {
+    
+    # multicolor must have length 1
     
     if (verbose >= 1) {
       print("Measuring the preservation of a module assignment between a reference and one or more test datasets..")
@@ -1070,9 +1091,13 @@ wrapModulePreservation <- function(listDatExpr,
     
     names(multiExpr) <- if (!is.null(names(listDatExpr))) names(listDatExpr) else 1:length(multiExpr) 
     
+    #########
+    
     multiColor <- listColors # rename for consistency but otherwise leave unchanged
     
     names(multiColor) <- names(multiExpr)[1] # listColors and hence multiColor is only allowed to have length 1
+    
+    ########
     
     referenceNetworks = rep(1, length(multiExpr)-1) # The reference dataset is always the first
     testNetworks = as.list(2:length(multiExpr)) # the test sets are the second, third, ..., last 
@@ -1119,9 +1144,12 @@ wrapModulePreservation <- function(listDatExpr,
 ############################################################################################################################################################
 
 load_obj <- function(f) {
-  # Utility function for loading an object stored in any of 
-  # .RData, .RDS, .loom, .csv, .txt, .tab, .delim
-  # File may be gzip compressed 
+  # Usage: Loads (gzip compressed) file from .RData, .RDS, .loom, .csv, .txt, .tab, .delim
+  #
+  # Args: 
+  #   f: path to file
+  # returns: 
+  #   RObject
   
   compressed = F
   
@@ -1131,21 +1159,50 @@ load_obj <- function(f) {
   }
   
   if (grepl(pattern = "\\.RDS", x = f, ignore.case = T)) {
-    readRDS(file=if(compressed) eval(parse(text=f)) else f)
-  } else if (grepl(pattern="\\.RData|\\.rda", x=f, ignore.case = T)) { 
+    out <- readRDS(file=if(compressed) eval(parse(text=f)) else f)
+  } else if (grepl(pattern="\\.RData|\\.Rda", x=f, ignore.case = T)) { 
     env <- new.env()
     nm <- load(f, env)[1]
-    env[[nm]]
+    out <- env[[nm]]
   } else if (grepl(pattern="\\.loom", x=f)) {
-    connect(filename=f, mode = "r+")
+    out <- connect(filename=f, mode = "r+")
   } else if (grepl(pattern = "\\.csv", x=f)) {
-    read.csv(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
-  } else if (grepl(pattern = "\\.tab", x=f)) {
-    read.table(file=if(compressed) eval(parse(text=f)) else f, sep="\t", stringsAsFactors = F, quote="", header=T) 
+    out <- read.csv(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+  } else if (grepl(pattern = "\\.tab|\\.tsv", x=f)) {
+    out <- read.table(file=if(compressed) eval(parse(text=f)) else f, sep="\t", stringsAsFactors = F, quote="", header=T) 
   } else if (grepl(pattern = "\\.txt", x=f)) {
-    read.delim(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
-  }
+    out <- read.delim(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+  } 
+  out
 }
+# load_obj <- function(f) {
+#   # Utility function for loading an object stored in any of 
+#   # .RData, .RDS, .loom, .csv, .txt, .tab, .delim
+#   # File may be gzip compressed 
+#   
+#   compressed = F
+#   
+#   if (grepl(pattern = "\\.gz|\\.gzip", x=f))  {
+#     compressed <- T
+#     f = paste0("gzfile('",f,"')")
+#   }
+#   
+#   if (grepl(pattern = "\\.RDS", x = f, ignore.case = T)) {
+#     readRDS(file=if(compressed) eval(parse(text=f)) else f)
+#   } else if (grepl(pattern="\\.RData|\\.rda", x=f, ignore.case = T)) { 
+#     env <- new.env()
+#     nm <- load(f, env)[1]
+#     env[[nm]]
+#   } else if (grepl(pattern="\\.loom", x=f)) {
+#     connect(filename=f, mode = "r+")
+#   } else if (grepl(pattern = "\\.csv", x=f)) {
+#     read.csv(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+#   } else if (grepl(pattern = "\\.tab", x=f)) {
+#     read.table(file=if(compressed) eval(parse(text=f)) else f, sep="\t", stringsAsFactors = F, quote="", header=T) 
+#   } else if (grepl(pattern = "\\.txt", x=f)) {
+#     read.delim(file=if(compressed) eval(parse(text=f)) else f, stringsAsFactors = F, quote="", header=T)
+#   }
+# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################
@@ -1980,6 +2037,61 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
        validAEs = validAEs, 
        allAEOK = allAEOK)
 }
+
+############################################################################################################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+
+# install and require packages using a function (allows for automation)
+ipak <- function(pkgs){
+  new.pkgs <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(new.pkgs)) {
+    sapply(new.pkgs, function(pkg) {
+      tryCatch({
+        install.packages(pkg, dependencies = TRUE)
+      }, warning = function(war) {
+        tryCatch({
+          source("https://bioconductor.org/biocLite.R")
+          biocLite(pkg, suppressUpdates = T)
+        }, error = function(err1) {
+          warning(paste0(pkg, " encountered the error: ", err1))
+          dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+          ipak(dependency)
+        })
+      } ,
+      error = function(err)
+      {
+        dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+        ipak(dependency)
+      })
+    })
+  }
+  suppressPackageStartupMessages(sapply(pkgs, require, character.only = TRUE))
+  failed <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(failed)>0) warning(paste0(paste0(failed, collapse = " "), " failed to install"))
+}
+
+############################################################################################################################################################
+############################################################## SPECIFITY ###################################################################################
+############################################################################################################################################################
+# 
+# specificity.index(pSI.in = t(datExpr), 
+#                   pSI.in.filter, 
+#                   bts = 50, p_max = 0.1, e_min = 0.3, hist = FALSE, SI = FALSE)
+#  returns a 
+# 
+# 
+# mod_specificity <- function(modEmbedMat, module) {
+#   # usage: Get specificity values for a set of modules across a set of celltypes / tissues etc
+#   # args
+#   #   modEmbedMat: cellType (or tissue etc) x module embedding matrix
+#   #   module: a vector of gene weights with gene names
+#   # value
+#   #   - s matrix of dim == dim(modEmbedMat) with the specificity scores 
+#   #   
+#   # dependencies: 
+#   #   pSI package https://cran.r-project.org/web/packages/pSI/pSI.pdf
+# }
 
 ############################################################################################################################################################
 ############################################################################################################################################################

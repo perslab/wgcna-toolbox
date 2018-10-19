@@ -1,7 +1,12 @@
 # Cross-dataset gene network correlation and preservation analysis pipeline
 # Usage: e.g.
 #
-#
+
+# args:
+#   
+# value:
+#   set of merged modules in the form of eigenvectors of gene weights
+#   set of unmerged modules in the form of eigenvectors of gene weights
 
 ######################################################################
 ########################### OptParse #################################
