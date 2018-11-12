@@ -91,6 +91,7 @@ e.g.
 
 * `seurat_path`: Path to Seurat object, preferably with some QC based on nUMI and percent.mito
 * `project_dir`: Optional. Project directory. Directory and subdirectories RObjects, plots, tables and log will be created if they do not exist. Defaults to the directory one level up from input data dir.
+* `scratch_dir` : Directory for temporary files, defaults to `/scratch/tmp-wgcna/`
 * `data_prefix`: Dataset prefix for output files.
 * `run_prefix`: Run prefix for output files. 
 * `autosave`: Save at four checkpoints during the script to enable resuming the session in case of problems? Defaults to `T`.
@@ -100,8 +101,10 @@ e.g.
 * `metadata_corr_col`: Specify `seurat@meta.data$` column(s) for which to compute correlations with gene modules. Takes a character with a character in single (double) quotes containing a vector of `meta.data` column names, without whitespace, in double (single) quotes e.g. `"c('nUMI')"` or `"c('nUMI','Age')"`. For factor or character metadata, each levels is analysed as a dummy variable, so exercise caution. Defaults to `NULL`.
 * `metadata_corr_filter_vals`: Specify one or more values within the `seurat@meta.data$` column(s). Retain only modules which are significantly (anti-) correlated (at present, there is no threshold value for the correlation). As with metadata_corr_col, takes a character with a vector, without whitespace,  of `meta.data` column names e.g. `"c('Female')"` or `"c('fasted','HFD')"`. Case-insensitive. Defaults to `NULL`.
 * `use.imputed`: Use data in the `obj@imputed` slot for the computations to replace the `@data` slot? If the `@imputed` slot is empty, will revert to the default (`FALSE`).
-* `regress_out`: A character in single (double) quotes with a vector of variables in double (single) quotes, without whitespace,  on which to regress out variation e.g. `"c('percent.mito','percent.ribo','nUMI')"`. Defaults to `NULL`
+* `regress_out`: A character in single (double) quotes with a vector of variables in double (single) quotes, without whitespace, on which to regress out variation. Defaults to `"c('percent.mito','percent.ribo','nUMI')"`. 
 * `min.cells`: What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, defaults to 5. 
+* `minCellClusterSize`: integer. Minimum number of cells to attempt WGCNA analysis. Defaults to `50L`.
+* `map_genes_to_ensembl`: logical. Map genes from symbol to ensembl? Required if applying MAGMA gene set test. Defaults to `TRUE`.
 * `genes_remove_dir`: "Path to a directory of gene lists saved in .csv, .tab, .txt, .RData, or .RDS, to remove before the analysis".
 * `genes_use`: One of `"all"`, `"var.genes"` for seurat var.genes, or `"PCA"` for genes that load significantly on at least one significant PC. Defaults to `"PCA"`
 * `pca_genes`: If `genes_use` == `"PCA"`, use `var.genes` or `all` genes to perform PCA to select genes based on PC loadings? If `num.replicate` is zero, select 5000 genes loading highly on the top PCs for downstream analysis. If non-zero, use JackStraw to identify significant PCs. If using `all` genes for the PCA, select significant genes based on the JackStraw; otherwise just use loadings.
@@ -122,4 +125,4 @@ e.g.
 * `data_organism`: `hsapiens` or `mmusculus`.
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character, in double(single) quotes, with a vector of character names in single(double) quotes, to match within the filename of the GWAS, given without whitespace, e.g. `"c('body_BMI_Locke2015')"` or `"c('BMI','T1D','T2D')"`. Case-insensitive. Defaults to `NULL`
-* `n_cores`: Number of cores to use for parallelization. Defaults to 5
+* `RAM_Gb_max`: Upper limit on Gb RAM available. Taken into account when setting up parallel processes. Defaults to 250.

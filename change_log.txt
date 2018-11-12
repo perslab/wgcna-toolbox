@@ -1,4 +1,24 @@
 # Change log
+
+
+v2.6 - 12-11-2018 
+
+### Changed 
+* made scratch_dir an argument
+* refactored (some) functional code to give temporary variables more readable names
+* when loading list_dissTOM, use match to find dissTOM that survived filtering, rather than %in% 
+* Do no append sumstats and params to table, write to new, to avoid conflicting column numbers if number of params changed
+
+### Added
+* Filter out small modules after the t.test 
+* use safeParallel for parallelisation; removed n_cores arguments and add RAM_Gb_max instead
+* added data and celltype names to cellModEmbedMat
+
+### Fixed
+* For kIMs, when doing t-test, was using kMs from  before reassigning genes
+* kM_reassign_fnc would return the colors of one iteration before. If a whole module had been reassigned in the subsequent and last iteration, it would result in the colors vector having an additional level compared to the kMs columns. 
+* Fix bug in outputting number of t.test significant genes
+
 v2.5 - 19-10-2018
 
 ### Fixed
