@@ -639,10 +639,23 @@ if (is.null(resume)) {
   subsets <- safeParallel(fun = fun, 
                           args=args, 
                           seurat_obj=seurat_obj)
+  
+  names(subsets) = sNames
   # Free up space - this may be crucial for parallelising, since "FORK" pushes all the global environment variables to every worker
   rm(seurat_obj)
   invisible(gc()); invisible(R.utils::gcDLLs())
   
+  message("Filtering out empty subsets")
+  # Filter out subsets with no cells(?) - happens with liver clust_sample subsettings
+  args=list("X"=subsets)
+  fun = function(obj) {
+    return(if (!is.null(colnames(obj@raw.data))) obj else NULL)  
+    }
+  subsets<- safeParallel(fun=fun, args=args)
+  
+  subsets_idx_ok <- sapply(subsets, function(x) !is.null(x))
+  subsets <- subsets[subsets_idx_ok]
+  sNames <- sNames[subsets_idx_ok]
   
   # get original n_cells
   #n_cells_subsets_orig <- sapply(subsets, function(seurat_obj) ncol(seurat_obj@raw.data), simplify = T)
@@ -653,10 +666,16 @@ if (is.null(resume)) {
   if (data_type=="sc") {
     message(paste0("Filtering out subsets with fewer than ", minCellClusterSize, " cells"))
     subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
-      if(ncol(seurat_obj@raw.data)<=minCellClusterSize) {
-        warning(paste0(unique(as.character(seurat_obj@ident))[1], " cell cluster filtered out because it contains < ", minCellClusterSize, " cells"))
-        return(FALSE)
-      } else return(TRUE)
+      if(!is.null(ncol(seurat_obj@raw.data))) {
+        if(ncol(seurat_obj@raw.data)<minCellClusterSize) {
+          warning(paste0(unique(as.character(seurat_obj@ident))[1], " cell cluster filtered out because it contains < ", minCellClusterSize, " cells"))
+          return(FALSE)
+        } else {
+          return(TRUE)
+        }
+      } else {
+        return(TRUE)
+      }
     }, simplify = T)
   } else if (data_type=="bulk") { # no need to filter out any subsets
     subsets_ok_idx = !logical(length = length(subsets))
@@ -678,7 +697,16 @@ if (is.null(resume)) {
                             args=args, 
                             outfile=outfile, 
                             min.cells=min.cells)
-    
+  }
+  
+  if (any(sapply(subsets, is.null))) {
+    idx_ok <- sapply(subsets, !is.null, simplify=T)
+    warning(paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames[!idx_ok], " had no genes left"))
+    subsets <- subsets[idx_ok]
+    sNames <- sNames[idx_ok]
+  }
+  
+  if (data_type=="sc") {
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "NormalizeData.txt")
     args = list("X"=subsets)
     fun = function(seurat_obj) { NormalizeData(object = seurat_obj) }
@@ -686,6 +714,13 @@ if (is.null(resume)) {
                             args=args, 
                             outfile=outfile)
     
+  }
+  
+  if (any(sapply(subsets, is.null))) {
+    idx_ok <- sapply(subsets, !is.null, simplify=T)
+    warning(paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames[!idx_ok], " had no genes left"))
+    subsets <- subsets[idx_ok]
+    sNames <- sNames[idx_ok]
   }
   
   message("Scaling and regressing data subsets")
@@ -970,7 +1005,7 @@ if (resume == "checkpoint_1") {
     invisible(gc())
     
     fun <- function(multiExpr,name) {
-      consensus = consensusTOM(multiExpr = multiExpr, 
+      tryCatch({consensus = consensusTOM(multiExpr = multiExpr, 
                                checkMissingData = checkMissingData,
                                maxBlockSize = maxBlockSize, 
                                blockSizePenaltyPower = blockSizePenaltyPower, 
@@ -1003,14 +1038,30 @@ if (resume == "checkpoint_1") {
       # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
       # The main output is the consensus matrix which is saved to disk and not returned
       goodGenesTOM_idx = as.logical(consensus$goodSamplesAndGenes$goodGenes)
-      goodGenesTOM_idx
+      return(goodGenesTOM_idx)
+      }, error = function(err) {
+        adjacency = adjacency(datExpr=list_datExpr[[name]], 
+                              type=type, 
+                              power = list_sft[[name]]$Power, 
+                              corFnc = corFnc, 
+                              corOptions = corOptions)
+        consTomDS = TOMsimilarity(adjMat=adjacency,
+                                  TOMType=TOMType,
+                                  TOMDenom=TOMDenom,
+                                  verbose=verbose,
+                                  indent = indent)
+        colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
+        save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
+        goodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
+        return(goodGenesTOM_idx)
+      })
     }
     
     args <- list("multiExpr"=list_multiExpr, "name"=sNames)
     outfile = outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt")
     
-    list_goodGenesTOM_idx <- tryCatch({
-      safeParallel(fun=fun, 
+    #list_goodGenesTOM_idx <- tryCatch({
+    list_goodGenesTOM_idx <- safeParallel(fun=fun, 
                    args=args, 
                    outfile=outfile, 
                    checkMissingData = checkMissingData,
@@ -1041,30 +1092,46 @@ if (resume == "checkpoint_1") {
                    cacheDir = scratch_dir,
                    cacheBase = ".blockConsModsCache",
                    verbose = verbose,
-                   indent = indent)}, 
-      error=function(err) {
-        message("consensusTOM failed")
-        outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_TOM_for_par.txt")
-        fun <- function(datExpr,name) { 
-          adjacency = adjacency(datExpr=datExpr, 
-                                type=type, 
-                                power = list_sft[[name]]$Power, 
-                                corFnc = corFnc, 
-                                corOptions = corOptions)
-          consTomDS = TOMsimilarity(adjMat=adjacency,
-                                    TOMType=TOMType,
-                                    TOMDenom=TOMDenom,
-                                    verbose=verbose,
-                                    indent = indent)
-          colnames(consTomDS) <- rownames(consTomDS) <- colnames(datExpr)
-          save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-          goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
-          goodGenesTOM_idx
-        }
-        args = list("datExpr"=list_datExpr, "name"=sNames)
-        safeParallel(fun=fun, args=args, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)})
+                   indent = indent,
+                   list_datExpr=list_datExpr)
+    # }, 
+    #   error=function(err) {
+    #     message("consensusTOM failed")
+    #     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_TOM_for_par.txt")
+    #     fun <- function(name) { 
+    #       adjacency = adjacency(datExpr=list_datExpr[[name]], 
+    #                             type=type, 
+    #                             power = list_sft[[name]]$Power, 
+    #                             corFnc = corFnc, 
+    #                             corOptions = corOptions)
+    #       consTomDS = TOMsimilarity(adjMat=adjacency,
+    #                                 TOMType=TOMType,
+    #                                 TOMDenom=TOMDenom,
+    #                                 verbose=verbose,
+    #                                 indent = indent)
+    #       colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
+    #       save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
+    #       goodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
+    #       return(goodGenesTOM_idx)
+    #     }
+    #     args = list("name"=sNames)
+    #     safeParallel(fun=fun, 
+    #                  args=args, 
+    #                  type=type, 
+    #                  list_sft=list_sft, 
+    #                  corFnc=corFnc, 
+    #                  corOptions=corOptions, 
+    #                  TOMType=TOMType, 
+    #                  TOMDenom=TOMDenom, 
+    #                  verbose=verbose, 
+    #                  indent=indent, 
+    #                  data_prefix=data_prefix, 
+    #                  run_prefix=run_prefix, 
+    #                  scratch_dir=scratch_dir)
+    #     })
     
     # Use the goodGenesTOM_idx to filter the datExpr matrices
+    
     list_datExpr_gg <- mapply(function(datExpr,goodGenesTOM_idx) datExpr[,goodGenesTOM_idx], 
                               datExpr=list_datExpr, 
                               goodGenesTOM_idx=list_goodGenesTOM_idx, 
@@ -2964,9 +3031,6 @@ if (resume == "checkpoint_4") {
                                              x=list_metadata, 
                                              y=list_MEs_gwas,  
                                              SIMPLIFY = F) 
-        
-        
-        
         # Remove 'ME' from eigengene names
         for (j in 1:length(list_mod_metadata_corr_rho)) {
           colnames(list_mod_metadata_corr_rho[[j]]) <- gsub("^ME", "", colnames(list_mod_metadata_corr_rho[[j]]), ignore.case=F)

@@ -7,10 +7,14 @@
 
 FilterGenes <- function(seurat_obj_sub, min.cells) {
   
-  if (min.cells > 0) {
+  if (min.cells > 0 & !is.null(dim(seurat_obj_sub@raw.data))) { 
     num.cells <- rowSums(seurat_obj_sub@raw.data > 0)
     genes.use <- names(x = num.cells[which(x = num.cells >= min.cells)])
-    seurat_obj_sub@raw.data <- seurat_obj_sub@raw.data[genes.use, ]
+    if (length(genes.use)>0) {
+      seurat_obj_sub@raw.data <- seurat_obj_sub@raw.data[genes.use, ]
+    } else {
+      seurat_obj_sub <- NULL
+    }
   }
   
   return(seurat_obj_sub)
@@ -2354,8 +2358,6 @@ safeParallel = function(fun, args, simplify=F, MARGIN=NULL, n_cores=NULL, Gb_max
     
   } else if ("try-error" %in% class(cl)) {
     
-    args[["FUN"]] <- fun
-    
     if (length(args)>1) {
       
       fnc = "mapply"
@@ -2374,6 +2376,9 @@ safeParallel = function(fun, args, simplify=F, MARGIN=NULL, n_cores=NULL, Gb_max
         args[["simplify"]] <- NULL
         }
     }
+    
+    args[["FUN"]] <- fun
+    
   }
   
   list_out <- tryCatch({ 
