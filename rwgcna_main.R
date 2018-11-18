@@ -66,6 +66,8 @@ option_list <- list(
               help="One of 'all', 'var.genes' or 'PCA' for genes with significant loading on at least one significant PC. 'All' is not recommended. [default %default]"), 
   make_option("--pca_genes", type="character", default="var.genes",
               help="'all' or 'var.genes'. 'All' is computationally expensive but allows for selecting genes based on PC loading p-values rather than magnitudes [default %default]"), 
+  make_option("--n_genes_use", type="integer", default=5000L,
+              help="If using PCA with var.genes or jackstrawnReplicate=0 and therefore selecting genes based on PC loadings, how many top loading genes to use [default %default]"), 
   make_option("--corFnc", type="character", default="bicor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). [default %default]"), 
   make_option("--networkType", type="character", default = "signed",
@@ -211,6 +213,8 @@ genes_remove_dir <- opt$genes_remove_dir
 genes_use <- opt$genes_use
 
 pca_genes <- opt$pca_genes
+
+n_genes_use <- opt$n_genes_use
 
 corFnc <- opt$corFnc 
 
@@ -833,7 +837,8 @@ if (is.null(resume)) {
         wrapJackStraw(seurat_obj_sub = seurat_obj, 
                       n_cores = min(length(subsets), detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = as.numeric(max(sapply(subsets, object.size)))/1024^3)-1), 
                       jackstrawnReplicate = jackstrawnReplicate, 
-                      pvalThreshold = pvalThreshold)
+                      pvalThreshold = pvalThreshold,
+                      n_genes_use=n_genes_use)
       }, error = function(err) {
         message(paste0(name, ": PCA gene selection (with n Jackstraw resampling == ", jackstrawnReplicate, " failed with error: ", err))
         message("using var.genes instead")
