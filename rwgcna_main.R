@@ -170,8 +170,10 @@ run_prefix <- opt$run_prefix
 
 # load saved image?
 if (!is.null(resume)) {
+  message(paste0("loading from ", resume))
   tryCatch({load(file=sprintf("%s%s_%s_%s_image.RData.gz", scratch_dir, data_prefix, run_prefix, resume))},
            error = function(x) {stop(paste0(resume, " session image file not found in ", scratch_dir))})
+  
 }
 
 seurat_path <- opt$seurat_path 
@@ -1005,7 +1007,9 @@ if (resume == "checkpoint_1") {
     invisible(gc())
     
     fun <- function(multiExpr,name) {
-      tryCatch({consensus = consensusTOM(multiExpr = multiExpr, 
+      tryCatch({
+        #consensus = consensusTOM(multiExpr = multiExpr, 
+        consensusTOM(multiExpr = multiExpr, 
                                checkMissingData = checkMissingData,
                                maxBlockSize = maxBlockSize, 
                                blockSizePenaltyPower = blockSizePenaltyPower, 
@@ -1037,8 +1041,8 @@ if (resume == "checkpoint_1") {
                                indent = indent)
       # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
       # The main output is the consensus matrix which is saved to disk and not returned
-      goodGenesTOM_idx = as.logical(consensus$goodSamplesAndGenes$goodGenes)
-      return(goodGenesTOM_idx)
+      #goodGenesTOM_idx = as.logical(consensus$goodSamplesAndGenes$goodGenes)
+      #return(goodGenesTOM_idx)
       }, error = function(err) {
         adjacency = adjacency(datExpr=list_datExpr[[name]], 
                               type=type, 
@@ -1053,8 +1057,8 @@ if (resume == "checkpoint_1") {
                                   indent = indent)
         colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
         save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-        goodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
-        return(goodGenesTOM_idx)
+        #oodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
+        #return(goodGenesTOM_idx)
       })
     }
     
@@ -1062,7 +1066,8 @@ if (resume == "checkpoint_1") {
     outfile = outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt")
     
     #list_goodGenesTOM_idx <- tryCatch({
-    list_goodGenesTOM_idx <- safeParallel(fun=fun, 
+    #list_goodGenesTOM_idx <- safeParallel(fun=fun, 
+                              safeParallel(fun=fun, 
                                            args=args, 
                                            outfile=outfile, 
                                            checkMissingData = checkMissingData,
@@ -1100,49 +1105,14 @@ if (resume == "checkpoint_1") {
                                            indent = indent,
                                            list_datExpr=list_datExpr,
                                            scratch_dir = scratch_dir)
-    # }, 
-    #   error=function(err) {
-    #     message("consensusTOM failed")
-    #     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_TOM_for_par.txt")
-    #     fun <- function(name) { 
-    #       adjacency = adjacency(datExpr=list_datExpr[[name]], 
-    #                             type=type, 
-    #                             power = list_sft[[name]]$Power, 
-    #                             corFnc = corFnc, 
-    #                             corOptions = corOptions)
-    #       consTomDS = TOMsimilarity(adjMat=adjacency,
-    #                                 TOMType=TOMType,
-    #                                 TOMDenom=TOMDenom,
-    #                                 verbose=verbose,
-    #                                 indent = indent)
-    #       colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
-    #       save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-    #       goodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
-    #       return(goodGenesTOM_idx)
-    #     }
-    #     args = list("name"=sNames)
-    #     safeParallel(fun=fun, 
-    #                  args=args, 
-    #                  type=type, 
-    #                  list_sft=list_sft, 
-    #                  corFnc=corFnc, 
-    #                  corOptions=corOptions, 
-    #                  TOMType=TOMType, 
-    #                  TOMDenom=TOMDenom, 
-    #                  verbose=verbose, 
-    #                  indent=indent, 
-    #                  data_prefix=data_prefix, 
-    #                  run_prefix=run_prefix, 
-    #                  scratch_dir=scratch_dir)
-    #     })
     
-    # Use the goodGenesTOM_idx to filter the datExpr matrices
-    
-    list_datExpr_gg <- mapply(function(datExpr,goodGenesTOM_idx) datExpr[,goodGenesTOM_idx], 
-                              datExpr=list_datExpr, 
-                              goodGenesTOM_idx=list_goodGenesTOM_idx, 
-                              SIMPLIFY=F)
-    
+    # # Use the goodGenesTOM_idx to filter the datExpr matrices
+    # list_datExpr_gg <- mapply(function(datExpr,goodGenesTOM_idx) {
+    #   datExpr[,goodGenesTOM_idx]}, 
+    # datExpr=list_datExpr, 
+    # goodGenesTOM_idx=list_goodGenesTOM_idx, 
+    # SIMPLIFY=F)
+
   } else if (TOMnReplicate==0) {
     
     message("Computing the Topological Overlap Matrix")
@@ -1166,31 +1136,50 @@ if (resume == "checkpoint_1") {
                                 indent = indent)
       colnames(consTomDS) <- rownames(consTomDS) <- colnames(datExpr)
       save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-      goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
-      goodGenesTOM_idx
+      #goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
+      #goodGenesTOM_idx
     }
     args = list("datExpr"=list_datExpr, "name"=sNames)
-    list_goodGenesTOM_idx <- safeParallel(fun=fun, args=args, outfile=outfile, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)
-    list_datExpr_gg <- list_datExpr
-    
+    #list_goodGenesTOM_idx <- safeParallel(fun=fun, args=args, outfile=outfile, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)
+    safeParallel(fun=fun, args=args, outfile=outfile, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)
+    #list_datExpr_gg <- list_datExpr
   }
   
-  rm(list_datExpr)
+  #rm(list_datExpr)
   
   if (TOMnReplicate > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
   
   # Load TOMs into memory and convert to distance matrices
-  outfile = paste0(log_dir, data_prefix, "_", run_prefix, "dissTOM_log.txt")
-  
-  fun = function(name, datExpr) {
-    consTomDS<-load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name))
+  #outfile = paste0(log_dir, data_prefix, "_", run_prefix, "loadConsTOM_log.txt")
+  fun = function(name) {
+    load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name))
     #load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Load the consensus TOM generated by blockwiseConsensusModules
-    1-as.dist(consTomDS) # Convert proximity to distance
+    #1-as.dist(consTomDS) # Convert proximity to distance
   }
+  args = list("name"=sNames)
+  list_consTOM = safeParallel(fun=fun, 
+                              args=args, 
+                              scratch_dir=scratch_dir, 
+                              data_prefix=data_prefix, 
+                              run_prefix=run_prefix, 
+                              load_obj=load_obj)
   
-  args = list("name"=sNames, "datExpr"= list_datExpr_gg)
-  list_dissTOM = safeParallel(fun=fun, args=args, outfile=outfile, scratch_dir=scratch_dir, data_prefix=data_prefix, run_prefix=run_prefix, load_obj=load_obj)
+  # Filter datExpr to retain genes that were kept by goodSamplesGenesMS, called by consensusTOM 
+  fun = function(datExpr, consTOM) {
+    datExpr[,match(colnames(consTOM), colnames(datExpr))]
+  }
+  args=list(datExpr=list_datExpr, consTOM=list_consTOM)
+  list_datExpr_gg <- safeParallel(fun=fun, args=args)
   
+  rm(list_datExpr)
+  
+  # Convert proximity TOMs to distance matrices 
+  args= list("X"=list_consTOM)
+  fun = function(consTOM) { 
+    1-as.dist(consTOM) 
+    }
+  list_dissTOM <- safeParallel(fun=fun, args=args)  
+  rm(list_consTOM)
   # Save list_dissTOM to harddisk
   names(list_dissTOM) <- sNames
   

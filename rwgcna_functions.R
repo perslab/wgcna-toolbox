@@ -24,7 +24,7 @@ FilterGenes <- function(seurat_obj_sub, min.cells) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThreshold) {
+wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThreshold, n_genes_use=5000) {
   # gene.criterion: 'p.val' means selecting genes (used for PCA) with significant empirical p-val
   #                 'PC.loadings' means projecting all genes onto the PCs to get loadings and selecting 
   #                 genes that have a high absolute loading on a significant PC
@@ -112,7 +112,7 @@ wrapJackStraw = function(seurat_obj_sub, n_cores, jackstrawnReplicate, pvalThres
     
     loadings <- abs(seurat_obj_sub@dr$pca@gene.loadings.full[,1:(min(13,pcs.compute))])
     max_loadings <- apply(loadings, MARGIN=1, FUN=function(x) max(x))
-    names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:10000]
+    names_genes_use <- names(max_loadings[order(max_loadings, decreasing = T)])[1:min(n_genes_use, length(max_loadings))]
     
   }
   
