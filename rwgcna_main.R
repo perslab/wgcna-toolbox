@@ -178,6 +178,8 @@ if (!is.null(resume)) {
   
 }
 
+opt <- parse_args(OptionParser(option_list=option_list))
+
 seurat_path <- opt$seurat_path 
 
 project_dir <- opt$project_dir
