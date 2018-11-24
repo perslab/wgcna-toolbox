@@ -271,8 +271,9 @@ cutreeHybrid_for_vec <- function(comb, geneTree, dissTOM, maxPamDist, useMedoids
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_MEs_by_kIMs=F, dissTOM = NULL) {
+mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey) {
   # Utility function for more easily parallelising mergeCloseModules
+  # deprecated
   colors <- NULL
   MEs <- NULL 
   tryCatch({
@@ -289,11 +290,9 @@ mergeCloseModules_for_vec <- function(cutree,comb, datExpr, excludeGrey, scale_M
     
     colors = labels2colors(merged$colors)
     #MEs = merged$newMEs 
-    MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
+    MEs = moduleEigengenes_uv(expr = as.matrix(datExpr),
                                      colors=colors,
-                                     excludeGrey = excludeGrey,
-                                     scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                     dissTOM = dissTOM)
+                                     excludeGrey = excludeGrey)
     
     
   }, error = function(c) {
@@ -577,8 +576,7 @@ kM_reassign_fnc = function(colors,
                            verbose=2,
                            corFnc=NULL,
                            max_iter=3,
-                           cellType,
-                           scale_MEs_by_kIMs=F) {
+                           cellType) {
   
   # Usage: iteratively reassign genes to modules based on kIM / kME until the number to reassign <= stop_condition
   # Args: 
@@ -609,11 +607,9 @@ kM_reassign_fnc = function(colors,
       while(TRUE) {
         if (fuzzyModMembership == "kME") {
           message(paste0(cellType, ": Computing Module Eigengenes"))
-          MEs <- moduleEigengenes_kIM_scale(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
+          MEs <- moduleEigengenes_uv(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
                                             colors = colors,
-                                            excludeGrey=T,
-                                            scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                            dissTOM=dissTOM)$eigengenes
+                                            excludeGrey=T)$eigengenes
           
           message(paste0(cellType, ": Computing ", fuzzyModMembership, "s"))
           kMs <- signedKME(as.matrix(datExpr),
@@ -681,9 +677,7 @@ kM_reassign_neg_fnc = function(Ms,
                                colors, 
                                datExpr, 
                                corFnc, 
-                               excludeGrey,
-                               scale_MEs_by_kIMs=F,
-                               dissTOM=NULL) {
+                               excludeGrey)  {
   # Status: hiatus - currently unused
   # Returns a list with new colors,l MEs, kMEs, pkMEs, and dataframe with information on the reassigned genes
   
@@ -705,11 +699,9 @@ kM_reassign_neg_fnc = function(Ms,
     colors[rows_to_reassign] <- colors[col_most_negkME][rows_to_reassign]
     
     # Recompute Module Eigengenes, kME, pkME
-    MEs = moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
+    MEs = moduleEigengenes_uv(expr = as.matrix(datExpr),
                                      colors,
-                                     excludeGrey = excludeGrey,
-                                     scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-                                     dissTOM=dissTOM)$eigengenes
+                                     excludeGrey = excludeGrey)$eigengenes
     
     kMEs = signedKME(as.matrix(datExpr),
                      MEs,
@@ -1707,7 +1699,6 @@ cellModEmbed <- function(datExpr,
                          cellType=NULL,
                          kMs=NULL,
                          excludeGrey=T,
-                         scale_MEs_by_kIMs=F,
                          dissTOM=NULL) {
   # datExpr should be cell x gene matrix or data.frame with ALL genes and ALL cells in the analysis
   # colors is a character vector with gene names
@@ -1725,10 +1716,8 @@ cellModEmbed <- function(datExpr,
         colors_full[names(colors_full) %in% names(colors[colors==col])] <- col
       }
       
-      embed_mat <- moduleEigengenes_kIM_scale(expr=datExpr, 
+      embed_mat <- moduleEigengenes_uv(expr=datExpr, 
                                               colors = colors_full, 
-                                              scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                              dissTOM=dissTOM,
                                               impute = TRUE, 
                                               nPC = 1, 
                                               align = "along average", 
@@ -1793,14 +1782,21 @@ if (FALSE) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE, dissTOM=NULL, impute = TRUE, nPC = 1, align = "along average", 
-                                        excludeGrey = FALSE, grey = if (is.numeric(colors)) 0 else "grey", 
-                                        subHubs = TRUE, trapErrors = FALSE, returnValidOnly = trapErrors, 
-                                        softPower = 6, scale = TRUE, verbose = 0, indent = 0) 
+moduleEigengenes_uv <- function (expr, colors, 
+                                 impute = TRUE, 
+                                 nPC = 1, 
+                                 align = "along average", 
+                                 excludeGrey = FALSE, 
+                                 grey = if (is.numeric(colors)) 0 else "grey", 
+                                 subHubs = TRUE, 
+                                 trapErrors = FALSE, 
+                                 returnValidOnly = trapErrors, 
+                                 softPower = 8, 
+                                 scale = TRUE, 
+                                 verbose = 0, 
+                                 indent = 0) 
 {
-  ############ ADDED ############ 
-  #kIMs <- if (scale_MEs_by_kIMs == T) kIM_eachMod_norm(dissTOM, colors, verbose=verbose, excludeGrey=excludeGrey) else NULL
-  ############################### 
+  # moduleEigengenes function modified to also return left (u) eigenvectors of length n_gene_in_module
   
   spaces = indentSpaces(indent)
   if (verbose == 1) 
@@ -1842,11 +1838,10 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
     if (sum(as.character(modlevels) != as.character(grey)) > 0) {
       modlevels = modlevels[as.character(modlevels) != 
                               as.character(grey)]
-    }
-  else {
+    } else {
     stop(paste("Color levels are empty. Possible reason: the only color is grey", 
                "and grey module is excluded from the calculation."))
-  }
+    }
   PrinComps = data.frame(matrix(NA, nrow = dim(expr)[[1]], 
                                 ncol = length(modlevels)))
   
@@ -1885,11 +1880,9 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
     if (verbose > 2) 
       printFlush(paste(spaces, " ...", sum(restrict1), 
                        "genes"))
-    datModule = as.matrix(t(expr[, restrict1]))
+    datModule = as.matrix(t(expr[, restrict1])) # datModule is a genes_mod * cells = n * p matrix
     n = dim(datModule)[1]
     p = dim(datModule)[2]
-    
-    ######
     
     svd_1 = try({
       if (nrow(datModule) > 1 && impute) {
@@ -1915,22 +1908,7 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
         printFlush(paste(spaces, " ...scaling"))
       if (scale) 
         datModule = t(scale(t(datModule)))
-      ############ ADDED ############ 
-      # @author: Jonatan Thompson, Perslab, rkm916@ku.dk
-      
-      # if(!is.null(kIMs)) {
-      #   pkIMs <- kIMs[[restrict1, "modulename"]] # retrieve principal kIMs
-      #   pkIMs <- 1/sum(pkIMs) # normalise the principal kIMs so they sum to 1
-      #   mapply(function(X,y) X*y, # scale the rows (genes) of datModule by the normalised principal kIM 
-      #          X=datModule, 
-      #          y=pkIMs,
-      #          SIMPLIFY=T) %>% matrix(nrow=nrow(datModule)) -> datModule
-      # } 
-      # the kIM-scaled datModule now replaces the original for svd and for computing average expression
-      # doesn't work..
-      # unnecessary??
-      
-      ###############################
+
       if (verbose > 5) 
         printFlush(paste(spaces, " ...calculating SVD"))
       
@@ -2000,8 +1978,7 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
       isPC[i] = FALSE
       isHub[i] = FALSE
       validColors[restrict1] = grey
-    }
-    else {
+    } else {
       PrinComps[, i] = pc
       ae = try({
         if (isPC[i]) 
@@ -2035,13 +2012,14 @@ moduleEigengenes_kIM_scale <- function (expr, colors, scale_MEs_by_kIMs = FALSE,
       validAEs[i] = !(class(ae) == "try-error")
       
       ########## ADDED ##########
-      # Also left singular components
+      # Also align left singular components with average gene expression
       names(pc_l) <- rownames(datModule)
       PrinComps_l[[i]] = pc_l
       
-      if (isPC[i]) 
-        scaledExpr_l = scale(t(datModule))
-      averExpr_l[[i]] = colMeans(scaledExpr_l, na.rm = TRUE)
+      # if (isPC[i]) {
+      #   scaledExpr_l = scale(t(datModule)) # a cell * gene_mod_i matrix
+      # }
+      averExpr_l[[i]] = colMeans(scaledExpr, na.rm = TRUE) # for each gene averaging over cells
       if (align == "along average") {
         if (verbose > 4) 
           printFlush(paste(spaces, " .. aligning reverse module eigengene with average gene expression."))

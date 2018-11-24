@@ -1,5 +1,22 @@
 # Change log
 
+v2.7 - 24-11-2018
+
+### Added
+* n_genes_use argument for when using PCA loadings to select genes
+* GSEA on user-specified genelist rather than fixed BMI genes list
+
+### changed
+* removed obsolete scale_MEs_by_kIMS from main and from moduleEigengenes, changed moduleEigengenes function name to moduleEigengenes_uv
+* increased moduleEigengenes softPower parameter from 6 to 8
+* cleaned up commented out code
+* output sumstats, params and celltype-wise logs to a new file for each run, to avoid problems in case of a change of arguments
+* Improved filtering of cell clusters and updating sNames each time
+
+### Fixed
+* consensusTOM tryCatch would redo all the TOMs without resampling, not just the ones where consensusTOM failed.
+* the tryCatch backup TOM call would not have acces to list_datExpr, resulting in an error
+* safeParallel would, if makeCluster failed, add FUN to args before checking the length of args, resulting in choosing mapply as fall back always.
 
 v2.6 - 12-11-2018 
 

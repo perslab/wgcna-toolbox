@@ -92,12 +92,12 @@ option_list <- list(
               help = "Number of times to resample the dataset when finding the consensus TOM [default %default]"),
   make_option("--fuzzyModMembership", type="character", default="kIM",
               help="Which 'fuzzy' measure of gene membership in a module should be used? Options are 'kME' (correlation between gene expression and module PC1 expression) and 'kIM' (sum of edges between a gene and genes in the module, normalized by number of genes in the module; i.e. average distance in the TOM between a gene and genes in the module [default %default]."),  
-  make_option("--scale_MEs_by_kIMs", type="logical", default="F",
-              help="If fuzzyModMembership == kME, should the gene weight in eigengene computation be scaled by kIM? [default %default]"),  
   make_option("--PPI_filter", type="logical", default=T,
               help="Valiate gene modules using Protein-Protein Interactions?"),
   make_option("--data_organism", type="character", default="mmusculus",
               help = "'hsapiens' or 'mmusculus', [default %default]"),
+  make_option("--list_genesets_path", type="character", default = NULL,
+              help = "Path to a list of geneset vectors saved as a RDS or RData object. If map_genes_to_ensembl is TRUE, if necessary lists will be remapped to ensembl [default %default]"),
   make_option("--magma_gwas_dir", type="character", default = NULL,
               help = "MAGMA input GWAS data directory, e.g. '/projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/', '/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/'. NULL skips the magma GWAS step [default %default]"),
   make_option("--gwas_filter_traits", type="character", default = NULL,
@@ -245,9 +245,9 @@ TOMnReplicate <- opt$TOMnReplicate
 
 fuzzyModMembership <- opt$fuzzyModMembership
 
-scale_MEs_by_kIMs <- opt$scale_MEs_by_kIMs
-
 PPI_filter <- opt$PPI_filter
+
+list_genesets_path <- opt$list_genesets_path
 
 magma_gwas_dir <- opt$magma_gwas_dir 
 
@@ -309,16 +309,16 @@ if (data_organism == "mmusculus") {
   mapping_hs_mm_filepath = "/projects/timshel/sc-genetics/sc-genetics/data/gene_annotations/gene_annotation.hsapiens_mmusculus_unique_orthologs.GRCh37.ens_v91.txt.gz"
   
   # mendelian and coding variants geneset path
-  variants_path <- "/projects/jonatan/genesets/variants_ensembl_mm.RData"
+  #variants_path <- BMI_genesets_ensembl_mm.RDS"
   
-} else if (data_organism == "hsapiens") {
+} #else if (data_organism == "hsapiens") {
   
   #mapping_hs_filepath = "/projects/tp/tmp-bmi-brain/data/mapping/gene_annotation_hsapiens.txt.gz" 
   
   # mendelian and coding variants geneset path
-  variants_path <- "/projects/jonatan/genesets/variants_ensembl_hs.RData"
+  #variants_path <- "/projects/jonatan/genesets/BMI_genesets_ensembl_hs.RDS"
   
-}
+#}
 
 try(disableWGCNAThreads())
 
@@ -371,12 +371,6 @@ if (is.null(resume)) {
     } 
   }
   
-  if (fuzzyModMembership=="kIM" & scale_MEs_by_kIMs) scale_MEs_by_kIMs <- F
-  
-  if (TODO) {
-    scale_MEs_by_kIMs = F
-  }
-  
   if (!map_genes_to_ensembl) {
     if (!is.null(magma_gwas_dir)) {
       magma_gwas_dir <- gwas_filter_traits<-NULL
@@ -387,6 +381,12 @@ if (is.null(resume)) {
   
   if (!RAM_Gb_max >= 1 | !RAM_Gb_max <= 1000) stop("verify RAM_Gb_max value")
   
+  ######################################################################
+  ######################## CREATE ERROR LOG ############################
+  ######################################################################
+  
+  path_cellClusters_dropped_log <- paste0(log_dir, data_prefix, "_", run_prefix, "_cellClusters_dropped.txt")
+    
   ######################################################################
   ################# LOAD AND SUBSET SEURAT OBJECT ######################
   ######################################################################
@@ -437,7 +437,7 @@ if (is.null(resume)) {
   }
   
   ident <- seurat_obj@ident
-  sNames <- names(table(seurat_obj@ident))
+  sNames_0 <- names(table(seurat_obj@ident))
   
   ######################################################################
   ################### COMPUTE PERCENT MITO, PERCENT RIBO ###############
@@ -567,7 +567,6 @@ if (is.null(resume)) {
   ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
   ######################################################################
   
-  #if (FALSE) {
   message("Normalizing, scaling and saving full expression matrix")
   
   # Normalise
@@ -634,7 +633,7 @@ if (is.null(resume)) {
   
   message("Subsetting the dataset")
   
-  subsets <- lapply(sNames, function(name) SubsetData(seurat_obj,
+  subsets <- lapply(sNames_0, function(name) SubsetData(seurat_obj,
                                                       ident.use = name, 
                                                       do.scale = F, 
                                                       do.center = F,
@@ -648,50 +647,34 @@ if (is.null(resume)) {
                           args=args, 
                           seurat_obj=seurat_obj)
   
-  names(subsets) = sNames
-  # Free up space - this may be crucial for parallelising, since "FORK" pushes all the global environment variables to every worker
+  names(subsets) = sNames_0
+  
+  # Save stats for outputting at the end
+  n_cells_subsets = sapply(subsets, function(seurat_obj) ncol(seurat_obj@raw.data), simplify = T)
+  n_genes_subsets = sapply(subsets, function(seurat_obj) nrow(seurat_obj@raw.data), simplify=T)
+  
+  # Free up space 
   rm(seurat_obj)
-  invisible(gc()); invisible(R.utils::gcDLLs())
   
-  message("Filtering out empty subsets")
-  # Filter out subsets with no cells(?) - happens with liver clust_sample subsettings
-  args=list("X"=subsets)
-  fun = function(obj) {
-    return(if (!is.null(colnames(obj@raw.data))) obj else NULL)  
-    }
-  subsets<- safeParallel(fun=fun, args=args)
-  
-  subsets_idx_ok <- sapply(subsets, function(x) !is.null(x))
-  subsets <- subsets[subsets_idx_ok]
-  sNames <- sNames[subsets_idx_ok]
-  
-  # get original n_cells
-  #n_cells_subsets_orig <- sapply(subsets, function(seurat_obj) ncol(seurat_obj@raw.data), simplify = T)
-  ### Filter out cell types that have too few cells (<minCellClusterSize).
+   ### Filter out cell types that have too few cells
   # We do this do avoid downstream problems with Seurat or WGCNA. 
   # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
   
   if (data_type=="sc") {
-    message(paste0("Filtering out subsets with fewer than ", minCellClusterSize, " cells"))
-    subsets_ok_idx <- sapply(subsets, function(seurat_obj) {
-      if(!is.null(ncol(seurat_obj@raw.data))) {
-        if(ncol(seurat_obj@raw.data)<minCellClusterSize) {
-          warning(paste0(unique(as.character(seurat_obj@ident))[1], " cell cluster filtered out because it contains < ", minCellClusterSize, " cells"))
-          return(FALSE)
-        } else {
-          return(TRUE)
-        }
-      } else {
-        return(TRUE)
-      }
-    }, simplify = T)
+    message(paste0("Filtering out cell clusters with fewer than ", minCellClusterSize, " cells"))
+    idx_subsets_ok <- n_cells_subsets>=minCellClusterSize
   } else if (data_type=="bulk") { # no need to filter out any subsets
-    subsets_ok_idx = !logical(length = length(subsets))
+    idx_subsets_ok = !logical(length = length(subsets))
   }
   
-  subsets <- subsets[subsets_ok_idx]
-  sNames <- sNames[subsets_ok_idx]
-  names(subsets) <- sNames 
+  if (sum(idx_subsets_ok)<length(idx_subsets_ok)) {
+    log_entry <- paste0(c("The following cell clusters had <", minCellClusterSize,"cells and were therefore dropped:",sNames_0[!idx_subsets_ok]), collapse=" ")
+    warning(log_entry)
+    cat(text = log_entry, file =  path_cellClusters_dropped_log, append=T, sep = "\n")
+  }
+  subsets <- subsets[idx_subsets_ok]
+  sNames_1 <- sNames_0[idx_subsets_ok]
+  names(subsets) <- sNames_1 
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
   if (data_type=="sc") {
@@ -707,12 +690,18 @@ if (is.null(resume)) {
                             min.cells=min.cells)
   }
   
-  if (any(sapply(subsets, is.null))) {
-    idx_ok <- sapply(subsets, !is.null, simplify=T)
-    warning(paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames[!idx_ok], " had no genes left"))
-    subsets <- subsets[idx_ok]
-    sNames <- sNames[idx_ok]
+   
+  # Filter
+  idx_subsets_ok <- sapply(subsets, function(subset) {!is.null(rownames(subset@raw.data))}, simplify=T)
+  if (length(idx_subsets_ok)!=sum(idx_subsets_ok)) {
+    log_entry <-paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames_1[!idx_subsets_ok], " had no genes left")
+    warning(log_entry)
+    cat(log_entry, file = path_cellClusters_dropped_log, append=T, sep = "\n")
   }
+    
+  subsets <- subsets[idx_subsets_ok]
+  sNames_2 <- sNames_1[idx_subsets_ok]
+  
   
   if (data_type=="sc") {
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "NormalizeData.txt")
@@ -722,13 +711,6 @@ if (is.null(resume)) {
                             args=args, 
                             outfile=outfile)
     
-  }
-  
-  if (any(sapply(subsets, is.null))) {
-    idx_ok <- sapply(subsets, !is.null, simplify=T)
-    warning(paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames[!idx_ok], " had no genes left"))
-    subsets <- subsets[idx_ok]
-    sNames <- sNames[idx_ok]
   }
   
   message("Scaling and regressing data subsets")
@@ -862,10 +844,6 @@ if (is.null(resume)) {
     list_datExpr <- lapply(subsets, function(x) seurat_to_datExpr(seurat_obj_sub = x, idx_genes_use = rownames(x@scale.data) %in% x@var.genes))
   } 
   
-  # Save stats for outputting at the end
-  n_cells_subsets = sapply(list_datExpr, function(x) nrow(x), simplify = T)
-  n_genes_subsets = sapply(list_datExpr, function(x) ncol(x), simplify=T)
-  
   # Clear up
   rm(subsets) #, builtInParams)
   invisible(gc())
@@ -908,7 +886,7 @@ if (resume == "checkpoint_1") {
   softPower <- 8 # Set a default value as fall back
   
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_compute_softPowers.txt")
-  args = list("datExpr" = list_datExpr, "subsetName"=sNames)
+  args = list("datExpr" = list_datExpr, "subsetName"=sNames_2)
   fun = function(datExpr, subsetName) {
     powers = c(1:30)
     sft = pickSoftThreshold(data=datExpr,
@@ -919,7 +897,6 @@ if (resume == "checkpoint_1") {
                             networkType = networkType,
                             verbose = 1)
     pdf(sprintf("%s%s_%s_%s_pickSoftThresholdSFTFit.pdf", plots_dir, data_prefix, run_prefix, subsetName),width=10,height=5)
-    #par(mfrow = c(1,2));
     cex1 = 0.9;
     # Scale-free topology fit index as a function of the soft-thresholding power
     plot(sft$fitIndices[,1],
@@ -952,9 +929,7 @@ if (resume == "checkpoint_1") {
     if (sum(fitIndices_filter$SFT.R.sq >= 0.93) > 1) {
       fitIndices_filter_2 <- fitIndices_filter[fitIndices_filter$SFT.R.sq>=0.93,] 
       fitIndices_filter_2[which.min(fitIndices_filter_2$Power), c(1,2,6)] -> df_sft
-      #softPower = min(fitIndices_filter$Power[fitIndices_filter$SFT.R.sq>=0.9])
     } else {
-      #(fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)) %>% dplyr::select(Power))[1,] -> list_sft
       (fitIndices_filter %>% dplyr::arrange(desc(SFT.R.sq)))[1,c(1,2,6)]  -> df_sft
     }
     return(df_sft)
@@ -971,7 +946,7 @@ if (resume == "checkpoint_1") {
                           data_prefix=data_prefix, 
                           run_prefix=run_prefix)
   
-  names(list_sft) <- sNames
+  names(list_sft) <- sNames_2
   
   # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
   setwd(scratch_dir)
@@ -1003,7 +978,7 @@ if (resume == "checkpoint_1") {
                                    fraction=fraction, 
                                    randomSeed=randomSeed)
     
-    names(list_multiExpr) <- sNames 
+    names(list_multiExpr) <- sNames_2 
     
     ######################################################################
     ######### RUN CONSENSUSTOM ON THE RESAMPLED DATASETS #################
@@ -1015,7 +990,6 @@ if (resume == "checkpoint_1") {
     
     fun <- function(multiExpr,name) {
       tryCatch({
-        #consensus = consensusTOM(multiExpr = multiExpr, 
         consensusTOM(multiExpr = multiExpr, 
                                checkMissingData = checkMissingData,
                                maxBlockSize = maxBlockSize, 
@@ -1046,10 +1020,7 @@ if (resume == "checkpoint_1") {
                                cacheBase = ".blockConsModsCache",
                                verbose = verbose,
                                indent = indent)
-      # For each consensusTOM, get a logical vector where 'good_genes' that were used are TRUE
-      # The main output is the consensus matrix which is saved to disk and not returned
-      #goodGenesTOM_idx = as.logical(consensus$goodSamplesAndGenes$goodGenes)
-      #return(goodGenesTOM_idx)
+
       }, error = function(err) {
         adjacency = adjacency(datExpr=list_datExpr[[name]], 
                               type=type, 
@@ -1064,16 +1035,12 @@ if (resume == "checkpoint_1") {
                                   indent = indent)
         colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
         save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-        #oodGenesTOM_idx <- rep("TRUE", ncol(list_datExpr[[name]]))
-        #return(goodGenesTOM_idx)
       })
     }
     
-    args <- list("multiExpr"=list_multiExpr, "name"=sNames)
+    args <- list("multiExpr"=list_multiExpr, "name"=sNames_2)
     outfile = outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt")
-    
-    #list_goodGenesTOM_idx <- tryCatch({
-    #list_goodGenesTOM_idx <- safeParallel(fun=fun, 
+
                               safeParallel(fun=fun, 
                                            args=args, 
                                            outfile=outfile, 
@@ -1112,13 +1079,6 @@ if (resume == "checkpoint_1") {
                                            indent = indent,
                                            list_datExpr=list_datExpr,
                                            scratch_dir = scratch_dir)
-    
-    # # Use the goodGenesTOM_idx to filter the datExpr matrices
-    # list_datExpr_gg <- mapply(function(datExpr,goodGenesTOM_idx) {
-    #   datExpr[,goodGenesTOM_idx]}, 
-    # datExpr=list_datExpr, 
-    # goodGenesTOM_idx=list_goodGenesTOM_idx, 
-    # SIMPLIFY=F)
 
   } else if (TOMnReplicate==0) {
     
@@ -1143,13 +1103,11 @@ if (resume == "checkpoint_1") {
                                 indent = indent)
       colnames(consTomDS) <- rownames(consTomDS) <- colnames(datExpr)
       save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Save TOM the way consensusTOM would have done
-      #goodGenesTOM_idx <- rep("TRUE", ncol(datExpr))
-      #goodGenesTOM_idx
+
     }
-    args = list("datExpr"=list_datExpr, "name"=sNames)
-    #list_goodGenesTOM_idx <- safeParallel(fun=fun, args=args, outfile=outfile, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)
+    args = list("datExpr"=list_datExpr, "name"=sNames_2)
     safeParallel(fun=fun, args=args, outfile=outfile, type=type, list_sft=list_sft, corFnc=corFnc, corOptions=corOptions, TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, data_prefix=data_prefix, run_prefix=run_prefix, scratch_dir=scratch_dir)
-    #list_datExpr_gg <- list_datExpr
+
   }
   
   #rm(list_datExpr)
@@ -1157,13 +1115,11 @@ if (resume == "checkpoint_1") {
   if (TOMnReplicate > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
   
   # Load TOMs into memory and convert to distance matrices
-  #outfile = paste0(log_dir, data_prefix, "_", run_prefix, "loadConsTOM_log.txt")
   fun = function(name) {
     load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name))
-    #load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, name)) # Load the consensus TOM generated by blockwiseConsensusModules
-    #1-as.dist(consTomDS) # Convert proximity to distance
+
   }
-  args = list("name"=sNames)
+  args = list("name"=sNames_2)
   list_consTOM = safeParallel(fun=fun, 
                               args=args, 
                               scratch_dir=scratch_dir, 
@@ -1188,7 +1144,7 @@ if (resume == "checkpoint_1") {
   list_dissTOM <- safeParallel(fun=fun, args=args)  
   rm(list_consTOM)
   # Save list_dissTOM to harddisk
-  names(list_dissTOM) <- sNames
+  names(list_dissTOM) <- sNames_2
   
   saveRDS(list_dissTOM, file=sprintf("%s%s_%s_list_dissTOM.rds.gz", scratch_dir, data_prefix, run_prefix), compress = "gzip")
   
@@ -1198,7 +1154,7 @@ if (resume == "checkpoint_1") {
   
   rm(list_dissTOM)
   
-  for (subsetName in sNames) {
+  for (subsetName in sNames_2) {
     if (file.exists(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, subsetName))) {
       try(file.remove(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", scratch_dir, data_prefix, run_prefix, subsetName)))
     }
@@ -1233,20 +1189,34 @@ if (resume == "checkpoint_2") {
   ipak(pkgs)
   
   ######################################################################
-  ####################### CLUSTER ON THE TOM ###########################
+  ##################### LOAD AND FILTER DISSTOMS #######################
   ######################################################################
+  # TODO: Could filter earlier
   
   list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
   list_dissTOM <- load_obj(list_dissTOM_path)
   
-  invisible(gc())
+  # Remove NULL
+  idx_celltypes_dissTOM_NULL <- sapply(list_dissTOM, is.null)
+  
+  # Write log
+  if (any(idx_celltypes_dissTOM_NULL)) write.table(x=sNames_2[idx_celltypes_dissTOM_NULL],file = paste0(log_dir, data_prefix, "_", run_prefix, "_cell_clusters_TOM_NULL.tab"))
+  
+  # Edit objects
+  list_dissTOM <- list_dissTOM[!idx_celltypes_dissTOM_NULL]
+  list_datExpr_gg <- list_datExpr_gg[!idx_celltypes_dissTOM_NULL]
+  sNames_3 <- sNames_2[!idx_celltypes_dissTOM_NULL]
+  
+  ######################################################################
+  ####################### CLUSTER ON THE TOM ###########################
+  ######################################################################
   
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parHclust.txt")
   fun <- function(dissTOM) {hclust(d=dissTOM, method=hclustMethod)}
   args = list("X"=list_dissTOM)
   
   list_geneTree <- safeParallel(fun=fun, args=args, outfile = outfile, hclustMethod=hclustMethod)
-  names(list_geneTree) = sNames # used for PlotDendro
+  names(list_geneTree) = sNames_3 # used for PlotDendro
   
   ######################################################################
   ######################### COMPUTE MODULES ############################
@@ -1271,35 +1241,74 @@ if (resume == "checkpoint_2") {
     }
   }
   
-  list_list_comb <- lapply(1:length(sNames), function(i) return(list_comb)) # just multiply..
+  list_list_comb <- lapply(1:length(sNames_3), function(i) return(list_comb)) # just multiply..
   
-  attr(x=list_list_comb, which = "names") <- sNames # for some reason, just setting names(list_list_comb) <- sNames filled the list with NULLs...
+  attr(x=list_list_comb, which = "names") <- sNames_3 # for some reason, just setting names(list_list_comb) <- sNames_3 filled the list with NULLs...
   
   invisible(gc()); invisible(R.utils::gcDLLs())
   
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_cutreeHybrid_for_vec.txt")
   
   fun <- function(geneTree,dissTOM) {
-    lapply(list_comb, function(comb) cutreeHybrid_for_vec(comb=comb, 
-                                                          geneTree=geneTree, 
-                                                          dissTOM = dissTOM,
-                                                          maxPamDist = maxPamDist, 
-                                                          useMedoids = useMedoids))}
+    lapply(list_comb, function(comb) {
+      tryCatch({
+        cutreeHybrid_for_vec(comb=comb, 
+                                    geneTree=geneTree, 
+                                    dissTOM = dissTOM,
+                                    maxPamDist = maxPamDist, 
+                                    useMedoids = useMedoids)
+      }, error= function(err) {
+      message(paste0(comb), ": cutreeHybrid failed")
+      return(NULL)
+     })
+      }
+    )}
   
   args = list("geneTree"=list_geneTree, "dissTOM"=list_dissTOM)
   
   list_list_cutree <- safeParallel(fun=fun, args=args, outfile=outfile, list_comb=list_comb, maxPamDist=maxPamDist, useMedoids=useMedoids)
   
-  names(list_list_cutree) = sNames
-  
   # free up memory
   if (fuzzyModMembership=="kME") rm(list_dissTOM)
+  
   # Produce labels for plotting the modules found by different parameters
   list_plot_label <- lapply(list_comb, function(comb) plotLabel_for_vec(comb=comb)) # list of labels for plot
   # Make a copy of the labels for each subset
   list_list_plot_label = list()
-  list_list_plot_label <- lapply(sNames, function(name) list_list_plot_label[[name]] = list_plot_label)
-  #names(list_list_plot_label) = sNames
+  list_list_plot_label <- lapply(sNames_3, function(name) list_list_plot_label[[name]] = list_plot_label)
+  
+  # Remove NULLs in nested lists where cutreeHybrid failed
+  list_vec_idx.combcutreeNULL <- lapply(list_list_cutree, function(list_cutree) {
+    sapply(list_cutree, is.null)
+  })
+  
+  names(list_vec_idx.combcutreeNULL) = sNames_3
+  
+  # filter
+  if (any(sapply(list_vec_idx.combcutreeNULL, function(idx) idx==T))) {
+    
+    list_list_cutree <- mapply(function(list_cutree, vec_idx.combcutreeNULL) {
+      list_cutree[!vec_idx.combcutreeNULL]
+    }, list_cutree=list_list_cutree, vec_idx.combcutreeNULL = list_vec_idx.combcutreeNULL, SIMPLIFY=F)
+    
+    list_list_comb <- mapply(function(list_comb, vec_idx.combcutreeNULL) {
+      list_comb[!vec_idx.combcutreeNULL]
+    }, list_comb=list_list_comb, vec_idx.combcutreeNULL = list_vec_idx.combcutreeNULL, SIMPLIFY=F)
+    
+    list_list_plot_label <- mapply(function(list_plot_label, vec_idx.combcutreeNULL) {
+      list_plot_label[!vec_idx.combcutreeNULL]
+    }, list_plot_label = list_list_plot_label, vec_idx.combcutreeNULL = list_vec_idx.combcutreeNULL, SIMPLIFY=F)
+  }
+  
+  names(list_list_cutree) <- names(list_list_comb) <- names(list_list_plot_label) <- sNames_3
+  
+  # Filter at the cell cluster level
+  
+  list_list_cutree <- Filter(f=length, x= list_list_cutree)
+  list_list_comb <- Filter(f=length, x=list_list_comb)
+  list_list_plot_label <- Filter(f=length, x=list_list_plot_label)
+  sNames_4 <- names(list_list_cutree) 
+  list_datExpr_gg <-list_datExpr_gg[names(list_datExpr_gg) %in% sNames_4]
   
   ######################################################################
   ######################### MERGE CLOSE MODULES ########################
@@ -1335,11 +1344,9 @@ if (resume == "checkpoint_2") {
             warning(paste0(cellType, ": Only one proper module found, nothing to merge"))
             colors = labels2colors(cutree$labels) 
           }
-          MEs <- try(moduleEigengenes_kIM_scale(expr = as.matrix(datExpr),
+          MEs <- try(moduleEigengenes_uv(expr = as.matrix(datExpr),
                                                 colors=colors,
-                                                excludeGrey = T,
-                                                #scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-                                                dissTOM = NULL))
+                                                excludeGrey = T))
           if (class(MEs)=="try-error") MEs <- NULL
         } else {
           warning(paste0(cellType, ": No modules found"))
@@ -1360,7 +1367,7 @@ if (resume == "checkpoint_2") {
     
     list_list_merged <- safeParallel(fun=fun, args=args, outfile=outfile, corFnc = corFnc,corOptions=corOptions)
     
-    names(list_list_merged) = sNames
+    names(list_list_merged) = sNames_4
     
     # get colors
     fun = function(list_merged,datExpr,cellType) {
@@ -1373,12 +1380,12 @@ if (resume == "checkpoint_2") {
     
     args=list("list_merged"=list_list_merged, 
               datExpr=list_datExpr_gg, 
-              cellType=sNames)
+              cellType=sNames_4)
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "getColors.txt")
     
     # Extract the colors from the list returned by mergeCloseModules
     list_list_colors <- safeParallel(fun=fun, args=args, outfile=outfile)
-    names(list_list_colors) <- sNames
+    names(list_list_colors) <- sNames_4
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
     fun = function(list_merged) {lapply(list_merged, function(merged) {
@@ -1386,7 +1393,7 @@ if (resume == "checkpoint_2") {
     args = list("X"=list_list_merged)
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "getMEs.txt")
     list_list_MEs <- safeParallel(fun=fun, args=args, outfile=outfile)
-    names(list_list_MEs) <- sNames
+    names(list_list_MEs) <- sNames_4
     
     # Compute kMEs 
     fun = function(list_MEs, datExpr) {
@@ -1412,28 +1419,19 @@ if (resume == "checkpoint_2") {
     fun = function(x) lapply(x, function(y) labels2colors(y$labels))
     args = list("X"=list_list_cutree)
     list_list_colors <- safeParallel(fun=fun, args=args)
-    #list_list_colors <- parLapplyLB(cl, list_list_cutree, function(x) lapply(x, function(y) labels2colors(y$labels)))
-    
+
     fun =  function(list_colors,datExpr) lapply(list_colors, function(colors) name_for_vec(to_be_named=colors, given_names = colnames(datExpr), dimension=NULL))
     args = list("list_colors"=list_list_colors, "datExpr"=list_datExpr_gg)
     list_list_colors <- safeParallel(fun=fun, args=args)
-    # list_list_colors <- clusterMap(cl, function(list_colors,datExpr) lapply(list_colors, function(colors) name_for_vec(to_be_named=colors, given_names = colnames(datExpr), dimension=NULL)),
-    #                                list_colors = list_list_colors,
-    #                                datExpr = list_datExpr_gg,
-    #                                SIMPLIFY=F,
-    #                                .scheduling = c("dynamic"))
+
     
     fun = function(list_colors,list_plot_label) name_for_vec(to_be_named=list_colors, given_names = as.character(list_plot_label), dimension=NULL)
     args = list(list_colors = list_list_colors,
                 list_plot_label = list_list_plot_label)
     list_list_colors <- safeParallel(fun=fun, args=args)
-    # list_list_colors <- clusterMap(cl, function(list_colors,list_plot_label) name_for_vec(to_be_named=list_colors, given_names = as.character(list_plot_label), dimension=NULL),
-    #                                list_colors = list_list_colors,
-    #                                list_plot_label = list_list_plot_label,
-    #                                SIMPLIFY=F,
-    #                                .scheduling = c("dynamic"))
+
     
-    names(list_list_colors) <- sNames
+    names(list_list_colors) <- sNames_4
     
     # Merge close modules using correlation between IM embeddings
     fun = function(dissTOM, list_colors) lapply(list_colors, function(colors) kIM_eachMod_norm(dissTOM = dissTOM, 
@@ -1445,14 +1443,7 @@ if (resume == "checkpoint_2") {
                 list_colors = list_list_colors)
     list_list_kMs <- safeParallel(fun = fun, args=args)
     
-    # list_list_kMs <- clusterMap(cl, function(dissTOM, list_colors) lapply(list_colors, function(colors) kIM_eachMod_norm(dissTOM = dissTOM, 
-    #                                                                                                                      colors = colors,
-    #                                                                                                                      verbose=verbose,
-    #                                                                                                                      excludeGrey=F)),
-    #                             dissTOM = list_dissTOM,
-    #                             list_colors = list_list_colors,
-    #                             SIMPLIFY=F,
-    #                             .scheduling = c("dynamic"))
+
     
     fun = function(list_colors,list_kMs,datExpr,dissTOM, cellType) mapply( function(colors,kMs) mergeCloseModskIM(datExpr=datExpr,
                                                                                                                   colors = colors,
@@ -1472,51 +1463,27 @@ if (resume == "checkpoint_2") {
                 cellType = names(list_list_colors))
     list_list_merged <- safeParallel(fun=fun, args=args)
     
-    # list_list_merged <- clusterMap(cl, function(list_colors,list_kMs,datExpr,dissTOM, cellType) mapply( function(colors,kMs) mergeCloseModskIM(datExpr=datExpr,
-    #                                                                                                                                            colors = colors,
-    #                                                                                                                                            kIMs  = kMs,
-    #                                                                                                                                            dissTOM = dissTOM,
-    #                                                                                                                                            moduleMergeCutHeight=moduleMergeCutHeight,
-    #                                                                                                                                            verbose=verbose,
-    #                                                                                                                                            cellType = cellType),
-    #                                                                                                     colors = list_colors,
-    #                                                                                                     kMs = list_kMs,
-    #                                                                                                     SIMPLIFY=F),
-    #                                list_colors = list_list_colors,
-    #                                list_kMs = list_list_kMs,
-    #                                datExpr = list_datExpr_gg,
-    #                                dissTOM = list_dissTOM,
-    #                                cellType = names(list_list_colors),
-    #                                SIMPLIFY=F,
-    #                                .scheduling = c("dynamic"))
-    
+   
     fun = function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
                                        error = function(c) {
                                          warning(paste0(cellType, " failed"))
                                        })}
     args = list("X"=names(list_list_merged))
     list_list_colors <- safeParallel(fun=fun, args=args)
-    # list_list_colors <- parLapplyLB(cl, names(list_list_merged), function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
-    #                                                                                           error = function(c) {
-    #                                                                                             warning(paste0(cellType, " failed"))
-    #                                                                                           })})
+
     fun = function(x) lapply(x, function(y) y[['colors']])
     args= list("X"=list_list_merged)
     list_list_colors <- safeParallel(fun=fun, args=args)
-    # list_list_colors <- parLapplyLB(cl, list_list_merged, function(x) lapply(x, function(y) y[['colors']]))
-    
+
     fun = function(x) lapply(x, function(y) y[['kIMs']])
     args= list("X"=list_list_merged)
     list_list_kMs <- safeParallel(fun=fun, args=args)
     
-    ##list_list_kMs <- parLapplyLB(cl, list_list_merged, function(x) lapply(x, function(y) y[['kIMs']]))
     list_list_MEs <- NULL
     
-    # stopCluster(cl)
-    # invisible(gc()); invisible(R.utils::gcDLLs())
     
   }
-  names(list_list_colors) <- names(list_list_kMs) <- sNames
+  names(list_list_colors) <- names(list_list_kMs) <- sNames_4
   
   ################################################  ######################
   ###################### REASSIGN GENES BASED ON kM ####################
@@ -1526,9 +1493,6 @@ if (resume == "checkpoint_2") {
   if (kM_reassign) {
     message(paste0("Reassigning genes based on ", fuzzyModMembership))
     
-    # cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), 
-    #                   type = "FORK", 
-    #                   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_kM_reassign.txt"))
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_kM_reassign.txt")
     
     if (fuzzyModMembership=="kIM") {
@@ -1560,7 +1524,6 @@ if (resume == "checkpoint_2") {
                                                                                     max_iter = 3,
                                                                                     cellType = cellType))
       args = list(list_colors = list_list_colors,
-                  #dissTOM = list_dissTOM,
                   datExpr = list_datExpr_gg,
                   cellType = names(list_list_colors))
       
@@ -1568,25 +1531,7 @@ if (resume == "checkpoint_2") {
     
     
     list_list_reassign = safeParallel(fun=fun, args=args, outfile=outfile, fuzzyModMembership=fuzzyModMembership, corFnc=corFnc, verbose=verbose)
-    # list_list_reassign = clusterMap(cl, function(list_colors,
-    #                                              dissTOM,
-    #                                              datExpr,
-    #                                              cellType) lapply(list_colors, function(colors) kM_reassign_fnc(colors = colors,
-    #                                                                                                             fuzzyModMembership = fuzzyModMembership,
-    #                                                                                                             dissTOM = if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) dissTOM else NULL,
-    #                                                                                                             datExpr = if (fuzzyModMembership=="kME") datExpr else NULL,
-    #                                                                                                             corFnc = if (fuzzyModMembership=="kME") corFnc else NULL,
-    #                                                                                                             verbose=verbose,
-    #                                                                                                             max_iter = 3,
-    #                                                                                                             cellType = cellType)),
-    #                                 list_colors = list_list_colors,
-    #                                 dissTOM = list_dissTOM,
-    #                                 datExpr = list_datExpr_gg,
-    #                                 cellType = names(list_list_colors),
-    #                                 SIMPLIFY=F,
-    #                                 .scheduling = c("dynamic"))
     
-    #stopCluster(cl)
     
     # Extract new colors and kMs from the list of lists of lists returned by the vectorised kM_reassign 
     list_list_colors_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$colors))
@@ -1608,9 +1553,7 @@ if (resume == "checkpoint_2") {
   
   message(paste0("Computing primary "), fuzzyModMembership, "s")
   
-  # invisible(gc()); invisible(R.utils::gcDLLs())
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_primary_kMs_for_PPI.txt")
-  # cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 0.5)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_primary_kMs_for_PPI.txt"))
   fun = function(list_kMs,
                  list_colors) mapply(function(kMs, colors) {
                    if (length(unique(colors))>1) {
@@ -1628,20 +1571,7 @@ if (resume == "checkpoint_2") {
   
   list_list_pkMs <- safeParallel(fun=fun, args=args, outfile=outfile)
   
-  # list_list_pkMs <- clusterMap(cl, function(list_kMs,
-  #                                           list_colors) mapply(function(kMs, colors) {
-  #                                             if (length(unique(colors))>1) {
-  #                                               pkMs_fnc(kMs=kMs, colors=colors)  
-  #                                             } else {
-  #                                               pkMs<-numeric(length=length(colors))
-  #                                               names(pkMs) <- names(colors)
-  #                                               pkMs}
-  #                                           }, 
-  #                                           kMs = list_kMs, 
-  #                                           colors=list_colors, SIMPLIFY=F), 
-  #                              list_kMs = list_list_kMs_reassign, 
-  #                              list_colors = list_list_colors_reassign, 
-  #                              SIMPLIFY = F, .scheduling = c("dynamic"))
+ 
   
   # The pkM vectors already have gene names. Now name each vector, and each list of vectors
   fun = function(list_pkMs,list_plot_label) name_for_vec(to_be_named = list_pkMs, 
@@ -1650,17 +1580,9 @@ if (resume == "checkpoint_2") {
   args = list(list_pkMs=list_list_pkMs, 
               list_plot_label=list_list_plot_label)
   list_list_pkMs <- safeParallel(fun=fun, args=args)
-  # list_list_pkMs <- clusterMap(cl, function(list_pkMs,list_plot_label) name_for_vec(to_be_named = list_pkMs, 
-  #                                                                                   given_names = as.character(list_plot_label), 
-  #                                                                                   dimension = NULL), 
-  #                              list_pkMs=list_list_pkMs, 
-  #                              list_plot_label=list_list_plot_label, 
-  #                              SIMPLIFY=F, .scheduling = c("dynamic"))
   
-  names(list_list_pkMs) <- sNames
-  
-  # stopCluster(cl)
-  # invisible(gc()); invisible(R.utils::gcDLLs())
+  names(list_list_pkMs) <- sNames_4
+
   
   ######################################################################
   ##### FILTER OUT GENES WITH INSIGNIFICANT GENE-MOD CORRELATION #######
@@ -1671,8 +1593,6 @@ if (resume == "checkpoint_2") {
     
     message("Computing gene-module correlation t-test p-values")
     
-    # invisible(gc()); invisible(R.utils::gcDLLs())
-    # cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 0.5)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt"))
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test.txt")
     
     if (fuzzyModMembership=="kME") {
@@ -1708,42 +1628,10 @@ if (resume == "checkpoint_2") {
       args = list(list_pkMs = list_list_pkMs, 
                   list_colors = list_list_colors_reassign, 
                   list_comb = list_list_comb,
-                  cellType = sNames)
+                  cellType = sNames_4)
       
       list_list_geneMod_t.test <- safeParallel(fun=fun, args=args, pvalThreshold=pvalThreshold) 
       
-      # list_list_geneMod_t.test <- clusterMap(cl, function(list_pkMs, list_colors, cellType)  {
-      #   mapply(function(pkMs, colors, comb) {
-      #     tryCatch({
-      #       if (length(unique(colors))>1){
-      #         vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
-      #         vec_p.val <- ifelse(colors!="grey", stats::pt(q=vec_t,  
-      #                                                       lower.tail = F, 
-      #                                                       df = length(pkMs)-2), 1) # compute p.values. We are genuinely only interested in upper tail 
-      #         vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
-      #         vec_idx_signif <- vec_q.val < pvalThreshold # compute boolean significance vector. Set "grey" to TRUE so we don't count them
-      #         vec_idx_signif[colors=="grey"] <- TRUE
-      #         out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-      #         out } 
-      #       else {
-      #         out <- NULL
-      #       }
-      #     }, 
-      #     error = function(err) {
-      #       message(paste0(cellType, ", ", comb, ": ", "Failed to compute gene p-values with error: ", err))  
-      #       out <- data.frame("p.val" = rep(0, length(colors)), "q.val" = rep(0, length(colors)), "signif" = rep(TRUE, length(colors)))
-      #       out
-      #     })
-      #   },
-      #   pkMs=list_pkMs, 
-      #   colors=list_colors, 
-      #   comb = names(list_colors),
-      #   SIMPLIFY=F)},
-      #   list_pkMs = list_list_pkMs, 
-      #   list_colors = list_list_colors_reassign, 
-      #   cellType = sNames,
-      #   SIMPLIFY=F, 
-      #   .scheduling = c("dynamic"))
       
     } else if (fuzzyModMembership=="kIM") {
       
@@ -1774,43 +1662,13 @@ if (resume == "checkpoint_2") {
       
       args  = list(datExpr = list_datExpr_gg,
                    list_colors = list_list_colors_reassign,
-                   cellType = sNames,
+                   cellType = sNames_4,
                    list_kMs = list_list_kMs_reassign,
                    list_comb=list_list_comb,
                    dissTOM = list_dissTOM)
       
       list_list_embed_mat <- safeParallel(fun=fun, args=args)
-      # list_list_embed_mat <- clusterMap(cl, function(datExpr, list_colors, cellType, list_kMs, dissTOM) { 
-      #   mapply(function(colors, kMs, comb) {
-      #     tryCatch({
-      #       if (length(unique(colors))>1) {
-      #         message(paste0(cellType, ": Computing module kIM embeddings"))
-      #         cellModEmbed(datExpr=datExpr,
-      #                      colors=colors,
-      #                      latentGeneType="IM",
-      #                      cellType=NULL, # to avoid having it in the embedding matrix column names
-      #                      kMs = kMs,
-      #                      dissTOM = dissTOM)
-      #       } else {
-      #         NULL
-      #       }
-      #     }, error = function(err) {
-      #       message(paste0(cellType, ", ", comb, ": ", "failed to compute embedding matrix with error: ", err))
-      #       NULL
-      #       })
-      #   },
-      #   colors=list_colors,
-      #   kMs = list_kMs,
-      #   comb= names(list_colors),
-      #   SIMPLIFY=F)
-      #   },
-      # datExpr = list_datExpr_gg,
-      # list_colors = list_list_colors_reassign,
-      # cellType = sNames,
-      # list_kMs = list_list_kMs_reassign,
-      # dissTOM = list_dissTOM,
-      # SIMPLIFY=F,
-      # .scheduling = c("dynamic"))
+      
       
       fun = function(datExpr, list_embed_mat, list_colors, list_comb, cellType) {
         mapply(function(embed_mat, colors, comb){
@@ -1847,45 +1705,10 @@ if (resume == "checkpoint_2") {
                   list_embed_mat = list_list_embed_mat,
                   list_colors = list_list_colors_reassign,
                   list_comb = list_list_comb,
-                  cellType = sNames)
+                  cellType = sNames_4)
       
       list_list_geneMod_t.test <- safeParallel(fun=fun, args=args, outfile=outfile, pvalThreshold=pvalThreshold)
-      # list_list_geneMod_t.test <- clusterMap(cl, function(datExpr, list_embed_mat, list_colors, cellType) {
-      #   mapply(function(embed_mat, colors, comb){
-      #     tryCatch({
-      #       if (length(unique(colors))>1) {
-      #         message(paste0(cellType, ": Computing gene correlations with module kIM embeddings"))
-      #         vec_p.val <- numeric(length=length(colors))
-      #         names(vec_p.val) <- names(colors)
-      #         vec_p.val[colors=="grey"] <- 0
-      #         
-      #         for (color in names(table(colors))[!grepl("^grey$",names(table(colors)))]) {
-      #           vec_p.val[colors==color] <- apply(X = datExpr[,colors==color], MARGIN = 2, FUN = function(datExpr_col) cor.test(datExpr_col, embed_mat[, color,drop=F], 
-      #                                                                                                                           alternative = "greater", 
-      #                                                                                                                           method = "pearson", 
-      #                                                                                                                           conf.level = 1-pvalThreshold)$p.value)
-      #         }
-      #         vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
-      #         vec_idx_signif <- vec_q.val < pvalThreshold
-      #         vec_idx_signif[colors=="grey"] <- TRUE# compute boolean significance vector. Set "grey" to TRUE so we don't count them
-      #         out <- data.frame("p.val" = vec_p.val, "q.val" = vec_q.val, "signif" = vec_idx_signif)
-      #         out } else out <- NULL
-      #     }, error= function(err) {
-      #       message(paste0(cellType, ", ", comb, ": ", "failed to compute t.test with error: ", err))
-      #       out <- data.frame("p.val" = rep(0, length(colors)), "q.val" = rep(0, length(colors)), "signif" = rep(TRUE, length(colors)))
-      #       out
-      #     })
-      #   },
-      #   embed_mat=list_embed_mat,
-      #   colors=list_colors,
-      #   comb = names(list_colors),
-      #   SIMPLIFY=F)}, 
-      #   datExpr = list_datExpr_gg,
-      #   list_embed_mat = list_list_embed_mat,
-      #   list_colors = list_list_colors_reassign,
-      #   cellType = sNames,
-      #   SIMPLIFY=F,
-      #   .scheduling = c("dynamic"))
+      
       
       rm(list_list_embed_mat)
     } 
@@ -1909,10 +1732,7 @@ if (resume == "checkpoint_2") {
                                            if (!is.null(geneMod_t.test)) all(geneMod_t.test$signif) else T}
                                            , simplify=T)}, simplify=T))) {
     message("Filtering out genes with insignificant gene-module correlation p-values in expression profile")
-    #invisible(gc()); invisible(R.utils::gcDLLs())
-    
-    #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_t.test_filtering.txt"))
-    
+
     # filter colors
     fun = function(list_colors_reassign, list_geneMod_t.test) {
       mapply(function(colors_reassign, geneMod_t.test) {
@@ -1931,24 +1751,7 @@ if (resume == "checkpoint_2") {
     args = list(list_colors_reassign = list_list_colors_reassign, 
                 list_geneMod_t.test = list_list_geneMod_t.test)
     list_list_colors_t.test <- safeParallel(fun=fun, args=args)
-    # list_list_colors_t.test <- clusterMap(cl, function(list_colors_reassign, list_geneMod_t.test) {
-    #   mapply(function(colors_reassign, geneMod_t.test) {
-    #     
-    #     if (!is.null(geneMod_t.test)) {
-    #       colors_t.test <- colors_reassign
-    #       colors_t.test[!geneMod_t.test$signif] <- rep("grey", times=sum(!geneMod_t.test$signif))
-    #       return(colors_t.test)
-    #     } else {
-    #       colors_reassign
-    #     }
-    #   }, colors_reassign = list_colors_reassign, 
-    #   geneMod_t.test = list_geneMod_t.test, 
-    #   SIMPLIFY=F)
-    # }, 
-    # list_colors_reassign = list_list_colors_reassign, 
-    # list_geneMod_t.test = list_list_geneMod_t.test,
-    # SIMPLIFY=F,
-    # .scheduling = c("dynamic"))
+    
     fun = function(list_pkMs, list_geneMod_t.test) {
       
       mapply(function(pkMs, geneMod_t.test) {
@@ -1969,29 +1772,7 @@ if (resume == "checkpoint_2") {
     args = list(list_pkMs = list_list_pkMs, 
                 list_geneMod_t.test = list_list_geneMod_t.test)
     list_list_pkMs_t.test <- safeParallel(fun=fun, args=args)
-    # list_list_pkMs_t.test <- clusterMap(cl, function(list_pkMs, list_geneMod_t.test) {
-    #   
-    #   mapply(function(pkMs, geneMod_t.test) {
-    #     
-    #     if (!is.null(geneMod_t.test)) {
-    #       
-    #       pkMs_t.test <- pkMs
-    #       pkMs_t.test[!geneMod_t.test$signif] <- rep(0, times=sum(!geneMod_t.test$signif))
-    #       return(pkMs_t.test)
-    #     } else {
-    #       pkMs 
-    #     }
-    #   }, 
-    #   pkMs = list_pkMs, 
-    #   geneMod_t.test = list_geneMod_t.test, 
-    #   SIMPLIFY=F)
-    # }, 
-    # list_pkMs = list_list_pkMs, 
-    # list_geneMod_t.test = list_list_geneMod_t.test,
-    # SIMPLIFY=F,
-    # .scheduling = c("dynamic"))
     
-    # stopCluster(cl)
   } 
   
   ######################################################################
@@ -2006,9 +1787,7 @@ if (resume == "checkpoint_2") {
     
     message(paste0("Filtering out modules with fewer than ", minClusterSize, " genes left after t.testing"))
     
-    #invisible(gc()); invisible(R.utils::gcDLLs())
-    
-    #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_minClusterSize_filter.txt"))
+
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_par_minClusterSize_filter.txt")
     
     # filter pkMs
@@ -2024,19 +1803,7 @@ if (resume == "checkpoint_2") {
     args= list(list_pkMs = list_list_pkMs_t.test, 
                list_colors = list_list_colors_t.test)
     list_list_pkMs_t.test <- safeParallel(fun=fun, args=args, outfile=outfile)
-    # list_list_pkMs_t.test <- clusterMap(cl, function(list_pkMs, list_colors) {
-    #   mapply(function(pkMs, colors) {
-    #     mods_too_small <- names(table(colors))[table(colors) < minClusterSize]
-    #     pkMs[colors %in% mods_too_small] <- rep(0, times=sum(colors %in% mods_too_small))
-    #     return(pkMs)
-    #   }, pkMs = list_pkMs, 
-    #   colors = list_colors, 
-    #   SIMPLIFY=F)
-    # }, 
-    # list_pkMs = list_list_pkMs_t.test, 
-    # list_colors = list_list_colors_t.test,
-    # SIMPLIFY=F,
-    # .scheduling = c("dynamic"))
+    
     
     # filter colors after pkMs as we needed colors to filter pkMs
     fun = function(list_colors) {
@@ -2048,15 +1815,7 @@ if (resume == "checkpoint_2") {
     }
     args= list("X"=list_list_colors_t.test)
     list_list_colors_t.test <- safeParallel(fun=fun, args=args, outfile=outfile)
-    # list_list_colors_t.test <- parLapplyLB(cl, list_list_colors_t.test, function(list_colors) {
-    #   lapply(list_colors, function(colors) {
-    #     mods_too_small <- names(table(colors))[table(colors) < minClusterSize]
-    #     colors[colors %in% mods_too_small] <- rep("grey", times=sum(colors %in% mods_too_small))
-    #     colors
-    #   })
-    # })
     
-    # stopCluster(cl)
   } 
   
   ######################################################################
@@ -2068,16 +1827,13 @@ if (resume == "checkpoint_2") {
   message("Matching module color labels between parameter settings")
   
   # Align / match the colors so similar modules found with different sets of parameters have the same name
-  #invisible(gc()); invisible(R.utils::gcDLLs())
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parMatchColors.txt")
-  #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_parMatchColors.txt"))
   fun = function(x) parMatchColors(list_colors = x)
   args = list("X"=list_list_colors_t.test)
   list_list_colors_matched <- safeParallel(fun=fun, args=args, outfile=outfile)
-  #list_list_colors_matched <- parLapplyLB(cl, list_list_colors_t.test, function(x) parMatchColors(list_colors = x))
-  
+
   # Rename highest level list entries (cell clusters)
-  names(list_list_colors_matched) = sNames
+  names(list_list_colors_matched) = sNames_4
   
   # Name each entry of the vectors of color assignments with the corresponding genes
   fun =  function(list_colors_matched,datExpr) lapply(list_colors_matched, 
@@ -2087,19 +1843,6 @@ if (resume == "checkpoint_2") {
   args = list(list_colors_matched=list_list_colors_matched, 
               datExpr=list_datExpr_gg)
   list_list_colors_matched <- safeParallel(fun=fun, args=args, outfile=outfile)
-  
-  
-  # list_list_colors_matched <- clusterMap(cl, function(list_colors_matched,datExpr) lapply(list_colors_matched, 
-  #                                                                                         function(colors_matched) name_for_vec(to_be_named=colors_matched, 
-  #                                                                                                                               given_names=colnames(datExpr), 
-  #                                                                                                                               dimension = NULL)), 
-  #                                        list_colors_matched=list_list_colors_matched, 
-  #                                        datExpr=list_datExpr_gg, 
-  #                                        SIMPLIFY=F,
-  #                                        .scheduling = c("dynamic"))
-  
-  # stopCluster(cl)
-  # invisible(gc()); invisible(R.utils::gcDLLs())
   
   ######################################################################
   ######################### REMOVE ALL-GREY RUNS #######################
@@ -2138,7 +1881,6 @@ if (resume == "checkpoint_2") {
                                 logical_params_ok = list_logical_params_ok,
                                 SIMPLIFY = F)[logical_subsets_ok]
   
-  #list_list_MEs_ok <- if (fuzzyModMembership=="kME")  mapply(function(x,y) x[y], x = list_list_MEs, y = list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   list_list_colors_matched_ok <- mapply(function(list_colors_matched,logical_params_ok) {
     list_colors_matched[logical_params_ok]
   }, 
@@ -2149,7 +1891,7 @@ if (resume == "checkpoint_2") {
   list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs_t.test, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
   list_list_reassign_log <- if (kM_reassign) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
   
-  sNames_ok <- sNames[logical_subsets_ok]
+  sNames_5 <- sNames_4[logical_subsets_ok]
   
   list_datExpr_ok <- list_datExpr_gg[logical_subsets_ok] # If for a subset all parameters gave only grey modules, take it out of the top level list.
   list_geneTree_ok <- list_geneTree[logical_subsets_ok]
@@ -2161,7 +1903,7 @@ if (resume == "checkpoint_2") {
                                         y = list_datExpr_ok, SIMPLIFY=F)
   
   # Make a warning and report if any whole subsets produced no modules
-  discarded <- setdiff(sNames, sNames_ok)
+  discarded <- setdiff(sNames_4, sNames_5)
   if (length(discarded > 0)) {
     warning(paste0(discarded, " were dropped because the script didn't find any modules  "))
     fileConn <- file(description = sprintf("%s%s_%s_ERROR_report.txt", log_dir,  data_prefix, run_prefix), open = 'a')
@@ -2222,11 +1964,8 @@ if (resume == "checkpoint_3") {
     list_PPI_pkM_threshold <- lapply(list_list_pkMs_ok, function(x) quantile(unlist(x, use.names = F), probs = c(0.05), names=F))
   }
   
-  # invisible(gc()); invisible(R.utils::gcDLLs())
+
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt")
-  # cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 0.5)-1), 
-  #                   type = "FORK", 
-  #                   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_PPI_outer_for_vec.txt"))
   fun = function(list_colors,list_pkMs,PPI_pkME_threshold) {
     mapply(function(colors,pkMs) PPI_outer_for_vec(colors = colors,
                                                    pkMs = pkMs,
@@ -2241,28 +1980,7 @@ if (resume == "checkpoint_3") {
               list_pkMs = list_list_pkMs_ok,
               PPI_pkME_threshold = list_PPI_pkM_threshold)
   list_list_PPI <- safeParallel(fun=fun, args=args, outfile=outfile, STRINGdb_species=STRINGdb_species)
-  # list_list_PPI <- clusterMap(cl, function(list_colors,list_pkMs,PPI_pkME_threshold) {
-  #   #tryCatch({
-  #   mapply(function(colors,pkMs) PPI_outer_for_vec(colors = colors,
-  #                                                  pkMs = pkMs,
-  #                                                  STRINGdb_species = STRINGdb_species,
-  #                                                  PPI_pkM_threshold = PPI_pkME_threshold,
-  #                                                  pvalThreshold = pvalThreshold),
-  #          colors = list_colors,
-  #          pkMs = list_pkMs,
-  #          SIMPLIFY=F)
-  #   #}, error = function(c) {warning(paste0(name, ": PPI check failed with the error: ",c))}
-  #   #) 
-  # },
-  # list_colors = list_list_colors_matched_ok,
-  # list_pkMs = list_list_pkMs_ok,
-  # PPI_pkME_threshold = list_PPI_pkM_threshold,
-  # SIMPLIFY=F, 
-  # .scheduling = c("dynamic"))
   
-  # stopCluster(cl)
-  
-  # invisible(gc()); invisible(R.utils::gcDLLs())
   
   list_list_colors_PPI <- if (PPI_filter) lapply(list_list_PPI, function(x) lapply(x, function(y) y$colors_PPI)) else list_list_colors_matched_ok
   list_list_module_PPI <- lapply(list_list_PPI, function(x) lapply(x, function(y) data.frame(y$module_PPI, stringsAsFactors = F)))
@@ -2299,8 +2017,7 @@ if (resume == "checkpoint_4") {
   ######################### LOAD PACKAGES ##############################
   ######################################################################
   
-  pkgs <- c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA", "liger", "boot")
-  # TODO: do we actually use Seurat? 
+  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA", "liger", "boot")
   ipak(pkgs)
   
   ######################################################################
@@ -2323,7 +2040,7 @@ if (resume == "checkpoint_4") {
   list_list_colors_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_colors_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_module_PPI_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_module_PPI, y = list_PPI_vec_n_grey, SIMPLIFY=F)
   list_list_module_PPI_signif_order <- mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_module_PPI_signif, y = list_PPI_vec_n_grey, SIMPLIFY=F)
-  list_list_geneMod_t.test_order <- if (kM_signif_filter) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_geneMod_t.test[sNames %in% sNames_ok], y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
+  list_list_geneMod_t.test_order <- if (kM_signif_filter) mapply(function(x,y) x[order(y, decreasing=F)], x = list_list_geneMod_t.test[names(list_list_geneMod_t.test) %in% sNames_5], y = list_PPI_vec_n_grey, SIMPLIFY=F) else NULL
   
   ######################################################################
   ##### FOR EACH SUBSET SELECT PARAMETERS WITH BEST PPI ENRICHMENT #####
@@ -2339,9 +2056,9 @@ if (resume == "checkpoint_4") {
   list_geneMod_t.test <- if (kM_signif_filter)  lapply(list_list_geneMod_t.test_order, function(x) x[[1]]) else NULL 
   
   # Name by cell clusters
-  names(list_plot_label_final)  <-  names(list_colors_PPI) <- names(list_colors_all) <- names(list_module_PPI) <- names(list_module_PPI_signif)<- sNames_ok
-  if (kM_reassign) names(list_reassign_log) <- sNames_ok
-  if (kM_signif_filter)  names(list_geneMod_t.test) <- sNames_ok
+  names(list_plot_label_final)  <-  names(list_colors_PPI) <- names(list_colors_all) <- names(list_module_PPI) <- names(list_module_PPI_signif)<- sNames_5
+  if (kM_reassign) names(list_reassign_log) <- sNames_5
+  if (kM_signif_filter)  names(list_geneMod_t.test) <- sNames_5
   
   # Make list of list of final parameters
   param_names = c("minClusterSize", "deepSplit","pamStage", "moduleMergeCutHeight")
@@ -2357,7 +2074,7 @@ if (resume == "checkpoint_4") {
   # For any parameter setting, does the number of genes assigned to grey correspond to the length of the vector of assignments? If not, it's ok.
   logical_subsets_PPI_ok <- as.logical(mapply(function(x,y) x != length(y), x = PPI_vec_n_grey, y = list_colors_PPI, SIMPLIFY = F))
   
-  sNames_PPI <- sNames_ok[logical_subsets_PPI_ok]
+  sNames_PPI <- sNames_5[logical_subsets_PPI_ok]
   list_colors_PPI <- list_colors_PPI[logical_subsets_PPI_ok]
   list_module_PPI_ok <- list_module_PPI[logical_subsets_PPI_ok]
   list_module_PPI_signif_ok <- list_module_PPI_signif[logical_subsets_PPI_ok]
@@ -2375,7 +2092,6 @@ if (resume == "checkpoint_4") {
   message("Making module colors unique across cell clusters")
   
   # Get nested list of modules
-  # list_mods <- lapply(list_colors_PPI, function(x) names(table(x))[-grep("^grey$", names(table(x)))])
   list_mods <- lapply(list_colors_PPI, function(x) names(table(x)))
   
   list_mods <- lapply(list_mods, function(mods) {
@@ -2398,13 +2114,7 @@ if (resume == "checkpoint_4") {
   } else if (length(mods) > length(all_cols_nogrey_uniq) & length(mods) < length(all_cols_nogrey) ) { # if there aren't enough unique colors unless they have numbers added
     mods_uniq <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(mods), replace=F)]
   } else if (length(mods) > length(all_cols_nogrey)) { # if there aren't enough unique colors in R
-    #fakeCols <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods) - length(all_cols_nogrey)))
     mods_uniq <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods)))
-    #fakeCols <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods)))
-    #mods_uniq <- mods
-    #mods_uniq[1:length(all_cols_nogrey)] <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(all_cols_nogrey), replace=F)]
-    #mods_uniq[(length(all_cols_nogrey)+1):length(mods_uniq)] <- fakeCols[sample(x=1:length(fakeCols), size=length(mods_uniq)-length(all_cols_nogrey), replace=F)]
-    #mods_uniq <- fakeCols[sample(x=1:length(fakeCols), size=length(mods_uniq), replace=F)]
   }
   
   list_mods_uniq <- vector(mode="list", length=length(list_mods))
@@ -2416,14 +2126,6 @@ if (resume == "checkpoint_4") {
       k = k+1
     }
   }
-  
-  # Nest the modules by celltype
-  # k = 0
-  # list_mods_uniq <- vector(mode="list", length=length(list_mods))
-  # for (i in 1:length(list_mods)) {
-  #   list_mods_uniq[[i]] <- mods_uniq[(k+1):(k+length(list_mods[[i]]))]
-  #   k <- k+length(list_mods[[i]])
-  # }
   
   names(list_mods_uniq) <- names(list_colors_PPI)
   
@@ -2475,7 +2177,7 @@ if (resume == "checkpoint_4") {
   
   message("Computing kMs after making colors unique and computing Protein-Protein Interactions")
   
-  if (fuzzyModMembership=="kIM"){#} | scale_MEs_by_kIMs) {
+  if (fuzzyModMembership=="kIM"){
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
     list_dissTOM_PPI <- list_dissTOM[match(sNames_PPI,names(list_dissTOM))]
@@ -2484,16 +2186,13 @@ if (resume == "checkpoint_4") {
   
   if (fuzzyModMembership == "kME") {
     
-    #invisible(gc())
-    #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kMEs_PPI.txt"))
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kMEs_PPI.txt")
     fun = function(x,y,cellType) {
       out <- try({
-        moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
+        moduleEigengenes_uv(expr = as.data.frame(x, col.names=col.names(x)),
                                    colors=y,
                                    excludeGrey=T)#,
-        #scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-        #dissTOM=if (scale_MEs_by_kIMs) z else NULL)
+
       })
       if (class(out) == "try-error"){
         warning(paste0(cellType, ": moduleEigengenes failed with the error: ", out))
@@ -2504,32 +2203,10 @@ if (resume == "checkpoint_4") {
     }
     args = list(x = list_datExpr_PPI, 
                 y = list_colors_PPI_uniq,
-                #z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
                 cellType = names(list_datExpr_PPI))
     
     list_ModuleEigengenes_out_PPI <- safeParallel(fun=fun, args=args, outfile=outfile)
-    # list_ModuleEigengenes_out_PPI <- clusterMap(cl, function(x,y,z,cellType) {
-    #   out <- try({
-    #     moduleEigengenes_kIM_scale(expr = as.data.frame(x, col.names=col.names(x)),
-    #                                colors=y,
-    #                                excludeGrey=T,
-    #                                scale_MEs_by_kIMs=scale_MEs_by_kIMs,
-    #                                dissTOM=if (scale_MEs_by_kIMs) z else NULL)
-    #   })
-    #   if (class(out) == "try-error"){
-    #     warning(paste0(cellType, ": moduleEigengenes failed with the error: ", out))
-    #     out <- list(eigengenes=NULL, u = NULL)
-    #   } else {
-    #     out
-    #   }
-    # }, 
-    # x = list_datExpr_PPI, 
-    # y = list_colors_PPI_uniq,
-    # z = if (scale_MEs_by_kIMs) list_dissTOM_PPI else numeric(length=length(sNames_PPI)),
-    # cellType = names(list_datExpr_PPI),
-    # SIMPLIFY = F,
-    # .scheduling = c("dynamic"))
-    
+
     list_MEs_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$eigengenes)
     
     list_u_PPI <- lapply(list_ModuleEigengenes_out_PPI, function(x) x$u) # u is actually a list, since the left eigenvectors have different lengths depending on the number of genes in the module
@@ -2550,20 +2227,7 @@ if (resume == "checkpoint_4") {
                 y=list_MEs_PPI)
     list_kMs_PPI <- safeParallel(fun=fun, args=args, outfile=outfile)
     
-    # list_kMs_PPI <- clusterMap(cl, function(x,y) {
-    #   if(!is.null(y)) {
-    #     signedKME(datExpr = as.matrix(x),
-    #               datME = y,
-    #               outputColumnName = "",
-    #               corFnc = corFnc)
-    #   } else {
-    #     NULL  
-    #   }
-    # }, 
-    # x=list_datExpr_PPI, 
-    # y=list_MEs_PPI,
-    # SIMPLIFY=F,
-    # .scheduling = c("dynamic"))
+    
     
     # Remove 'ME' from eigengenes
     list_MEs_PPI <- lapply(list_MEs_PPI, function(x) {
@@ -2577,15 +2241,9 @@ if (resume == "checkpoint_4") {
     x = list_MEs_PPI,
     y = list_datExpr_PPI,
     SIMPLIFY=F)
-    
-    # stopCluster(cl)
-    #invisible(gc()); invisible(R.utils::gcDLLs())
-    
+
   } else if (fuzzyModMembership == "kIM"){
     
-    #invisible(gc()); invisible(R.utils::gcDLLs())
-    
-    #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type = "FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kIMs_PPI.txt"))
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_kIMs_PPI.txt")
     fun = function(x,y) kIM_eachMod_norm(dissTOM = x, 
                                          colors = y,
@@ -2594,13 +2252,7 @@ if (resume == "checkpoint_4") {
     args = list(x = list_dissTOM_PPI, 
                 y = list_colors_PPI_uniq)
     list_kMs_PPI <- safeParallel(fun=fun, args=args, outfile=outfile)
-    # list_kMs_PPI <- clusterMap(cl, function(x,y) kIM_eachMod_norm(dissTOM = x, 
-    #                                                               colors = y,
-    #                                                               excludeGrey=T),
-    #                            x = list_dissTOM_PPI, 
-    #                            y = list_colors_PPI_uniq, 
-    #                            SIMPLIFY=F, 
-    #                            .scheduling = c("dynamic"))
+    
     
     
     names(list_kMs_PPI) <- sNames_PPI
@@ -2622,90 +2274,84 @@ if (resume == "checkpoint_4") {
                 colors = list_colors_PPI_uniq)
     list_u_PPI <- safeParallel(fun=fun, args=args, outfile=outfile)
     
-    # list_u_PPI <- clusterMap(cl, function(kMs, colors) {
-    #   
-    #   u <- lapply(colnames(kMs), function(module) {
-    #     out <- kMs[match(names(colors)[colors==module], rownames(kMs)),module]
-    #     names(out) = rownames(kMs)[colors==module]
-    #     return(out)
-    #   })
-    #   names(u) <- colnames(kMs)
-    #   return(u)
-    # },
-    # kMs = list_kMs_PPI,
-    # colors = list_colors_PPI_uniq,
-    # SIMPLIFY=F,
-    # .scheduling = c("dynamic"))
     
-    # stopCluster(cl)
     
     invisible(gc()); invisible(R.utils::gcDLLs())
   } 
   
-  #if (fuzzyModMembership == "kIM" | scale_MEs_by_kIMs) rm(list_dissTOM_PPI)
   if (fuzzyModMembership == "kIM") rm(list_dissTOM_PPI)
   
   ##########################################################################
-  ################## COMPUTE RARE VARIANTS ENRICHMENT ######################
+  ###################### COMPUTE GENE SET ENRICHMENT #######################
   ##########################################################################
   
-  message("Checking modules for enrichment with rare variants/mendelian genes")
+  n_modules_GSEA_enriched <- rep(NA, times = length(sNames_0))
+  names(n_modules_GSEA_enriched) <- sNames_0
   
-  variants <- load_obj(f=variants_path)
-  
-  # convert kMs from dataframes to lists
-  list_list_kMs_PPI <- lapply(list_kMs_PPI, function(x) as.list(x)) 
-  
-  # give gene names to each vector of kMs
-  list_list_kMs_PPI <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
-                              a = list_list_kMs_PPI,
-                              b = list_kMs_PPI,
-                              SIMPLIFY = F)
-  
-  names(list_list_kMs_PPI) = sNames_PPI 
-  
-  #invisible(gc()); invisible(R.utils::gcDLLs())
-  #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_variants_GSEA.txt"))
-  outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_variants_GSEA.txt")
-  fun = function(x) lapply(x, 
-                           function(y) {
-                             out<-matrix(gsea(values = y, geneset = variants, plot = F, return.details=T), ncol=4)
-                             colnames(out) <- c("p.val", "edge.score", "edge.value", "scaled.score")
-                             
-                             return(out)})
-  args =  list("X"=list_list_kMs_PPI)
-  list_list_variants_GSEA <- safeParallel(fun=fun, args=args, outfile=outfile, variants=variants)
-  # list_list_variants_GSEA <- parLapplyLB(cl, list_list_kMs_PPI, 
-  #                                        function(x) lapply(x, 
-  #                                                           function(y) {
-  #                                                             out<-matrix(gsea(values = y, geneset = variants, plot = F, return.details=T), ncol=4)
-  #                                                             colnames(out) <- c("p.val", "edge.score", "edge.value", "scaled.score")
-  #                                                             
-  #                                                             return(out)}
-  #                                        ))
-  # Returns a list (of modules) of dataframes with enrichment terms as rownames and columns: p.val, q.val, sscore and edge
-  # stopCluster(cl)
-  # invisible(gc()); invisible(R.utils::gcDLLs())
-  
-  # dissolve the top level celltype list so we have a list of module enrichment vectors
-  unlist(list_list_variants_GSEA, recursive = F, use.names = T)  -> list_variants_GSEA 
-  #variants_GSEA_mat <- matrix(nrow=length(list_variants_GSEA), ncol=6) 
-  
-  celltype_col <- rep(sNames_PPI, times=sapply(list_list_variants_GSEA, length))
-  mods_col <- gsub("^.*\\.", "", names(list_variants_GSEA))
-  GSEA_cols <- Reduce( f = rbind, list_variants_GSEA)
-  
-  variants_GSEA_df  <- data.frame(celltype=celltype_col, module=mods_col, GSEA_cols, row.names=NULL, stringsAsFactors = F)
-  # adjust p.vals for multiple testing
-  p.adjust(variants_GSEA_df[['p.val']], method = "fdr") %>% -log10(.) -> variants_GSEA_df$q.val 
-  
-  # find row idx of modules with rare variant / mendelian gene enrichment 
-  idx_row_variants <- variants_GSEA_df$q.val > -log10(pvalThreshold)
-  
-  # count number of enriched module per celltype for summary stats
-  n_modules_variants_enriched <- rep(NA, times = length(sNames))
-  n_modules_variants_enriched[match(sNames_PPI,sNames)] <- sapply(sNames_PPI, function(x) sum(variants_GSEA_df$celltype[idx_row_variants]==x))
-  
+  if (!is.null(list_genesets_path)) {
+    
+    message("Performing Gene Set Enrichment Analysis")
+    
+    list_genesets <- load_obj(f=list_genesets_path)
+    
+    if (map_genes_to_ensembl) {
+      if (!all(sapply(list_genesets, function(geneset) sum(grepl(pattern="ENSG|ENSMUSG", x=geneset))==length(geneset)))) {
+        # retrieve gene hgnc symbols in mapping file
+        mapping <-  read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F) 
+        if (!is.null(names(list_genesets))) names_tmp <- names(list_genesets)
+        list_genesets <- lapply(list_genesets, function(geneset) {
+          out <- gene_map(data.frame("genes"=geneset),
+                   idx_gene_column = 1,
+                   mapping=mapping,
+                   from="hgnc|symbol|optimal", 
+                   to="ensembl",
+                   replace = T,
+                   na.rm = T)[[1]]
+          if (!is.null(names(geneset))) names(out) <- names(geneset)
+          return(out)
+        })
+        names(list_genesets) <- names_tmp; rm(names_tmp)
+      }
+    }
+    
+    # convert kMs from dataframes to lists
+    list_list_kMs_PPI <- lapply(list_kMs_PPI, function(x) as.list(x)) 
+    
+    # give gene names to each vector of kMs
+    list_list_kMs_PPI <- mapply(function(a,b) lapply(a, function(x) name_for_vec(to_be_named = x, given_names = rownames(b), dimension = NULL)),
+                                a = list_list_kMs_PPI,
+                                b = list_kMs_PPI,
+                                SIMPLIFY = F)
+    
+    names(list_list_kMs_PPI) = sNames_PPI 
+    
+    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_GSEA.txt")
+    fun = function(list_values) lapply(list_values, 
+                             function(values) {
+                               out<-iterative.bulk.gsea(values = values, set.lists = list_genesets)
+                               #colnames(out) <- c("p.val", "edge.score", "edge.value", "scaled.score")
+                               return(out)})
+    args =  list("X"=list_list_kMs_PPI)
+    list_list_GSEA <- safeParallel(fun=fun, args=args, outfile=outfile, list_genesets=list_genesets)
+    
+    # dissolve the top level celltype list so we have a list of module enrichment vectors
+    unlist(list_list_GSEA, recursive = F, use.names = T)  -> list_GSEA 
+
+    celltype_col <- rep(sNames_PPI, times=sapply(list_list_GSEA, length))
+    mods_col <- gsub("^.*\\.", "", names(list_GSEA))
+    GSEA_cols <- Reduce( f = rbind, list_GSEA)
+    
+    GSEA_df  <- data.frame(celltype=celltype_col, module=mods_col, GSEA_cols, row.names=NULL, stringsAsFactors = F)
+    
+    # adjust p.vals for multiple testing
+    p.adjust(GSEA_df[['p.val']], method = "fdr") %>% -log10(.) -> GSEA_df$q.val 
+    
+    # find row idx of enriched modules
+    idx_row_GSEA <- GSEA_df$q.val > -log10(pvalThreshold)
+    
+    # count number of enriched module per celltype for summary stats
+    n_modules_GSEA_enriched[names(n_modules_GSEA_enriched) %in% sNames_PPI] <- sapply(sNames_PPI, function(name) sum(GSEA_df$celltype[idx_row_GSEA]==name))
+  }  
   ##########################################################################
   ############# COMPUTE MAGMA COMMON VARIANTS GWAS ENRICHMENT ##############
   ##########################################################################
@@ -2721,8 +2367,6 @@ if (resume == "checkpoint_4") {
     
     if (data_organism == "mmusculus") {
       
-      #invisible(gc()); invisible(R.utils::gcDLLs())
-      
       # map mouse to human gene orthologs  
       mapping_orthology = read.csv(gzfile(mapping_hs_mm_filepath),sep="\t",header=T, stringsAsFactors = F)
       
@@ -2737,17 +2381,7 @@ if (resume == "checkpoint_4") {
       args = list(modulekM = list_kMs_PPI,
                   colors_PPI_uniq =list_colors_PPI_uniq)
       list_MMtoHsmapping <- safeParallel(fun=fun, args=args, outfile=outfile, log_dir=log_dir, data_prefix=data_prefix, run_prefix=run_prefix, mapping_orthology=mapping_orthology)
-      # list_MMtoHsmapping <- clusterMap(cl, function(modulekM,colors_PPI_uniq) mapMMtoHs(modulekM = modulekM,
-      #                                                                                   colors = colors_PPI_uniq,
-      #                                                                                   log_dir = log_dir, 
-      #                                                                                   data_prefix = data_prefix, 
-      #                                                                                   run_prefix = run_prefix,
-      #                                                                                   mapping_orthology = mapping_orthology),
-      #                                  modulekM = list_kMs_PPI,
-      #                                  colors_PPI_uniq =list_colors_PPI_uniq,
-      #                                  .scheduling = c("dynamic"))
-      # stopCluster(cl)
-      # invisible(gc()); invisible(R.utils::gcDLLs())
+      
       
       list_kMs_hs <- lapply(list_MMtoHsmapping, function(x) x$kM) 
       list_colors_hs <- lapply(list_MMtoHsmapping, function(x) x$colors)  
@@ -2807,19 +2441,6 @@ if (resume == "checkpoint_4") {
                 colors_hs = list_colors_hs)
     magma_results <- safeParallel(fun=fun, args=args, outfile = outfile, gwas=gwas, magma_test_type=magma_test_type, genes_background_ensembl_hs=genes_background_ensembl_hs)
     
-    # magma_results <- clusterMap(cl, function(x,y,z) kM_magma(cellType = x, 
-    #                                                          modulekM = y,
-    #                                                          gwas = gwas,
-    #                                                          test_type = magma_test_type,
-    #                                                          colors_hs = z,
-    #                                                          genes_background_ensembl_hs = genes_background_ensembl_hs),#add as arg to fnc
-    #                             x = names(list_kMs_hs),
-    #                             y = list_kMs_hs,
-    #                             z = list_colors_hs, 
-    #                             SIMPLIFY=F,
-    #                             .scheduling = c("dynamic"))
-    # stopCluster(cl)
-    # invisible(gc()); invisible(R.utils::gcDLLs())
     
     # Prepare tables for results
     list_magma.r <- list_magma.p <- list_magma.emp.p <- vector(mode="list", length = length(list_kMs_hs))
@@ -2872,6 +2493,7 @@ if (resume == "checkpoint_4") {
   }
   
   rm(gwas)
+  
   ##########################################################################
   ############## FILTER MODULES ON GENES WITH GWAS ENRICHMENT ##############
   ##########################################################################
@@ -2881,8 +2503,7 @@ if (resume == "checkpoint_4") {
     # Check if the gwas_filter_traits strings provided by the user can be found in the magma_gwas_dir files
     
     if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(magma.p.fdr.log), ignore.case=T)), simplify = T) %>% any) {
-      #if (sapply(gwas_filter_traits, function(x) any(grepl(x, colnames(magma.p.fdr.log[,-grep("module", colnames(magma.p.fdr.log))]), ignore.case=T)), simplify = T) %>% all) {
-      
+
       # Identify columns to keep
       idx_col_keep <- sapply(gwas_filter_traits, function(x) grep(paste0(x,"|module|celltype"), colnames(magma.p.fdr.log), ignore.case=T), simplify = T) %>% Reduce(union,.)# %>% as.logical 
       
@@ -2895,8 +2516,8 @@ if (resume == "checkpoint_4") {
       # Identify rows to keep
       idx_row_gwas <- apply(magma.p.fdr.log.sig[,-grep("module|celltype", colnames(magma.p.fdr.log.sig))], MARGIN = 1, max) > -log10(pvalThreshold)
       
-      # rows enriched for gwas common variants and/or for rare variants
-      idx_row_keep <- idx_row_gwas | idx_row_variants[match(variants_GSEA_df$module, magma.p.fdr.log$module)]
+      # rows enriched for MAGMA GWAS or GSEA
+      idx_row_keep <- idx_row_gwas | (if (!is.null(list_genesets_path)) idx_row_GSEA[match(GSEA_df$module, magma.p.fdr.log$module)] else rep(TRUE, length(idx_row_gwas)) )
       
       if (sum(idx_row_keep)>0) {
         
@@ -2923,8 +2544,9 @@ if (resume == "checkpoint_4") {
   }
   
   # count number of enriched module per celltype for summary stats
-  n_modules_gwas_enriched <- rep(NA, times = length(sNames))
-  n_modules_gwas_enriched[match(sNames_PPI,sNames)] <- if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
+  n_modules_gwas_enriched <- rep(NA, times = length(sNames_0))  
+  names(n_modules_gwas_enriched) <- sNames_0
+  n_modules_gwas_enriched[names(n_modules_gwas_enriched) %in% sNames_PPI] <- if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sapply(sNames_PPI, function(x) sum(magma.p.fdr.log$celltype[idx_row_gwas]==x)) else rep(NA, times=length(sNames_PPI))
   
   ######################################################################
   ####### FILTER MODULES ON GWAS SIGNIFICANCE ALSO IN OTHER FILES ######
@@ -3008,7 +2630,6 @@ if (resume == "checkpoint_4") {
   ####### COMPUTE MODULE - METADATA CORRELATION IN EACH CELL CLUSTER ###
   ######################################################################
   
-  #if (fuzzyModMembership=="kIM" | scale_MEs_by_kIMs) {
   if (fuzzyModMembership=="kIM") {
     list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
@@ -3041,7 +2662,6 @@ if (resume == "checkpoint_4") {
       } else if (fuzzyModMembership == "kIM") {
         
         # compute the equivalent to eigengenes (i.e. embeddings) but using kIMs as eigenvectors on which to project each cell's gene-length vector
-        #cl <- makeCluster(n_cores, type="FORK", outfile = paste0(log_dir, "list_cell_IM_embed_mat_for_meta_corr.txt"))
         list_embed_mat <- mapply(function(a,b,c,d,e) cellModEmbed(datExpr=a, 
                                                                   colors=b, 
                                                                   latentGeneType="IM",
@@ -3054,7 +2674,6 @@ if (resume == "checkpoint_4") {
                                  d = list_kMs_gwas,
                                  e = list_dissTOM_gwas,
                                  SIMPLIFY=F)
-        #stopCluster(cl)
         
         # Get correlations
         list_mod_metadata_corr_rho <- mapply(function(x,y) cor(x=as.matrix(x), 
@@ -3073,7 +2692,6 @@ if (resume == "checkpoint_4") {
       }
       
       # Name the rows of the correlation matrix with the metadata columns
-      #list_mod_metadata_corr_rho <- lapply(list_mod_metadata_corr_rho, function(x) name_for_vec(to_be_named = x, given_names = colnames(metadata), dimension = 1)) 
       
       # Compute p values
       list_mod_metadata_corr_pval <- mapply(function(x,y) WGCNA::corPvalueStudent(x, 
@@ -3117,7 +2735,6 @@ if (resume == "checkpoint_4") {
     metadata = NULL
   }
   
-  #if (scale_MEs_by_kIMs | fuzzyModMembership=="kIM" ) rm(list_dissTOM_gwas)
   if (fuzzyModMembership=="kIM" ) rm(list_dissTOM_gwas)
   
   ##########################################################################
@@ -3226,8 +2843,9 @@ if (resume == "checkpoint_4") {
   }
   
   # count number of enriched module per celltype for summary stats
-  n_modules_meta_enriched <- rep(NA, times=length(sNames))
-  if (!is.null(metadata_corr_col) & !is.null(metadata_corr_filter_vals)) n_modules_meta_enriched[match(sNames_gwas,sNames)] <- sapply(list_idx_module_meta_sig, sum) 
+  n_modules_meta_enriched <- rep(NA, times=length(sNames_0))
+  names(n_modules_meta_enriched) <-sNames_0
+  if (!is.null(metadata_corr_col) & !is.null(metadata_corr_filter_vals)) n_modules_meta_enriched[names(n_modules_meta_enriched) %in% sNames_0] <- sapply(list_idx_module_meta_sig, sum) 
   
   ######################################################################
   ############################ COMPUTE PRIMARY KMs #####################
@@ -3236,22 +2854,17 @@ if (resume == "checkpoint_4") {
   
   message(paste0("Computing primary "), fuzzyModMembership, "s")
   
-  #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "list_pkMs_meta.txt"))
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "list_pkMs_meta.txt")
   fun = function(kMs, colors) pkMs_fnc(kMs=kMs, colors=colors)
   args = list("kMs" = list_kMs_meta, "colors"=list_colors_meta)
   list_pkMs_meta <- safeParallel(fun=fun, args=args, outfile=outfile)
-  # list_pkMs_meta <- clusterMap(cl, function(colors, kMs) pkMs_fnc(kMs=kMs, colors=colors), 
-  #                              kMs = list_kMs_meta, colors=list_colors_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
-  
-  # stopCluster(cl)
+
   names(list_pkMs_meta) <- sNames_meta
   
   ######################################################################
   ##################### COMPUTE CELL x EIGENGENE MATRIX ################
   ######################################################################
-  
-  #if (FALSE) { 
+
   message("Computing all cell embeddings on all modules, across celltypes")
   
   scale_data_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_scale_regr_data_ensembl"), full.names = T)
@@ -3259,46 +2872,21 @@ if (resume == "checkpoint_4") {
   
   invisible(gc())
   
-  # if (scale_MEs_by_kIMs) {
-  #   list_dissTOM_path <- dir(path = scratch_dir, pattern = paste0(data_prefix, "_", run_prefix, "_list_dissTOM"), full.names = T)
-  #   list_dissTOM <- load_obj(list_dissTOM_path)
-  #   list_dissTOM_meta <- list_dissTOM[match(sNames_meta, names(list_dissTOM))]
-  #   rm(list_dissTOM)  
-  # }
-  
   latentGeneType <- if (fuzzyModMembership == "kME") "ME" else if (fuzzyModMembership=="kIM") "IM"
   
-  # cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "make_cell_embed_mat.txt"))
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "make_cell_embed_mat.txt")
   fun = function(x,y,z) cellModEmbed(datExpr = datExpr, 
                                      colors = x,
                                      latentGeneType = latentGeneType,
                                      cellType = y,
                                      kMs = if (latentGeneType== "IM") z else NULL)#,
-  #scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-  #dissTOM = if (scale_MEs_by_kIMs) a else NULL)
+
   args = list(x = list_colors_meta, 
               y = names(list_colors_meta),
               z = list_kMs_meta)#,
-  #a = if (scale_MEs_by_kIMs) list_dissTOM_meta else numeric(length=length(sNames_meta)))
-  list_cellModEmbed_mat <- safeParallel(fun=fun, args=args, outfile=outfile, datExpr = datExpr, latentGeneType = latentGeneType)#, scale_MEs_by_kIMs = scale_MEs_by_kIMs)
-  # list_cellModEmbed_mat <- clusterMap(cl, function(x,y,z,a) cellModEmbed(datExpr = datExpr, 
-  #                                                                        colors = x,
-  #                                                                        latentGeneType = latentGeneType,
-  #                                                                        cellType = y,
-  #                                                                        kMs = if (latentGeneType== "IM") z else NULL,
-  #                                                                        scale_MEs_by_kIMs = scale_MEs_by_kIMs,
-  #                                                                        dissTOM = if (scale_MEs_by_kIMs) a else NULL), 
-  #                                     x = list_colors_meta, 
-  #                                     y = names(list_colors_meta),
-  #                                     z = list_kMs_meta,
-  #                                     a = if (scale_MEs_by_kIMs) list_dissTOM_meta else numeric(length=length(sNames_meta)),
-  #                                     SIMPLIFY=F,
-  #                                     .scheduling = c("dynamic"))
+
+  list_cellModEmbed_mat <- safeParallel(fun=fun, args=args, outfile=outfile, datExpr = datExpr, latentGeneType = latentGeneType)
   
-  # stopCluster(cl)
-  
-  # invisible(gc()); invisible(R.utils::gcDLLs())
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
   
@@ -3306,8 +2894,7 @@ if (resume == "checkpoint_4") {
   
   cellModEmbed_mat_annot <- cbind(rep(x = data_prefix,  times=nrow(cellModEmbed_mat)), ident, rownames(datExpr), cellModEmbed_mat)
   colnames(cellModEmbed_mat_annot) <- c("data", "ident", "cell_id", colnames(cellModEmbed_mat)) 
-  #if (scale_MEs_by_kIMs) rm(list_dissTOM_meta)
-  
+
   rm(datExpr)
   
   ######################################################################
@@ -3331,13 +2918,13 @@ if (resume == "checkpoint_5") {
   pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "readr")
   
   ipak(pkgs)
+  
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
   # retrieve gene hgnc symbols in mapping file
   mapping <- if (map_genes_to_ensembl) read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", tables_dir, data_prefix, run_prefix, data_organism), stringsAsFactors = F) else NULL
   
-  #cl <- makeCluster(min(n_cores, detectCores_plus(Gb_max = RAM_Gb_max, additional_Gb = 2)-1), type="FORK", outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "write_outputs.txt"))
   outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "write_outputs.txt")
   
   message("Preparing outputs")
@@ -3346,19 +2933,14 @@ if (resume == "checkpoint_5") {
   fun = function(a,b) lapply(b, function(x) names(a)[a==x])
   args = list(a=list_colors_meta, b=list_module_meta)
   list_list_module_meta_genes = safeParallel(fun=fun,args=args, outfile=outfile)
-  # list_list_module_meta_genes <- clusterMap(cl,function(a,b) lapply(b, function(x) names(a)[a==x]), 
-  #                                           a=list_colors_meta, b=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
   fun = function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL)
   args=  list(x=list_list_module_meta_genes, y=list_module_meta)
   list_list_module_meta_genes <- safeParallel(fun=fun,args=args,outfile=outfile)
-  # list_list_module_meta_genes <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL), 
-  #                                           x=list_list_module_meta_genes, y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
-  
+
   # make a copy for pkMs
   list_list_module_meta_pkMs <- list_list_module_meta_genes
   # order the gene lists by pkM and get pkM value
-  #tmp <- tmp2 <- list_list_module_meta_genes
-  
+
   message("Preparing sorted gene lists")
   # iterate over celltypes
   for (i in 1:length(list_list_module_meta_genes)) {
@@ -3367,16 +2949,10 @@ if (resume == "checkpoint_5") {
       pkMs = list_pkMs_meta[[i]]
       mod_genes <- list_list_module_meta_genes[[i]][[j]]
       mod_pkMs_sorted <- sort(pkMs[match(mod_genes,names(pkMs)), drop=F], decreasing=T)
-      #tmp[[i]][[j]] <- genes[order(pkMs[names(pkMs) %in% genes], decreasing=T)]
       list_list_module_meta_genes[[i]][[j]] <- names(mod_pkMs_sorted) 
       list_list_module_meta_pkMs[[i]][[j]] <- mod_pkMs_sorted
-      #tmp[[i]][[j]] <- names(pkMs_sorted) 
-      #tmp2[[i]][[j]] <- mod_pkMs_sorted
     }
   }
-  
-  # list_list_module_meta_genes <- tmp
-  # list_list_module_meta_pkMs  <- tmp2
   
   message("Preparing module genes dataframe")
   
@@ -3393,18 +2969,12 @@ if (resume == "checkpoint_5") {
     args = list("X"=list_list_module_meta_genes)
     list_list_module_meta_genes_hgnc = safeParallel(fun=fun,args=args, outfile=outfile, mapping=mapping)
   
-    #list_list_module_meta_genes_hgnc <- parLapplyLB(cl, list_list_module_meta_genes, function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)]))
     fun = function(x,y) name_for_vec(to_be_named = x, 
                                  given_names = y, 
                                  dimension = NULL)
     args = list(x=list_list_module_meta_genes_hgnc, 
               y=list_module_meta)
     list_list_module_meta_genes_hgnc = safeParallel(fun=fun, args=args, outfile=outfile)
-    # list_list_module_meta_genes_hgnc <- clusterMap(cl, function(x,y) name_for_vec(to_be_named = x, 
-    #                                                                               given_names = y, 
-    #                                                                               dimension = NULL), 
-    #                                                x=list_list_module_meta_genes_hgnc, 
-    #                                                y=list_module_meta, SIMPLIFY=F, .scheduling = c("dynamic"))
     hgnc <- unlist(list_list_module_meta_genes_hgnc, recursive = T, use.names=F) 
     df_meta_module_genes <- data.frame(data, run, cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
     colnames(df_meta_module_genes) <- c("data", "run", "cell_cluster", "module", "ensembl", "hgnc", paste0("p", fuzzyModMembership))
@@ -3424,46 +2994,18 @@ if (resume == "checkpoint_5") {
   
   write.csv(df_meta_module_genes, file = sprintf("%s%s_%s_cell_cluster_module_genes.csv",tables_dir, data_prefix, run_prefix), quote = F, row.names = F)
   
-  # # also output ordered gene lists
-  # for (i in names(list_list_module_meta_genes)) {
-  #   for (j in names(list_list_module_meta_genes[[i]])) {
-  #     invisible(write.csv(list_list_module_meta_genes[[i]][[j]], file = sprintf("%s%s_%s_%s_%s_module_genes.csv",tables_dir, data_prefix, run_prefix, i, j), row.names = F, quote = F))
-  #   }
-  # }
-  
-  #save(list_list_module_meta_genes, file=sprintf("%s%s_%s_list_list_module_genes.RData", RObjects_dir, data_prefix, run_prefix))
-  
   ####################### SAVE STRINGDB PPI OUTPUT #########################
   ##########################################################################
   
   # convert the module PPI dataframe columns from list to numeric 
-  # list_module_PPI_uniq <- lapply(list_module_PPI_uniq, function(x) {
-  #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
-  #   out <- matrix(out, ncol=3)
-  #   colnames(out) = colnames(x)
-  #   out <- data.frame(out)
-  #   return(out)
-  #   })
-  
   list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
-  
-  # list_module_PPI_signif_uniq_f <- lapply(list_module_PPI_signif_uniq_f, function(x) {
-  #   out = apply(X = x[,,drop=F], FUN = as.numeric, MARGIN=2)
-  #   out <- matrix(out, ncol=3)
-  #   colnames(out) = colnames(x)
-  #   out <- data.frame(out)
-  #   return(out)
-  # })
   
   # output 
   fun = function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F)
   args = list(x=list_module_PPI_uniq, 
               y= sNames_PPI[match(names(list_module_PPI_uniq),sNames_PPI)])
   invisible(safeParallel(fun=fun, args=args, outfile=outfile, tables_dir=tables_dir, data_prefix=data_prefix, run_prefix))
-  # invisible(clusterMap(cl, function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F), 
-  #                      x=list_module_PPI_uniq, 
-  #                      y= sNames_PPI[sNames_PPI %in% names(list_module_PPI_uniq)], 
-  #                      SIMPLIFY = F, .scheduling = c("dynamic")))
+
   
   if (length(list_module_PPI_signif_uniq_f) > 0) {
     fun = function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
@@ -3490,14 +3032,14 @@ if (resume == "checkpoint_5") {
   invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_kMs.csv", tables_dir, data_prefix, run_prefix, y), 
                                                    row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
   
-  ############### OUTPUT MENDELIAN/RARE VARIANT RESULTS #####################
+  ######################## OUTPUT GSEA RESULTS ##############################
   ###########################################################################
   
-  variants_GSEA_df <- arrange(variants_GSEA_df, desc(scaled.score))  
-  
-  # Full set of results
-  invisible(write.csv(variants_GSEA_df, file=sprintf("%s%s_%s_mendelian_rareVariants_GSEA.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
-  
+  if (!is.null(list_genesets_path)) {
+    try({GSEA_df <- arrange(GSEA_df, desc(scaled.score))  
+    invisible(write.csv(GSEA_df, file=sprintf("%s%s_%s_GSEA_df.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    })
+  }
   ######################## OUTPUT MAGMA RESULTS #############################
   ###########################################################################
   
@@ -3529,9 +3071,8 @@ if (resume == "checkpoint_5") {
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  #if (FALSE) {
   invisible(write.csv(x=as.data.frame(cellModEmbed_mat), file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=F, quote = F))
-  #}
+  
   ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
   ########################################################################### 
   
@@ -3542,33 +3083,73 @@ if (resume == "checkpoint_5") {
   
   t_finish <- as.character(Sys.time())
   
-  sumstats_celltype_df <- data.frame(run_prefix = rep(run_prefix, times=length(sNames)),
-                                     subset = sNames, 
-                                     n_cells = n_cells_subsets,
-                                     n_genes = n_genes_subsets,
-                                     softPower = sapply(list_sft, function(x) x$Power),
-                                     SFT.R.sq = sapply(list_sft, function(x) x$SFT.R.sq),
-                                     median.k. = sapply(list_sft, function(x) x$median.k.),
-                                     plot_label_final = ifelse(test=sNames %in% sNames_ok, yes= unlist(x=list_plot_label_final, use.names = F), no=NA),
-                                     n_genes_reassign = if (kM_reassign) ifelse(test=sNames %in% sNames_ok, yes = sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T), no = 0) else numeric(length=sNames),
-                                     prop_genes_t.test_fail = if (kM_signif_filter) ifelse(test= sNames %in% sNames_ok, yes=sapply(list_geneMod_t.test, function(x) {if (!is.null(x)) {sum(as.numeric(!x$signif))/length(x$signif)} else {NA_real_}}, simplify =T), no=NA) else rep(NA, times=length(sNames)),
-                                     prop_genes_assign =  ifelse(test = sNames %in% sNames_ok, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
-                                     prop_genes_assign_PPI = ifelse(test = sNames %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
-                                     n_modules = ifelse(test=sNames %in% sNames_ok, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
-                                     n_modules_PPI_enriched = ifelse(test=sNames %in% sNames_PPI, yes=sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
-                                     prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") ifelse(test=sNames %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames)) else rep(NA, length(sNames)), 
-                                     n_modules_variants_enriched = n_modules_variants_enriched,
-                                     n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames)),
-                                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) n_modules_meta_enriched else rep(NA, times=length(sNames)),
-                                     row.names = NULL, stringsAsFactors = F)
+  sumstats_celltype_df <- matrix(data = NA_real_, nrow=length(sNames_0), ncol=19) %>% data.frame 
+  colnames(sumstats_celltype_df) = c("run_prefix", 
+                                     "subset", 
+                                     "n_cells", 
+                                     "n_genes", 
+                                     "softpower", 
+                                     "SFT.R.sq", 
+                                     "median.k.", 
+                                     "plot_label_final", 
+                                     "n_genes_reassign", 
+                                     "prop_genes_t.test_fail", 
+                                     "prop_genes_assign",
+                                     "prop_genes_assign_PPI",
+                                     "n_modules",
+                                     "n_modules_PPI_enriched",
+                                     "prop_genes_mapped_to_ortholog",
+                                     "n_modules_GSEA_enriched",
+                                     "n_modules_gwas_enriched",
+                                     "n_modules_meta_enriched")
+  
+  sumstats_celltype_df[["run_prefix"]] = rep(run_prefix, times=length(sNames_0))
+  sumstats_celltype_df[["subset"]] = sNames_0
+  sumstats_celltype_df[["n_cells"]] = n_cells_subsets
+  sumstats_celltype_df[["n_genes"]] = n_genes_subsets
+  sumstats_celltype_df[["softPower"]][sNames_0 %in% sNames_2] = sapply(list_sft, function(x) x$Power)
+  sumstats_celltype_df[["SFT.R.sq"]][sNames_0 %in% sNames_2] = sapply(list_sft, function(x) x$SFT.R.sq)
+  sumstats_celltype_df[["median.k."]][sNames_0 %in% sNames_2] = sapply(list_sft, function(x) x$median.k.)
+  sumstats_celltype_df[["plot_label_final"]][sNames_0 %in% sNames_5 ] = unlist(x=list_plot_label_final, use.names = F)
+  if (kM_reassign) sumstats_celltype_df[["n_genes_reassign"]][sNames_0 %in% sNames_5] = sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T)
+  if (kM_signif_filter) sumstats_celltype_df[["prop_genes_t.test_fail"]][sNames_0 %in% sNames_5] = sapply(list_geneMod_t.test, function(x) {if (!is.null(x)) {sum(as.numeric(!x$signif))/length(x$signif)} else {NA_real_}}, simplify =T)
+  sumstats_celltype_df[["prop_genes_assign"]][sNames_0 %in% sNames_5] = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
+  sumstats_celltype_df[["prop_genes_assign_PPI"]][sNames_0 %in% sNames_PPI] = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
+  sumstats_celltype_df[["n_modules"]][sNames_0 %in% sNames_5] = sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T)
+  sumstats_celltype_df[["n_modules_PPI_enriched"]][sNames_0 %in% sNames_PPI] = sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T)
+  if (!is.null(magma_gwas_dir)) sumstats_celltype_df[["prop_genes_mapped_to_ortholog"]][sNames_0 %in% sNames_PPI] = vec_MMtoHsmapping_prop.mapped
+  if (!is.null(list_genesets_path)) sumstats_celltype_df[["n_modules_GSEA_enriched"]] = n_modules_GSEA_enriched
+  if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sumstats_celltype_df[["n_modules_gwas_enriched"]] = n_modules_gwas_enriched
+  if (!is.null(metadata) & !is.null(metadata_corr_col))  sumstats_celltype_df[["n_modules_meta_enriched"]] =n_modules_meta_enriched
+
+  
+  # sumstats_celltype_df <- data.frame(run_prefix = rep(run_prefix, times=length(sNames_0)),
+  #                                    subset = sNames_0, 
+  #                                    n_cells = n_cells_subsets,
+  #                                    n_genes = n_genes_subsets,
+                                     # softPower = sapply(list_sft, function(x) x$Power),
+                                     # SFT.R.sq = sapply(list_sft, function(x) x$SFT.R.sq),
+                                     # median.k. = sapply(list_sft, function(x) x$median.k.),
+                                     # plot_label_final = ifelse(test=sNames_0 %in% sNames_5, yes= unlist(x=list_plot_label_final, use.names = F), no=NA),
+                                     # n_genes_reassign = if (kM_reassign) ifelse(test=sNames_0 %in% sNames_5, yes = sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T), no = 0) else numeric(length=sNames_0),
+                                     # prop_genes_t.test_fail = if (kM_signif_filter) ifelse(test= sNames_0 %in% sNames_5, yes=sapply(list_geneMod_t.test, function(x) {if (!is.null(x)) {sum(as.numeric(!x$signif))/length(x$signif)} else {NA_real_}}, simplify =T), no=NA) else rep(NA, times=length(sNames_0)),
+                                     # prop_genes_assign =  ifelse(test = sNames_0 %in% sNames_5, yes = sapply(list_colors_all, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
+                                     # prop_genes_assign_PPI = ifelse(test = sNames_0 %in% sNames_PPI, yes = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T), no = 0),
+                                     # n_modules = ifelse(test=sNames_0 %in% sNames_5, yes=sapply(list_colors_all, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
+                                     # n_modules_PPI_enriched = ifelse(test=sNames_0 %in% sNames_PPI, yes=sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T), no = 0),
+                                     # prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") ifelse(test=sNames_0 %in% sNames_PPI, yes=vec_MMtoHsmapping_prop.mapped, no=NA) else rep(NA, length(sNames_0)) else rep(NA, length(sNames_0)), 
+                                     # n_modules_GSEA_enriched = n_modules_GSEA_enriched,
+                                     # n_modules_gwas_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) n_modules_gwas_enriched else rep(NA, times=length(sNames_0)),
+                                     # n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) n_modules_meta_enriched else rep(NA, times=length(sNames_0)),
+                                     # row.names = NULL, stringsAsFactors = F)
   
   sumstats_run <- c(run_prefix = run_prefix,
                     t_start = t_start,
                     t_finish = t_finish,
                     mean_percent_mito = mean(percent.mito, na.rm=T),
                     mean_percent_ribo = mean(percent.mito, na.rm=T),
-                    n_celltypes = length(subsets_ok_idx),
-                    n_celltypes_used = sum(subsets_ok_idx),
+                    n_celltypes = length(sNames_0),
+                    n_celltypes_used = length(sNames_5),
                     prop_genes_mapped_to_ensembl = if (map_genes_to_ensembl) round(sum(!is.na(mapping$ensembl))/nrow(mapping),2) else NA_real_,
                     prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign, na.rm=T),2),
                     prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI, na.rm=T),2),
@@ -3576,7 +3157,7 @@ if (resume == "checkpoint_5") {
                     n_modules_total = sum(sumstats_celltype_df$n_modules),
                     n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched), 
                     prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (data_organism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA else NA,
-                    n_modules_variants_enriched = sum(sumstats_celltype_df$n_modules_variants_enriched, na.rm=T),
+                    n_modules_GSEA_enriched = if(!is.null(list_genesets_path)) sum(sumstats_celltype_df$n_modules_GSEA_enriched, na.rm=T) else NA_real_,
                     n_modules_magma_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sum(n_modules_gwas_enriched, na.rm = T) else NA,
                     n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) sum(sumstats_celltype_df$n_modules_meta_enriched, na.rm = T) else NA) 
   
@@ -3587,22 +3168,20 @@ if (resume == "checkpoint_5") {
   matrix(unlist(params_run), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
   
   # make path strings
-  sumstats_celltype_path = sprintf("%s%s_sumstats_celltype.tab", log_dir, data_prefix)
-  sumstats_run_path = sprintf("%s%s_sumstats_run.tab", log_dir, data_prefix)
-  params_run_path = sprintf("%s%s_params_run.tab", log_dir, data_prefix)
+  sumstats_celltype_path = sprintf("%s%s_%s_sumstats_celltype.tab", log_dir, data_prefix, run_prefix)
+  sumstats_run_path = sprintf("%s%s_%s_sumstats_run.tab", log_dir, data_prefix, run_prefix)
+  params_run_path = sprintf("%s%s_%s_params_run.tab", log_dir, data_prefix, run_prefix)
   
   # set append param values
-  append_sumstats_celltype = F#file.exists(sumstats_celltype_path)
-  append_sumstats_run = F#file.exists(sumstats_run_path)
-  append_params_run = F#file.exists(params_run_path)
+  append_sumstats_celltype = F
+  append_sumstats_run = F
+  append_params_run = F
   
   # write to file
   write.table(sumstats_celltype_df, file=sumstats_celltype_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_celltype, col.names = !append_sumstats_celltype)
   write.table(sumstats_run_df, file=sumstats_run_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_run, col.names = !append_sumstats_run)
   write.table(params_run_df, file=params_run_path, quote = F, sep = "\t", row.names=F, append = append_params_run, col.names = !append_params_run)
-  
-  # stopCluster(cl)
-  
+
   ######################################################################
   ################# SAVE SESSION IMAGE AND FINISH ######################
   ######################################################################

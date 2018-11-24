@@ -108,6 +108,7 @@ e.g.
 * `genes_remove_dir`: "Path to a directory of gene lists saved in .csv, .tab, .txt, .RData, or .RDS, to remove before the analysis".
 * `genes_use`: One of `"all"`, `"var.genes"` for seurat var.genes, or `"PCA"` for genes that load significantly on at least one significant PC. Defaults to `"PCA"`
 * `pca_genes`: If `genes_use` == `"PCA"`, use `var.genes` or `all` genes to perform PCA to select genes based on PC loadings? If `num.replicate` is zero, select 5000 genes loading highly on the top PCs for downstream analysis. If non-zero, use JackStraw to identify significant PCs. If using `all` genes for the PCA, select significant genes based on the JackStraw; otherwise just use loadings.
+*`n_genes_use`: If genes_use==PCA and pca_genes == var.genes, n_genes_use controls the number of top PC loading genes to include in the analysis. Default: 5000
 * `corFnc`: Correlation function: either `"cor"` (Pearson) or `"bicor"` - biweighted midcorrelation. Defaults to `"cor"`
 * `networkType`: `"signed"`, `"signed hybrid"` or `"unsigned"`. '"signed"' scales correlations to [0:1]; '"unsigned"' takes the absolute value (but the TOM can still be '"signed"'); '"signed hybrid"' sets negative correlations to zero. Defaults to `"signed"`.
 * `hclustMethod`: Hierarchical clustering agglomeration method. See `hclust()` documentation. For bulk RNAseq data, consider `average`. Defaults to `complete``
@@ -120,9 +121,9 @@ e.g.
 * `jackstrawnReplicate`: Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `pca_genes` above). Integer, defaults to 500. 
 * `TOMnReplicate`: Number of times to permute the dataset, defaults to 100
 * `fuzzyModMembership: `kME`: gene-eigengene correlation or `kIM`: average distance from gene to each module gene. Also used when computing cell embeddings on gene modules
-* `scale_MEs_by_kIMs`: Disactivated 
 * `PPI_filter`: Use Protein-Protein Interactions to validate modules? Defaults to TRUE
 * `data_organism`: `hsapiens` or `mmusculus`.
+* `list_genesets_path`: optional path to RDS or RData object containing a list of genesets against which to test modules using the GSEA algorithm. If map_genes_to_ensembl == T, the genesets will also be mapped for consistency. 
 * `magma_gwas_dir`: MAGMA input GWAS data directory as a character. Outputs results per subdirectory. Defaults to `/projects/jonatan/tmp-bmi-brain/data/magma/`.
 * `gwas_filter_traits`: Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character, in double(single) quotes, with a vector of character names in single(double) quotes, to match within the filename of the GWAS, given without whitespace, e.g. `"c('body_BMI_Locke2015')"` or `"c('BMI','T1D','T2D')"`. Case-insensitive. Defaults to `NULL`
 * `RAM_Gb_max`: Upper limit on Gb RAM available. Taken into account when setting up parallel processes. Defaults to 250.
