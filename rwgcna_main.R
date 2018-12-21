@@ -102,8 +102,6 @@ option_list <- list(
               help = "MAGMA input GWAS data directory, e.g. '/projects/jonatan/tmp-epilepsy/data/magma/ilae-lancet-2014/', '/projects/jonatan/tmp-bmi-brain/data/magma/BMI-brain/'. NULL skips the magma GWAS step [default %default]"),
   make_option("--gwas_filter_traits", type="character", default = NULL,
               help = "Filter out modules not significantly correlated with matching gwas studies within the magma_gwas_dir. Takes a character with a vector, without whitespace, of character names to match within the filename of the GWAS , e.g. ''c('body_BMI_Locke2015')'' or ''c('BMI', 'T1D', 'T2D')''. Case-insensitive. [default %default]"),
-  # make_option("--n_cores", type="integer", default=5,
-  #             help = "Number of cores to use for parallelization [default %default]"),
   make_option("--RAM_Gb_max", type="integer", default=250,
               help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]")
 )
@@ -138,14 +136,37 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
 current.dir = paste0(LocationOfThisScript(), "/")
 
 ######################################################################
-############################ LOAD FUNCTIONS ##########################
-######################################################################
-
-source(file = paste0(current.dir, "rwgcna_functions.R"))
-
-######################################################################
 ############################## PACKAGES ##############################
 ######################################################################
+
+# install and require packages using a function (allows for automation)
+ipak <- function(pkgs){
+  new.pkgs <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(new.pkgs)) {
+    sapply(new.pkgs, function(pkg) {
+      tryCatch({
+        install.packages(pkg, dependencies = TRUE)
+      }, warning = function(war) {
+        tryCatch({
+          source("https://bioconductor.org/biocLite.R")
+          biocLite(pkg, suppressUpdates = T)
+        }, error = function(err1) {
+          warning(paste0(pkg, " encountered the error: ", err1))
+          dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+          ipak(dependency)
+        })
+      } ,
+      error = function(err)
+      {
+        dependency <- gsub("\\W|ERROR: dependency | is not available for package.*", "", err)
+        ipak(dependency)
+      })
+    })
+  }
+  suppressPackageStartupMessages(sapply(pkgs, require, character.only = TRUE))
+  failed <- pkgs[!(pkgs %in% installed.packages()[, "Package"])]
+  if (length(failed)>0) warning(paste0(paste0(failed, collapse = " "), " failed to install"))
+}
 
 # install and require packages
 
@@ -256,9 +277,13 @@ if (!is.null(gwas_filter_traits)) gwas_filter_traits <- eval(parse(text=gwas_fil
 
 data_organism <- opt$data_organism
 
-#n_cores <- opt$n_cores  
-
 RAM_Gb_max <- opt$RAM_Gb_max
+
+######################################################################
+############################## FUNCTIONS #############################
+######################################################################
+
+source(file = paste0(current.dir, "rwgcna_functions.R"))
 
 ######################################################################
 ############################## CONSTANTS #############################
@@ -361,8 +386,6 @@ if (is.null(resume)) {
   if (! (jackstrawnReplicate >= 0)) stop("jackstrawnReplicate must be 0 or higher")
   
   if (! (TOMnReplicate >= 0)) stop("TOMnReplicate must be non-negative")
-  
-  #if (! (n_cores >= 0 & n_cores <= detectCores())) stop("n_cores must be in the range 0-detectCores()")
   
   if (!is.null(genes_remove_dir)) {
     if (!file.exists(genes_remove_dir)) {
@@ -662,18 +685,21 @@ if (is.null(resume)) {
   
   if (data_type=="sc") {
     message(paste0("Filtering out cell clusters with fewer than ", minCellClusterSize, " cells"))
-    idx_subsets_ok <- n_cells_subsets>=minCellClusterSize
+    idx_cellcluster_ok <- n_cells_subsets>=minCellClusterSize
   } else if (data_type=="bulk") { # no need to filter out any subsets
-    idx_subsets_ok = !logical(length = length(subsets))
+    idx_cellcluster_ok = !logical(length = length(subsets))
   }
   
-  if (sum(idx_subsets_ok)<length(idx_subsets_ok)) {
-    log_entry <- paste0(c("The following cell clusters had <", minCellClusterSize,"cells and were therefore dropped:",sNames_0[!idx_subsets_ok]), collapse=" ")
+  if (!all(idx_cellcluster_ok)) {
+    log_entry <- paste0(sNames_0[!idx_cellcluster_ok], ": had <", minCellClusterSize," cells and was therefore dropped")
     warning(log_entry)
     cat(text = log_entry, file =  path_cellClusters_dropped_log, append=T, sep = "\n")
+    
+    # Filter
+    subsets <- subsets[idx_cellcluster_ok]
   }
-  subsets <- subsets[idx_subsets_ok]
-  sNames_1 <- sNames_0[idx_subsets_ok]
+  
+  sNames_1 <- sNames_0[idx_cellcluster_ok]
   names(subsets) <- sNames_1 
   
   # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
@@ -692,16 +718,16 @@ if (is.null(resume)) {
   
    
   # Filter
-  idx_subsets_ok <- sapply(subsets, function(subset) {!is.null(rownames(subset@raw.data))}, simplify=T)
-  if (length(idx_subsets_ok)!=sum(idx_subsets_ok)) {
-    log_entry <-paste0("After filtering out genes expressed in fewer than ", min.cells, " cells, ", sNames_1[!idx_subsets_ok], " had no genes left")
+  idx_cellcluster_ok <- sapply(subsets, function(subset) {!is.null(rownames(subset@raw.data))}, simplify=T)
+  if (!all(idx_cellcluster_ok)) {
+    log_entry <-paste0(sNames_1[!idx_cellcluster_ok], ": had no genes left after filtering out genes expressed in fewer than ", min.cells, " cells, therefore dropped")
     warning(log_entry)
     cat(log_entry, file = path_cellClusters_dropped_log, append=T, sep = "\n")
+    # filter
+    subsets <- subsets[idx_cellcluster_ok]
   }
-    
-  subsets <- subsets[idx_subsets_ok]
-  sNames_2 <- sNames_1[idx_subsets_ok]
-  
+
+  sNames_2 <- sNames_1[idx_cellcluster_ok]
   
   if (data_type=="sc") {
     outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "NormalizeData.txt")
@@ -957,39 +983,21 @@ if (resume == "checkpoint_1") {
     ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
     ######################################################################
     
-    message(sprintf("Resampling the samples %s times with replace = %s", TOMnReplicate, replace))
-    
-    outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_bootStrap.txt")
-    fun = function(datExpr) {
-      bootstrap(datExpr=datExpr, 
-                nPermutations = TOMnReplicate,
-                replace = replace,
-                fraction = fraction,
-                randomSeed = randomSeed)
-    }
-    
-    args <- list("X"=list_datExpr)
-    
-    list_multiExpr <- safeParallel(fun = fun, 
-                                   args=args, 
-                                   outfile=outfile, 
-                                   nPermutations=TOMnReplicate, 
-                                   replace=replace, 
-                                   fraction=fraction, 
-                                   randomSeed=randomSeed)
-    
-    names(list_multiExpr) <- sNames_2 
-    
-    ######################################################################
-    ######### RUN CONSENSUSTOM ON THE RESAMPLED DATASETS #################
-    ######################################################################
-    
+    message(sprintf("Resampling the expression data with fraction %s with replace = %s and %s replicates", fraction, replace, TOMnReplicate))
+
     message(sprintf("Computing the consensus Topological Overlap Matrix with %s permutations", TOMnReplicate))
     
     invisible(gc())
     
-    fun <- function(multiExpr,name) {
+    fun <- function(datExpr,name) {
       tryCatch({
+          
+        multiExpr <- bootstrap(datExpr=datExpr, 
+                      nPermutations = nPermutations,
+                      replace = replace,
+                      fraction = fraction,
+                      randomSeed = randomSeed)
+          
         consensusTOM(multiExpr = multiExpr, 
                                checkMissingData = checkMissingData,
                                maxBlockSize = maxBlockSize, 
@@ -1038,47 +1046,56 @@ if (resume == "checkpoint_1") {
       })
     }
     
-    args <- list("multiExpr"=list_multiExpr, "name"=sNames_2)
+    args <- list("datExpr"=list_datExpr, "name"=sNames_2)
     outfile = outfile = paste0(log_dir, data_prefix, "_", run_prefix, "_", "log_consensusTOM.txt")
 
-                              safeParallel(fun=fun, 
-                                           args=args, 
-                                           outfile=outfile, 
-                                           checkMissingData = checkMissingData,
-                                           maxBlockSize = maxBlockSize, 
-                                           blockSizePenaltyPower = blockSizePenaltyPower, 
-                                           randomSeed = randomSeed,
-                                           corType = corType,
-                                           corFnc = corFnc, 
-                                           corOptions = corOptions,
-                                           maxPOutliers = maxPOutliers,
-                                           quickCor = quickCor,
-                                           pearsonFallback = pearsonFallback,
-                                           cosineCorrelation = cosineCorrelation,
-                                           replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                           list_sft = list_sft,
-                                           networkType = networkType,
-                                           type = networkType,
-                                           TOMType=TOMType,
-                                           TOMDenom = TOMDenom,
-                                           saveIndividualTOMs = saveIndividualTOMs,
-                                           data_prefix=data_prefix, 
-                                           run_prefix=run_prefix,
-                                           networkCalibration = networkCalibration,
-                                           sampleForCalibration = sampleForCalibration,
-                                           sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                           getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                           consensusQuantile = consensusQuantile,
-                                           useMean = useMean,
-                                           saveConsensusTOMs = saveConsensusTOMs,
-                                           returnTOMs = F,
-                                           useDiskCache = T,
-                                           cacheDir = scratch_dir,
-                                           cacheBase = ".blockConsModsCache",
-                                           verbose = verbose,
-                                           indent = indent,
-                                           list_datExpr=list_datExpr,
-                                           scratch_dir = scratch_dir)
+    additional_Gb = max(as.numeric(sapply(args, FUN = function(x) {object.size(x)*TOMnReplicate}, simplify = T)))/1024^3 
+    obj_size_Gb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
+    n_cores <- min(max(sapply(args, length)), min(detectCores()%/%3, RAM_Gb_max %/% (obj_size_Gb + additional_Gb))-1)
+    
+    safeParallel(fun=fun, 
+                 args=args,
+                 outfile=outfile,
+                 n_cores=n_cores,
+                 nPermutations=TOMnReplicate,
+                 replace=replace,
+                 fraction=fraction,
+                 randomSeed=randomSeed,
+                 checkMissingData = checkMissingData,
+                 maxBlockSize = maxBlockSize, 
+                 blockSizePenaltyPower = blockSizePenaltyPower, 
+                 randomSeed = randomSeed,
+                 corType = corType,
+                 corFnc = corFnc, 
+                 corOptions = corOptions,
+                 maxPOutliers = maxPOutliers,
+                 quickCor = quickCor,
+                 pearsonFallback = pearsonFallback,
+                 cosineCorrelation = cosineCorrelation,
+                 replaceMissingAdjacencies = replaceMissingAdjacencies,
+                 list_sft = list_sft,
+                 networkType = networkType,
+                 type = networkType,
+                 TOMType=TOMType,
+                 TOMDenom = TOMDenom,
+                 saveIndividualTOMs = saveIndividualTOMs,
+                 data_prefix=data_prefix, 
+                 run_prefix=run_prefix,
+                 networkCalibration = networkCalibration,
+                 sampleForCalibration = sampleForCalibration,
+                 sampleForCalibrationFactor = sampleForCalibrationFactor,
+                 getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                 consensusQuantile = consensusQuantile,
+                 useMean = useMean,
+                 saveConsensusTOMs = saveConsensusTOMs,
+                 returnTOMs = F,
+                 useDiskCache = T,
+                 cacheDir = scratch_dir,
+                 cacheBase = ".blockConsModsCache",
+                 verbose = verbose,
+                 indent = indent,
+                 list_datExpr=list_datExpr,
+                 scratch_dir = scratch_dir)
 
   } else if (TOMnReplicate==0) {
     
@@ -1112,7 +1129,7 @@ if (resume == "checkpoint_1") {
   
   #rm(list_datExpr)
   
-  if (TOMnReplicate > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
+  #if (TOMnReplicate > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
   
   # Load TOMs into memory and convert to distance matrices
   fun = function(name) {
@@ -1197,15 +1214,19 @@ if (resume == "checkpoint_2") {
   list_dissTOM <- load_obj(list_dissTOM_path)
   
   # Remove NULL
-  idx_celltypes_dissTOM_NULL <- sapply(list_dissTOM, is.null)
+  idx_cellcluster_ok <- !sapply(list_dissTOM, is.null)
+
+  if (!all(idx_cellcluster_ok)) {
+    log_entry <-paste0(sNames_2[!idx_cellcluster_ok], ": Topological Overlap Matrix step failed, dropped from analysis")
+    warning(log_entry)
+    cat(log_entry, file = path_cellClusters_dropped_log, append=T, sep = "\n")
+    
+    # Edit objects
+    list_dissTOM <- list_dissTOM[idx_cellcluster_ok]
+    list_datExpr_gg <- list_datExpr_gg[idx_cellcluster_ok]
+  }
   
-  # Write log
-  if (any(idx_celltypes_dissTOM_NULL)) write.table(x=sNames_2[idx_celltypes_dissTOM_NULL],file = paste0(log_dir, data_prefix, "_", run_prefix, "_cell_clusters_TOM_NULL.tab"))
-  
-  # Edit objects
-  list_dissTOM <- list_dissTOM[!idx_celltypes_dissTOM_NULL]
-  list_datExpr_gg <- list_datExpr_gg[!idx_celltypes_dissTOM_NULL]
-  sNames_3 <- sNames_2[!idx_celltypes_dissTOM_NULL]
+  sNames_3 <- sNames_2[idx_cellcluster_ok]
   
   ######################################################################
   ####################### CLUSTER ON THE TOM ###########################
@@ -1303,13 +1324,20 @@ if (resume == "checkpoint_2") {
   names(list_list_cutree) <- names(list_list_comb) <- names(list_list_plot_label) <- sNames_3
   
   # Filter at the cell cluster level
+  idx_cellcluster_ok <- sapply(list_list_cutree, function(x) length(x)>0)
   
-  list_list_cutree <- Filter(f=length, x= list_list_cutree)
-  list_list_comb <- Filter(f=length, x=list_list_comb)
-  list_list_plot_label <- Filter(f=length, x=list_list_plot_label)
-  sNames_4 <- names(list_list_cutree) 
-  list_datExpr_gg <-list_datExpr_gg[names(list_datExpr_gg) %in% sNames_4]
+  if (!all(idx_cellcluster_ok)) {
+    log_entry <-paste0(sNames_3[!idx_cellcluster_ok], " : cutreeHybrid failed, removed from analysis")
+    warning(log_entry)
+    cat(log_entry, file = path_cellClusters_dropped_log, append=T, sep = "\n")
+    
+    list_list_cutree <- list_list_cutree[idx_cellcluster_ok]# Filter(f=length, x= list_list_cutree)
+    list_list_comb <-list_list_comb[idx_cellcluster_ok] #Filter(f=length, x=list_list_comb)
+    list_list_plot_label <-list_list_plot_label[idx_cellcluster_ok]# Filter(f=length, x=list_list_plot_label)
+    list_datExpr_gg <- list_datExpr_gg[idx_cellcluster_ok]#list_datExpr_gg[names(list_datExpr_gg) %in% sNames_4]
+  }
   
+  sNames_4 <- sNames_3[idx_cellcluster_ok]# names(list_list_cutree) 
   ######################################################################
   ######################### MERGE CLOSE MODULES ########################
   ######################################################################
@@ -1499,7 +1527,7 @@ if (resume == "checkpoint_2") {
       fun = function(list_colors,
                      dissTOM,
                      datExpr,
-                     cellType) lapply(list_colors, function(colors) kM_reassign_fnc(colors = colors,
+                     cellType) lapply(list_colors, function(cols) kM_reassign_fnc(cols = cols,
                                                                                     fuzzyModMembership = fuzzyModMembership,
                                                                                     dissTOM = if (fuzzyModMembership=="kIM") dissTOM else NULL,
                                                                                     datExpr = if (fuzzyModMembership=="kME") datExpr else NULL,
@@ -1515,7 +1543,7 @@ if (resume == "checkpoint_2") {
     } else if (fuzzyModMembership=="kME"){ # to avoid storing list_dissTOM
       fun = function(list_colors,
                      datExpr,
-                     cellType) lapply(list_colors, function(colors) kM_reassign_fnc(colors = colors,
+                     cellType) lapply(list_colors, function(cols) kM_reassign_fnc(cols = cols,
                                                                                     fuzzyModMembership = fuzzyModMembership,
                                                                                     #dissTOM = if (fuzzyModMembership=="kIM") dissTOM else NULL,
                                                                                     datExpr = if (fuzzyModMembership=="kME") datExpr else NULL,
@@ -1867,34 +1895,47 @@ if (resume == "checkpoint_2") {
   list_colors_matched=list_list_colors_matched, 
   SIMPLIFY=F)
   
-  logical_subsets_ok <- sapply(list_logical_params_ok, any, simplify = T)
+  idx_cellcluster_ok <- sapply(list_logical_params_ok, any, simplify = T)
   
   # First, for each run, remove results of any parametrisation for which all the genes were assigned to grey
   # If for a subset all parameters gave only grey modules, take it out of the top level list.
   list_list_plot_label_ok <- mapply(function(list_plot_label,logical_params_ok) list_plot_label[logical_params_ok], 
                                     list_plot_label = list_list_plot_label, 
                                     logical_params_ok = list_logical_params_ok, 
-                                    SIMPLIFY = F)[logical_subsets_ok]
+                                    SIMPLIFY = F)
   
   list_list_cutree_ok <- mapply(function(list_cutree,logical_params_ok) list_cutree[logical_params_ok], 
                                 list_cutree = list_list_cutree,
                                 logical_params_ok = list_logical_params_ok,
-                                SIMPLIFY = F)[logical_subsets_ok]
+                                SIMPLIFY = F)
   
   list_list_colors_matched_ok <- mapply(function(list_colors_matched,logical_params_ok) {
     list_colors_matched[logical_params_ok]
   }, 
   list_colors_matched=list_list_colors_matched, 
   logical_params_ok=list_logical_params_ok, 
-  SIMPLIFY = F)[logical_subsets_ok]
+  SIMPLIFY = F)
   
-  list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs_t.test, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok]
-  list_list_reassign_log <- if (kM_reassign) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)[logical_subsets_ok] else NULL
-  
-  sNames_5 <- sNames_4[logical_subsets_ok]
-  
-  list_datExpr_ok <- list_datExpr_gg[logical_subsets_ok] # If for a subset all parameters gave only grey modules, take it out of the top level list.
-  list_geneTree_ok <- list_geneTree[logical_subsets_ok]
+  list_list_pkMs_ok <- mapply(function(x,y) x[y], x=list_list_pkMs_t.test, y=list_logical_params_ok, SIMPLIFY = F)
+  list_list_reassign_log_ok <- if (kM_reassign) mapply(function(x,y) x[y], x=list_list_reassign_log, y=list_logical_params_ok, SIMPLIFY = F)  else NULL
+
+  # Make a warning and report if any whole subsets produced no modules
+  if (!all(idx_cellcluster_ok)) {
+    log_entry <- paste0(sNames_4[idx_cellcluster_ok], " had no modules, dropped from the analysis")
+    warning(log_entry)
+    cat(log_entry, file = path_cellClusters_dropped_log, append=T, sep = "\n")
+    
+    # filter
+    list_list_plot_label_ok <- list_list_plot_label[idx_cellcluster_ok]
+    list_list_cutree_ok <- list_list_cutree[idx_cellcluster_ok]
+    list_datExpr_ok <- list_datExpr_gg[idx_cellcluster_ok] # If for a subset all parameters gave only grey modules, take it out of the top level list.
+    list_geneTree_ok <- list_geneTree[idx_cellcluster_ok]
+    list_list_colors_matched_ok <- list_list_colors_matched_ok[idx_cellcluster_ok]
+    list_list_pkMs_ok <- list_list_pkMs_ok[idx_cellcluster_ok]
+    list_list_reassign_log_ok <- if (kM_reassign) list_list_reassign_log_ok[idx_cellcluster_ok] else NULL 
+  }
+
+  sNames_5 <- sNames_4[idx_cellcluster_ok]
   
   # Assign gene names to each color vector
   list_list_colors_matched_ok <- mapply(function(x,y) lapply(x, function(z) name_for_vec(to_be_named=z, given_names=colnames(y), 
@@ -1902,16 +1943,7 @@ if (resume == "checkpoint_2") {
                                         x = list_list_colors_matched_ok, 
                                         y = list_datExpr_ok, SIMPLIFY=F)
   
-  # Make a warning and report if any whole subsets produced no modules
-  discarded <- setdiff(sNames_4, sNames_5)
-  if (length(discarded > 0)) {
-    warning(paste0(discarded, " were dropped because the script didn't find any modules  "))
-    fileConn <- file(description = sprintf("%s%s_%s_ERROR_report.txt", log_dir,  data_prefix, run_prefix), open = 'a')
-    writeLines(paste0(discarded, " were dropped because the script didn't find any modules"), fileConn)
-    close(fileConn)
-  }
-  
-  rm(list_datExpr_gg, list_geneTree, list_list_cutree, list_list_MEs, list_list_plot_label)#, list_idx_mapped_gg)
+  rm(list_list_plot_label, list_list_cutree, list_datExpr_gg, list_geneTree, list_list_colors_matched, list_list_pkMs_t.test, list_list_reassign_log, list_list_MEs)#, list_idx_mapped_gg)
   
   invisible(gc())
   
@@ -2168,6 +2200,8 @@ if (resume == "checkpoint_4") {
   colors_uniq = list_colors_PPI_uniq,
   module_PPI_signif = list_module_PPI_signif_ok,
   SIMPLIFY = F)
+  
+  names(list_module_PPI_uniq) <- names(list_module_PPI_signif_uniq) <- sNames_PPI
   
   ######################################################################
   ########## RECOMPUTE MEs, kMs, pkMs AFTER PPI FILTER #########
@@ -2691,6 +2725,7 @@ if (resume == "checkpoint_4") {
         
       }
       
+    
       # Name the rows of the correlation matrix with the metadata columns
       
       # Compute p values
@@ -2728,6 +2763,11 @@ if (resume == "checkpoint_4") {
       rownames(corr_fdr.log) <- rownames(corr_pval)
       colnames(corr_fdr.log) <- colnames(corr_pval)
       corr_fdr.log <- as.data.frame(corr_fdr.log)
+      
+      # Also single rho df
+      corr_rho <- Reduce(x=list_mod_metadata_corr_rho, f=cbind)
+      rownames(corr_rho) <- rownames(corr_pval)
+      colnames(corr_rho) <- colnames(corr_pval)
       
     } 
     
@@ -2938,19 +2978,21 @@ if (resume == "checkpoint_5") {
   list_list_module_meta_genes <- safeParallel(fun=fun,args=args,outfile=outfile)
 
   # make a copy for pkMs
-  list_list_module_meta_pkMs <- list_list_module_meta_genes
+  list_list_module_meta_pkMs <- list_list_module_meta_genes # just a template
+  list_list_module_gene_loadings <- if (fuzzyModMembership == "kME") list_list_module_meta_genes else NULL # just a template
   # order the gene lists by pkM and get pkM value
 
-  message("Preparing sorted gene lists")
   # iterate over celltypes
   for (i in 1:length(list_list_module_meta_genes)) {
     # iterate over modules
     for (j in 1:length(list_list_module_meta_genes[[i]])) {
       pkMs = list_pkMs_meta[[i]]
+      if (fuzzyModMembership == "kME") mod_u <- list_u_meta[[i]][[j]]
       mod_genes <- list_list_module_meta_genes[[i]][[j]]
       mod_pkMs_sorted <- sort(pkMs[match(mod_genes,names(pkMs)), drop=F], decreasing=T)
-      list_list_module_meta_genes[[i]][[j]] <- names(mod_pkMs_sorted) 
+      list_list_module_meta_genes[[i]][[j]] <- names(mod_pkMs_sorted)  # sort the genes
       list_list_module_meta_pkMs[[i]][[j]] <- mod_pkMs_sorted
+      if (fuzzyModMembership == "kME") list_list_module_gene_loadings[[i]][[j]] <- mod_u[match(names(mod_pkMs_sorted), names(mod_u)), drop=F]
     }
   }
   
@@ -2961,6 +3003,7 @@ if (resume == "checkpoint_5") {
   ensembl <- if (map_genes_to_ensembl) unlist(list_list_module_meta_genes, recursive = T, use.names = F) else NULL 
   hgnc <- if (!map_genes_to_ensembl) unlist(list_list_module_meta_genes, recursive = T, use.names = F) else NULL 
   pkMs <- unlist(list_list_module_meta_pkMs, recursive = T, use.names = F)
+  if (fuzzyModMembership == "kME") gene_loadings <- unlist(list_list_module_gene_loadings, recursive = T, use.names = F)
   data <- rep(data_prefix, times= length(pkMs))
   run <- rep(run_prefix, times= length(pkMs))    
   
@@ -2982,6 +3025,7 @@ if (resume == "checkpoint_5") {
     df_meta_module_genes <- data.frame(data, run, cell_cluster, module, hgnc, pkMs, row.names = NULL)
     colnames(df_meta_module_genes) <- c("data", "run", "cell_cluster", "module", "hgnc", paste0("p", fuzzyModMembership))
   }
+  if (fuzzyModMembership=="kME") df_meta_module_genes[["gene_loadings"]] <- gene_loadings
   
   ##########################################################################
   ############################# OUTPUT TABLES ##############################
@@ -2992,66 +3036,99 @@ if (resume == "checkpoint_5") {
   ##################### WRITE OUT TABLES OF MODULE GENES ####################
   ###########################################################################
   
-  write.csv(df_meta_module_genes, file = sprintf("%s%s_%s_cell_cluster_module_genes.csv",tables_dir, data_prefix, run_prefix), quote = F, row.names = F)
+  write.csv(df_meta_module_genes, file = gzfile(sprintf("%s%s_%s_cell_cluster_module_genes.csv.gz",tables_dir, data_prefix, run_prefix)), quote = F, row.names = F)
   
   ####################### SAVE STRINGDB PPI OUTPUT #########################
   ##########################################################################
   
+
+  # output 
+  # fun = function(module_PPI_uniq,cell_cluster) write.csv(as.matrix(module_PPI_uniq, ncol=2), file=gzfile(sprintf("%s%s_%s_%s_STRINGdb_output_all.csv.gz", tables_dir, data_prefix, run_prefix, cell_cluster)), row.names = F, quote = F)
+  # args = list(module_PPI_uniq=list_module_PPI_uniq, 
+  #             cell_cluster= sNames_PPI[match(names(list_module_PPI_uniq),sNames_PPI)])
+  # invisible(safeParallel(fun=fun, args=args, outfile=outfile, tables_dir=tables_dir, data_prefix=data_prefix, run_prefix))
+  
+  list_module_PPI_uniq <- mapply(FUN = function(module_PPI_uniq, cell_cluster) {
+    if (!is.null(nrow(module_PPI_uniq))) module_PPI_uniq[["cell_cluster"]] <- rep(cell_cluster, nrow(module_PPI_uniq))
+    return(module_PPI_uniq)
+  },module_PPI_uniq=list_module_PPI_uniq, cell_cluster=names(list_module_PPI_uniq), SIMPLIFY=F)
+  module_PPI_uniq_df <- Reduce(x=list_module_PPI_uniq, f = rbind)
+  colnames(module_PPI_uniq_df) <- c("colors","q.value","expected.interactions", "cell_cluster")
+  write.csv(module_PPI_uniq_df, file=gzfile(sprintf("%s%s_%s_STRINGdb_output_all.csv.gz", tables_dir, data_prefix, run_prefix)), row.names = F, quote = F)
+  
+  # Now significantly PPI enriched modules
   # convert the module PPI dataframe columns from list to numeric 
   list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
   
-  # output 
-  fun = function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_all.csv", tables_dir, data_prefix, run_prefix, y), row.names = F, quote = F)
-  args = list(x=list_module_PPI_uniq, 
-              y= sNames_PPI[match(names(list_module_PPI_uniq),sNames_PPI)])
-  invisible(safeParallel(fun=fun, args=args, outfile=outfile, tables_dir=tables_dir, data_prefix=data_prefix, run_prefix))
-
-  
   if (length(list_module_PPI_signif_uniq_f) > 0) {
-    fun = function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
-                                  row.names=F, 
-                                  quote = F)
-    args=list(x=list_module_PPI_signif_uniq_f, 
-              y= sNames_PPI[match(names(list_module_PPI_signif_uniq_f),sNames_PPI)])
+    list_module_PPI_signif_uniq_f <- mapply(FUN = function(module_PPI_signif_uniq_f, cell_cluster) {
+      if (!is.null(nrow(module_PPI_signif_uniq_f))) module_PPI_signif_uniq_f[["cell_cluster"]] <- rep(cell_cluster, nrow(module_PPI_signif_uniq_f))
+      return(module_PPI_signif_uniq_f)
+    },module_PPI_signif_uniq_f=list_module_PPI_signif_uniq_f, cell_cluster=names(list_module_PPI_signif_uniq_f), SIMPLIFY=F)
+    module_PPI_signif_uniq_df_f <- Reduce(x=list_module_PPI_signif_uniq_f, f = rbind)
+    colnames(module_PPI_signif_uniq_df_f) <- c("colors","q.value","expected.interactions","cell_cluster")
     
-    invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv", tables_dir, data_prefix, run_prefix, y), 
-                                                     row.names=F, 
-                                                     quote = F), 
-                         x=list_module_PPI_signif_uniq_f, 
-                         y= sNames_PPI[match(names(list_module_PPI_signif_uniq_f),sNames_PPI)], 
-                         SIMPLIFY = F))
+    write.csv(module_PPI_signif_uniq_df_f, file=gzfile(sprintf("%s%s_%s_STRINGdb_output_signif.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=F, quote=F)
+    
+    # fun = function(x,y) write.csv(as.matrix(x, ncol=2), file=gzfile(sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv.gz", tables_dir, data_prefix, run_prefix, y)), 
+    #                               row.names=F, 
+    #                               quote = F)
+    # args=list(x=list_module_PPI_signif_uniq_f, 
+    #           y= sNames_PPI[match(names(list_module_PPI_signif_uniq_f),sNames_PPI)])
+    # 
+    # invisible(mapply(function(x,y) write.csv(as.matrix(x, ncol=2), file=gzfile(sprintf("%s%s_%s_%s_STRINGdb_output_signif.csv.gz", tables_dir, data_prefix, run_prefix, y)), 
+    #                                                  row.names=F, 
+    #                                                  quote = F), 
+    #                      x=list_module_PPI_signif_uniq_f, 
+    #                      y= sNames_PPI[match(names(list_module_PPI_signif_uniq_f),sNames_PPI)], 
+    #                      SIMPLIFY = F))
+    
   }
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
   
   # Prepare dfs with a gene column followed by kMEs / kIMs 
-  list_kMs_meta_out <- lapply(list_kMs_meta, function(x) cbind(genes=rownames(x), x))
-  rownames(list_kMs_meta) <- NULL
+  list_kMs_meta_out <- lapply(list_kMs_meta, function(kMs) {
+    kMs<-cbind(genes=rownames(kMs), kMs)
+    rownames(kMs) <- NULL
+    kMs
+    })
+
   
-  invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_kMs.csv", tables_dir, data_prefix, run_prefix, y), 
-                                                   row.names=F, quote = F), list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
+  # invisible(mapply(function(x,y) write.csv(x, file=gzfile(sprintf("%s%s_%s_%s_kMs.csv.gz", tables_dir, data_prefix, run_prefix, y)), 
+  #                                                  row.names=F, quote = F), 
+  #                  list_kMs_meta_out, sNames_meta, SIMPLIFY = F))
+  
+  # save kMs as a single outer join 
+  kMs_meta_out <- Reduce(f = function(df1, df2) {
+    dplyr::full_join(df1, df2, by="genes")}, 
+    x=list_kMs_meta_out)
+  
+  write.csv(kMs_meta_out, file=gzfile(sprintf("%s%s_%s_kMs_full_join.csv.gz", tables_dir, data_prefix, run_prefix)), 
+            row.names=F, quote = F)
   
   ######################## OUTPUT GSEA RESULTS ##############################
   ###########################################################################
   
   if (!is.null(list_genesets_path)) {
     try({GSEA_df <- arrange(GSEA_df, desc(scaled.score))  
-    invisible(write.csv(GSEA_df, file=sprintf("%s%s_%s_GSEA_df.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    invisible(write.csv(GSEA_df, file=gzfile(sprintf("%s%s_%s_GSEA_df.csv.gz", tables_dir, data_prefix, run_prefix)), 
+                        row.names=F, quote = F))
     })
   }
   ######################## OUTPUT MAGMA RESULTS #############################
   ###########################################################################
   
   if (!is.null(magma_gwas_dir)) {
-    invisible(write.csv(magma.p.all, file=sprintf("%s%s_%s_magma.p.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
-    invisible(write.csv(magma.emp.p.all, file=sprintf("%s%s_%s_magma.emp.p.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
-    invisible(write.csv(magma.p.fdr.log, file=sprintf("%s%s_%s_magma.fdr.log.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
-    invisible(write.csv(magma.r.all, file=sprintf("%s%s_%s_magma.r.csv", tables_dir, data_prefix, run_prefix), row.names=F, quote = F))
+    invisible(write.csv(magma.p.all, file=gzfile(sprintf("%s%s_%s_magma.p.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=F, quote = F))
+    invisible(write.csv(magma.emp.p.all, file=gzfile(sprintf("%s%s_%s_magma.emp.p.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=F, quote = F))
+    invisible(write.csv(magma.p.fdr.log, file=gzfile(sprintf("%s%s_%s_magma.fdr.log.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=F, quote = F))
+    invisible(write.csv(magma.r.all, file=gzfile(sprintf("%s%s_%s_magma.r.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=F, quote = F))
     
-    if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=sprintf("%s%s_%s_magma.fdr.log.sig.csv", tables_dir, data_prefix, run_prefix), 
+    if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=gzfile(sprintf("%s%s_%s_magma.fdr.log.sig.csv.gz", tables_dir, data_prefix, run_prefix)), 
                                                           row.names=F, quote = F))
-    if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=sprintf("%s%s_%s_magma.r.sig.csv", tables_dir, data_prefix, run_prefix), 
+    if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=gzfile(sprintf("%s%s_%s_magma.r.sig.csv.gz", tables_dir, data_prefix, run_prefix)), 
                                                  row.names=F, quote = F))
   }
   
@@ -3059,19 +3136,21 @@ if (resume == "checkpoint_5") {
   ###########################################################################
   
   if (!is.null(metadata_corr_col) & !is.null(metadata)) {
-    invisible(write.csv(corr_fdr.log, file=sprintf("%s%s_%s_all_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix), row.names=T, quote = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_rho.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
-                         list_mod_metadata_corr_rho, 
-                         sNames_gwas, SIMPLIFY = F))
-    invisible(mapply(function(x,y) write.csv(x, file=sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv", tables_dir, data_prefix, run_prefix, y), row.names=T, quote = F), 
-                         list_mod_metadata_corr_fdr.log, 
-                         sNames_gwas, SIMPLIFY = F))
+    invisible(write.csv(corr_fdr.log, file=gzfile(sprintf("%s%s_%s_all_metadata_corr_logfdr.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=T, quote = F))
+    invisible(write.csv(corr_rho, file=gzfile(sprintf("%s%s_%s_all_metadata_rho.csv.gz", tables_dir, data_prefix, run_prefix)), row.names=T, quote = F))
+    
+    # invisible(mapply(function(x,y) write.csv(x, file=gzfile(sprintf("%s%s_%s_%s_metadata_corr_rho.csv.gz", tables_dir, data_prefix, run_prefix, y)), row.names=T, quote = F), 
+    #                      list_mod_metadata_corr_rho, 
+    #                      sNames_gwas, SIMPLIFY = F))
+    # invisible(mapply(function(x,y) write.csv(x, file=gzfile(sprintf("%s%s_%s_%s_metadata_corr_logfdr.csv.gz", tables_dir, data_prefix, run_prefix, y)), row.names=T, quote = F), 
+    #                      list_mod_metadata_corr_fdr.log, 
+    #                      sNames_gwas, SIMPLIFY = F))
   }
   
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  invisible(write.csv(x=as.data.frame(cellModEmbed_mat), file=sprintf("%s%s_%s_%s_cellModEmbed.csv", tables_dir, data_prefix, run_prefix, fuzzyModMembership), row.names=F, quote = F))
+  invisible(write.csv(x=as.data.frame(cellModEmbed_mat_annot), file=gzfile(sprintf("%s%s_%s_%s_cellModEmbed.csv.gz", tables_dir, data_prefix, run_prefix, fuzzyModMembership)), row.names=F, quote = F))
   
   ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
   ########################################################################### 

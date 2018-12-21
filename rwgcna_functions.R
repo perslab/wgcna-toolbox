@@ -569,13 +569,14 @@ deleteGrey <- function(list_kMs) {
 ############################################################################################################################################################
 ############################################################################################################################################################
 
-kM_reassign_fnc = function(colors,
+kM_reassign_fnc = function(cols,
                            fuzzyModMembership,
                            dissTOM = NULL,
                            datExpr = NULL,
                            verbose=2,
                            corFnc=NULL,
                            max_iter=3,
+                           reassign_threshold=1.2,
                            cellType) {
   
   # Usage: iteratively reassign genes to modules based on kIM / kME until the number to reassign <= stop_condition
@@ -583,32 +584,33 @@ kM_reassign_fnc = function(colors,
   #   fuzzyModMembership: "kME" or "kIM"
   #   dissTOM: list of TOM distance matrices. Only required if fuzzyModMembership = "kIM"
   #   datExpr: cell x gene expression matrix. Only required if fuzzyModMembership = "kME"
-  #   colors: vector of module assignments with gene names
+  #   cols: vector of module assignments with gene names
   #   corFnc: WGCNA correlation function; only needed if fuzzyModMembership = "kME"
   #   verbose: 0-5, controls message output
   #   max_iter: integer; max iterations.
+  #   reassign_threshold: threshold ratio of competing to current module kME for reassignment to occur 
   # Value:
-  #   list with entries "colors", "kMs" and "log". 
+  #   list with entries "cols", "kMs" and "log". 
   
   print(paste0(cellType, ": Reassigning genes to modules with higher ", fuzzyModMembership))
   
   # initialise
   tryCatch({
-    colors_original <- colors_new <- colors
-    reassign_total  <- reassign_t_1 <- logical(length(colors))
-    reassign_t <- ! logical(length(colors))
+    cols_original <- cols_new <- cols
+    reassign_total  <- reassign_t_1 <- logical(length(cols))
+    reassign_t <- ! logical(length(cols))
     min_change = 5 # the minimum change from one iteration to the next required to continue
     t = 1
     MEs <- NULL
     kMs <- NULL 
     log=NULL 
     
-    if (!is.null(colors) & length(unique(colors))>1) {
+    if (!is.null(cols) & length(unique(cols))>1) {
       while(TRUE) {
         if (fuzzyModMembership == "kME") {
           message(paste0(cellType, ": Computing Module Eigengenes"))
           MEs <- moduleEigengenes_uv(expr=datExpr, # TODO do we need to make it into a dataframe with names?..
-                                            colors = colors,
+                                            colors = cols,
                                             excludeGrey=T)$eigengenes
           
           message(paste0(cellType, ": Computing ", fuzzyModMembership, "s"))
@@ -617,29 +619,29 @@ kM_reassign_fnc = function(colors,
                            outputColumnName = "",
                            corFnc = corFnc)
           
-          message(paste0(cellType, ": Computing primary "), fuzzyModMembership, "s")
-          
         }  else if (fuzzyModMembership == "kIM") {
           
           kMs <- kIM_eachMod_norm(dissTOM=dissTOM, 
-                                  colors=colors, 
+                                  colors=cols, 
                                   verbose=verbose,
                                   excludeGrey=T)
         }
         
-        pkMs <- pkMs_fnc(kMs=kMs, colors=colors)
+        message(paste0(cellType, ": Computing primary "), fuzzyModMembership, "s")
+        
+        pkMs <- pkMs_fnc(kMs=kMs, colors=cols)
         
         maxkMs <- max.col(kMs, ties.method = "random") #  integer vector of length nrow(kMs)
-        # Reassign if there is a kM value to another module which is more than 1.05 times the current pkM value
-        colors_new <- mapply(function(i, j, pkM) if (kMs[i,j] > 1.05*pkM) colnames(kMs)[j] else colors[i], i = 1:length(maxkMs), j = maxkMs, pkM=pkMs, SIMPLIFY=T) # get new module assignment vector
-        colors_new[colors=="grey"] <- "grey" # Do not reallocate genes previously allocated to grey, since they are likely to get reallocated as "grey" is not a real cohesive module
-        names(colors_new) <- names(colors)
+        # Reassign if there is a kM value to another module which is more than reassign_threshold times the current pkM value
+        cols_new <- mapply(function(i, j, pkM) if (kMs[i,j] > reassign_threshold*pkM) colnames(kMs)[j] else cols[i], i = 1:length(maxkMs), j = maxkMs, pkM=pkMs, SIMPLIFY=T) # get new module assignment vector
+        cols_new[cols=="grey"] <- "grey" # Do not reallocate genes previously allocated to grey, since they are likely to get reallocated as "grey" is not a real cohesive module
+        names(cols_new) <- names(cols)
         
-        reassign_t <- colors_new != colors
+        reassign_t <- cols_new != cols
         
         if ((t>1 & sum(reassign_t_1) - sum(reassign_t) < min_change) | sum(reassign_t) < min_change | t >= max_iter) break #else message(paste0(cellType, ", iteration ", t, ": reassigning ",  sum(reassign_t), " genes to new modules based on their ", fuzzyModMembership))
         
-        colors <- colors_new
+        cols <- cols_new
         
         reassign_total <- reassign_total | reassign_t
         reassign_t_1 <- reassign_t
@@ -647,20 +649,20 @@ kM_reassign_fnc = function(colors,
         t = t+1
       }
       
-      log <- data.frame("gene" = names(colors)[reassign_total], 
-                        "original_module" = colors_original[reassign_total], 
-                        "new_module" = colors_new[reassign_total], stringsAsFactors=F, row.names=NULL)
+      log <- data.frame("gene" = names(cols)[reassign_total], 
+                        "original_module" = cols_original[reassign_total], 
+                        "new_module" = cols_new[reassign_total], stringsAsFactors=F, row.names=NULL)
       
       if (verbose > 0) print(paste0(cellType, ": a total of ", sum(reassign_total), " genes reassigned to new modules"))
       
     } else {
       warning(paste0(cellType, ": one or no modules, nothing to reassign"))
     }
-    return(list("colors" = colors_new, "kMs" = kMs, "log" = log))
+    return(list("colors" = cols_new, "kMs" = kMs, "log" = log))
   }, 
   error = function(c) {
     warning(paste0("kM_reassign_fnc failed for ", cellType, " with the following error: ", c))
-    return(list("colors" = colors_original, 
+    return(list("colors" = cols_original, 
                 "kMs" = NULL,
                 "log" = NULL))}
   )
@@ -2307,11 +2309,15 @@ safeParallel = function(fun, args, simplify=F, MARGIN=NULL, n_cores=NULL, Gb_max
     if (is.null(Gb_max)) Gb_max=200
     additional_Gb = max(as.numeric(sapply(args, FUN = function(x) object.size(x), simplify = T)))/1024^3
     obj_size_Gb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
-    n_cores <- max(1, min(detectCores()%/%3, Gb_max %/% (obj_size_Gb + additional_Gb))-1)
-    n_cores <- min(n_cores, max(sapply(args, length)))
+    n_cores <- min(max(sapply(args, length)), min(detectCores()%/%3, Gb_max %/% (obj_size_Gb + additional_Gb))-1)
   }
   
-  cl <-  if (!is.null(outfile)) try(makeCluster(spec=max(1,n_cores), type="FORK", timeout=30, outfile = outfile)) else try(makeCluster(spec=max(1,n_cores), type="FORK", timeout=30))
+  if (n_cores >= 2) {
+    cl <-  if (!is.null(outfile)) try(makeCluster(spec=max(1,n_cores), type="FORK", timeout=30, outfile = outfile)) else try(makeCluster(spec=max(1,n_cores), type="FORK", timeout=30))
+  } else {
+    cl <- "failed"
+    class(cl) <- "try-error"
+  }
   #cl <- "hi"
   #class(cl) <- "try-error"
   if (!"try-error" %in% class(cl)) {
