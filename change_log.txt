@@ -1,5 +1,47 @@
 # Change log
 
+v2.8 - 08-02-2019
+
+### Added 
+* user can input expression data in other than seurat object format. User can provide metadata in separate file 
+* nFeatures argument to specify how many genes to use
+
+### Changed 
+* Upgraded all functions to Seurat 3 while ensuring compatibility with Seurat 2 objects
+* user specifies assay and slot to use
+* increase kM reassign threshold to 1.2 to avoid reassigning too many genes 
+* do not output module left eigenvectors separately as they are already in cell_cluster_gene_module dataframe
+* cellModEmbed matrix "ident" column changed name to "cell_cluster" to align with cell_cluster_module_gene csv 
+* cellModEmbed matrix now output using data slot to allow the user to scale subsequently as desired.
+* pamStage default changed to F
+* the number of variable features to find depends on the featuresUse argument since variable features go into PCA and hence limit the gene choice when using PCA gene selection
+* the genes to scale depend on featuresUse since only scaled genes can be used in PCA
+* changed the jackstraw:
+    - Removed the PCAgenes parameter
+    - Made it possible to select genes on PC loadings, PC loadings with jackstraw filtering of PCs, or PC loadings using significance as criterion
+* when trying several sets of parameters (e.g. pamStage FALSE and TRUE), the script now selects the parameters, for each subset, that produces the highest number of modules (this could be improved in future)
+
+### Fixed 
+* delete all temporary files
+* fixed problem with removing celltypes that have no modules at different stages, undefined variables when none to delete
+* filtering genes that failed TOM resampling by using colnames of consTOM failed since consTOM was already a distance matrix without colnames or rownames
+* mergeCloseModskIM  now exits when there is only one module left
+* Newly introduced bug in mergeCloseModskIM
+* Bug in having renamed color argument to modcolor argument in moduleEigengenes_uv function argument without doing so in the body.
+* fixed an error in cellModEmbed with kIM whereby the matrix was not being generated; strange 
+* duplicate softpower column in sumstats_celltype.tab; n_genes retained although it was now giving original number of genes, so added n_genes_used 
+
+### Removed
+* use_imputed parameter
+* quit_session parameter
+* genes_remove_dir parameter 
+* PPI  test
+* correlation test
+* magma test
+* gene set enrichment test
+* map_to_ensembl
+* matching colors between parametrisations: only for plotting so irrelevant
+
 v2.7 - 24-11-2018
 
 ### Added
