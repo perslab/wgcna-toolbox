@@ -2,7 +2,7 @@
 
 Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 
-## Robust WGCNA pipeline
+## Robust WGCNA pipeline (rwgnca_main_seurat3.0.R)
 
 *Dependencies:*
 * optparse
@@ -50,3 +50,7 @@ time Rscript /projects/jonatan/tools/wgcna-src/wgcna-toolbox/rwgcna_main_seurat3
 
 ### Help
 Rscript /projects/jonatan/tools/wgcna-src/wgcna-toolbox/rwgcna_main_seurat3.0.R --help
+
+## post-WGCNA scripts
+
+* Various scripts for post-WGCNA analysis for post-WGCNA pipeline analysis of module embeddings, correlations, gene set enrichment etc. More information at the top of each script. 

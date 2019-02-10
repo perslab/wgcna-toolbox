@@ -25,6 +25,7 @@ v2.8 - 08-02-2019
 * changed corFnc default from bicor to cor
 * changed networkType default from signed to c('signed hybrid')
 * removed prefixData default
+* reorganised scripts into main WGCNA pipeline, auxillary post-analysis scripts, and old scripts 
 
 ### Fixed 
 * delete all temporary files

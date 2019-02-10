@@ -235,7 +235,7 @@ if (!file.exists(dirTmp)) dir.create(dirTmp)
 tStart <- as.character(Sys.time())
 
 # source parameter values
-source(file = paste0(current.dir, "rwgcna_params.R"))
+source(file = paste0(current.dir, "rwgcna_params_seurat3.0.R"))
 
 ######################################################################
 ############################ SET OPTIONS #############################
