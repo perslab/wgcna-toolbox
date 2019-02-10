@@ -23,9 +23,9 @@ option_list <- list(
               help = "If datExpr is not provided as a Seurat object, provide path to metadata containing celltype identities under the colIdents. File should be in one of the standard (compressed) character separated formats. First column should have cellnames matching column names in datExpr [default %default]"),  
   make_option("--dirProject", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir. [default %default]"),
-  make_option("--dirScratch", type="character", default="/scratch/tmp-wgcna/",
-              help = "Directory for temporary files, [default %default]"),
-  make_option("--prefixData", type="character", default="sc_data",
+  make_option("--dirTmp", type="character", default=NULL,
+              help = "Directory for temporary files, defaults to creating a 'tmp' folder within the project directory, [default %default]"),
+  make_option("--prefixData", type="character", 
               help = "Dataset prefix for the project, [default %default]"),
   make_option("--prefixRun", type="character", default="run1",
               help = "Run prefix to distinguish runs e.g. with different parameters, [default %default]"),
@@ -42,7 +42,7 @@ option_list <- list(
   make_option("--assayUse", type="character", default="RNA",
               help="If datExpr is a Seurat object, indicate whether to use 'RNA' or 'integrated' assay, [default %default]"),
   make_option("--slotUse", type="character", default="scale.data",
-              help="If datExpr is a Seurat object, indicate whether to use 'counts', 'data' or 'scale.data', [default %default]"),
+              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? scale.data is unavoidable if we wish to regress out confounders [default %default]"),
   make_option("--varsToRegress", type="character", default='c("nCount_RNA", "percent.mito", "percent.ribo")',
               help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') [default %default]"),
   make_option("--minGeneCells", type="integer", default=20L,
@@ -53,11 +53,13 @@ option_list <- list(
               help="One of 'var.features', 'PCLoading', 'JackStrawPCLoading' or 'JackStrawPCSignif'. PCLoading uses the top nFeatures PC loading genes; JackStrawPCLoading does the same but only on PCs retained after JackStraw significance testing; JackStrawPCSignif uses gene p-values instead of loadings [default %default]"), 
   make_option("--nFeatures", type="numeric", default=5000,
               help="How many genes to select under the criteria set with the featuresUse argument, set to Inf to take all [default %default]"), 
-  make_option("--nRepJackStraw", type="integer", default=250L,
+  make_option("--nPC", type="integer", default=100L,
+              help = "Number of principal components to compute for selecting genes based on their loadings, [default %default]."),
+  make_option("--nRepJackStraw", type="integer", default=300L,
               help = "Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `featuresUse` above), [default %default]."),
-  make_option("--corFnc", type="character", default="bicor",
+  make_option("--corFnc", type="character", default="cor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). [default %default]"), 
-  make_option("--networkType", type="character", default = "signed",
+  make_option("--networkType", type="character", default = "signed hybrid",
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); ''c('signed hybrid')'' (quoted vector) sets negative correlations to zero. [default %default]"),
   make_option("--nRepTOM", type="integer", default=100L,
               help = "Number of times to resample the dataset when finding the consensus TOM [default %default]"),
@@ -65,7 +67,7 @@ option_list <- list(
               help = "Hierarchical clustering agglomeration method. One of 'ward.D', 'ward.D2', 'single', 'complete', 'average' (= UPGMA), 'mcquitty' (= WPGMA), 'median' (= WPGMC) or 'centroid' (= UPGMC). See hclust() documentation for further information. [default %default]"),
   make_option("--minClusterSize", type="character", default="15L",
               help = "Minimum features needed to form a module, or an initial cluster before the Partitioning Around Medoids-like step. WGCNA authors recommend decreasing the minimum cluster size when using higher settings of deepSplit. Takes a character with a vector, without whitespace, of integer values to try 'c(15,20,25)' [default %default]"),
-  make_option("--deepSplit", type="character", default="3L",
+  make_option("--deepSplit", type="character", default="2L",
               help = "Controls the sensitivity of the cutreeDynamic/cutreeHybrid algorithm. Takes a character with a vector, without whitespace, of integer values between 0-4 to try, e.g. 'c(1,2,3)', [default %default]"),
   make_option("--moduleMergeCutHeight", type="character", default="c(0.15)",
               help = "Cut-off level for 1-cor(eigen-gene, eigen-gene) for merging modules. Takes a character with a vector, without whitespace, of double values to try, e.g. 'c(0.1, 0.2)', [default %default]"),
@@ -141,14 +143,14 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 resume <- opt$resume
 prefixData <- opt$prefixData 
-dirScratch <- opt$dirScratch
+dirTmp <- opt$dirTmp
 prefixRun <- opt$prefixRun
 
 # load saved image?
 if (!is.null(resume)) {
   message(paste0("loading from ", resume))
-  tryCatch({load(file=sprintf("%s%s_%s_%s_image.RData.gz", dirScratch, prefixData, prefixRun, resume))},
-           error = function(x) {stop(paste0(resume, " session image file not found in ", dirScratch))})
+  tryCatch({load(file=sprintf("%s%s_%s_%s_image.RData.gz", dirTmp, prefixData, prefixRun, resume))},
+           error = function(x) {stop(paste0(resume, " session image file not found in ", dirTmp))})
   
 }
 
@@ -158,7 +160,7 @@ opt <- parse_args(OptionParser(option_list=option_list))
 pathDatExpr <- opt$pathDatExpr 
 pathMetadata <- opt$pathMetadata
 dirProject <- opt$dirProject
-dirScratch <- opt$dirScratch
+dirTmp <- opt$dirTmp
 dataType = opt$dataType
 autosave <- opt$autosave
 assayUse <- opt$assayUse
@@ -184,6 +186,7 @@ moduleMergeCutHeight <- eval(parse(text=opt$moduleMergeCutHeight))
 pamStage <- eval(parse(text=opt$pamStage))
 kMReassign <- opt$kMReassign
 kMSignifFilter <- opt$kMSignifFilter
+nPC <- opt$nPC
 nRepJackStraw <- opt$nRepJackStraw
 fuzzyModMembership <- opt$fuzzyModMembership
 RAMGbMax <- opt$RAMGbMax
@@ -224,6 +227,9 @@ if (!file.exists(dirRObjects)) dir.create(dirRObjects)
 
 dirLog = paste0(dirProject,"log/")
 if (!file.exists(dirLog)) dir.create(dirLog)
+
+if (is.null(dirTmp)) dirTmp <- paste0(dirProject,"tmp/")
+if (!file.exists(dirTmp)) dir.create(dirTmp)
 
 #flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 tStart <- as.character(Sys.time())
@@ -473,11 +479,11 @@ if (is.null(resume)) {
   message("Saving full expression matrix")
   
   saveRDS(datExprNormFull, file = sprintf("%s%s_%s_datExprNormFull.RDS.gz", 
-                                  dirScratch, 
+                                  dirTmp, 
                                   prefixData, 
                                   prefixRun), 
           compress = "gzip")
-  #save(ident, file = sprintf("%s%s_%s_ident.RData", dirScratch, prefixData, prefixRun))
+  #save(ident, file = sprintf("%s%s_%s_ident.RData", dirTmp, prefixData, prefixRun))
   rm(datExprNormFull)
 
   ######################################################################
@@ -653,7 +659,7 @@ if (is.null(resume)) {
         out <- RunPCA(object = seurat_obj,
                assay = assayUse,
                features = VariableFeatures(seurat_obj),
-               npcs = nPC_seurat,
+               npcs = nPC,
                #rev.pca = F,
                weight.by.var = T, # weighs cell embeddings 
                do.print = F,
@@ -670,7 +676,7 @@ if (is.null(resume)) {
             out <- RunPCA(object = seurat_obj,
                    assay = assayUse,
                    features = VariableFeatures(seurat_obj),
-                   npcs = nPC_seurat %/% 1.5,#min(nPC_seurat, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
+                   npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
                    weight.by.var = T,
                    seed.use = randomSeed,
                    maxit = maxit*2, # set to 500 as default
@@ -696,7 +702,7 @@ if (is.null(resume)) {
     subsets <- safeParallel(fun=fun, 
                             args=args, 
                             outfile=outfile, 
-                            nPC_seurat=nPC_seurat,
+                            nPC=nPC,
                             randomSeed=randomSeed,
                             maxit=maxit,
                             fastpath=fastpath)
@@ -741,7 +747,7 @@ if (is.null(resume)) {
     list_datExpr <- lapply(subsets, function(seurat_obj) GetAssayData(seurat_obj, assay=assayUse, slot=slotUse)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
   } 
   
-  n_genes_subsets_used <- sapply(list_datExpr, ncol)
+  n_genes_subsets_used <- sapply(list_datExpr, ncol) 
   
   # Clear up
   rm(subsets) 
@@ -753,7 +759,7 @@ if (is.null(resume)) {
   
   # Save or load session image 
   resume = "checkpoint_1"
-  if (autosave) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData.gz", dirScratch, prefixData, prefixRun), compress = "gzip")
+  if (autosave) save.image(file=sprintf("%s%s_%s_checkpoint_1_image.RData.gz", dirTmp, prefixData, prefixRun), compress = "gzip")
   
 } 
 
@@ -847,7 +853,7 @@ if (resume == "checkpoint_1") {
   names(list_sft) <- sNames_1
   
   # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
-  setwd(dirScratch)
+  setwd(dirTmp)
   
   if (nRepTOM > 0) {
     
@@ -893,7 +899,7 @@ if (resume == "checkpoint_1") {
                                consensusTOMFilePattern = paste0(prefixData,"_", prefixRun, "_", name,"_consensusTOM-block.%b.RData"),
                                returnTOMs = F,
                                useDiskCache = T,
-                               cacheDir = dirScratch,
+                               cacheDir = dirTmp,
                                cacheBase = ".blockConsModsCache",
                                verbose = verbose,
                                indent = indent)
@@ -911,7 +917,7 @@ if (resume == "checkpoint_1") {
                                   verbose=verbose,
                                   indent = indent)
         colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
-        save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirScratch, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
+        save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
       })
     }
     
@@ -959,12 +965,12 @@ if (resume == "checkpoint_1") {
                  saveConsensusTOMs = saveConsensusTOMs,
                  returnTOMs = F,
                  useDiskCache = T,
-                 cacheDir = dirScratch,
+                 cacheDir = dirTmp,
                  cacheBase = ".blockConsModsCache",
                  verbose = verbose,
                  indent = indent,
                  list_datExpr=list_datExpr,
-                 dirScratch = dirScratch)
+                 dirTmp = dirTmp)
 
   } else if (nRepTOM==0) {
     
@@ -988,7 +994,7 @@ if (resume == "checkpoint_1") {
                                 verbose=verbose,
                                 indent = indent)
       colnames(consTomDS) <- rownames(consTomDS) <- colnames(datExpr)
-      save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirScratch, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
+      save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
    }
     args = list("datExpr"=list_datExpr, "name"=sNames_1)
     invisible(safeParallel(fun=fun, args=args, 
@@ -997,7 +1003,7 @@ if (resume == "checkpoint_1") {
                list_sft=list_sft,
                corFnc=corFnc, 
                corOptions=corOptions, 
-               TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, prefixData=prefixData, prefixRun=prefixRun, dirScratch=dirScratch))
+               TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, prefixData=prefixData, prefixRun=prefixRun, dirTmp=dirTmp))
     list_consensus <- lapply(list_datExpr, function(datExpr)list("goodSamplesAndGenes"=list("goodGenes"=rep(TRUE,ncol(datExpr)))))
   }
   
@@ -1007,13 +1013,13 @@ if (resume == "checkpoint_1") {
   
   # Load TOMs into memory and convert to distance matrices
   fun = function(name) {
-    load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirScratch, prefixData, prefixRun, name))
+    load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name))
 
   }
   args = list("name"=sNames_1)
   list_consTOM = safeParallel(fun=fun, 
                               args=args, 
-                              dirScratch=dirScratch, 
+                              dirTmp=dirTmp, 
                               prefixData=prefixData, 
                               prefixRun=prefixRun, 
                               load_obj=load_obj)
@@ -1042,7 +1048,7 @@ if (resume == "checkpoint_1") {
   # Save list_dissTOM to harddisk
   names(list_dissTOM) <- sNames_1
   
-  saveRDS(list_dissTOM, file=sprintf("%s%s_%s_list_dissTOM.rds.gz", dirScratch, prefixData, prefixRun), compress = "gzip")
+  saveRDS(list_dissTOM, file=sprintf("%s%s_%s_list_dissTOM.rds.gz", dirTmp, prefixData, prefixRun), compress = "gzip")
   
   ######################################################################
   ######################### CLEAR UP TOMS IN MEMORY AND HD #############
@@ -1051,11 +1057,11 @@ if (resume == "checkpoint_1") {
   rm(list_dissTOM)
   
   for (subsetName in sNames_1) {
-    if (file.exists(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirScratch, prefixData, prefixRun, subsetName))) {
-      try(file.remove(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirScratch, prefixData, prefixRun, subsetName)))
+    if (file.exists(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, subsetName))) {
+      try(file.remove(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, subsetName)))
     }
     # Delete individual TOMs from disk
-    indivTOM_paths <- dir(path=dirScratch, pattern=paste0(prefixData, "_", prefixRun, "_", subsetName, "_individualTOM"), full.names = T)
+    indivTOM_paths <- dir(path=dirTmp, pattern=paste0(prefixData, "_", prefixRun, "_", subsetName, "_individualTOM"), full.names = T)
     for (indivTOM in indivTOM_paths) {
       try(file.remove(indivTOM))
     }
@@ -1066,7 +1072,7 @@ if (resume == "checkpoint_1") {
   ######################################################################
   
   resume="checkpoint_2"
-  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData.gz", dirScratch, prefixData, prefixRun), compress = "gzip")
+  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_2_image.RData.gz", dirTmp, prefixData, prefixRun), compress = "gzip")
   
 } 
 
@@ -1088,7 +1094,7 @@ if (resume == "checkpoint_2") {
   ######################################################################
   # TODO: Could filter earlier
   
-  list_dissTOM_path <- dir(path = dirScratch, pattern = paste0(prefixData, "_", prefixRun, "_list_dissTOM"), full.names = T)
+  list_dissTOM_path <- dir(path = dirTmp, pattern = paste0(prefixData, "_", prefixRun, "_list_dissTOM"), full.names = T)
   list_dissTOM <- load_obj(list_dissTOM_path)
   
   # Remove NULL
@@ -1772,7 +1778,7 @@ if (resume == "checkpoint_2") {
   
   resume = "checkpoint_3"
   message("Reached checkpoint 3, saving session image")
-  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData.gz", dirScratch, prefixData, prefixRun), compress = "gzip")
+  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_3_image.RData.gz", dirTmp, prefixData, prefixRun), compress = "gzip")
 } 
 
 if (resume == "checkpoint_3") {
@@ -1891,7 +1897,7 @@ if (resume == "checkpoint_3") {
   message("Computing kMs and pkMs")
 
   if (fuzzyModMembership=="kIM"){
-    list_dissTOM_path <- dir(path = dirScratch, pattern = paste0(prefixData, "_", prefixRun, "_list_dissTOM"), full.names = T)
+    list_dissTOM_path <- dir(path = dirTmp, pattern = paste0(prefixData, "_", prefixRun, "_list_dissTOM"), full.names = T)
     list_dissTOM <- load_obj(list_dissTOM_path)
     list_dissTOM <- list_dissTOM[match(sNames_4,names(list_dissTOM))]
   }
@@ -2010,7 +2016,7 @@ if (resume == "checkpoint_3") {
 
   message("Computing all cell embeddings on all modules, across celltypes")
   
-  path_datExpr <- dir(path = dirScratch, pattern = paste0(prefixData, "_", prefixRun, "_datExprNormFull.RDS.gz"), full.names = T)
+  path_datExpr <- dir(path = dirTmp, pattern = paste0(prefixData, "_", prefixRun, "_datExprNormFull.RDS.gz"), full.names = T)
   load_obj(path_datExpr[1]) %>% t -> datExpr 
   
   invisible(gc())
@@ -2067,7 +2073,7 @@ if (resume == "checkpoint_3") {
   
   resume = "checkpoint_4"
   message("Reached checkpoint 4, saving session image")
-  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData.gz", dirScratch, prefixData, prefixRun), compress = "gzip")
+  if (autosave) save.image( file=sprintf("%s%s_%s_checkpoint_4_image.RData.gz", dirTmp, prefixData, prefixRun), compress = "gzip")
 } 
 
 if (resume == "checkpoint_4") {
@@ -2258,7 +2264,7 @@ if (resume == "checkpoint_4") {
   t_finish <- as.character(Sys.time())
   
   sumstats_celltype_df <- matrix(data = NA_real_, nrow=length(sNames_0), ncol=13) %>% data.frame 
-    colnames(sumstats_celltype_df) = c("prefixRun", 
+  colnames(sumstats_celltype_df) = c("prefixRun", 
                                      "subset", 
                                      "n_cells", 
                                      "n_genes", 
@@ -2351,7 +2357,7 @@ if (resume == "checkpoint_4") {
   
   save.image(file=sprintf("%s%s_%s_final_session_image.RData.gz", dirRObjects, prefixData, prefixRun), compress = "gzip")
   
-  tmp_file_paths <- dir(path = dirScratch, pattern = paste0(prefixData,"_", prefixRun), full.names = T)
+  tmp_file_paths <- dir(path = dirTmp, pattern = paste0(prefixData,"_", prefixRun), full.names = T)
   if (length(tmp_file_paths)>0) for (ch in tmp_file_paths) try(file.remove(ch))
   
   message("Script DONE!")

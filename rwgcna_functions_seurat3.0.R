@@ -1266,7 +1266,7 @@ wrapSubset <- function(obj, ident, do.scale=T, do.center=T) {
   
   obj_sub <- RunPCA(object = obj_sub, 
                     pc.genes = obj_sub@var.genes, 
-                    pcs.compute = nPC_seurat, 
+                    pcs.compute = nPC, 
                     do.print = F)#, pcs.print = 1:5, genes.print = 5)
   
   

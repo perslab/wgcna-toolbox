@@ -20,6 +20,11 @@ v2.8 - 08-02-2019
     - Removed the PCAgenes parameter
     - Made it possible to select genes on PC loadings, PC loadings with jackstraw filtering of PCs, or PC loadings using significance as criterion
 * when trying several sets of parameters (e.g. pamStage FALSE and TRUE), the script now selects the parameters, for each subset, that produces the highest number of modules (this could be improved in future)
+* Made nPC a user argument, defaults to 100 
+* changed deepSplit default from 3 to 2
+* changed corFnc default from bicor to cor
+* changed networkType default from signed to c('signed hybrid')
+* removed prefixData default
 
 ### Fixed 
 * delete all temporary files
