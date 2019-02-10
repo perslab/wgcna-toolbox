@@ -659,7 +659,8 @@ if (is.null(resume)) {
         out <- RunPCA(object = seurat_obj,
                assay = assayUse,
                features = VariableFeatures(seurat_obj),
-               npcs = nPC,
+               #npcs = nPC,
+               npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2)),
                #rev.pca = F,
                weight.by.var = T, # weighs cell embeddings 
                do.print = F,
@@ -676,7 +677,8 @@ if (is.null(resume)) {
             out <- RunPCA(object = seurat_obj,
                    assay = assayUse,
                    features = VariableFeatures(seurat_obj),
-                   npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
+                   #npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
+                   npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3)),
                    weight.by.var = T,
                    seed.use = randomSeed,
                    maxit = maxit*2, # set to 500 as default
@@ -735,7 +737,8 @@ if (is.null(resume)) {
                       nRepJackStraw = nRepJackStraw, 
                       pvalThreshold = pvalThreshold,
                       featuresUse=featuresUse,
-                      nFeatures = nFeatures)
+                      nFeatures = nFeatures,
+                      nPC = nPC)
 
     }
     

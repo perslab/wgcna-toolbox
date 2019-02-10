@@ -28,9 +28,10 @@ wrapJackStraw = function(seurat_obj_sub,
                          nRepJackStraw, 
                          pvalThreshold, 
                          featuresUse,
-                         nFeatures) {
+                         nFeatures,
+                         nPC) {
 
-  prop.freq <- max(0.016, round(4/length(VariableFeatures(seurat_obj_sub)),3)) # to ensure we have at least 3 samples so the algorithm works well
+    prop.freq <- max(0.016, round(4/length(VariableFeatures(seurat_obj_sub)),3)) # to ensure we have at least 3 samples so the algorithm works well
   # see https://github.com/satijalab/seurat/issues/5
   ###
   
@@ -38,7 +39,7 @@ wrapJackStraw = function(seurat_obj_sub,
   
   seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
                               reduction="pca",
-                              dims = pcs.compute,
+                              dims = min(nPC, min(length(VariableFeatures(seurat_obj_sub))%/% 2, ncol(seurat_obj_sub) %/% 2)),
                               num.replicate = nRepJackStraw, 
                               verbose=T,
                               prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
