@@ -111,7 +111,7 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
   return(NULL)
 }
 current.dir = paste0(LocationOfThisScript(), "/")
-#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/"
+#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/WGCNApipeline/"
 
 ######################################################################
 ############################## FUNCTIONS #############################
@@ -307,48 +307,44 @@ if (is.null(resume)) {
   ######################################################################
     
   if (!is.null(pathMetadata)) {
-    
     metadata <- load_obj(pathMetadata) 
     if (any(duplicated(metadata[,1]))) metadata[,1] <- make.unique(metadata[,1]) 
     rownames(metadata) <- metadata[,1]
     metadata <- metadata[,-1]
-    
   } else {
     metadata <- NULL
   }
   
-  if (!any(c("seurat", "Seurat","loom") %in% class(tmp))) { # not a loom object, nor a seurat object
-    
-    # Get genes, make them unique, make them into rownames
-    if (any(duplicated(tmp[,1]))) tmp[,1] <- make.unique(tmp[,1]) 
-    rownames(tmp) <- tmp[,1]
-    tmp <- tmp[,-1]
-
-    seurat_obj <- CreateSeuratObject(counts= tmp, 
-                                      project= paste0(prefixData, "_", prefixRun),
-                                      assay = "RNA",
-                                      meta.data = metadata) #todo is this
-                                      
-  } else if ("loom" %in% class(tmp)) {
-    seurat_obj <- Seurat::Convert(from=tmp, to="seurat")
-    if (!is.null(metadata)) seurat_obj <- AddMetaData(seurat_obj, metadata = metadata)
-  } else if (any(c("seurat", "Seurat") %in% class(tmp))) {
+  # Convert to suitable new Seurat format
+  if (any(c("seurat", "Seurat") %in% class(tmp))) {
     seurat_obj <- if (tmp@version!='3.0.0.9000') {
-      
       tryCatch({
         Seurat::UpdateSeuratObject(object = tmp)}, error=function(err) {
-        counts <- tmp@raw.data
-        if (any(duplicated(rownames(counts)))) rownames(counts) <- make.unique(rownames(counts)) # should not be possible
-        CreateSeuratObject(counts=counts, 
-                           project = prefixData,
-                           assay="RNA", 
-                           min.cells=0,
-                           min.features=0, 
-                           meta.data = tmp@meta.data)
+          counts <- tmp@raw.data
+          if (any(duplicated(rownames(counts)))) rownames(counts) <- make.unique(rownames(counts)) # should not be possible
+          CreateSeuratObject(counts=counts, 
+                             project = prefixData,
+                             assay="RNA", 
+                             min.cells=0,
+                             min.features=0, 
+                             meta.data = tmp@meta.data)
       })
     }  else  {
       tmp
     }
+  } else if ("loom" %in% class(tmp)) {
+    seurat_obj <- Seurat::Convert(from=tmp, to="seurat")
+    if (!is.null(metadata)) seurat_obj <- AddMetaData(seurat_obj, metadata = metadata)
+  } else { # not a loom object, nor a seurat object
+    # Get genes, make them unique, make them into rownames
+    if (any(duplicated(tmp[,1]))) tmp[,1] <- make.unique(tmp[,1]) 
+    rownames(tmp) <- tmp[,1]
+    tmp <- tmp[,-1]
+    
+    seurat_obj <- CreateSeuratObject(counts= tmp, 
+                                     project= paste0(prefixData, "_", prefixRun),
+                                     assay = "RNA",
+                                     meta.data = metadata) #todo is this
   }
   
   rm(tmp)
@@ -380,7 +376,7 @@ if (is.null(resume)) {
   }
   
   vec_idents <- Idents(seurat_obj) %>% as.character
-  sNames_0 <- names(table(vec_idents))
+  sNames_0 <- vec_idents %>% unique %>% sort
   
   mat_addAnnot <- if (!is.null(vec_colAnnot)) seurat_obj@meta.data[,vec_colAnnot] else NULL
 
@@ -451,7 +447,7 @@ if (is.null(resume)) {
   ######################################################################
   
   # Normalise
-  seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
+  if (all(dim(GetAssayData(seurat_obj, slot="data")))==0) seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
    
   # Scale and regress out confounders
   #if (!is.null(varsToRegress)) varsToRegress <- varsToRegress[varsToRegress %in% names(seurat_obj@meta.data)]
@@ -474,7 +470,7 @@ if (is.null(resume)) {
   #ident <- seurat_obj@ident
   #}
   
-  datExprNormFull <- GetAssayData(object=seurat_obj, assay.type=assayUse, slot="data") %>% as.matrix
+  datExprNormFull <- GetAssayData(object=seurat_obj, slot="data") %>% as.matrix
   # Save scale and regressed whole expression matrix with ensembl rownames for later use
   message("Saving full expression matrix")
   
@@ -496,16 +492,16 @@ if (is.null(resume)) {
     CreateSeuratObject(counts = GetAssayData(object=seurat_obj, assay=assayUse, slot="counts")[,Idents(seurat_obj)==name], 
                        project = prefixData,
                        assay = assayUse,
-                       min.features = minGeneCells,
-                       min.cells = if (dataType=="sc") minCellClusterSize else NULL,
+                       min.cells = minGeneCells,
                        meta.data = seurat_obj@meta.data[Idents(seurat_obj)==name,]
                        )})
-
+  
   # Save stats for outputting at the end
-  n_cells_subsets = table(Idents(seurat_obj)) #this is in the same order as sNames_0
+  #n_cells_subsets = table(Idents(seurat_obj)) #warning: this is in the wrong order because Idents is a factor..
+  n_cells_subsets = sapply(subsets, ncol)
   vec_logicalCellClustOK <- if (dataType=="sc") n_cells_subsets > minCellClusterSize else !logical(length = length(subsets))
   #sapply(subsets, function(seuratObj) ncol(seuratObj), simplify = T)
-  n_genes_subsets = sapply(subsets, function(seuratObj) nrow(seuratObj), simplify=T)
+  n_genes_subsets = sapply(subsets, nrow, simplify=T)
   
   # Free up space 
   rm(seurat_obj)
@@ -617,9 +613,10 @@ if (is.null(resume)) {
   subsets <- safeParallel(fun=fun,
                           args=args)
   
+  # Scale and regress
   if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | slotUse =="scale.data") {
    
-    message("Scaling and regressing data subsets")
+    message("Scaling data subsets")
     
     if (!is.null(varsToRegress)) varsToRegress = varsToRegress[varsToRegress %in% colnames(subsets[[1]]@meta.data)] 
     
@@ -650,7 +647,7 @@ if (is.null(resume)) {
   # PCA 
   if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif')) {
     
-    message("Performing Principal Component Analysis..")
+    message("Performing Principal Component Analysis")
     
     start_time <- Sys.time()
     
@@ -658,7 +655,7 @@ if (is.null(resume)) {
       seurat_tmp <- tryCatch({ 
         out <- RunPCA(object = seurat_obj,
                assay = assayUse,
-               features = VariableFeatures(seurat_obj),
+               features = VariableFeatures(seurat_obj),#if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
                #npcs = nPC,
                npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2)),
                #rev.pca = F,
@@ -668,7 +665,6 @@ if (is.null(resume)) {
                maxit = maxit, # set to 500 as default
                fastpath = fastpath, 
                verbose=T) 
-        ProjectDim(object=out, reduction = "pca", verbose=F)
         }, 
         error = function(err) {
           message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
@@ -676,7 +672,7 @@ if (is.null(resume)) {
           tryCatch({
             out <- RunPCA(object = seurat_obj,
                    assay = assayUse,
-                   features = VariableFeatures(seurat_obj),
+                   features = VariableFeatures(seurat_obj),#if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
                    #npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
                    npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3)),
                    weight.by.var = T,
@@ -684,7 +680,8 @@ if (is.null(resume)) {
                    maxit = maxit*2, # set to 500 as default
                    fastpath = F,
                    verbose=T)
-            ProjectDim(object=out, reduction = "pca", verbose=F)
+            
+            
           }, error = function(err1) {
             message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
             message("Returning the original Seurat object with empty dr$pca slot")
@@ -718,7 +715,11 @@ if (is.null(resume)) {
   if (featuresUse=='PCLoading') {
     
     list_datExpr <- lapply(subsets, function(seurat_obj) {
-      loadingsAbs <- Loadings(seurat_obj, reduction="pca", projected=T) %>% abs 
+      seurat_obj <- ProjectDim(object=seurat_obj, 
+                               reduction = "pca", 
+                               verbose=F,
+                               overwrite=F)
+      loadingsAbs <- seurat_obj@reductions$pca@feature.loadings.projected %>% abs 
       apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
         '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
       GetAssayData(object=seurat_obj,slot = slotUse, assay = assayUse)[namesFeaturesUse,] %>% t
@@ -733,12 +734,16 @@ if (is.null(resume)) {
     
     message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
     fun = function(seurat_obj, name) {
-        wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                      nRepJackStraw = nRepJackStraw, 
-                      pvalThreshold = pvalThreshold,
-                      featuresUse=featuresUse,
-                      nFeatures = nFeatures,
-                      nPC = nPC)
+      seurat_obj <- ProjectDim(object=seurat_obj,
+                               reduction = "pca",
+                               verbose=F,
+                               overwrite=T)
+      wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                    nRepJackStraw = nRepJackStraw, 
+                    pvalThreshold = pvalThreshold,
+                    featuresUse=featuresUse,
+                    nFeatures = nFeatures,
+                    nPC = nPC)
 
     }
     
@@ -1228,7 +1233,7 @@ if (resume == "checkpoint_2") {
   ######################### MERGE CLOSE MODULES ########################
   ######################################################################
   
-  message(paste0("Merging modules with a distance below ", moduleMergeCutHeight))
+  message(paste0("Merging close modules"))
   
   if (fuzzyModMembership=="kME") {
     

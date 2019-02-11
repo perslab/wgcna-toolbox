@@ -31,19 +31,28 @@ wrapJackStraw = function(seurat_obj_sub,
                          nFeatures,
                          nPC) {
 
-    prop.freq <- max(0.016, round(4/length(VariableFeatures(seurat_obj_sub)),3)) # to ensure we have at least 3 samples so the algorithm works well
+  prop.freq <- max(0.016, round(4/length(VariableFeatures(seurat_obj_sub)),3)) # to ensure we have at least 3 samples so the algorithm works well
   # see https://github.com/satijalab/seurat/issues/5
   ###
   
-  pcs.compute = ncol(Loadings(seurat_obj_sub, reduction="pca"))
+  #pcs.compute = ncol(Loadings(seurat_obj_sub, reduction="pca"))
   
-  seurat_obj_sub <- JackStraw(object = seurat_obj_sub,
-                              reduction="pca",
-                              dims = min(nPC, min(length(VariableFeatures(seurat_obj_sub))%/% 2, ncol(seurat_obj_sub) %/% 2)),
-                              num.replicate = nRepJackStraw, 
-                              verbose=T,
-                              prop.freq = prop.freq) # https://github.com/satijalab/seurat/issues/5
-  
+  seurat_obj_sub <- tryCatch({
+    JackStraw(object = seurat_obj_sub,
+              reduction="pca",
+              dims = min(min(length(VariableFeatures(seurat_obj_sub))%/% 2, ncol(seurat_obj_sub) %/% 3), min(nPC,ncol(seurat_obj_sub@reductions$pca@feature.loadings))),#min(, min(length(VariableFeatures(seurat_obj_sub))%/% 2, ncol(seurat_obj_sub) %/% 2)),
+              num.replicate = nRepJackStraw, 
+              verbose=F,
+              prop.freq = prop.freq)}, error= function(err) {
+                # Reduce number of dimensions (PCs) and increase prop.freq, the proportion of genes scrambled
+                JackStraw(object = seurat_obj_sub,
+                          reduction="pca",
+                          dims = min(min(length(VariableFeatures(seurat_obj_sub))%/% 4, ncol(seurat_obj_sub) %/% 4), min(nPC,ncol(seurat_obj_sub@reductions$pca@feature.loadings))),
+                          num.replicate = nRepJackStraw, 
+                          verbose=F,
+                          prop.freq = prop.freq*1.2)
+              }) # https://github.com/satijalab/seurat/issues/5
+
   # Inserts p-values into seurat_obj_sub@reductions$pca@JackStraw$overall.p.values
   # as a nPC * 2 matrix with colnames "PC" and "Score"
   seurat_obj_sub <- ScoreJackStraw(object = seurat_obj_sub, dims = 1:pcs.compute)
@@ -62,15 +71,21 @@ wrapJackStraw = function(seurat_obj_sub,
   if (featuresUse == 'JackStrawPCSignif') {
     # Take genes that load significantly on a significant PC
     row_min <- apply(pAll[,PC_select_idx, drop=F], MARGIN = 1, FUN = min)
-    namesFeaturesUse <- rownames(pAll)[row_min < pvalThreshold]
+    vec_idxOrder <- order(row_min, na.last = T, decreasing = F) 
+    vec_idxOrderSignif <- vec_idxOrder[row_min[vec_idxOrder]<pvalThreshold]
+    namesFeaturesUse <- rownames(pAll)[vec_idxOrderSignif][1:min(nFeatures, length(vec_idxOrderSignif))]
     # If there are not enough significant gene loadings (e.g. due to too few reps)
     # take max loadings instead
-    if (length(namesFeaturesUse<500)) featuresUse = 'JackStrawPCLoading' 
+    if (length(namesFeaturesUse<1000)) featuresUse = 'JackStrawPCLoading' 
   }
   
   if (featuresUse=='JackStrawPCLoading') {
     # Take max nFeatures loading genes, using only significant PCs
-    loadingsAbs <- Loadings(seurat_obj_sub, reduction="pca", projected=T) %>% abs 
+    seurat_obj_sub <- ProjectDim(object=seurat_obj_sub, 
+                                     reduction = "pca", 
+                                     verbose=F,
+                                     overwrite=F)
+    loadingsAbs <- seurat_obj_sub@reductions$pca@feature.loadings.projected %>% abs 
     loadingsAbs <- loadingsAbs[,PC_select_idx] # only count loadings on significant PCs after JackStraw
     apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
       '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
