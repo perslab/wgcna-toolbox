@@ -655,7 +655,7 @@ if (is.null(resume)) {
       seurat_tmp <- tryCatch({ 
         out <- RunPCA(object = seurat_obj,
                assay = assayUse,
-               features = VariableFeatures(seurat_obj),#if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
+               features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
                #npcs = nPC,
                npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2)),
                #rev.pca = F,
@@ -672,7 +672,7 @@ if (is.null(resume)) {
           tryCatch({
             out <- RunPCA(object = seurat_obj,
                    assay = assayUse,
-                   features = VariableFeatures(seurat_obj),#if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
+                   features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
                    #npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
                    npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3)),
                    weight.by.var = T,
@@ -734,10 +734,10 @@ if (is.null(resume)) {
     
     message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
     fun = function(seurat_obj, name) {
-      seurat_obj <- ProjectDim(object=seurat_obj,
-                               reduction = "pca",
-                               verbose=F,
-                               overwrite=T)
+      # seurat_obj <- ProjectDim(object=seurat_obj, 
+      #                          reduction = "pca", 
+      #                          verbose=F,
+      #                          overwrite=T)
       wrapJackStraw(seurat_obj_sub = seurat_obj, 
                     nRepJackStraw = nRepJackStraw, 
                     pvalThreshold = pvalThreshold,
@@ -1037,11 +1037,16 @@ if (resume == "checkpoint_1") {
   # fun = function(datExpr, consTOM) {
   #   datExpr[,match(colnames(consTOM), colnames(datExpr))]
   # }
-  fun = function(datExpr, consensus) {
-    datExpr[,consensus$goodSamplesAndGenes$goodGenes]
+  fun = function(datExpr, consensus, consTOM) {
+    if (!is.null(consTOM)) {
+      if (ncol(as.matrix(consTOM))==ncol(datExpr)) datExpr else datExpr[,consensus$goodSamplesAndGenes$goodGenes]
+    } else {
+      NULL
+    }
   }
   
-  args=list(datExpr=list_datExpr, consensus=list_consensus)
+  args=list(datExpr=list_datExpr, consensus=list_consensus, consTOM=list_consTOM)
+  outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_datExpr_gg.txt")
   list_datExpr_gg <- safeParallel(fun=fun, args=args)
   
   rm(list_datExpr)
@@ -1985,7 +1990,7 @@ if (resume == "checkpoint_3") {
 
     list_MEs <- NULL
 
-    # Output list of list of kM gene weights, one vector per module, i.e. u is a list!
+    # Output list of list of kM gene weights, one vector per module
     fun = function(kMs, colors) {
 
       list_u <- lapply(colnames(kMs), function(module) {
@@ -2121,16 +2126,16 @@ if (resume == "checkpoint_4") {
   # order the gene lists by pkM and get pkM value
 
   # iterate over celltypes
-  for (i in 1:length(list_list_module_genes)) {
+  for (celltype in names(list_list_module_genes)) {
     # iterate over modules
-    for (j in 1:length(list_list_module_genes[[i]])) {
-      pkMs = list_pkMs[[i]]
-      if (fuzzyModMembership == "kME") mod_u <- list_list_u[[i]][[j]]
-      mod_genes <- list_list_module_genes[[i]][[j]]
+    for (module in names(list_list_module_genes[[celltype]])) {
+      pkMs = list_pkMs[[celltype]]
+      if (fuzzyModMembership == "kME") mod_u <- list_list_u[[celltype]][[module]]
+      mod_genes <- list_list_module_genes[[celltype]][[module]]
       mod_pkMs_sorted <- sort(pkMs[match(mod_genes,names(pkMs)), drop=F], decreasing=T)
-      list_list_module_genes[[i]][[j]] <- names(mod_pkMs_sorted)  # sort the genes
-      list_list_module_pkMs[[i]][[j]] <- mod_pkMs_sorted
-      if (fuzzyModMembership == "kME") list_list_module_gene_loadings[[i]][[j]] <- mod_u[match(names(mod_pkMs_sorted), names(mod_u)), drop=F]
+      list_list_module_genes[[celltype]][[module]] <- names(mod_pkMs_sorted)  # sort the genes
+      list_list_module_pkMs[[celltype]][[module]] <- mod_pkMs_sorted
+      if (fuzzyModMembership == "kME") list_list_module_gene_loadings[[celltype]][[module]] <- mod_u[match(names(mod_pkMs_sorted), names(mod_u)), drop=F]
     }
   }
   
