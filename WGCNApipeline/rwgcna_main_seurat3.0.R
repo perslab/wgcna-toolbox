@@ -231,19 +231,21 @@ if (!file.exists(dirLog)) dir.create(dirLog)
 if (is.null(dirTmp)) dirTmp <- paste0(dirProject,"tmp/")
 if (!file.exists(dirTmp)) dir.create(dirTmp)
 
-#flag_date = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+flagDate = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 tStart <- as.character(Sys.time())
 
 # source parameter values
 source(file = paste0(current.dir, "rwgcna_params_seurat3.0.R"))
 
 ######################################################################
-############################ SET OPTIONS #############################
+################### LOG FILE VERSION HISTORY #########################
 ######################################################################
 
-try(disableWGCNAThreads())
-
-options(stringsAsFactors = F)
+tStart %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStartPrint
+pathFileVersionLog <- paste0(dirLog, prefixData, "_", prefixRun, "_", tStartPrint, "_commitVersion.txt")
+setwd(current.dir)
+system2(command="git", args=c("log", "-n 3"), stdout=pathFileVersionLog)
+cat(text = paste0("\nWGCNA run tStart: ", tStartPrint) , file =  pathFileVersionLog, append=T, sep = "\n")
 
 ######################################################################
 ########################## PREPROCESS DATA ###########################
@@ -289,7 +291,7 @@ if (is.null(resume)) {
   ######################################################################
   
   pathLogCellClustersDropped <- paste0(dirLog, prefixData, "_", prefixRun, "_cellClustersDropped.txt")
-    
+
   ######################################################################
   ################# LOAD AND SUBSET EXPRESSSION DATA ###################
   ######################################################################
@@ -913,6 +915,7 @@ if (resume == "checkpoint_1") {
                                indent = indent)
 
       }, error = function(err) {
+        message(paste0(name, ": consensusTOM failed, computing normal TOM"))
         adjacency = adjacency(datExpr=list_datExpr[[name]], 
                               type=type, 
                               power = list_sft[[name]]$Power, 
@@ -2348,9 +2351,9 @@ if (resume == "checkpoint_4") {
   matrix(unlist(params_run,recursive = F), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
   
   # make path strings
-  sumstats_celltype_path = sprintf("%s%s_%s_sumstats_celltype.tab", dirLog, prefixData, prefixRun)
-  sumstats_run_path = sprintf("%s%s_%s_sumstats_run.tab", dirLog, prefixData, prefixRun)
-  params_run_path = sprintf("%s%s_%s_params_run.tab", dirLog, prefixData, prefixRun)
+  sumstats_celltype_path = sprintf("%s%s_%s_%s_sumstats_celltype.tab", dirLog, prefixData, prefixRun, flagDate)
+  sumstats_run_path = sprintf("%s%s_%s_%s_sumstats_run.tab", dirLog, prefixData, prefixRun, flagDate)
+  params_run_path = sprintf("%s%s_%s_%s_params_run.tab", dirLog, prefixData, prefixRun, flagDate)
   
   # set append param values
   append_sumstats_celltype = F

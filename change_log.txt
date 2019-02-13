@@ -5,6 +5,7 @@ v2.8 - 08-02-2019
 ### Added 
 * user can input expression data in other than seurat object format. User can provide metadata in separate file 
 * nFeatures argument to specify how many genes to use
+* logs a snapshot of top three most recent git commits
 
 ### Changed 
 * Upgraded all functions to Seurat 3 while ensuring compatibility with Seurat 2 objects
@@ -26,6 +27,8 @@ v2.8 - 08-02-2019
 * changed networkType default from signed to c('signed hybrid')
 * removed prefixData default
 * reorganised scripts into main WGCNA pipeline, auxillary post-analysis scripts, and old scripts 
+* set options in params file only (was duplicated in main script)
+* set random seed for R base (e.g. sample function) with set.seed 
 
 ### Fixed 
 * delete all temporary files

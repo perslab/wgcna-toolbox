@@ -148,7 +148,7 @@ getNetworkCalibrationSamples = FALSE # logical: should samples used for TOM cali
 
 # Consensus definition
 
-consensusQuantile = 0.20 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
+consensusQuantile = 0.5 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
 # Set to quartile recommended for different datasets in http://www.genetics.ucla.edu/courses/statgene/networks/files/Langfelder-Thursday-ConsensusModules.pdf.
 useMean = FALSE # should the consensus be determined from a (possibly weighted) mean across the data sets rather than a quantile?
 #setWeights = NULL # Optional vector (one component per input set) of weights to be used for weighted mean consensus. Only used when useMean above is TRUE.
@@ -242,8 +242,10 @@ respectSmallClusters = TRUE #	 Only used for method "hybrid" and only if labelUn
 # The following setting is important for WGCNA
 options(stringsAsFactors = FALSE);
 # Multiple threads possible in RStudio server but not in desktop
-#enableWGCNAThreads(nThreads = n_cores)#
+WGCNA::disableWGCNAThreads()#
+
 randomSeed = 12345
+set.seed(seed = randomSeed)
 
 options(pairwise.complete.obs = T) # How to handle missing values in correlations
 checkMissingData = TRUE # should data be checked for excessive missing values in genes and samples, and for genes with zero variance?
