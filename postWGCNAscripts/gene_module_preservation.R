@@ -8,7 +8,7 @@
 #   * module preservation Z-scores and p-values
 
 # usage: e.g.
-## time Rscript /projects/jonatan/tools/wgcna-src/wgcna-toolbox/wgcna_preservation.R --pathDfNWA   "/projects/jonatan/tmp-epilepsy/tables/modMerge2_test_df_geneModule_merged.csv.gz" --colGeneWeights  "pkIM" --vec_pathsDatExpr   'c("ep_ex" = "/projects/jonatan/tmp-epilepsy/RObjects/EP_ex_seurat_obj_filtered.RDS.gz")'  --vec_metadataIdentCols   'c("ep_ex" = "subtypesBoth")'  --list_list_vec_identLvlsMatch 'list("L6_Nr4a2"=list("ep_ex"=c("Exc_L5-6_THEMIS_DCSTAMP", "Exc_L5-6_THEMIS_CRABP1", "Exc_L5-6_THEMIS_FGF10")), "L3_Prss12"=list("ep_ex"=c("Exc_L3-4_RORB_CARM1P1")), "L5_Grin3a"=list("ep_ex"=c("Exc_L4-5_RORB_FOLH1B","Exc_L4-5_RORB_DAPK2", "Exc_L4-6_RORB_SEMA3E")), "L6_Syn3"=list("ep_ex"=c("Exc_L5-6_THEMIS_C1QL3")), "L2_3_Cux2"=list("ep_ex"=c("Exc_L2-3_LINC00507_FREM3")), "L2_Lamp5"=list("ep_ex"=c("Exc_L2-4_LINC00507_GLP2R","Exc_L2_LAMP5_LTK")), "L4_Rorb"=list("ep_ex"=c("Exc_L3-5_RORB_TWIST2", "Exc_L3-5_RORB_ESR1", "Exc_L3-5_RORB_COL22A1", "Exc_L3-5_RORB_FILIP1L")), "L6_tle4"=list("ep_ex"=c("Exc_L6_FEZF2_OR2T8","Exc_L6_FEZF2_SCUBE1", "Exc_L5-6_FEZF2_EFTUD1P1","Exc_L5-6_SLC17A7_IL15", "Exc_L5-6_FEZF2_ABO")), "L5_Htr2c"=list("ep_ex"=c("Exc_L4-6_FEZF2_IL26")))' --minGeneClusterSize 10 --minCellClusterSize 50 --colGeneNames "hgnc|symbol|gene_name_optimal" --dirOut    "/projects/jonatan/tmp-epilepsy/" --prefixOut    "ep_ex_4_multi_4" --dirScratch    "/scratch/tmp-wgcna/" --networkType  "signed hybrid" --corFnc    "cor" --dataOrganism    "hsapiens" --scaleCenterRegress T  --colMod module_merged --colCellCluster cell_cluster_merged
+## time Rscript /projects/jonatan/tools/wgcna-src/wgcna-toolbox/wgcna_preservation.R --pathDfNWA   "/projects/jonatan/tmp-epilepsy/tables/modMerge2_test_df_geneModule_merged.csv.gz" --colGeneWeights  "pkIM" --vec_pathsDatExpr   'c("ep_ex" = "/projects/jonatan/tmp-epilepsy/RObjects/EP_ex_seurat_obj_filtered.RDS.gz")'  --vec_metadataIdentCols   'c("ep_ex" = "subtypesBoth")'  --list_list_vec_identLvlsMatch 'list("L6_Nr4a2"=list("ep_ex"=c("Exc_L5-6_THEMIS_DCSTAMP", "Exc_L5-6_THEMIS_CRABP1", "Exc_L5-6_THEMIS_FGF10")), "L3_Prss12"=list("ep_ex"=c("Exc_L3-4_RORB_CARM1P1")), "L5_Grin3a"=list("ep_ex"=c("Exc_L4-5_RORB_FOLH1B","Exc_L4-5_RORB_DAPK2", "Exc_L4-6_RORB_SEMA3E")), "L6_Syn3"=list("ep_ex"=c("Exc_L5-6_THEMIS_C1QL3")), "L2_3_Cux2"=list("ep_ex"=c("Exc_L2-3_LINC00507_FREM3")), "L2_Lamp5"=list("ep_ex"=c("Exc_L2-4_LINC00507_GLP2R","Exc_L2_LAMP5_LTK")), "L4_Rorb"=list("ep_ex"=c("Exc_L3-5_RORB_TWIST2", "Exc_L3-5_RORB_ESR1", "Exc_L3-5_RORB_COL22A1", "Exc_L3-5_RORB_FILIP1L")), "L6_tle4"=list("ep_ex"=c("Exc_L6_FEZF2_OR2T8","Exc_L6_FEZF2_SCUBE1", "Exc_L5-6_FEZF2_EFTUD1P1","Exc_L5-6_SLC17A7_IL15", "Exc_L5-6_FEZF2_ABO")), "L5_Htr2c"=list("ep_ex"=c("Exc_L4-6_FEZF2_IL26")))' --minGeneClusterSize 10 --minCellClusterSize 50 --colGeneNames "hgnc|symbol|gene_name_optimal" --dirOut    "/projects/jonatan/tmp-epilepsy/" --prefixOut    "ep_ex_4_multi_4" --dirTmp    "/scratch/tmp-wgcna/" --networkType  "signed hybrid" --corFnc    "cor" --dataOrganism    "hsapiens" --scaleCenterRegress T  --colMod module_merged --colCellCluster cell_cluster_merged
 
 ######################################################################
 ########################## DEFINE FUNCTIONS ##########################
@@ -39,17 +39,18 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
 }
 
 dir_current = paste0(LocationOfThisScript(), "/")
-#dir_current = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/"
+#dir_current = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/postWGCNAscripts/"
 
-source(file=paste0(dir_current,"rwgcna_functions.R"))
+#source(file=paste0(dir_current,"rwgcna_functions.R"))
+source(file="/projects/jonatan/tools/functions-src/utility_functions.R")
 
 ######################################################################
 ########################### PACKAGES #################################
 ######################################################################
 
-ipak(c("optparse", "Seurat", "WGCNA", "dplyr", "Biobase", "Matrix", "parallel", "readr"))#, "NetRep"))
-
-stopifnot(as.character(packageVersion("Seurat"))=='2.3.2')
+ipak(c("optparse", "WGCNA", "dplyr", "Biobase", "Matrix", "parallel", "readr"))#, "NetRep"))
+library("Seurat", lib.loc = "/projects/jonatan/tools/Rpackages3.5/")
+stopifnot(grepl("2.3", as.character(packageVersion("Seurat"))))
 
 ######################################################################
 ########################### OPTPARSE #################################
@@ -58,14 +59,14 @@ stopifnot(as.character(packageVersion("Seurat"))=='2.3.2')
 option_list <- list(
   make_option("--pathDfNWA", type="character",
               help = "path to dataframe from a gene network analysis run, in long format (i.e. one row per gene per celltype), containing 'cell_cluster', 'module', one or two gene name columns, and a column of numeric scores. I.e. one row per gene, e.g. rwgcna cell_cluster_module_genes.csv files"),  
+  make_option("--colGeneNames", type="character", default="hgnc|symbol|gene_name_optimal",
+              help ="string or regex for grepping nwa_df and gene mapping dataframe and for output, e.g. 'hgnc|symbol|gene_name' or 'ensembl', [default %default]"),
   make_option("--colGeneWeights", type="character",
               help = "nwa_df column with gene weights"), 
   make_option("--colMod", type="character", default="module_merged",
               help = "nwa_df column with module assignment [default %default]"), 
   make_option("--colCellCluster", type="character", default="cell_cluster_merged",
               help ="nwa_df colunn with module cell cluster of origin, e.g. 'cell_cluster' or 'cell_cluster_merged', [default %default]"),
-  make_option("--colFilter", type="character", default = "filteringOK", 
-              help = "Filter modules by logical value in this column of df_NWA, [default %default]"), 
   make_option("--vec_pathsDatExpr", type="character",
               help = "Quoted vector of named strings with paths to expression datasets in seurat or matrix dataframe datatype saved as (compressed) RObject, e.g. ''c('datExpr1'='/projects/mydata/datExpr1.RDS.gz', 'datExpr2'='/projects/mydata2/datExpr2.csv'). The first dataset is assumed to contain the reference subsets, but subsets of it may also be included among test datasets''"),  
   make_option("--vec_pathsDatExprMetadata", type="character", default = NULL,
@@ -74,17 +75,15 @@ option_list <- list(
               help = "vector of characters to identify columns in metadata by which to split the expression data, named by the datExpr names, e.g. ''c(datExpr1='celltype', datExpr2='clust.res.1')''."),
   make_option("--list_list_vec_identLvlsMatch", type="character", default=NULL,
               help="a quoted list of named lists, named by 'reference' celltype, of vectors of components designating 'test' celltype(s). All , e.g. ''list('L6_Nr4a2'=list('ep_ex'=c('Exc_L5-6_THEMIS_DCSTAMP', 'Exc_L5-6_THEMIS_CRABP1', 'Exc_L5-6_THEMIS_FGF10')), 'L3_Prss12'=list('ep_ex'=c('Exc_L3-4_RORB_CARM1P1')), 'L5_Grin3a'=list('ep_ex'=c('Exc_L4-5_RORB_FOLH1B','Exc_L4-5_RORB_DAPK2', 'Exc_L4-6_RORB_SEMA3E')))''. If the argument is left as NULL, will match each level to all others. [default %default]"),       #help = "quoted list of named character vectors with named components. List names are labelling levels (e.g. 'tissue', 'celltype'), vector names are column in datExpr metadata, vector values are regex to match levels. Use NA in a vector to skip a dataset for that labelling. E.g. ''list('tissue' = c(tissue='.*', NA), 'sub_celltype'=c(tissue_cell_type = '.*', ClusterName = '.*'))''"),
-  make_option("--minCellClusterSize", type="integer", default=100L,
+  make_option("--minCellClusterSize", type="integer", default=50L,
               help="What is the minimum number of cells in a cell_cluster to continue? Integer, [default %default]."),
   make_option("--minGeneClusterSize", type="integer", default=10L,
               help="What is the minimum number of genes in a module to continue? Integer, [default %default]."),
-  make_option("--colGeneNames", type="character", default="hgnc|symbol|gene_name_optimal",
-              help ="string or regex for grepping nwa_df and gene mapping dataframe and for output, e.g. 'hgnc|symbol|gene_name' or 'ensembl', [default %default]"),
-  make_option("--dirOut", type="character",
+   make_option("--dirOut", type="character",
               help = "Outputs go to /tables and /RObjects subdirectories"),  
   make_option("--prefixOut", type="character", default = paste0(substr(gsub("-","",as.character(Sys.Date())),3,1000), "_", sample(x = 999, size = 1)),
               help = "Unique prefix for output files, [default %default]"),
-  make_option("--dirScratch", type="character", default = "/scratch/tmp-wgcna/",
+  make_option("--dirTmp", type="character", default = "/scratch/tmp-wgcna/",
               help = "Outputs go to /tables and /RObjects subdirectories"),
   make_option("--networkType", type="character", default = "c('signed hybrid')",
               help = "for WGCNA modulePreservation function: one of 'signed', 'unsigned', ''c('signed hybrid')'',  [default %default]"),
@@ -108,7 +107,6 @@ pathDfNWA <- opt$pathDfNWA
 colGeneWeights <- opt$colGeneWeights
 colMod <- opt$colMod
 colCellCluster <- opt$colCellCluster
-colFilter <- opt$colFilter
 vec_pathsDatExpr <- eval(parse(text=opt$vec_pathsDatExpr))
 
 vec_pathsDatExprMetadata <- opt$vec_pathsDatExprMetadata
@@ -124,7 +122,7 @@ minGeneClusterSize <- opt$minGeneClusterSize
 colGeneNames <- opt$colGeneNames
 dirOut <- opt$dirOut
 prefixOut <- opt$prefixOut
-dirScratch <- opt$dirScratch
+dirTmp <- opt$dirTmp
 networkType <- opt$networkType
 corFnc <- opt$corFnc
 dataOrganism <- opt$dataOrganism
@@ -136,6 +134,7 @@ RAMGbMax <- opt$RAMGbMax
 ######################################################################
 
 options(stringsAsFactors = F, use="pairwise.complete.obs")
+WGCNA::disableWGCNAThreads()
 
 ######################################################################
 ############################ CONSTANTS ###############################
@@ -162,6 +161,8 @@ if (!file.exists(dirLog)) dir.create(dirLog)
 flagDate = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 randomSeed = 12345
+set.seed(randomSeed)
+
 ######################################################################
 ##################### VERIFY AND NAME INPUT ##########################
 ######################################################################
@@ -226,7 +227,7 @@ colCellCluster <- grep(colCellCluster, colnames(df_geneModule), value=T)
 # check if the specified reference levels exist in the gene module df
 
 if (!is.null(list_list_vec_identLvlsMatch)) {
-  if (!all(names(list_list_vec_identLvlsMatch) %in% df_geneModule[[colMod]]))  {
+  if (!all(names(list_list_vec_identLvlsMatch) %in% df_geneModule[[colCellCluster]]))  {
     missing = names(list_list_vec_identLvlsMatch)[!names(list_list_vec_identLvlsMatch) %in% df_geneModule[[colCellCluster]]] 
     if (length(missing)>0) stop(paste0(missing, " not found in gene module df ", collapse=" "))
   }
@@ -414,44 +415,6 @@ names(list_datExpr) <- names(vec_pathsDatExpr)
 rm(list_seuratObj)
 
 ######################################################################
-######## EXTRACT METADATA AND CONVERT FACTORS TO MODEL MATRIX ########
-######################################################################
-#TODO: Reintroduce correlation analysis?
-if (FALSE) {
-  list_metadat_names <- lapply(list_metadata, colnames)
-  # Convert any character or factor meta.data to numeric dummy variables each level with its own numeric column
-  if (!is.null(list_metadata_corr_col)) {
-    list_metadata <- mapply(function(metadata_corr_col, metadat_names) {
-      if (any(colnames(meta.data) %in% metadata_corr_col)) {
-        metadata <- matrix(NA, nrow=nrow(seuratObj@meta.data), ncol=1)
-        include <- seuratObj@meta.data[,colnames(seuratObj@meta.data) %in% metadata_corr_col, drop=F]
-        for (i in 1:ncol(include)) {
-          if (class(include[,i]) %in% c("factor", "character")) {
-            metadata <- cbind(metadata, factorToIndicator(include[,i, drop=T]))        
-          } else {
-            metadata <- cbind(metadata, include[,i, drop=F])
-          }
-        }
-        metadata <- metadata[,-1, drop=F]
-        if (!is.null(metadata_corr_filter_vals)) metadata <- metadata[, toupper(colnames(metadata)) %in% toupper(metadata_corr_filter_vals), drop = F]
-        metadata <- as.data.frame(metadata)
-        # Filter out any metadata columns where all the values are identical
-        metadata <- metadata[apply(metadata, MARGIN=2, FUN = function(x) length(unique(x))>1)]
-        if (ncol(metadata) == 0) metadata <- NULL    
-        rownames(metadata) = rownames(seuratObj@meta.data)
-        return(metadata)
-      } else {
-        NULL
-      }
-    },metadata_corr_col = list_metadata_corr_col, 
-    metadat_names = list_metadat_names, 
-    SIMPLIFY=F)
-  } else {
-    list_metadata <- NULL
-  }
-}
-
-######################################################################
 ################## RUN PRESERVATION ANALYSIS #########################
 ######################################################################
 
@@ -461,7 +424,9 @@ lvlRef_datExprTest_presModsOut <- list()
 lvlRef_datExprTest_presNwOut <- list()
 
 #WGCNA::disableWGCNAThreads()
-setwd(dir = dirScratch)
+setwd(dir = dirTmp)
+
+# loop over reference levels, i.e. reference cell clusters where WGCNA found modules
 
 for (lvlRef in names(list_list_vec_identLvlsMatch)) {
   
@@ -669,9 +634,11 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
     objSizeGb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
     nCores <- max(1, min(detectCores() %/% 3, RAMGbMax %/% (objSizeGb + additionalGb))-1)
     nCores <- min(nCores, 40)
-    enableWGCNAThreads(nThreads = nCores)
     
-      lvlRef_datExprTest_presModsOut[[lvlRef]][[datExprTestName]] <- tryCatch({
+    disableWGCNAThreads()
+    #enableWGCNAThreads(nThreads = nCores)
+    
+    lvlRef_datExprTest_presModsOut[[lvlRef]][[datExprTestName]] <- tryCatch({
       modulePreservation(multiData=multiData,
                         multiColor=multiColor,
                         dataIsExpr = TRUE,
@@ -839,20 +806,39 @@ df_presStats <- dplyr::left_join(df_modPresStats, df_nwPresStats, by=c("ref_data
 write.csv(x=df_presStats, file = paste0(dirTables, prefixOut, "_df_preservationStats.csv"), quote = F, row.names = F)
 # write.csv(x=df_nwPresStats, file = paste0(dirTables, prefixOut, "_df_nwPresStats.csv"), quote = F, row.names = F)
 #   
-########################### SAVE LOG OF PARAMS #######################
 
-paramsRun <- unlist(opt, recursive=F)# all the user options/defaults
-matrix(unlist(paramsRun), nrow=1) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> df_paramsRun
-colnames(df_paramsRun) <- names(paramsRun)
-paramsRunPath = sprintf("%s%s_paramsRun.tab", dirLog, prefixOut)
-append = F#file.exists(params_run_path) # NB: if left as NULL, they won't get included!
-write.table(df_paramsRun, 
-            file=paramsRunPath, 
-            quote = F, 
-            sep = "\t", 
-            row.names=F, 
-            append = append, 
-            col.names = !append)
+######################################################################
+############### LOG PARAMETERS AND FILE VERSION ######################
+######################################################################
+
+as.character(Sys.time()) %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStop
+
+if (is.null(path_runLog)) path_runLog <- paste0(dirLog, "_GSA_runLog.txt")
+
+dirCurrent = paste0(LocationOfThisScript(), "/") # need to have this function defined
+setwd(dirCurrent) # this should be a git directory
+
+# get the latest git commit
+gitCommitEntry <- try(system2(command="git", args=c("log", "-n 1 --oneline"), stdout=TRUE))
+
+# Write to text file
+cat(text = "\n" , file =  path_runLog, append=T, sep = "\n")
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
+cat(text = prefixOut , file =  path_runLog, append=T, sep = "\n")
+cat(sessionInfo()[[1]]$version.string, file=path_runLog, append=T, sep="\n")
+if (!"try-error" %in% class(gitCommitEntry)) cat(text = paste0("git commit: ", gitCommitEntry) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStart: ", tStart) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStop: ", tStop) , file =  path_runLog, append=T, sep = "\n")
+
+# output parameters (assumping use of optparse package)
+cat(text = "\nPARAMETERS: " , file =  path_runLog, append=T, sep = "\n")
+for (i in 1:length(opt)) {
+  cat(text = paste0(names(opt)[i], "= ", opt[[i]]) , file =  path_runLog, append=T, sep = "\n")
+}
+
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
 
 ############################ WRAP UP ################################
 
