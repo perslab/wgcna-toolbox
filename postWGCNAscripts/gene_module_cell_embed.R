@@ -75,6 +75,8 @@ option_list <- list(
               help = "Unique prefix for output files, [default %default]"), 
   make_option("--minGeneClusterSize", type="integer", default=10L,
               help="What is the minimum number of genes in a module to continue? Integer, [default %default]."),
+  make_option("--normalizeGeneWeights", type="logical", default=F,
+              help="normalize gene weights to sum to 1?, [default %default]."),
   make_option("--scaleToZScore", type="logical", default = TRUE,
               help = "scale and center module expression to make it into a Z score? Recommended if using kIMs as gene weights as their scale depends on the WGCNA softPower parameter [default %default]."),  
   make_option("--assaySlot", type="character", default = NULL,
@@ -103,6 +105,7 @@ colModule <- opt$colModule
 dirOut <- opt$dirOut
 prefixOut <- opt$prefixOut
 minGeneClusterSize <- opt$minGeneClusterSize
+normalizeGeneWeights <- opt$normalizeGeneWeights
 scaleToZScore <- opt$scaleToZScore
 assaySlot <- opt$assaySlot
 dirScratch <- opt$dirScratch
@@ -172,6 +175,12 @@ df_NWA <- df_NWA[!df_NWA[[colModule]] %in% mods_too_small,]
 
 df_NWA <- df_NWA[!is.na(df_NWA[[colModule]]),]
 
+if (normalizeGeneWeights) {
+  for (module in unique(df_NWA[[colModule]])) {
+    normFactor <- sum(df_NWA[[colGeneWeights]][df_NWA[[colModule]]==module])
+    df_NWA[[colGeneWeights]][df_NWA[[colModule]]==module] <- df_NWA[[colGeneWeights]][df_NWA[[colModule]]==module]/normFactor
+  }
+}
 ###########
 
 
@@ -230,6 +239,7 @@ if (!any(c("seurat","loom") %in% class(dataObj))) { # not a loom object, nor a s
   rownames(datExpr) <- dataObj[,1]
 }
 rm (dataObj)
+
 # Add any further metadata coming from another file
 # if (!is.null(path_metadata)) {
 #   if (all_equal(rownames(metadata_tmp), colnames(dataObj@raw.data))) {
