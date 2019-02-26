@@ -94,7 +94,9 @@ option_list <- list(
   make_option("--scaleCenterRegress", type="logical", default = "TRUE",
               help = "[default %default]. If TRUE, and vec_pathsDatExpr points to an RObject, the script will try to use the @scale.data slot and, if missing, will normalize and scale the data and regress out nUMI, percent.mito and percent.ribo. If FALSE, for RObjects will use the @data slot, or, if empty, the @raw.data slot"),  
   make_option("--RAMGbMax", type="integer", default=250L,
-              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]")
+              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]"),
+  make_option("--path_runLog", type="character", default=NULL,
+              help = "Path to file to log the run and the git commit. If left as NULL, write to a file called runLog.text in the dirLog [default %default]")
 )
 
 ######################################################################
@@ -128,6 +130,7 @@ corFnc <- opt$corFnc
 dataOrganism <- opt$dataOrganism
 scaleCenterRegress <- opt$scaleCenterRegress
 RAMGbMax <- opt$RAMGbMax
+path_runLog <- opt$path_runLog
 
 ######################################################################
 ############################# SET PARAMS #############################
@@ -415,23 +418,18 @@ names(list_datExpr) <- names(vec_pathsDatExpr)
 rm(list_seuratObj)
 
 ######################################################################
-################## RUN PRESERVATION ANALYSIS #########################
+############### RUN CELLTYPE-CELLTYPE PRESERVATION ANALYSIS ##########
 ######################################################################
-
-outfile = paste0(dirLog, prefixOut, "_modulePreservation_log.txt")
-
-lvlRef_datExprTest_presModsOut <- list()
-lvlRef_datExprTest_presNwOut <- list()
 
 #WGCNA::disableWGCNAThreads()
 setwd(dir = dirTmp)
 
 # loop over reference levels, i.e. reference cell clusters where WGCNA found modules
 
-for (lvlRef in names(list_list_vec_identLvlsMatch)) {
-  
-  lvlRef_datExprTest_presModsOut[[lvlRef]] <- list()
-  lvlRef_datExprTest_presNwOut[[lvlRef]] <- list()
+#for (lvlRef in names(list_list_vec_identLvlsMatch)) {
+fun1 = function(lvlRef)  {
+
+  datExprTest_presNwOut <- list()
   
   ####################################################
   #### Get gene network coloring for cell_cluster ####
@@ -453,8 +451,7 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
                                               rownames(list_datExpr[[datExprTestName]]))))
   
   if (length(idxLvlRefCells) < minCellClusterSize) {
-    lvlRef_datExprTest_presModsOut[[lvlRef]] <- NA_character_
-    lvlRef_datExprTest_presNwOut[[lvlRef]] <- NA_character_
+    datExprTest_presNwOut <- NA_character_
     message(paste0(lvlRef, " skipped because it has < ", minCellClusterSize, " cells"))
     next
   } 
@@ -480,9 +477,6 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
   ####################################################
   
   for (datExprTestName in names(list_list_vec_identLvlsMatch[[lvlRef]])) {
-
-    #lvlRef_datExprTest_presModsOut[[lvlRef]][[datExprTestName]] <- list()
-    #lvlRef_datExprTest_presNwOut[[lvlRef]][[datExprTestName]] <- list()
 
     message(paste0("Reference: ", lvlRef, ", testing preservation in subsets of ", datExprTestName))
     
@@ -521,49 +515,11 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
     }
     
     if (length(list_datExprTest)==0) {
-      lvlRef_datExprTest_presModsOut[[lvlRef]][[datExprTestName]] <- NA_character_
-      lvlRef_datExprTest_presNwOut[[lvlRef]][[datExprTestName]] <- NA_character_
+      datExprTest_presNwOut[[datExprTestName]] <- NA_character_
       message(paste0(datExprTestName, " skipped because no test sets have < ", minCellClusterSize, " cells"))
       next
     } 
-    # list_idx_subset_test <- mapply(function(metadataTest, colname_subset_test, pattern_subset_test) {
-    #   which(metadataTest[[colname_subset_test]] == unique(grep(paste0("^", pattern_subset_test, "$"), metadataTest[[colname_subset_test]], value=T)))
-    # }, metadataTest = list_metadataTest, colname_subset_test=colnames_subset_test, pattern_subset_test=patterns_subset_test, SIMPLIFY=F)
-    # 
-    # list_datExprTest <- list_datExpr[IDs_datExprTest]
-    # 
-    # list_datExprTest<- mapply(function(datExprTest, idx_subset_test) {
-    #   idxGenes <- colnames(datExprTest) %in% names(coloring)
-    #   datExprTest <- datExprTest[idx_subset_test,idxGenes]
-    # }, datExprTest = list_datExprTest, idx_subset_test = list_idx_subset_test, SIMPLIFY=F)
-    # 
-    # names(list_datExprTest) <- patterns_subset_test
-    # # Check that there are sufficient cells
-    # list_datExprTest <- lapply(list_datExprTest,function(datExprTest) {
-    #   return( if (nrow(datExprTest) >= minCellClusterSize) datExprTest else NULL)
-    # })
-    # 
-    # check test sets
-    # idx_test_NULL <- sapply(X=list_datExprTest, FUN=is.null,simplify=T)
-    # if (sum(idx_test_NULL)==length(list_datExprTest)) {
-    #   list_modulePreservation_out[[cell_cluster]] <- NA_character_
-    #   next
-    # } else if (sum(idx_test_NULL)>1 & sum(idx_test_NULL)<length(list_datExprTest)) {
-    #   list_datExprTest <- list_datExprTest[!idx_test_NULL]
-    #   message(paste0(patterns_subset_test[idx_test_NULL], " dropped as test sets due to having fewer than ", minCellClusterSize, " cells"))
-    # }
-  
-    ################################################################################
-    ################## CHECK MODULE GENES IN TEST SET ##############################
-    ################################################################################
-    
-    # Make the coloring vector the same length as the number of genes in the ref set
-    # coloring <- coloring[names(coloring) %in% colnames(datExpr_ref)]
-    # colors_tmp <- rep("grey", length=ncol(datExpr_ref))
-    # names(colors_tmp) <- colnames(datExpr_ref)
-    # colors_tmp[as.integer(na.omit(match(names(coloring), names(colors_tmp))))] <- coloring[as.integer(na.omit(match(names(colors_tmp), names(coloring))))]
-    # coloring <- colors_tmp
-    
+
     ####################################################
     ################ Prepare multidata #################
     ####################################################
@@ -578,35 +534,13 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
     names(multiData)[2:length(multiData)] <- names(list_datExprTest)
     
     rm(list_datExprTest)
-    # if (FALSE) {   
-    #   # Check the multidata samples 
-    #   goodSamplesGenesMS_out <- try(goodSamplesGenesMS(
-    #                               multiExpr=multiData,
-    #                               multiWeights = NULL,
-    #                               minFraction = 1/2000,
-    #                               minNSamples = 1,
-    #                               minNGenes = 50,
-    #                               tol = NULL,
-    #                               minRelativeWeight = -Inf,
-    #                               verbose = 3,
-    #                               indent = 0))
-    #   if ("try-error" %in% class(goodSamplesGenesMS_out)) {
-    #     message(paste0(cell_cluster, ": goodSamplesGenesMS failed, skipping to next ref set"))
-    #     list_modulePreservation_out[[cell_cluster]] <- NA_character_
-    #     next
-    #   }
-    # 
-    #   multiData <- mapply(function(dataset, idx_goodSamples) {
-    #     dataset$data <- dataset$data[idx_goodSamples, goodSamplesGenesMS_out$goodGenes]
-    #     }, dataset=multiData, idx_goodSamples=goodSamplesGenesMS_out$goodSamples)
-    # }
     
     ####################################################
     ####### Run preservationNetworkConnectivity ########
     ####################################################
     
     # This should test preservation in each test_lvl datExpr
-    lvlRef_datExprTest_presNwOut[[lvlRef]][[datExprTestName]] <- 
+    datExprTest_presNwOut[[datExprTestName]] <- 
       WGCNA::preservationNetworkConnectivity(multiExpr = multiData, 
                                              corFnc = corFnc, 
                                              corOptions = NULL, 
@@ -620,26 +554,142 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
                                              verbose=3, 
                                              indent=0)
     
-    ####################################################
-    ############### Prepare multicolor #################
-    ####################################################
     
-    multiColor <- list(coloring)
-    names(multiColor) <- lvlRef
+  }
+  return(datExprTest_presNwOut)
+}
+
+outfile = paste0(dirLog, prefixOut, "_networkPreservation_log.txt")
+args=list("X"=names(list_list_vec_identLvlsMatch))
+lvlRef_datExprTest_presNwOut <- safeParallel(fun=fun1, args=args, outfile=outfile)
+names(lvlRef_datExprTest_presNwOut) <- names(list_list_vec_identLvlsMatch)
+######################################################################
+################## RUN MODULE PRESERVATION ANALYSIS ##################
+######################################################################
+
+fun2 = function(lvlRef)  {
+  
+  datExprTest_presModsOut <- list()
+
+  ####################################################
+  #### Get gene network coloring for cell_cluster ####
+  ####################################################
+  
+  idxDuplicateGenes <- duplicated(df_geneModule[[geneCol]][df_geneModule[[colCellCluster]] == lvlRef])
+  coloring <- df_geneModule[[colMod]][df_geneModule[[colCellCluster]] == lvlRef][!idxDuplicateGenes]
+  names(coloring) <- df_geneModule[[geneCol]][df_geneModule[[colCellCluster]] == lvlRef][!idxDuplicateGenes]
+  
+  ####################################################
+  ############ Prepare reference dataset #############
+  ####################################################
+  
+  # Get metadata df
+  metadataRef <- list_metadata[[1]]
+  metadataColnameRef <- vec_metadataIdentCols[1]
+  
+  idxLvlRefCells <- as.integer(na.omit(match(rownames(metadataRef)[(metadataRef[[metadataColnameRef]] == lvlRef)], 
+                                             rownames(list_datExpr[[datExprTestName]]))))
+  
+  
+  idxGenes <- as.integer(na.omit(match(names(coloring), colnames(list_datExpr[[1]]))))
+  datExprRefLvl <- list_datExpr[[1]][idxLvlRefCells, idxGenes]
+  
+  ######################################################################
+  #### Filter out coloring genes which are missing in datExpr_ref ######
+  ######################################################################
+  
+  coloring <- coloring[names(coloring) %in% colnames(datExprRefLvl)]
+  
+  ####################################################
+  ############ Filter out small modules ##############
+  ####################################################
+  
+  modsTooSmall <- names(table(coloring))[table(coloring)<minGeneClusterSize]
+  coloring <- coloring[!coloring %in% modsTooSmall]
+  
+  ####################################################
+  ############## Prepare test datasets ###############
+  ####################################################
+  
+  for (datExprTestName in names(list_list_vec_identLvlsMatch[[lvlRef]])) {
+    
+    message(paste0("Reference: ", lvlRef, ", testing preservation in subsets of ", datExprTestName))
+    
+    metadataTest <- list_metadata[[datExprTestName]]
+    metadataColnameTest <- vec_metadataIdentCols[datExprTestName]
+    
+    idxGenes <- as.integer(na.omit(match(names(coloring), colnames(list_datExpr[[datExprTestName]]))))
+    
+    # filter out modules missing completely in datExprTest
+    mods_absent <- names(table(coloring))[!names(table(coloring)) %in% names(table(coloring[names(coloring) %in% colnames(list_datExpr[[datExprTestName]])[idxGenes]]))]
+    coloring_f <- coloring
+    coloring_f[coloring %in% mods_absent] <- "grey"
+    
+    # Filter out modules where fewer than half the genes present in datExprTest
+    vec_modPropGenesInTest <- table(coloring_f)/table(coloring[coloring %in% names(table(coloring_f))])
+    vec_modPropGenesInTestTooSmall<- names(vec_modPropGenesInTest[vec_modPropGenesInTest<0.5])
+    coloring_f <- coloring_f[!coloring_f %in% vec_modPropGenesInTestTooSmall]
+    
+    list_datExprTest <- list()
+    
+    for (lvlTest in list_list_vec_identLvlsMatch[[lvlRef]][[datExprTestName]]) {
       
-    # Prepare for parallel computation (WGCNA multi threads)
+      idxCells <- as.integer(na.omit(match(rownames(metadataTest)[(metadataTest[[metadataColnameTest]] == lvlTest)], 
+                                           rownames(list_datExpr[[datExprTestName]]))))
+      datExprLvlTest <- list_datExpr[[datExprTestName]][idxCells, idxGenes]
+      
+      ######################################################################
+      ################ Check that test subset has sufficient cells #########
+      ######################################################################
+      
+      if (nrow(datExprLvlTest) < minCellClusterSize) {
+        message(paste0(lvlRef, " preservation in ", lvlTest, " skipped because ", lvlTest, " has < ", minCellClusterSize, " cells"))
+        next
+      }
+      list_datExprTest[[lvlTest]] <- datExprLvlTest
+    }
     
-    require("doParallel")
-    additionalGb = max(as.numeric(sapply(multiData, FUN = function(x) object.size(x), simplify = T)))/1024^3
-    objSizeGb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
-    nCores <- max(1, min(detectCores() %/% 3, RAMGbMax %/% (objSizeGb + additionalGb))-1)
-    nCores <- min(nCores, 40)
+    if (length(list_datExprTest)==0) {
+      datExprTest_presModsOut[[datExprTestName]] <- NA_character_
+                             message(paste0(datExprTestName, " skipped because no test sets have < ", minCellClusterSize, " cells"))
+                             next
+    }
     
-    disableWGCNAThreads()
-    #enableWGCNAThreads(nThreads = nCores)
+    ####################################################
+    ################ Prepare multidata #################
+    ####################################################
     
-    lvlRef_datExprTest_presModsOut[[lvlRef]][[datExprTestName]] <- tryCatch({
-      modulePreservation(multiData=multiData,
+    # Prepare multidata
+    multiData <- vector(mode="list",length = 1+length(list_datExprTest)) # 1 for reference network
+    multiData[[1]] <- list("data"=datExprRefLvl)
+    for (k in 1:(length(multiData)-1)){
+      multiData[[k+1]] <- list("data"=list_datExprTest[[k]])
+    }
+    names(multiData)[1] <- lvlRef
+    names(multiData)[2:length(multiData)] <- names(list_datExprTest)
+    
+    rm(list_datExprTest)
+
+   ####################################################
+   ############### Prepare multicolor #################
+   ####################################################
+   
+   multiColor <- list(coloring)
+   names(multiColor) <- lvlRef
+   
+   # Prepare for parallel computation (WGCNA multi threads)
+   
+   #require("doParallel")
+   #additionalGb = max(as.numeric(sapply(multiData, FUN = function(x) object.size(x), simplify = T)))/1024^3
+   #objSizeGb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
+   #nCores <- max(1, min(detectCores() %/% 3, RAMGbMax %/% (objSizeGb + additionalGb))-1)
+   #nCores <- min(nCores, 40)
+   
+   #disableWGCNAThreads()
+   #enableWGCNAThreads(nThreads = nCores)
+   
+   datExprTest_presModsOut[[datExprTestName]] <- tryCatch({
+     modulePreservation(multiData=multiData,
                         multiColor=multiColor,
                         dataIsExpr = TRUE,
                         networkType = networkType, 
@@ -674,13 +724,16 @@ for (lvlRef in names(list_list_vec_identLvlsMatch)) {
                           write(x = paste0(lvlRef, ": modulePreservation failed with the following error: ", err), file = outfile,
                                 ncolumns = 1, append = T)
                           return(NA_character_)
-                          })
-    
+                        })
+                           
   }
+  return(datExprTest_presModsOut)
 }
 
-#TODO: remove when done testing
-#save.image(paste0(dirOut, prefixOut, "_", flagDate, "_session_image.RData.gz", compress="gzip"))
+outfile = paste0(dirLog, prefixOut, "_modulePreservation_log.txt")
+args=list("X"=names(list_list_vec_identLvlsMatch))
+lvlRef_datExprTest_presModsOut <- safeParallel(fun=fun2, args=args, outfile=outfile)
+names(lvlRef_datExprTest_presModsOut) <- names(list_list_vec_identLvlsMatch)
 ######################################################################
 ################# REFORMAT MODULE PRESERVATION SCORES ################
 ######################################################################
@@ -726,6 +779,10 @@ lvlRef_df_datExprTestStats <- lapply(X=names(list_list_vec_identLvlsMatch), FUN=
       if(!all(is.na(df_presStats))) {
         lvlTestCrop <- gsub("inColumnsAlsoPresentIn\\.", "", lvlTest)
         df_pBonf.pres <- data.frame(
+          "ref_dataset"=names(vec_pathsDatExpr)[1],
+          "ref_lvl"=lvlRef,
+          "test_dataset"=datExprTestName,
+          "test_lvl"=rep(lvlTestCrop, times= nrow(df_presStats)), 
           "module" = rownames(df_presStats), 
           "log.p.Bonfsummary.pres"=df_presStats[["log.p.Bonfsummary.pres"]])
         return(df_pBonf.pres)
@@ -741,7 +798,7 @@ lvlRef_df_datExprTestStats <- lapply(X=names(list_list_vec_identLvlsMatch), FUN=
     # logpBonf_stats_long <- reshape2::melt(logpBonf_stats)[-c(1,2)]
     # colnames(logpBonf_stats_long) <- c("log.p.Bonfsummary.pres")
 
-    df_presStats <- dplyr::full_join(df_Zsummary.pres, df_pBonf.pres)
+    df_presStats <- dplyr::full_join(df_Zsummary.pres, df_pBonf.pres, by=c("ref_dataset", "ref_lvl", "test_dataset", "test_lvl", "module"))
       
       
       # data.frame("ref_dataset" = names(vec_pathsDatExpr)[1],
@@ -813,7 +870,7 @@ write.csv(x=df_presStats, file = paste0(dirTables, prefixOut, "_df_preservationS
 
 as.character(Sys.time()) %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStop
 
-if (is.null(path_runLog)) path_runLog <- paste0(dirLog, "_GSA_runLog.txt")
+if (is.null(path_runLog)) path_runLog <- paste0(dirLog, "_preservation_runLog.txt")
 
 dirCurrent = paste0(LocationOfThisScript(), "/") # need to have this function defined
 setwd(dirCurrent) # this should be a git directory
