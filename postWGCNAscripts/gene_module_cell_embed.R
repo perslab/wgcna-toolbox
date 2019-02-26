@@ -43,14 +43,14 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
 }
 
 current.dir = paste0(LocationOfThisScript(), "/")
-#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/"
-source(file=paste0(current.dir,"rwgcna_functions.R"))
+#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/postWGCNAscripts/"
+source(file=paste0(gsub("postWGCNAscripts/","WGCNApipeline/",current.dir),"rwgcna_functions_seurat3.0.R"))
 
 ######################################################################
 ########################### PACKAGES #################################
 ######################################################################
 
-ipak(c("optparse", "dplyr", "Biobase", "Matrix", "parallel", "loomR", "readr"))
+ipak(c("Seurat", "optparse", "dplyr", "Biobase", "Matrix", "parallel", "loomR", "readr"))
 
 #stopifnot(as.character(packageVersion("Seurat"))=='3.0.0.9000')
 
@@ -59,10 +59,12 @@ ipak(c("optparse", "dplyr", "Biobase", "Matrix", "parallel", "loomR", "readr"))
 ######################################################################
 
 option_list <- list(
-  make_option("--pathDatExpr", type="character",
+  make_option("--path_datExpr", type="character",
               help = "Path to expression data in Seurat loomR or RObject format to score on WGCNA modules."),  
-  make_option("--vec_pathsDfNWA", type="character", default=NULL,
+  make_option("--vec_paths_df_NWA", type="character", default=NULL,
               help = "named vector of paths to dataframes containing WGCNA module genes and scores in long format, i.e. one row per gene e.g. rwgcna cell_cluster_module_genes.csv files, e.g.''c('mousebrain='/projects/jonatan/tmp-mousebrain/tables/example1.csv', 'tab_muris' = '/projects/jonatan/tmp-maca/example2.csv)''"),  
+  make_option("--colGeneNames", type="character",
+              help = "nwa_df column with gene names"), 
   make_option("--colGeneWeights", type="character",
               help = "nwa_df column with gene weights"), 
   make_option("--colModule", type="character", default="module_merged",
@@ -80,7 +82,9 @@ option_list <- list(
   make_option("--dirScratch", type="character", default="/scratch/tmp-wgcna/",
               help = "Directory for temporary files, [default %default]"),
   make_option("--RAMGbMax", type="integer", default=250,
-              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]")
+              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]"),
+  make_option("--path_runLog", type="character", default=NULL,
+              help = "Path to file to log the run and the git commit. If left as NULL, write to a file called runLog.text in the dirLog [default %default]")
   
 )
 
@@ -90,9 +94,10 @@ option_list <- list(
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
-pathDatExpr <- opt$pathDatExpr
-vec_pathsDfNWA <- opt$vec_pathsDfNWA
-if (!is.null(vec_pathsDfNWA)) vec_pathsDfNWA <- eval(parse(text=vec_pathsDfNWA))
+path_datExpr <- opt$path_datExpr
+vec_paths_df_NWA <- opt$vec_paths_df_NWA
+if (!is.null(vec_paths_df_NWA)) vec_paths_df_NWA <- eval(parse(text=vec_paths_df_NWA))
+colGeneNames <- opt$colGeneNames
 colGeneWeights <- opt$colGeneWeights
 colModule <- opt$colModule
 dirOut <- opt$dirOut
@@ -102,7 +107,9 @@ scaleToZScore <- opt$scaleToZScore
 assaySlot <- opt$assaySlot
 dirScratch <- opt$dirScratch
 RAMGbMax <- opt$RAMGbMax
+path_runLog <- opt$path_runLog
 
+use_loom = F # NB!!
 ######################################################################
 ############################# SET PARAMS #############################
 ######################################################################
@@ -115,8 +122,8 @@ options(stringsAsFactors = F, na.action = "na.omit")
 
 #if (!file.exists(dir_project_WGCNA)) stop("dir_project_WGCNA not found")
 if (!file.exists(dirOut)) stop("dirOut not found")
-if (!file.exists(pathDatExpr)) stop("pathDatExpr not found")
-#if (!is.null(path_metadata)) if (!file.exists(path_metadata)) stop("pathDatExpr not found")
+if (!file.exists(path_datExpr)) stop("path_datExpr not found")
+#if (!is.null(path_metadata)) if (!file.exists(path_metadata)) stop("path_datExpr not found")
 
 # set up and verify WGCNA directory paths
 
@@ -144,28 +151,32 @@ if (!file.exists(dirLog)) dir.create(dirLog)
 ######################### LOAD GENE LOADINGS VECTORS #################
 ######################################################################
 
-run_cellClusterModuleGenes <- lapply(vec_pathsDfNWA, read.csv)
+run_cellClusterModuleGenes <- lapply(vec_paths_df_NWA, read.csv)
 
 # If there are duplicate modules between WGCNA runs, prefix module names with the WGCNA run 
 if (length(run_cellClusterModuleGenes)>1) {
   if (sapply(X=run_cellClusterModuleGenes, function(df) unique(df[[colModule]]), simplify = T) %>% duplicated %>% any) {
     for (i in 1:length(run_cellClusterModuleGenes)) {
-      run_cellClusterModuleGenes[[i]][[colModule]] <- paste0(names(vec_pathsDfNWA)[i], "_",run_cellClusterModuleGenes[[i]][[colModule]]) # ensure modules from different runs remain distinct
+      run_cellClusterModuleGenes[[i]][[colModule]] <- paste0(names(vec_paths_df_NWA)[i], "_",run_cellClusterModuleGenes[[i]][[colModule]]) # ensure modules from different runs remain distinct
     }
   }
 }
 
 # merge into one long data frame
-runCellClusterModuleGenes <- if (length(run_cellClusterModuleGenes)>1) Reduce(x = run_cellClusterModuleGenes,f = rbind) else run_cellClusterModuleGenes[[1]]
+df_NWA <- if (length(run_cellClusterModuleGenes)>1) Reduce(x = run_cellClusterModuleGenes,f = rbind) else run_cellClusterModuleGenes[[1]]
 rm(run_cellClusterModuleGenes)
 
 # filter out very small modules. This should have been done in WGCNA main script already
-mods_too_small <- names(table(runCellClusterModuleGenes[[colModule]]))[table(runCellClusterModuleGenes[[colModule]])<minGeneClusterSize]
-runCellClusterModuleGenes <- runCellClusterModuleGenes[!runCellClusterModuleGenes[[colModule]] %in% mods_too_small,]
+mods_too_small <- names(table(df_NWA[[colModule]]))[table(df_NWA[[colModule]])<minGeneClusterSize]
+df_NWA <- df_NWA[!df_NWA[[colModule]] %in% mods_too_small,]
+
+df_NWA <- df_NWA[!is.na(df_NWA[[colModule]]),]
+
 ###########
 
-# gene_col <- grep(gene_names, colnames(runCellClusterModuleGenes), value=T)
-# colGeneWeights <- grep("^p*kI*ME*$", colnames(runCellClusterModuleGenes), ignore.case=T, value=T)
+
+# colGeneNames <- grep(gene_names, colnames(df_NWA), value=T)
+# colGeneWeights <- grep("^p*kI*ME*$", colnames(df_NWA), ignore.case=T, value=T)
 
 # run_cellType_module_u <- list()
 # WGCNA_cellTypes = c()
@@ -195,20 +206,29 @@ message("Loading expression matrix")
 # load/open connection to expression matrix
 # NB: may be huge
 
-if (grepl(pattern = "\\.loom", pathDatExpr)) {
-  dataObj <-  connect(filename = pathDatExpr, mode = "r+")
+if (grepl(pattern = "\\.loom", path_datExpr)) {
+  dataObj <-  connect(filename = path_datExpr, mode = "r+")
 } else {
-  dataObj <- load_obj(pathDatExpr)
+  dataObj <- load_obj(path_datExpr)
 } 
+
 if (!any(c("seurat","loom") %in% class(dataObj))) { # not a loom object, nor a seurat object
   #dataObj <- CreateSeuratObject(raw.data=dataObj, project= prefixOut, min.cells = -Inf, min.genes = -Inf)
   datExpr <- dataObj
 } else if ("seurat" %in% class(dataObj)) {
-  datExpr <- if (dataObj@version=='3.0.0.9000') GetAssayData(dataObj, assay.type="RNA", slot=assaySlot) else eval(parse(text=paste0("dataObj@", assaySlot)))
+  if (dataObj@version=='3.0.0.9000') {
+    datExpr <- GetAssayData(dataObj, assay.type="RNA", slot=assaySlot) 
+    } else {
+      if (assaySlot=="counts") assaySlot <- "raw.data"
+      datExpr <- eval(parse(text=paste0("dataObj@", assaySlot))) %>% as.matrix
+    }
 } else if ("loom" %in% class(dataObj)) {
   datExpr <- dataObj[["matrix"]][,]
   #dataObj <- Seurat::Convert(from=dataObj, to="seurat")
-} # if already a seurat object, do nothing
+} else {
+  datExpr <- dataObj[,-1] 
+  rownames(datExpr) <- dataObj[,1]
+}
 rm (dataObj)
 # Add any further metadata coming from another file
 # if (!is.null(path_metadata)) {
@@ -233,7 +253,7 @@ rm (dataObj)
 #   current_ensembl <- T
 #   
 #   tmp <- gene_map(df = dataObj@raw.data,
-#                   idx_gene_column = NULL,
+#                   idx_colGeneNamesumn = NULL,
 #                   mapping=mapping,
 #                   from="ensembl",
 #                   to="gene_name_optimal",
@@ -257,7 +277,7 @@ rm (dataObj)
 # 
 # if (grepl("ensembl", gene_names) & !current_ensembl) {
 #   dataObj@raw.data <- gene_map(df = dataObj@raw.data,
-#                                 idx_gene_column = NULL,
+#                                 idx_colGeneNamesumn = NULL,
 #                                 mapping=mapping,
 #                                 from="gene_name_optimal",
 #                                 to="ensembl",
@@ -301,6 +321,7 @@ rm (dataObj)
 # 
 # invisible(gc()); invisible(R.utils::gcDLLs())
 
+
 ######################################################################
 ################ COMPUTE CELL MODULE EMBEDDINGS ######################
 ######################################################################
@@ -323,15 +344,15 @@ if (!use_loom) {
     
     invisible(gc())
     # Compute embeddings
-    subEmbed <- sapply(X=unique(runCellClusterModuleGenes[[colModule]]), FUN=function(module) {
-      idx_mod <- which(runCellClusterModuleGenes[[colModule]]==module)
-      idx_match <- match(runCellClusterModuleGenes[[gene_col]][idx_mod], rownames(submat)) 
-      t(submat[idx_match[!is.na(idx_match)],]) %*% matrix(runCellClusterModuleGenes[[colGeneWeights]][idx_mod[!is.na(idx_match)]], nrow = length(idx_mod[!is.na(idx_match)]))
+    subEmbed <- sapply(X=unique(df_NWA[[colModule]]), FUN=function(module) {
+      idx_mod <- which(df_NWA[[colModule]]==module)
+      idx_match <- match(df_NWA[[colGeneNames]][idx_mod], rownames(submat)) 
+      t(submat[idx_match[!is.na(idx_match)],]) %*% matrix(df_NWA[[colGeneWeights]][idx_mod[!is.na(idx_match)]], nrow = length(idx_mod[!is.na(idx_match)]))
     },
     simplify=T)
     
     rownames(subEmbed) <- colnames(datExpr)[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]] #fixed from <- rownames... 181029
-    colnames(subEmbed) <- unique(runCellClusterModuleGenes[[colModule]])
+    colnames(subEmbed) <- unique(df_NWA[[colModule]])
     
     if (i==1) {
       
@@ -351,7 +372,7 @@ if (!use_loom) {
       #cellModEmbed_loom_chunk$add.row.attribute(list(cell_names = rownames(subEmbed)), overwrite = TRUE)
       
       #cellModEmbed_loom$add.col.attribute(list(ident = ident[(cell_chunk_idx[i]+1):cell_chunk_idx[i+1]]), overwrite = TRUE)
-      cellModEmbed_loom_chunk$add.row.attribute(list(gene_names = colnames(subEmbed)), overwrite = TRUE)
+      cellModEmbed_loom$add.row.attribute(list(gene_names = colnames(subEmbed)), overwrite = TRUE)
       cellModEmbed_loom$add.row.attribute(list(module = colnames(subEmbed)), overwrite = TRUE)
       
     } else {
@@ -470,5 +491,39 @@ try(invisible(file.remove(paste0(dirScratch, prefixOut, "_cellModEmbed.loom"))))
 #save.image(paste0(dirScratch, prefixOut, "_", date, "_session_image.RData"))               
 
 
+######################################################################
+############### LOG PARAMETERS AND FILE VERSION ######################
+######################################################################
+
+as.character(Sys.time()) %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStop
+
+if (is.null(path_runLog)) path_runLog <- paste0(dirLog, "_preservation_runLog.txt")
+
+dirCurrent = paste0(LocationOfThisScript(), "/") # need to have this function defined
+setwd(dirCurrent) # this should be a git directory
+
+# get the latest git commit
+gitCommitEntry <- try(system2(command="git", args=c("log", "-n 1 --oneline"), stdout=TRUE))
+
+# Write to text file
+cat(text = "\n" , file =  path_runLog, append=T, sep = "\n")
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
+cat(text = prefixOut , file =  path_runLog, append=T, sep = "\n")
+cat(sessionInfo()[[1]]$version.string, file=path_runLog, append=T, sep="\n")
+if (!"try-error" %in% class(gitCommitEntry)) cat(text = paste0("git commit: ", gitCommitEntry) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStart: ", tStart) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStop: ", tStop) , file =  path_runLog, append=T, sep = "\n")
+
+# output parameters (assumping use of optparse package)
+cat(text = "\nPARAMETERS: " , file =  path_runLog, append=T, sep = "\n")
+for (i in 1:length(opt)) {
+  cat(text = paste0(names(opt)[i], "= ", opt[[i]]) , file =  path_runLog, append=T, sep = "\n")
+}
+
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
+
+############################ WRAP UP ################################
 
 message("DONE!")
