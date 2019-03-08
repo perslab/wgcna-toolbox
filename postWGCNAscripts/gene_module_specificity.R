@@ -4,7 +4,8 @@
 # export R_MAX_NUM_DLLS=999
 # time RScript..
 
-# TODO: delete all non-specificity measures
+# **2019.02.14 This script has been superceded by projects/jonatan/tools/gene_set_enrichment/GSA_out.R**
+
 ######################################################################
 ############################# SET OPTIONS ############################
 ######################################################################

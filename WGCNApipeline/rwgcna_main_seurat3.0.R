@@ -413,8 +413,8 @@ if (is.null(resume)) {
   # 
   #   df_ensemblMapping <- load_obj(path_df_ensemblMapping[[dataOrganism]])
   # 
-  #   df_genes <- gene_map(df=df_genes,
-  #                            idx_gene_column = which(colnames(df_genes)==geneNames),
+  #   df_genes <- gene_map(dataIn=df_genes,
+  #                            colGene = geneNames,
   #                            mapping=df_ensemblMapping,
   #                            from=geneNames,
   #                            to=mapTo,

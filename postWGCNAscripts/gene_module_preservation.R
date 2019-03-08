@@ -41,7 +41,6 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
 dir_current = paste0(LocationOfThisScript(), "/")
 #dir_current = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/postWGCNAscripts/"
 
-#source(file=paste0(dir_current,"rwgcna_functions.R"))
 source(file="/projects/jonatan/tools/functions-src/utility_functions.R")
 
 ######################################################################
@@ -137,7 +136,7 @@ path_runLog <- opt$path_runLog
 ######################################################################
 
 options(stringsAsFactors = F, use="pairwise.complete.obs")
-WGCNA::disableWGCNAThreads()
+#WGCNA::disableWGCNAThreads()
 
 ######################################################################
 ############################ CONSTANTS ###############################
@@ -345,8 +344,8 @@ if (FALSE) {
   fun <- function(seuratObj) {
     if (any(grepl("ENSG|ENSMUSG",rownames(seuratObj@raw.data)))) {
       current_ensembl <- T
-      tmp <- gene_map(df = seuratObj@raw.data,
-                      idx_geneColumn = NULL,
+      tmp <- gene_map(dataIn = seuratObj@raw.data,
+                      colGene = NULL,
                       mapping=mapping,
                       from="ensembl",
                       to="gene_name_optimal",
@@ -364,8 +363,8 @@ if (FALSE) {
     seuratObj <- AddMetaData(object = seuratObj, metadata = percent_mito, col.name = "percent_mito")
     seuratObj <- AddMetaData(object = seuratObj, metadata = percent_ribo, col.name = "percent_ribo")
     if (grepl("ensembl", colGeneNames) & !current_ensembl) {
-      seuratObj@raw.data <- gene_map(df = seuratObj@raw.data,
-                                      idx_geneColumn = NULL,
+      seuratObj@raw.data <- gene_map(dataIn = seuratObj@raw.data,
+                                      colGene = NULL,
                                       mapping=mapping,
                                       from="gene_name_optimal",
                                       to="ensembl",
@@ -418,11 +417,16 @@ names(list_datExpr) <- names(vec_pathsDatExpr)
 rm(list_seuratObj)
 
 ######################################################################
-############### RUN CELLTYPE-CELLTYPE PRESERVATION ANALYSIS ##########
+############################ INITIALISE ##############################
 ######################################################################
 
-#WGCNA::disableWGCNAThreads()
+lvlRef_datExprTest_presNwOut <- lvlRef_datExprTest_presModsOut <- NULL
+
 setwd(dir = dirTmp)
+
+######################################################################
+############### RUN CELLTYPE-CELLTYPE PRESERVATION ANALYSIS ##########
+######################################################################
 
 # loop over reference levels, i.e. reference cell clusters where WGCNA found modules
 
@@ -538,7 +542,7 @@ fun1 = function(lvlRef)  {
     ####################################################
     ####### Run preservationNetworkConnectivity ########
     ####################################################
-    
+
     # This should test preservation in each test_lvl datExpr
     datExprTest_presNwOut[[datExprTestName]] <- 
       WGCNA::preservationNetworkConnectivity(multiExpr = multiData, 
@@ -562,10 +566,14 @@ fun1 = function(lvlRef)  {
 outfile = paste0(dirLog, prefixOut, "_networkPreservation_log.txt")
 args=list("X"=names(list_list_vec_identLvlsMatch))
 lvlRef_datExprTest_presNwOut <- safeParallel(fun=fun1, args=args, outfile=outfile)
+#lvlRef_datExprTest_presNwOut <- lapply(FUN=fun1,"X"=names(list_list_vec_identLvlsMatch))
+
 names(lvlRef_datExprTest_presNwOut) <- names(list_list_vec_identLvlsMatch)
 ######################################################################
 ################## RUN MODULE PRESERVATION ANALYSIS ##################
 ######################################################################
+
+require("doParallel")
 
 fun2 = function(lvlRef)  {
   
@@ -678,15 +686,14 @@ fun2 = function(lvlRef)  {
    names(multiColor) <- lvlRef
    
    # Prepare for parallel computation (WGCNA multi threads)
-   
-   #require("doParallel")
-   #additionalGb = max(as.numeric(sapply(multiData, FUN = function(x) object.size(x), simplify = T)))/1024^3
-   #objSizeGb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
-   #nCores <- max(1, min(detectCores() %/% 3, RAMGbMax %/% (objSizeGb + additionalGb))-1)
-   #nCores <- min(nCores, 40)
-   
+
+   additionalGb = max(as.numeric(sapply(multiData, FUN = function(x) object.size(x), simplify = T)))/1024^3
+   objSizeGb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
+   nCores <- max(1, min(detectCores() %/% 3, RAMGbMax %/% (objSizeGb + additionalGb))-1)
+   nCores <- min(nCores, 40)
+
    #disableWGCNAThreads()
-   #enableWGCNAThreads(nThreads = nCores)
+   enableWGCNAThreads(nThreads = nCores)
    
    datExprTest_presModsOut[[datExprTestName]] <- tryCatch({
      modulePreservation(multiData=multiData,
@@ -694,7 +701,7 @@ fun2 = function(lvlRef)  {
                         dataIsExpr = TRUE,
                         networkType = networkType, 
                         corFnc = corFnc,
-                        corOptions =NULL, #if (corFnc == "cor") list(use = 'p') else NULL,
+                        corOptions = NULL,#list(use="pairwise.complete.obs"),#NULL, #if (corFnc == "cor") list(use = 'p') else NULL,
                         referenceNetworks = 1, 
                         testNetworks = NULL,
                         nPermutations = 100, 
@@ -717,7 +724,7 @@ fun2 = function(lvlRef)  {
                         plotInterpolation = TRUE, 
                         interpolationPlotFile = "modulePreservationInterpolationPlots.pdf", 
                         discardInvalidOutput = TRUE,
-                        parallelCalculation = TRUE,
+                        parallelCalculation = T,#TRUE,
                         verbose = 3, 
                         indent = 0)}, error = function(err) {
                           message(paste0(lvlRef, ": modulePreservation failed with the following error: ", err))
@@ -731,9 +738,11 @@ fun2 = function(lvlRef)  {
 }
 
 outfile = paste0(dirLog, prefixOut, "_modulePreservation_log.txt")
-args=list("X"=names(list_list_vec_identLvlsMatch))
-lvlRef_datExprTest_presModsOut <- safeParallel(fun=fun2, args=args, outfile=outfile)
+#args=list("X"=names(list_list_vec_identLvlsMatch))
+#lvlRef_datExprTest_presModsOut <- safeParallel(fun=fun2, args=args, outfile=outfile)
+lvlRef_datExprTest_presModsOut <- lapply(FUN=fun2,"X"=names(list_list_vec_identLvlsMatch))
 names(lvlRef_datExprTest_presModsOut) <- names(list_list_vec_identLvlsMatch)
+
 ######################################################################
 ################# REFORMAT MODULE PRESERVATION SCORES ################
 ######################################################################

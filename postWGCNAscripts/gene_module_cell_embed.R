@@ -181,30 +181,6 @@ if (normalizeGeneWeights) {
     df_NWA[[colGeneWeights]][df_NWA[[colModule]]==module] <- df_NWA[[colGeneWeights]][df_NWA[[colModule]]==module]/normFactor
   }
 }
-###########
-
-
-# colGeneNames <- grep(gene_names, colnames(df_NWA), value=T)
-# colGeneWeights <- grep("^p*kI*ME*$", colnames(df_NWA), ignore.case=T, value=T)
-
-# run_cellType_module_u <- list()
-# WGCNA_cellTypes = c()
-# for (prefix_run in prefixes_WGCNA_run) {
-#   cellType_module_u_path <- dir(path = dir_RObjects_WGCNA, pattern = paste0(prefix_run, "_list_list_module_u.RDS"), full.names = T)
-#   run_cellType_module_u[[prefix_run]] <- load_obj(f = cellType_module_u_path)
-#   WGCNA_cellTypes <- c(WGCNA_cellTypes, names(run_cellType_module_u[[prefix_run]]))
-# }
-# 
-# names(run_cellType_module_u) <- prefixes_WGCNA_run
-
-######################################################################
-######################### LOAD METADATA ############################
-######################################################################
-
-# if (!is.null(path_metadata)){ 
-#   message("Loading metadata") 
-#   metadata <- load_obj(f=path_metadata)
-# }
 
 ######################################################################
 ######################### LOAD EXPRESSION MATRIX #####################
@@ -261,9 +237,9 @@ rm (dataObj)
 # if (any(grepl("ENSG|ENSMUSG",rownames(dataObj@raw.data)))) {
 #   
 #   current_ensembl <- T
-#   
-#   tmp <- gene_map(df = dataObj@raw.data,
-#                   idx_colGeneNamesumn = NULL,
+#   # NB: update 
+#   tmp <- gene_map(dataIn = dataObj@raw.data,
+#                   colGene = NULL,
 #                   mapping=mapping,
 #                   from="ensembl",
 #                   to="gene_name_optimal",
@@ -286,8 +262,8 @@ rm (dataObj)
 # dataObj <- AddMetaData(object = dataObj, metadata = percent_ribo, col.name = "percent_ribo")
 # 
 # if (grepl("ensembl", gene_names) & !current_ensembl) {
-#   dataObj@raw.data <- gene_map(df = dataObj@raw.data,
-#                                 idx_colGeneNamesumn = NULL,
+#   dataObj@raw.data <- gene_map(dataIn = dataObj@raw.data,
+#                                 colGene = NULL,
 #                                 mapping=mapping,
 #                                 from="gene_name_optimal",
 #                                 to="ensembl",
@@ -344,6 +320,7 @@ if (!use_loom) {
   
   cell_chunk_idx <- c(seq.int(from=0, to = ncell, by=min(5000, ncell %/% 1.9)))
   
+  if (!ncell%in%cell_chunk_idx) cell_chunk_idx <- c(cell_chunk_idx, ncell)
   #cl <- makeCluster(spec=n_cores, type="FORK", outfile = paste0(dirLog, prefixOut,"_", "cell_x_module_matrix.txt"), timeout=30)
   
   for (i in 1:(length(cell_chunk_idx)-1)) { # loop over chunks of cell
@@ -471,13 +448,14 @@ cellModEmbed <- if (scaleToZScore) cellModEmbed_loom[["layers/scale.data"]][,] e
                            #ident=cellModEmbed_loom[["col_attrs/ident"]][], 
                            #cell_names=cellModEmbed_loom[["col_attrs/cell_names"]][], 
                            #if (scaleToZScore) cellModEmbed_loom[["layers/scale.data"]][,] else cellModEmbed_loom[["matrix"]][,])
-rownames(cellModEmbed) <- cellModEmbed_loom[["col_attrs/cell_names"]][]
+
 #cellModEmbed[,2:length(cellModEmbed_loom[["row_attrs/gene_names"]][])+2] <- if (scaleToZScore) cellModEmbed_loom[["layers/scale.data"]][,] else cellModEmbed_loom[["matrix"]][,] 
 #cellModEmbed <- cbind(cellModEmbed_loom[["col_attrs/ident"]][], cellModEmbed_loom[["col_attrs/cell_names"]][], cellModEmbed)
 #rownames(cellModEmbed) <- cellModEmbed_loom[["col_attrs/cell_names"]][]
 #colnames(cellModEmbed)[4:ncol(cellModEmbed)] <- cellModEmbed_loom[["row_attrs/module"]][]  
 colnames(cellModEmbed) <- cellModEmbed_loom[["row_attrs/module"]][]  
-
+cellModEmbed <- cbind(data.frame("cell_ID"=cellModEmbed_loom[["col_attrs/cell_names"]][]),cellModEmbed)
+rownames(cellModEmbed) <- NULL
 write_csv(x=as.data.frame(cellModEmbed), path= paste0(dirTables, prefixOut, "_cellModEmbed.csv"))
 
 rm(cellModEmbed)

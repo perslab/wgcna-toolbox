@@ -1,7 +1,7 @@
 ## script to merge gene modules from different WGCNA runs based on the overlap in genes
 
 # Usage e.g.
-# time Rscript /projects/jonatan/tools/wgcna-serc/wgcna-toolbox/gene_module_merge2.R path_dfNWA /projects/jonatan/tmp-epilepsy/tables/ep_ex_4_10000_genes_cell_cluster_module_genes.csv --geneWeightsCol pkIM   geneCol ="hgnc" --minPropIntersect  0.75 --minWeightedCor  0.75 --minPropIntersect_iter_increase  1.01 --maxIter25 --corMethod  "pearson" --dirOut "/projects/jonatan/tmp-epilepsy/" --prefixOut "modMerge2_test" --RAMGbMax 250
+# time Rscript /projects/jonatan/tools/wgcna-serc/wgcna-toolbox/gene_module_merge2.R path_df_NWA /projects/jonatan/tmp-epilepsy/tables/ep_ex_4_10000_genes_cell_cluster_module_genes.csv --colGeneWeights pkIM   colGeneNames ="hgnc" --minPropIntersect  0.75 --minWeightedCor  0.75 --minPropIntersect_iter_increase  1.01 --maxIter25 --corMethod  "pearson" --dirOut "/projects/jonatan/tmp-epilepsy/" --prefixOut "modMerge2_test" --RAMGbMax 250
 
 # Algorithm:
 # Do until k == maxIter or until there are no modules to merge:
@@ -30,20 +30,22 @@ source(file="/projects/jonatan/tools/functions-src/utility_functions.R")
 ipak(c("optparse"))
 
 option_list <- list(
-  make_option("--path_dfNWA", type="character",
+  make_option("--path_df_NWA", type="character",
               help = "path to dataframe from a gene network analysis run, in long format (i.e. one row per gene per celltype), containing 'cell_cluster', 'module', one or two gene name columns, and a column of numeric scores. I.e. one row per gene, e.g. rwgcna cell_cluster_module_genes.csv files"),  
-  make_option("--geneWeightsCol", type="character", default ="pk.*M",
+  make_option("--colGeneWeights", type="character", default ="pk.*M",
               help = "nwa_df column with gene weights, , [default %default]"),  
-  make_option("--geneCol", type="character", default="hgnc",
+  make_option("--colGeneNames", type="character", default="hgnc",
               help ="string or regex for grepping nwa_df e.g. 'hgnc|symbol|gene_name' or 'ensembl', [default %default]"),
     make_option("--minPropIntersect", type="numeric", default = 0.65,
-              help = "minimum proportion of module j intersecting with module i to merge j into i, [default %default]"),
+              help = "minimum proportion of module j intersecting with module i to discard j or merge j into i, [default %default]"),
   make_option("--minPropIntersect_iter_increase", type="numeric", default = 1.02,
               help = "At the end of each iteration, multiply the minPropIntersect threshold by some numeric constant >= 1 to help ensure convergence given that merging modules increases the probability that others will have a large overlap with them, [default %default]"),
   make_option("--minWeightedCor", type="numeric", default = 0.8,
-              help = "if module j has at least minPropIntersect genes also in module i, set minimum correlation weighted by gene weight, to merge j into i, [default %default]"),
+              help = "if module j has at least minPropIntersect genes also in module i, set minimum correlation weighted by gene weight, to discard j or merge j into i, [default %default]"),
   make_option("--corMethod", type="character", default = "pearson",
               help = "pearson, spearman or kendall, [default %default]"),
+  make_option("--mergeOrPrune", type="character", default = "prune",
+              help = "'merge' to merge close modules or 'prune' to discard modules largely contained in others, [default %default]"),
   make_option("--maxIter", type="integer", default = 20,
               help = "maximum number of merge iterations , [default %default]"),
   make_option("--dirOut", type="character",
@@ -53,7 +55,9 @@ option_list <- list(
   make_option("--doPlot", type="logical", default = F,
               help = "Whether or not to plot intersect and correlation matrices at each iteration, [default %default]"),
   make_option("--RAMGbMax", type="integer", default=250,
-              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]")
+              help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]"),
+  make_option("--path_runLog", type="character", default=NULL,
+              help = "Path to file to log the run and the git commit. If left as NULL, write to a file called runLog.text in the dirLog [default %default]")
 )
 
 ######################################################################
@@ -68,19 +72,20 @@ ipak(c("dplyr", "Matrix", "parallel", "WGCNA", "corrplot", "readr", "RColorBrewe
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
-path_dfNWA <- opt$path_dfNWA 
-geneWeightsCol <- opt$geneWeightsCol
-geneCol <- opt$geneCol
+path_df_NWA <- opt$path_df_NWA 
+colGeneWeights <- opt$colGeneWeights
+colGeneNames <- opt$colGeneNames
 maxIter <- opt$maxIter
 dirOut <- opt$dirOut
 prefixOut <- opt$prefixOut
 corMethod <- opt$corMethod
+mergeOrPrune = opt$mergeOrPrune
 minPropIntersect <- opt$minPropIntersect
 minPropIntersect_iter_increase <- opt$minPropIntersect_iter_increase
 minWeightedCor <- opt$minWeightedCor
 doPlot <- opt$doPlot
 RAMGbMax <- opt$RAMGbMax
-
+path_runLog <- opt$path_runLog
 
 ######################################################################
 ############################# SET PARAMS #############################
@@ -113,6 +118,7 @@ if (!file.exists(dirLog)) dir.create(dirLog)
 flagDate = substr(gsub("-","",as.character(Sys.Date())),3,1000)
 
 randomSeed = 12345
+set.seed(seed = randomSeed)
 
 ######################################################################
 ######################## LOAD MODULE DATA ############################
@@ -120,10 +126,10 @@ randomSeed = 12345
 
 message("Loading gene module data")
 
-df_geneModule <- load_obj(path_dfNWA)
+df_geneModule <- load_obj(path_df_NWA)
 
-geneCol <- grep(geneCol, colnames(df_geneModule), value=T)
-geneWeightsCol <- grep(geneWeightsCol, colnames(df_geneModule), value=T)#colnames(df_geneModule)[which(sapply(X=colnames(df_geneModule), FUN =function(colname) class(df_geneModule[[colname]]))=="numeric")]
+colGeneNames <- grep(colGeneNames, colnames(df_geneModule), value=T)
+colGeneWeights <- grep(colGeneWeights, colnames(df_geneModule), value=T)#colnames(df_geneModule)[which(sapply(X=colnames(df_geneModule), FUN =function(colname) class(df_geneModule[[colname]]))=="numeric")]
 
 ######################################################################
 ###################### INITIALISE MERGE LOOP #########################
@@ -132,10 +138,11 @@ geneWeightsCol <- grep(geneWeightsCol, colnames(df_geneModule), value=T)#colname
 df_geneModule[["module_merged"]] <- df_geneModule[["module"]]
 df_geneModule[["cell_cluster_merged"]] <- df_geneModule[["cell_cluster"]]
 
-#df_geneModule[[paste0(geneWeightsCol, "_merged")]] <- df_geneModule[[geneWeightsCol]] 
+#df_geneModule[[paste0(colGeneWeights, "_merged")]] <- df_geneModule[[colGeneWeights]] 
 pathLog <- paste0(dirLog, prefixOut, "_mod_merge_log.txt")
 iteration=1
 modules_to_exclude <- c()
+
 while (T) {
   
   message(paste0(prefixOut, " merge iteration ", iteration))  
@@ -155,14 +162,14 @@ while (T) {
   message("Getting gene weight vectors")
   
   fun <- function(module) {
-    df_geneModule[[geneWeightsCol]] %>% '['(df_geneModule[["module_merged"]]==module) %>% na.omit %>% as.numeric ->geneWeights 
-    df_geneModule[[geneCol]] %>% '['(df_geneModule[["module_merged"]]==module) %>% na.omit %>% as.character -> names(geneWeights) 
+    df_geneModule[[colGeneWeights]] %>% '['(df_geneModule[["module_merged"]]==module) %>% na.omit %>% as.numeric ->geneWeights 
+    df_geneModule[[colGeneNames]] %>% '['(df_geneModule[["module_merged"]]==module) %>% na.omit %>% as.character -> names(geneWeights) 
     return(geneWeights)
   }
   
   args = list("X"=modules)
   list_geneWeights <- safeParallel(fun=fun,args=args)
-  
+  names(list_geneWeights) <- modules
   ######################################################################
   ############## Compute the mod j - mod i prop. overlap matrix ########
   ######################################################################
@@ -180,16 +187,18 @@ while (T) {
   
   args = list("X"=list_geneWeights)
   mat_moduleGeneIntersect <- safeParallel(fun=fun,args=args, simplify = T)
+  
   # set diagonal to zero
   mat_moduleGeneIntersect[col(mat_moduleGeneIntersect)==row(mat_moduleGeneIntersect)] <- 0
-
+  
   ### Compute modules to exclude in the coming iterations ###
   # They have no big intersections with other modules as a prop of their genes
   logical_colNoBigIntersect <- apply(mat_moduleGeneIntersect, MARGIN=2, FUN=function(j) max(j) < 0.75*minPropIntersect)  
   # No other modules have a big intersection with them
   logical_rowNoBigIntersect <- apply(mat_moduleGeneIntersect, MARGIN=1, FUN=function(j) max(j) < 0.75*minPropIntersect)  
   logical_noBigIntersect <- logical_colNoBigIntersect | logical_rowNoBigIntersect 
-    
+  
+  # exclude these from following iterations to save time
   modules_to_exclude <- c(modules_to_exclude, modules[!logical_noBigIntersect])
   
   ######################################################################
@@ -198,7 +207,7 @@ while (T) {
   if (doPlot){
     message("Plotting gene intersect matrix")
     
-    pdf(sprintf("%s%s_iter_%s_mod_intersect.pdf", dirPlots, prefixOut, k), 
+    pdf(sprintf("%s%s_iter_%s_mod_intersect.pdf", dirPlots, prefixOut, iteration), 
         width=max(20,ncol(mat_moduleGeneIntersect) %/% 3),
         height=max(20,ncol(mat_moduleGeneIntersect) %/% 3))
     corrplot(corr = mat_moduleGeneIntersect, 
@@ -206,7 +215,7 @@ while (T) {
              col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
              diag = F,
              is.corr=F,
-             title=paste0(prefixOut, ": prop. of mod j intersecting mod i, iteration k"),
+             title=paste0(prefixOut, ": prop. of mod j intersecting mod i, iteration ", iteration),
              order = "original",#hclust",
              hclust.method = "average",
              addCoef.col = "black",
@@ -284,27 +293,27 @@ while (T) {
   ######################################################################
   ############### Plot the overlap weighted correlation matrix #########
   ######################################################################
-  # if(doPlot) {
-  #   message("Plotting gene intersect weighted correlation matrix")
-  #   
-  #   pdf(sprintf("%s%s_iter%s_mat_modIntersectCorrWeighted.pdf", dirPlots, prefixOut, k), 
-  #       width=max(20,ncol(mat_modIntersectCorrWeighted) %/% 3),
-  #       height=max(20,ncol(mat_modIntersectCorrWeighted) %/% 3))
-  #   corrplot(corr = mat_modIntersectCorrWeighted, 
-  #            method = "color",
-  #            col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
-  #            diag = F,
-  #            is.corr=F,
-  #            title=paste0(prefixOut, ": weighted correlation of mod j's intersection with mod i, iteration k"),
-  #            order = "original",#"hclust",
-  #            hclust.method = "average",
-  #            addCoef.col = "black",
-  #            tl.srt = 45,
-  #            number.digits = 2L,
-  #            number.cex = 0.5)
-  #   
-  #   invisible(dev.off())
-  # }
+  if(doPlot) {
+    message("Plotting gene intersect weighted correlation matrix")
+
+    pdf(sprintf("%s%s_iter%s_mat_modIntersectCorrWeighted.pdf", dirPlots, prefixOut, iteration),
+        width=max(20,ncol(mat_modIntersectCorrWeighted) %/% 3),
+        height=max(20,ncol(mat_modIntersectCorrWeighted) %/% 3))
+    corrplot(corr = mat_modIntersectCorrWeighted,
+             method = "color",
+             col = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")), bias = 1)(200),
+             diag = F,
+             is.corr=F,
+             title=paste0(prefixOut, ": weighted correlation of mod j's intersection with mod i, iteration ", iteration),
+             order = "original",#"hclust",
+             hclust.method = "average",
+             addCoef.col = "black",
+             tl.srt = 45,
+             number.digits = 2L,
+             number.cex = 0.5)
+
+    invisible(dev.off())
+  }
   ######################################################################
   ################### IDENTIFY MODULES TO MERGE ########################
   ######################################################################
@@ -331,7 +340,6 @@ while (T) {
   # })
   # 
   # logical_colmerge[which(logical_colmerge)][!logical_highcorr]
-
   
   logical2_colBigIntersectCorr <- sapply(1:length(idx_colBigIntersect), function(k){
     j = idx_colBigIntersect[k]
@@ -357,7 +365,7 @@ while (T) {
   # ii. for duplicated genes, add NA in df_geneModule[["module_merged"]] for the j copy
   
   mods_to_merge <- modules[idx_colBigIntersect[logical2_colBigIntersectCorr]]
-  mods_to_merge_into <- modules[idx_rowBigIntersect[logical2_colBigIntersectCorr]]
+  mods_to_merge_into <- if (mergeOrPrune=="merge") modules[idx_rowBigIntersect[logical2_colBigIntersectCorr]] else NULL
 
   ######################################################################
   ###################### UPDATE DF_GENEMODULE ##########################
@@ -366,22 +374,23 @@ while (T) {
   message("Updating module dataframe")
   
   for (i in 1:length(mods_to_merge)) {
-    cell_cluster_to_merge_into <- df_geneModule[["cell_cluster"]][df_geneModule[["module"]]==mods_to_merge_into[i]][1]
+    cell_cluster_to_merge_into <- if (mergeOrPrune=="merge") df_geneModule[["cell_cluster"]][df_geneModule[["module"]]==mods_to_merge_into[i]][1] else NULL
     # module_merged column
     logical_to_merge <- df_geneModule[["module_merged"]] %in% mods_to_merge[i] 
     logical_to_merge_into <- df_geneModule[["module_merged"]] %in% mods_to_merge_into[i]
 
-    df_geneModule[["module_merged"]][logical_to_merge] <- mods_to_merge_into[i]
-    df_geneModule[["cell_cluster_merged"]][logical_to_merge] <- cell_cluster_to_merge_into
+    df_geneModule[["module_merged"]][logical_to_merge] <- if (mergeOrPrune=="merge") mods_to_merge_into[i] else NA
+    df_geneModule[["cell_cluster_merged"]][logical_to_merge] <- if (mergeOrPrune=="merge") cell_cluster_to_merge_into else NA
     
-    # in module_merged column set duplicate genes in merged module to NA_character 
-    logical_dup <- duplicated(df_geneModule[["hgnc"]]) 
-    logical_dup_merged <- logical_dup & logical_to_merge
-    
-    #logical2_isna <- is.na(df_geneModule[["module_merged"]][logical_to_merge | logical_to_merge_into][logical2_dup])
-    df_geneModule[["module_merged"]][logical_dup_merged] <- NA_character_
-    df_geneModule[["cell_cluster_merged"]][logical_dup_merged] <- NA_character_ 
-    
+    if (mergeOrPrune=="merge") {
+      # in module_merged column set duplicate genes in merged module to NA_character 
+      logical_dup <- duplicated(df_geneModule[["hgnc"]]) 
+      logical_dup_merged <- logical_dup & logical_to_merge
+      
+      #logical2_isna <- is.na(df_geneModule[["module_merged"]][logical_to_merge | logical_to_merge_into][logical2_dup])
+      df_geneModule[["module_merged"]][logical_dup_merged] <- NA_character_
+      df_geneModule[["cell_cluster_merged"]][logical_dup_merged] <- NA_character_ 
+    }
   }
   
   # write out log 
@@ -389,13 +398,16 @@ while (T) {
   message(log_entry)
   cat(log_entry, file = pathLog, append=T, sep = "\n")
 
-  log_entry <- paste0("    merging ", mods_to_merge, " into ", mods_to_merge_into, collapse="\n")
+  log_entry <- if (mergeOrPrune=="merge") { paste0("    merging ", mods_to_merge, " into ", mods_to_merge_into, collapse="\n") } else {
+    paste0("    pruning ", mods_to_merge, " due to overlap with ", mods_to_merge_into, collapse="\n") 
+  }
+  
   message(log_entry)
   cat(log_entry, file = pathLog, append=T, sep = "\n")
   
   iteration = iteration+1
  
-  if (k>maxIter) {
+  if (iteration>maxIter) {
     message(paste0(maxIter, " iterations reached, stopping"))
   }
   
@@ -408,6 +420,40 @@ while (T) {
 ############################ WRAP UP #################################
 ######################################################################
 
-readr::write_csv(x=df_geneModule, path = gzfile(paste0(dirTables, prefixOut, "_cell_cluster_module_genes.csv.gz")))
+write.csv(x = df_geneModule, file= gzfile(paste0(dirTables, prefixOut, "_cell_cluster_module_genes.csv.gz")), quote = F, row.names=F)
+
+######################################################################
+############### LOG PARAMETERS AND FILE VERSION ######################
+######################################################################
+
+as.character(Sys.time()) %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStop
+
+if (is.null(path_runLog)) path_runLog <- paste0(dirLog, "_preservation_runLog.txt")
+
+dirCurrent = paste0(LocationOfThisScript(), "/") # need to have this function defined
+setwd(dirCurrent) # this should be a git directory
+
+# get the latest git commit
+gitCommitEntry <- try(system2(command="git", args=c("log", "-n 1 --oneline"), stdout=TRUE))
+
+# Write to text file
+cat(text = "\n" , file =  path_runLog, append=T, sep = "\n")
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
+cat(text = prefixOut , file =  path_runLog, append=T, sep = "\n")
+cat(sessionInfo()[[1]]$version.string, file=path_runLog, append=T, sep="\n")
+if (!"try-error" %in% class(gitCommitEntry)) cat(text = paste0("git commit: ", gitCommitEntry) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStart: ", tStart) , file =  path_runLog, append=T, sep = "\n")
+cat(text = paste0("tStop: ", tStop) , file =  path_runLog, append=T, sep = "\n")
+
+# output parameters (assumping use of optparse package)
+cat(text = "\nPARAMETERS: " , file =  path_runLog, append=T, sep = "\n")
+for (i in 1:length(opt)) {
+  cat(text = paste0(names(opt)[i], "= ", opt[[i]]) , file =  path_runLog, append=T, sep = "\n")
+}
+
+cat(text = "##########################" , file =  path_runLog, append=T, sep = "\n")
+
+############################### FINISH ##################################
 
 message("Script done!")
