@@ -623,9 +623,8 @@ if (is.null(resume)) {
                           outfile=outfile)
   
   # Scale and regress
-  if (assayUse %in% c("RNA","integrated")  &
-      (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | 
-      slotUse =="scale.data")) {
+  if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | 
+      slotUse =="scale.data") {
    
     message("Scaling data subsets")
     
@@ -958,46 +957,47 @@ if (resume == "checkpoint_1") {
     list_consensus <- safeParallel(fun=fun, 
                                    list_iterable=list_iterable,
                                    outfile=outfile,
-                                   n_cores=n_cores,
-                                   nPermutations=nRepTOM,
-                                   replace=replace,
-                                   fraction=fraction,
-                                   randomSeed=randomSeed,
-                                   checkMissingData = checkMissingData,
-                                   maxBlockSize = maxBlockSize, 
-                                   blockSizePenaltyPower = blockSizePenaltyPower, 
-                                   randomSeed = randomSeed,
-                                   corType = corType,
-                                   corFnc = corFnc, 
-                                   corOptions = corOptions,
-                                   maxPOutliers = maxPOutliers,
-                                   quickCor = quickCor,
-                                   pearsonFallback = pearsonFallback,
-                                   cosineCorrelation = cosineCorrelation,
-                                   replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                   list_sft = list_sft,
-                                   networkType = networkType,
-                                   type = networkType,
-                                   TOMType=TOMType,
-                                   TOMDenom = TOMDenom,
-                                   saveIndividualTOMs = saveIndividualTOMs,
-                                   prefixData=prefixData, 
-                                   prefixRun=prefixRun,
-                                   networkCalibration = networkCalibration,
-                                   sampleForCalibration = sampleForCalibration,
-                                   sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                   getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                   consensusQuantile = consensusQuantile,
-                                   useMean = useMean,
-                                   saveConsensusTOMs = saveConsensusTOMs,
-                                   returnTOMs = F,
-                                   useDiskCache = T,
-                                   cacheDir = dirTmp,
-                                   cacheBase = ".blockConsModsCache",
-                                   verbose = verbose,
-                                   indent = indent,
-                                   list_datExpr=list_datExpr,
-                                   dirTmp = dirTmp)
+                                   #n_cores=n_cores,
+                                   #nPermutations=nRepTOM,
+                                   #replace=replace,
+                                   #fraction=fraction,
+                                   #randomSeed=randomSeed,
+                                   #checkMissingData = checkMissingData,
+                                   #maxBlockSize = maxBlockSize, 
+                                   #blockSizePenaltyPower = blockSizePenaltyPower, 
+                                   #randomSeed = randomSeed,
+                                   #corType = corType,
+                                   #corFnc = corFnc, 
+                                   #corOptions = corOptions,
+                                   #maxPOutliers = maxPOutliers,
+                                   #quickCor = quickCor,
+                                   #pearsonFallback = pearsonFallback,
+                                   #cosineCorrelation = cosineCorrelation,
+                                   #replaceMissingAdjacencies = replaceMissingAdjacencies,
+                                   #list_sft = list_sft,
+                                   #networkType = networkType,
+                                   #type = networkType,
+                                   #TOMType=TOMType,
+                                   #TOMDenom = TOMDenom,
+                                   #saveIndividualTOMs = saveIndividualTOMs,
+                                   #prefixData=prefixData, 
+                                   #prefixRun=prefixRun,
+                                   #networkCalibration = networkCalibration,
+                                   #sampleForCalibration = sampleForCalibration,
+                                   #sampleForCalibrationFactor = sampleForCalibrationFactor,
+                                   #getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                                   #consensusQuantile = consensusQuantile,
+                                   #useMean = useMean,
+                                   #saveConsensusTOMs = saveConsensusTOMs,
+                                   #returnTOMs = F,
+                                   #useDiskCache = T,
+                                   #cacheDir = dirTmp,
+                                   #cacheBase = ".blockConsModsCache",
+                                   #verbose = verbose,
+                                   #indent = indent,
+                                   #list_datExpr=list_datExpr,
+                                   #dirTmp = dirTmp
+                                   )
 
   } else if (nRepTOM==0) {
     
@@ -1027,11 +1027,18 @@ if (resume == "checkpoint_1") {
     invisible(safeParallel(fun=fun, 
                            list_iterable=list_iterable, 
                outfile=outfile, 
-               type=type, 
-               list_sft=list_sft,
-               corFnc=corFnc, 
-               corOptions=corOptions, 
-               TOMType=TOMType, TOMDenom=TOMDenom, verbose=verbose, indent=indent, prefixData=prefixData, prefixRun=prefixRun, dirTmp=dirTmp))
+               #type=type, 
+               #list_sft=list_sft,
+               #corFnc=corFnc, 
+               #corOptions=corOptions, 
+               #TOMType=TOMType, 
+               #TOMDenom=TOMDenom, 
+               #verbose=verbose, 
+               #indent=indent, 
+               #prefixData=prefixData, 
+               #prefixRun=prefixRun, 
+               #dirTmp=dirTmp
+               ))
     list_consensus <- lapply(list_datExpr, function(datExpr)list("goodSamplesAndGenes"=list("goodGenes"=rep(TRUE,ncol(datExpr)))))
   }
   
@@ -1047,10 +1054,11 @@ if (resume == "checkpoint_1") {
   list_iterable = list("name"=sNames_1)
   list_consTOM = safeParallel(fun=fun, 
                               list_iterable=list_iterable, 
-                              dirTmp=dirTmp, 
-                              prefixData=prefixData, 
-                              prefixRun=prefixRun, 
-                              load_obj=load_obj)
+                              #dirTmp=dirTmp, 
+                              #prefixData=prefixData, 
+                              #prefixRun=prefixRun, 
+                              #load_obj=load_obj
+                              )
   
   # Filter datExpr to retain genes that were kept by goodSamplesGenesMS, called by consensusTOM 
   # Check whether this step works
@@ -1158,7 +1166,11 @@ if (resume == "checkpoint_2") {
   fun <- function(dissTOM) {hclust(d=dissTOM, method=hclustMethod)}
   list_iterable = list("X"=list_dissTOM)
   
-  list_geneTree <- safeParallel(fun=fun, list_iterable=list_iterable, outfile = outfile, hclustMethod=hclustMethod)
+  list_geneTree <- safeParallel(fun=fun, 
+                                list_iterable=list_iterable, 
+                                outfile = outfile, 
+                                #hclustMethod=hclustMethod
+                                )
   names(list_geneTree) = sNames_2 # used for PlotDendro
   
   ######################################################################
@@ -1209,7 +1221,13 @@ if (resume == "checkpoint_2") {
   
   list_iterable = list("geneTree"=list_geneTree, "dissTOM"=list_dissTOM)
   
-  list_list_cutree <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, list_comb=list_comb, maxPamDist=maxPamDist, useMedoids=useMedoids)
+  list_list_cutree <- safeParallel(fun=fun, 
+                                   list_iterable=list_iterable, 
+                                   outfile=outfile#, 
+                                   #list_comb=list_comb, 
+                                   #maxPamDist=maxPamDist, 
+                                   #useMedoids=useMedoids
+                                   )
   
   # free up memory
   if (fuzzyModMembership=="kME") rm(list_dissTOM)
@@ -1321,7 +1339,12 @@ if (resume == "checkpoint_2") {
     
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_mergeCloseModules.txt")
     
-    list_list_merged <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, corFnc = corFnc,corOptions=corOptions)
+    list_list_merged <- safeParallel(fun=fun, 
+                                     list_iterable=list_iterable, 
+                                     outfile=outfile#, 
+                                     #corFnc = corFnc,
+                                     #corOptions=corOptions
+                                     )
     
     names(list_list_merged) = sNames_3
     
@@ -1340,7 +1363,9 @@ if (resume == "checkpoint_2") {
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "getColors.txt")
     
     # Extract the colors from the list returned by mergeCloseModules
-    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
+    list_list_colors <- safeParallel(fun=fun, 
+                                     list_iterable=list_iterable, 
+                                     outfile=outfile)
     names(list_list_colors) <- sNames_3
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
@@ -1348,7 +1373,9 @@ if (resume == "checkpoint_2") {
       if (!is.null(merged$MEs)) merged$MEs$eigengenes else NULL})}
     list_iterable = list("X"=list_list_merged)
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "getMEs.txt")
-    list_list_MEs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
+    list_list_MEs <- safeParallel(fun=fun, 
+                                  list_iterable=list_iterable, 
+                                  outfile=outfile)
     names(list_list_MEs) <- sNames_3
     
     # Compute kMEs 
@@ -1367,7 +1394,9 @@ if (resume == "checkpoint_2") {
                 datExpr=list_datExpr_gg)
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "compute_kMEs.txt")
     
-    list_list_kMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
+    list_list_kMs <- safeParallel(fun=fun, 
+                                  list_iterable=list_iterable, 
+                                  outfile=outfile)
     
   } else if (fuzzyModMembership=="kIM") { 
     
@@ -1488,7 +1517,9 @@ if (resume == "checkpoint_2") {
     }
     
     
-    list_list_reassign = safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, fuzzyModMembership=fuzzyModMembership, corFnc=corFnc, verbose=verbose)
+    list_list_reassign = safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile#, 
+                                      #fuzzyModMembership=fuzzyModMembership, corFnc=corFnc, verbose=verbose
+                                      )
     
     
     # Extract new colors and kMs from the list of lists of lists returned by the vectorised kMReassign 
@@ -1585,7 +1616,10 @@ if (resume == "checkpoint_2") {
                   list_comb = list_list_comb,
                   cellType = sNames_3)
       
-      list_list_geneMod_t.test <- safeParallel(fun=fun, list_iterable=list_iterable, pvalThreshold=pvalThreshold) 
+      list_list_geneMod_t.test <- safeParallel(fun=fun, 
+                                               list_iterable=list_iterable#, 
+                                               #pvalThreshold=pvalThreshold
+                                               ) 
       
       
     } else if (fuzzyModMembership=="kIM") {
@@ -1662,7 +1696,11 @@ if (resume == "checkpoint_2") {
                   list_comb = list_list_comb,
                   cellType = sNames_3)
       
-      list_list_geneMod_t.test <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, pvalThreshold=pvalThreshold)
+      list_list_geneMod_t.test <- safeParallel(fun=fun, 
+                                               list_iterable=list_iterable, 
+                                               outfile=outfile#, 
+                                               #pvalThreshold=pvalThreshold
+                                               )
       
       
       rm(list_list_embed_mat)
