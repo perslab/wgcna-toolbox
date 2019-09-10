@@ -55,7 +55,7 @@ option_list <- list(
               help="How many genes to select under the criteria set with the featuresUse argument, set to Inf to take all [default %default]"), 
   make_option("--nPC", type="integer", default=100L,
               help = "Number of principal components to compute for selecting genes based on their loadings, [default %default]."),
-  make_option("--nRepJackStraw", type="integer", default=300L,
+  make_option("--nRepJackStraw", type="integer", default=250L,
               help = "Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `featuresUse` above), [default %default]."),
   make_option("--corFnc", type="character", default="cor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). [default %default]"), 
@@ -79,7 +79,7 @@ option_list <- list(
               help = "Do a t test to filter out insignificant features from modules? If fuzzyModMembership=='kME', carries out a correlation t-test; if kIM, does a two-sample t-test between IntraModular and ExtraModular connectivities"),
   make_option("--fuzzyModMembership", type="character", default="kIM",
               help="Which 'fuzzy' measure of gene membership in a module should be used? Options are 'kME' (correlation between gene expression and module PC1 expression) and 'kIM' (sum of edges between a gene and genes in the module, normalized by number of genes in the module; i.e. average distance in the TOM between a gene and genes in the module [default %default]."),  
-  make_option("--RAMGbMax", type="integer", default=250,
+  make_option("--RAMGbMax", type="integer", default=400,
               help = "Upper limit on Gb RAM available. Taken into account when setting up parallel processes. [default %default]")
 )
 
@@ -111,7 +111,7 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
   return(NULL)
 }
 current.dir = paste0(LocationOfThisScript(), "/")
-#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/WGCNApipeline/"
+#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/"
 
 ######################################################################
 ############################## FUNCTIONS #############################
@@ -124,13 +124,21 @@ source(file = paste0(current.dir, "rwgcna_functions_seurat3.0.R"))
 ######################################################################
 
 # install and require packages
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("Biobase"))
+suppressPackageStartupMessages(library("Matrix"))
+suppressPackageStartupMessages(library("Seurat"))
+suppressPackageStartupMessages(library("parallel"))
+suppressPackageStartupMessages(library("reshape"))
+suppressPackageStartupMessages(library("reshape2"))
+suppressPackageStartupMessages(library("WGCNA"))
 
-ipak(c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA"))
+#ipak(c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA"))
 
 message("Packages loaded")
 
 # verify Seurat version
-stopifnot(as.character(packageVersion("Seurat"))=='3.0.0.9000')
+#stopifnot(as.character(packageVersion("Seurat"))=='3.0.0.9000')
 
 ######################################################################
 ################### GET COMMAND LINE OPTIONS #########################
@@ -237,15 +245,7 @@ tStart <- as.character(Sys.time())
 # source parameter values
 source(file = paste0(current.dir, "rwgcna_params_seurat3.0.R"))
 
-######################################################################
-################### LOG FILE VERSION HISTORY #########################
-######################################################################
-
-tStart %>% gsub("\\ ", "_",.) %>% gsub("\\:", ".", .) ->tStartPrint
-pathFileVersionLog <- paste0(dirLog, prefixData, "_", prefixRun, "_", tStartPrint, "_commitVersion.txt")
-setwd(current.dir)
-system2(command="git", args=c("log", "-n 3"), stdout=pathFileVersionLog)
-cat(text = paste0("\nWGCNA run tStart: ", tStartPrint) , file =  pathFileVersionLog, append=T, sep = "\n")
+set.seed(randomSeed)
 
 ######################################################################
 ########################## PREPROCESS DATA ###########################
@@ -319,21 +319,21 @@ if (is.null(resume)) {
   
   # Convert to suitable new Seurat format
   if (any(c("seurat", "Seurat") %in% class(tmp))) {
-    seurat_obj <- if (tmp@version!='3.0.0.9000') {
-      tryCatch({
-        Seurat::UpdateSeuratObject(object = tmp)}, error=function(err) {
-          counts <- tmp@raw.data
-          if (any(duplicated(rownames(counts)))) rownames(counts) <- make.unique(rownames(counts)) # should not be possible
-          CreateSeuratObject(counts=counts, 
-                             project = prefixData,
-                             assay="RNA", 
-                             min.cells=0,
-                             min.features=0, 
-                             meta.data = tmp@meta.data)
-      })
-    }  else  {
-      tmp
-    }
+    seurat_obj <- tmp#if (tmp@version!='3.0.0.9000') {
+    #   tryCatch({
+    #     Seurat::UpdateSeuratObject(object = tmp)}, error=function(err) {
+    #       counts <- tmp@raw.data
+    #       if (any(duplicated(rownames(counts)))) rownames(counts) <- make.unique(rownames(counts)) # should not be possible
+    #       CreateSeuratObject(counts=counts, 
+    #                          project = prefixData,
+    #                          assay="RNA", 
+    #                          min.cells=0,
+    #                          min.features=0, 
+    #                          meta.data = tmp@meta.data)
+    #   })
+    # }  else  {
+    #   tmp
+    # }
   } else if ("loom" %in% class(tmp)) {
     seurat_obj <- Seurat::Convert(from=tmp, to="seurat")
     if (!is.null(metadata)) seurat_obj <- AddMetaData(seurat_obj, metadata = metadata)
@@ -538,7 +538,7 @@ if (is.null(resume)) {
   #   # The authors prefer that you do it before creating a seurat object
   #   
   #   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "FilterGenes.txt")
-  #   args = list("X"=subsets)
+  #   list_iterable = list("X"=subsets)
   #   fun = function(seurat_obj) {
   #     num.cells <- rowSums(GetAssayData(seurat_obj, assay= assayUse, slot="counts") > 0)
   #     vec_logicalfeaturesUse <- which(x = num.cells >= minGeneCells)
@@ -552,7 +552,7 @@ if (is.null(resume)) {
   #     }
   #   }
   #   subsets <- safeParallel(fun=fun, 
-  #                           args=args, 
+  #                           list_iterable=list_iterable, 
   #                           outfile=outfile, 
   #                           minGeneCells=minGeneCells)
   # }
@@ -579,41 +579,38 @@ if (is.null(resume)) {
   # Need to renormalise after removing genes
   # if (dataType=="sc") {
   #   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "NormalizeData.txt")
-  #   args = list("X"=subsets)
+  #   list_iterable = list("X"=subsets)
   #   subsets <- safeParallel(fun=NormalizeData,
-  #                           args=args,
+  #                           list_iterable=list_iterable,
   #                           outfile=outfile)
   # }
 
   message("Finding variable features")
-  fun <- function(seurat_obj) {
+  fun <- function(seurat_obj, seuName) {
     tryCatch({
       
       FindVariableFeatures(object = seurat_obj,
-                         selection.method = "vst",
-                         do.plot=F,
-                         nfeatures = if (featuresUse=="var.features") {
-                           min(nFeatures, nrow(seurat_obj)) 
-                           } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
-                             nrow(seurat_obj)
-                           } else 2000)
-      
+                        selection.method = "vst",
+                        do.plot=F,
+                        nfeatures = if (featuresUse=="var.features") {
+                          min(nFeatures, nrow(seurat_obj))
+                          } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
+                            nrow(seurat_obj)
+                          } else 1000)
+
       }, error = function(err) {
-      FindVariableFeatures(object = seurat_obj,
+        warning(paste0(seuName, ": FindVariableFeatures failed with selection.method = 'vst'. Trying selection.method = 'mean.var.plot' instead."))
+        FindVariableFeatures(object = seurat_obj,
                            selection.method = "mean.var.plot",
-                           do.plot=F,
-                           nfeatures = if (featuresUse=="var.features") {
-                             min(nFeatures, nrow(seurat_obj)) 
-                           } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
-                             nrow(seurat_obj)
-                           } else 2000)
+                           do.plot=F)
       })
   }
   
-  args = list("X"=subsets)
+  list_iterable = list("seurat_obj"=subsets, "seuName" = names(subsets))
   outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_FindVariableFeatures_log.txt") 
   subsets <- safeParallel(fun=fun,
-                          args=args)
+                          list_iterable=list_iterable,
+                          outfile=outfile)
   
   # Scale and regress
   if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | slotUse =="scale.data") {
@@ -640,10 +637,10 @@ if (is.null(resume)) {
           stop(paste0(name,": ScaleData failed with the error: ", err))
         })
     }
-    args = list(seurat_obj = subsets, name = names(subsets))
+    list_iterable = list(seurat_obj = subsets, name = names(subsets))
     outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_ScaleData_log.txt") 
     subsets <- mapply(FUN = fun,seurat_obj=subsets, name=names(subsets))
-    #subsets <- safeParallel(fun=fun, args=args, outfile=outfile)
+    #subsets <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
   }
 
   # PCA 
@@ -696,12 +693,12 @@ if (is.null(resume)) {
       return(seurat_tmp)
     }
     
-    args <- list("seurat_obj" = subsets, "name" = names(subsets))
+    list_iterable <- list("seurat_obj" = subsets, "name" = names(subsets))
     
     outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_PCA_log.txt")
     
     subsets <- safeParallel(fun=fun, 
-                            args=args, 
+                            list_iterable=list_iterable, 
                             outfile=outfile, 
                             nPC=nPC,
                             randomSeed=randomSeed,
@@ -749,9 +746,9 @@ if (is.null(resume)) {
 
     }
     
-    args = list(seurat_obj = subsets, name = names(subsets))
+    list_iterable = list(seurat_obj = subsets, name = names(subsets))
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_JackStraw.txt")
-    list_datExpr<- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_datExpr<- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
     
   } else if (featuresUse == "var.features") {
     list_datExpr <- lapply(subsets, function(seurat_obj) GetAssayData(seurat_obj, assay=assayUse, slot=slotUse)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
@@ -800,7 +797,7 @@ if (resume == "checkpoint_1") {
   softPower <- 8 # Set a default value as fall back
   
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_compute_softPowers.txt")
-  args = list("datExpr" = list_datExpr, "subsetName"=sNames_1)
+  list_iterable = list("datExpr" = list_datExpr, "subsetName"=sNames_1)
   fun = function(datExpr, subsetName) {
     powers = c(1:30)
     sft = pickSoftThreshold(data=datExpr,
@@ -850,7 +847,7 @@ if (resume == "checkpoint_1") {
   }
   
   list_sft = safeParallel(fun=fun, 
-                          args=args, 
+                          list_iterable=list_iterable, 
                           outfile=outfile, 
                           maxBlockSize=maxBlockSize, 
                           corFnc=corFnc, 
@@ -862,7 +859,7 @@ if (resume == "checkpoint_1") {
   
   names(list_sft) <- sNames_1
   
-  # TOM files will be saved here by consensusTOM / blockwiseConsensusModules
+  # TOM files will be saved here by consensusTOM 
   setwd(dirTmp)
   
   if (nRepTOM > 0) {
@@ -932,56 +929,56 @@ if (resume == "checkpoint_1") {
       })
     }
     
-    args <- list("datExpr"=list_datExpr, "name"=sNames_1)
+    list_iterable <- list("datExpr"=list_datExpr, "name"=sNames_1)
     outfile = outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_consensusTOM.txt")
 
-    additional_Gb = max(as.numeric(sapply(args, FUN = function(x) {object.size(x)*nRepTOM}, simplify = T)))/1024^3 
+    additional_Gb = max(as.numeric(sapply(list_iterable, FUN = function(x) {object.size(x)*nRepTOM}, simplify = T)))/1024^3 
     obj_size_Gb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
-    n_cores <- min(max(sapply(args, length)), min(detectCores()%/%3, RAMGbMax %/% (obj_size_Gb + additional_Gb))-1)
+    n_cores <- min(max(sapply(list_iterable, length)), min(detectCores()%/%3, RAMGbMax %/% (obj_size_Gb + additional_Gb))-1)
     
     list_consensus <- safeParallel(fun=fun, 
-                 args=args,
-                 outfile=outfile,
-                 n_cores=n_cores,
-                 nPermutations=nRepTOM,
-                 replace=replace,
-                 fraction=fraction,
-                 randomSeed=randomSeed,
-                 checkMissingData = checkMissingData,
-                 maxBlockSize = maxBlockSize, 
-                 blockSizePenaltyPower = blockSizePenaltyPower, 
-                 randomSeed = randomSeed,
-                 corType = corType,
-                 corFnc = corFnc, 
-                 corOptions = corOptions,
-                 maxPOutliers = maxPOutliers,
-                 quickCor = quickCor,
-                 pearsonFallback = pearsonFallback,
-                 cosineCorrelation = cosineCorrelation,
-                 replaceMissingAdjacencies = replaceMissingAdjacencies,
-                 list_sft = list_sft,
-                 networkType = networkType,
-                 type = networkType,
-                 TOMType=TOMType,
-                 TOMDenom = TOMDenom,
-                 saveIndividualTOMs = saveIndividualTOMs,
-                 prefixData=prefixData, 
-                 prefixRun=prefixRun,
-                 networkCalibration = networkCalibration,
-                 sampleForCalibration = sampleForCalibration,
-                 sampleForCalibrationFactor = sampleForCalibrationFactor,
-                 getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                 consensusQuantile = consensusQuantile,
-                 useMean = useMean,
-                 saveConsensusTOMs = saveConsensusTOMs,
-                 returnTOMs = F,
-                 useDiskCache = T,
-                 cacheDir = dirTmp,
-                 cacheBase = ".blockConsModsCache",
-                 verbose = verbose,
-                 indent = indent,
-                 list_datExpr=list_datExpr,
-                 dirTmp = dirTmp)
+                                   list_iterable=list_iterable,
+                                   outfile=outfile,
+                                   n_cores=n_cores,
+                                   nPermutations=nRepTOM,
+                                   replace=replace,
+                                   fraction=fraction,
+                                   randomSeed=randomSeed,
+                                   checkMissingData = checkMissingData,
+                                   maxBlockSize = maxBlockSize, 
+                                   blockSizePenaltyPower = blockSizePenaltyPower, 
+                                   randomSeed = randomSeed,
+                                   corType = corType,
+                                   corFnc = corFnc, 
+                                   corOptions = corOptions,
+                                   maxPOutliers = maxPOutliers,
+                                   quickCor = quickCor,
+                                   pearsonFallback = pearsonFallback,
+                                   cosineCorrelation = cosineCorrelation,
+                                   replaceMissingAdjacencies = replaceMissingAdjacencies,
+                                   list_sft = list_sft,
+                                   networkType = networkType,
+                                   type = networkType,
+                                   TOMType=TOMType,
+                                   TOMDenom = TOMDenom,
+                                   saveIndividualTOMs = saveIndividualTOMs,
+                                   prefixData=prefixData, 
+                                   prefixRun=prefixRun,
+                                   networkCalibration = networkCalibration,
+                                   sampleForCalibration = sampleForCalibration,
+                                   sampleForCalibrationFactor = sampleForCalibrationFactor,
+                                   getNetworkCalibrationSamples = getNetworkCalibrationSamples,
+                                   consensusQuantile = consensusQuantile,
+                                   useMean = useMean,
+                                   saveConsensusTOMs = saveConsensusTOMs,
+                                   returnTOMs = F,
+                                   useDiskCache = T,
+                                   cacheDir = dirTmp,
+                                   cacheBase = ".blockConsModsCache",
+                                   verbose = verbose,
+                                   indent = indent,
+                                   list_datExpr=list_datExpr,
+                                   dirTmp = dirTmp)
 
   } else if (nRepTOM==0) {
     
@@ -1007,8 +1004,9 @@ if (resume == "checkpoint_1") {
       colnames(consTomDS) <- rownames(consTomDS) <- colnames(datExpr)
       save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
    }
-    args = list("datExpr"=list_datExpr, "name"=sNames_1)
-    invisible(safeParallel(fun=fun, args=args, 
+    list_iterable = list("datExpr"=list_datExpr, "name"=sNames_1)
+    invisible(safeParallel(fun=fun, 
+                           list_iterable=list_iterable, 
                outfile=outfile, 
                type=type, 
                list_sft=list_sft,
@@ -1027,9 +1025,9 @@ if (resume == "checkpoint_1") {
     load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name))
 
   }
-  args = list("name"=sNames_1)
+  list_iterable = list("name"=sNames_1)
   list_consTOM = safeParallel(fun=fun, 
-                              args=args, 
+                              list_iterable=list_iterable, 
                               dirTmp=dirTmp, 
                               prefixData=prefixData, 
                               prefixRun=prefixRun, 
@@ -1048,18 +1046,18 @@ if (resume == "checkpoint_1") {
     }
   }
   
-  args=list(datExpr=list_datExpr, consensus=list_consensus, consTOM=list_consTOM)
+  list_iterable=list(datExpr=list_datExpr, consensus=list_consensus, consTOM=list_consTOM)
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_datExpr_gg.txt")
-  list_datExpr_gg <- safeParallel(fun=fun, args=args)
+  list_datExpr_gg <- safeParallel(fun=fun, list_iterable=list_iterable)
   
   rm(list_datExpr)
   
   # Convert proximity TOMs to distance matrices 
-  args= list("X"=list_consTOM)
+  list_iterable= list("X"=list_consTOM)
   fun = function(consTOM) { 
     1-as.dist(consTOM) 
     }
-  list_dissTOM <- safeParallel(fun=fun, args=args)  
+  list_dissTOM <- safeParallel(fun=fun, list_iterable=list_iterable)  
   rm(list_consTOM)
   # Save list_dissTOM to harddisk
   names(list_dissTOM) <- sNames_1
@@ -1132,9 +1130,9 @@ if (resume == "checkpoint_2") {
   
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_parHclust.txt")
   fun <- function(dissTOM) {hclust(d=dissTOM, method=hclustMethod)}
-  args = list("X"=list_dissTOM)
+  list_iterable = list("X"=list_dissTOM)
   
-  list_geneTree <- safeParallel(fun=fun, args=args, outfile = outfile, hclustMethod=hclustMethod)
+  list_geneTree <- safeParallel(fun=fun, list_iterable=list_iterable, outfile = outfile, hclustMethod=hclustMethod)
   names(list_geneTree) = sNames_2 # used for PlotDendro
   
   ######################################################################
@@ -1183,9 +1181,9 @@ if (resume == "checkpoint_2") {
       }
     )}
   
-  args = list("geneTree"=list_geneTree, "dissTOM"=list_dissTOM)
+  list_iterable = list("geneTree"=list_geneTree, "dissTOM"=list_dissTOM)
   
-  list_list_cutree <- safeParallel(fun=fun, args=args, outfile=outfile, list_comb=list_comb, maxPamDist=maxPamDist, useMedoids=useMedoids)
+  list_list_cutree <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, list_comb=list_comb, maxPamDist=maxPamDist, useMedoids=useMedoids)
   
   # free up memory
   if (fuzzyModMembership=="kME") rm(list_dissTOM)
@@ -1290,14 +1288,14 @@ if (resume == "checkpoint_2") {
       comb = list_comb,
       SIMPLIFY=F)}
     
-    args = list(list_comb=list_list_comb,
+    list_iterable = list(list_comb=list_list_comb,
                 list_cutree = list_list_cutree,
                 datExpr = list_datExpr_gg,
                 cellType = names(list_datExpr_gg))
     
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_mergeCloseModules.txt")
     
-    list_list_merged <- safeParallel(fun=fun, args=args, outfile=outfile, corFnc = corFnc,corOptions=corOptions)
+    list_list_merged <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, corFnc = corFnc,corOptions=corOptions)
     
     names(list_list_merged) = sNames_3
     
@@ -1310,21 +1308,21 @@ if (resume == "checkpoint_2") {
       }) # list of merged colors
     } 
     
-    args=list(list_merged=list_list_merged, 
+    list_iterable=list(list_merged=list_list_merged, 
               datExpr=list_datExpr_gg, 
               cellType=sNames_3)
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "getColors.txt")
     
     # Extract the colors from the list returned by mergeCloseModules
-    list_list_colors <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
     names(list_list_colors) <- sNames_3
     
     # Extract the Module Eigengenes from the list returned by mergeCloseModules
     fun = function(list_merged) {lapply(list_merged, function(merged) {
       if (!is.null(merged$MEs)) merged$MEs$eigengenes else NULL})}
-    args = list("X"=list_list_merged)
+    list_iterable = list("X"=list_list_merged)
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "getMEs.txt")
-    list_list_MEs <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_list_MEs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
     names(list_list_MEs) <- sNames_3
     
     # Compute kMEs 
@@ -1339,27 +1337,27 @@ if (resume == "checkpoint_2") {
           kMEs
         } else NULL
       })}
-    args = list(list_MEs=list_list_MEs,  
+    list_iterable = list(list_MEs=list_list_MEs,  
                 datExpr=list_datExpr_gg)
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "compute_kMEs.txt")
     
-    list_list_kMs <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_list_kMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
     
   } else if (fuzzyModMembership=="kIM") { 
     
     fun = function(x) lapply(x, function(y) labels2colors(y$labels))
-    args = list("X"=list_list_cutree)
-    list_list_colors <- safeParallel(fun=fun, args=args)
+    list_iterable = list("X"=list_list_cutree)
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
     fun =  function(list_colors,datExpr) lapply(list_colors, function(colors) name_for_vec(to_be_named=colors, given_names = colnames(datExpr), dimension=NULL))
-    args = list("list_colors"=list_list_colors, "datExpr"=list_datExpr_gg)
-    list_list_colors <- safeParallel(fun=fun, args=args)
+    list_iterable = list("list_colors"=list_list_colors, "datExpr"=list_datExpr_gg)
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
     
     fun = function(list_colors,list_plot_label) name_for_vec(to_be_named=list_colors, given_names = as.character(list_plot_label), dimension=NULL)
-    args = list(list_colors = list_list_colors,
+    list_iterable = list(list_colors = list_list_colors,
                 list_plot_label = list_list_plot_label)
-    list_list_colors <- safeParallel(fun=fun, args=args)
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
     
     names(list_list_colors) <- sNames_3
@@ -1370,9 +1368,9 @@ if (resume == "checkpoint_2") {
                                                                                                verbose=verbose,
                                                                                                excludeGrey=F,
                                                                                                do.par=F))
-    args = list(dissTOM = list_dissTOM,
+    list_iterable = list(dissTOM = list_dissTOM,
                 list_colors = list_list_colors)
-    list_list_kMs <- safeParallel(fun = fun, args=args)
+    list_list_kMs <- safeParallel(fun = fun, list_iterable=list_iterable)
     
     
     fun = function(list_colors,list_kMs,datExpr,dissTOM, cellType) {
@@ -1388,29 +1386,29 @@ if (resume == "checkpoint_2") {
         kMs = list_kMs,
         SIMPLIFY=F)}
 
-    args = list(list_colors = list_list_colors,
+    list_iterable = list(list_colors = list_list_colors,
                 list_kMs = list_list_kMs,
                 datExpr = list_datExpr_gg,
                 dissTOM = list_dissTOM,
                 cellType = names(list_list_colors))
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_mergeCloseModskIM.txt")
-    list_list_merged <- safeParallel(fun=fun, args=args, outfile = outfile)
+    list_list_merged <- safeParallel(fun=fun, list_iterable=list_iterable, outfile = outfile)
     
    
     fun = function(cellType) {tryCatch({lapply(list_list_merged[[cellType]], function(y) y$colors)}, 
                                        error = function(c) {
                                          warning(paste0(cellType, " failed"))
                                        })}
-    args = list("X"=names(list_list_merged))
-    list_list_colors <- safeParallel(fun=fun, args=args)
+    list_iterable = list("X"=names(list_list_merged))
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
     fun = function(x) lapply(x, function(y) y[['colors']])
-    args= list("X"=list_list_merged)
-    list_list_colors <- safeParallel(fun=fun, args=args)
+    list_iterable= list("X"=list_list_merged)
+    list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
     fun = function(x) lapply(x, function(y) y[['kIMs']])
-    args= list("X"=list_list_merged)
-    list_list_kMs <- safeParallel(fun=fun, args=args)
+    list_iterable= list("X"=list_list_merged)
+    list_list_kMs <- safeParallel(fun=fun, list_iterable=list_iterable)
     
     list_list_MEs <- NULL
     
@@ -1441,7 +1439,7 @@ if (resume == "checkpoint_2") {
                                                                                     verbose=verbose,
                                                                                     max_iter = 3,
                                                                                     cellType = cellType)) 
-      args = list(list_colors = list_list_colors,
+      list_iterable = list(list_colors = list_list_colors,
                   dissTOM = list_dissTOM,
                   datExpr = list_datExpr_gg,
                   cellType = names(list_list_colors))
@@ -1457,14 +1455,14 @@ if (resume == "checkpoint_2") {
                                                                                     verbose=verbose,
                                                                                     max_iter = 3,
                                                                                     cellType = cellType))
-      args = list(list_colors = list_list_colors,
+      list_iterable = list(list_colors = list_list_colors,
                   datExpr = list_datExpr_gg,
                   cellType = names(list_list_colors))
       
     }
     
     
-    list_list_reassign = safeParallel(fun=fun, args=args, outfile=outfile, fuzzyModMembership=fuzzyModMembership, corFnc=corFnc, verbose=verbose)
+    list_list_reassign = safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, fuzzyModMembership=fuzzyModMembership, corFnc=corFnc, verbose=verbose)
     
     
     # Extract new colors and kMs from the list of lists of lists returned by the vectorised kMReassign 
@@ -1500,18 +1498,18 @@ if (resume == "checkpoint_2") {
                  kMs = list_kMs, 
                  colors=list_colors, SIMPLIFY=F)
   
-  args=list(list_kMs = list_list_kMs_reassign, 
+  list_iterable=list(list_kMs = list_list_kMs_reassign, 
             list_colors = list_list_colors_reassign)
   
-  list_list_pkMs <- safeParallel(fun=fun, args=args, outfile=outfile)
+  list_list_pkMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
   
   # The pkM vectors already have gene names. Now name each vector, and each list of vectors
   fun = function(list_pkMs,list_plot_label) name_for_vec(to_be_named = list_pkMs, 
                                                          given_names = as.character(list_plot_label), 
                                                          dimension = NULL)
-  args = list(list_pkMs=list_list_pkMs, 
+  list_iterable = list(list_pkMs=list_list_pkMs, 
               list_plot_label=list_list_plot_label)
-  list_list_pkMs <- safeParallel(fun=fun, args=args)
+  list_list_pkMs <- safeParallel(fun=fun, list_iterable=list_iterable)
   
   names(list_list_pkMs) <- sNames_3
 
@@ -1556,12 +1554,12 @@ if (resume == "checkpoint_2") {
         comb = list_comb,
         SIMPLIFY=F)}
       
-      args = list(list_pkMs = list_list_pkMs, 
+      list_iterable = list(list_pkMs = list_list_pkMs, 
                   list_colors = list_list_colors_reassign, 
                   list_comb = list_list_comb,
                   cellType = sNames_3)
       
-      list_list_geneMod_t.test <- safeParallel(fun=fun, args=args, pvalThreshold=pvalThreshold) 
+      list_list_geneMod_t.test <- safeParallel(fun=fun, list_iterable=list_iterable, pvalThreshold=pvalThreshold) 
       
       
     } else if (fuzzyModMembership=="kIM") {
@@ -1591,14 +1589,14 @@ if (resume == "checkpoint_2") {
         SIMPLIFY=F)
       }
       
-      args  = list(datExpr = list_datExpr_gg,
+      list_iterable  = list(datExpr = list_datExpr_gg,
                    list_colors = list_list_colors_reassign,
                    cellType = sNames_3,
                    list_kMs = list_list_kMs_reassign,
                    list_comb=list_list_comb,
                    dissTOM = list_dissTOM)
       
-      list_list_embed_mat <- safeParallel(fun=fun, args=args)
+      list_list_embed_mat <- safeParallel(fun=fun, list_iterable=list_iterable)
       
       
       fun = function(datExpr, list_embed_mat, list_colors, list_comb, cellType) {
@@ -1632,13 +1630,13 @@ if (resume == "checkpoint_2") {
         comb = list_comb,
         SIMPLIFY=F)}
       
-      args = list(datExpr = list_datExpr_gg,
+      list_iterable = list(datExpr = list_datExpr_gg,
                   list_embed_mat = list_list_embed_mat,
                   list_colors = list_list_colors_reassign,
                   list_comb = list_list_comb,
                   cellType = sNames_3)
       
-      list_list_geneMod_t.test <- safeParallel(fun=fun, args=args, outfile=outfile, pvalThreshold=pvalThreshold)
+      list_list_geneMod_t.test <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, pvalThreshold=pvalThreshold)
       
       
       rm(list_list_embed_mat)
@@ -1678,9 +1676,9 @@ if (resume == "checkpoint_2") {
       geneMod_t.test = list_geneMod_t.test, 
       SIMPLIFY=F)
     }
-    args = list(list_colors_reassign = list_list_colors_reassign, 
+    list_iterable = list(list_colors_reassign = list_list_colors_reassign, 
                 list_geneMod_t.test = list_list_geneMod_t.test)
-    list_list_colors_t.test <- safeParallel(fun=fun, args=args)
+    list_list_colors_t.test <- safeParallel(fun=fun, list_iterable=list_iterable)
 
   } 
   
@@ -1707,8 +1705,8 @@ if (resume == "checkpoint_2") {
         colors
       })
     }
-    args= list("X"=list_list_colors_t.test)
-    list_list_colors_t.test <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_iterable= list("X"=list_list_colors_t.test)
+    list_list_colors_t.test <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
    
   } 
   
@@ -1935,13 +1933,13 @@ if (resume == "checkpoint_3") {
         out
       }
     }
-    args = list(x = list_datExpr_gg,
+    list_iterable = list(x = list_datExpr_gg,
                 y = list_colors_uniq,
                 cellType = names(list_datExpr_gg))
     
     outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_MEs.txt")
     
-    list_ModuleEigengenes_out <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_ModuleEigengenes_out <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
 
     list_MEs <- lapply(list_ModuleEigengenes_out, function(x) x$eigengenes)
 
@@ -1959,9 +1957,9 @@ if (resume == "checkpoint_3") {
         NULL
       }
     }
-    args = list(x=list_datExpr_gg,
+    list_iterable = list(x=list_datExpr_gg,
                 y=list_MEs)
-    list_kMs <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_kMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
 
     # Remove 'ME' from eigengenes
     list_MEs <- lapply(list_MEs, function(x) {
@@ -1983,9 +1981,9 @@ if (resume == "checkpoint_3") {
                                          colors = y,
                                          excludeGrey=T,
                                          do.par=F)
-    args = list(x = list_dissTOM,
+    list_iterable = list(x = list_dissTOM,
                 y = list_colors_uniq)
-    list_kMs <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_kMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
 
 
 
@@ -2004,9 +2002,9 @@ if (resume == "checkpoint_3") {
       names(list_u) <- colnames(kMs)
       return(list_u)
     }
-    args = list(kMs = list_kMs,
+    list_iterable = list(kMs = list_kMs,
                 colors = list_colors_uniq)
-    list_list_u <- safeParallel(fun=fun, args=args, outfile=outfile)
+    list_list_u <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
 
   }
 
@@ -2021,8 +2019,8 @@ if (resume == "checkpoint_3") {
 
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "list_pkMs_PPI.txt")
   fun = function(kMs, colors) pkMs_fnc(kMs=kMs, colors=colors)
-  args = list("kMs" = list_kMs, "colors"=list_colors_uniq)
-  list_pkMs <- safeParallel(fun=fun, args=args, outfile=outfile)
+  list_iterable = list("kMs" = list_kMs, "colors"=list_colors_uniq)
+  list_pkMs <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
 
   names(list_pkMs) <- sNames_4
   
@@ -2046,11 +2044,11 @@ if (resume == "checkpoint_3") {
                                          cellType = name,
                                          kMs = if (latentGeneType== "IM") kMs else NULL)#,
 
-  args = list(vec_colors = list_colors_uniq, 
+  list_iterable = list(vec_colors = list_colors_uniq, 
               name = names(list_colors_uniq),
               kMs = list_kMs)#,
 
-  list_cellModEmbed_mat <- safeParallel(fun=fun, args=args, outfile=outfile, datExpr = datExpr, latentGeneType = latentGeneType)
+  list_cellModEmbed_mat <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, datExpr = datExpr, latentGeneType = latentGeneType)
   
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
@@ -2107,21 +2105,19 @@ if (resume == "checkpoint_4") {
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
   ##########################################################################
-  # retrieve gene hgnc symbols in mapping file
-  #mapping <- if (mapToEnsembl) read.csv(file=sprintf("%s%s_%s_%s_hgnc_to_ensembl_mapping_df.csv", dirTables, prefixData, prefixRun, dataOrganism), stringsAsFactors = F) else NULL
-  
+
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "write_outputs.txt")
   
   message("Preparing outputs")
   
   # prepare nested lists of module genes
   fun = function(a,b) lapply(b, function(x) names(a)[a==x])
-  args = list(a=list_colors_uniq, b=list_mods_uniq)
-  list_list_module_genes = safeParallel(fun=fun,args=args, outfile=outfile)
+  list_iterable = list(a=list_colors_uniq, b=list_mods_uniq)
+  list_list_module_genes = safeParallel(fun=fun,list_iterable=list_iterable, outfile=outfile)
   
   fun = function(x,y) name_for_vec(to_be_named = x, given_names = y, dimension = NULL)
-  args=  list(x=list_list_module_genes, y=list_mods_uniq)
-  list_list_module_genes <- safeParallel(fun=fun,args=args,outfile=outfile)
+  list_iterable=  list(x=list_list_module_genes, y=list_mods_uniq)
+  list_list_module_genes <- safeParallel(fun=fun,list_iterable=list_iterable,outfile=outfile)
 
   # make a copy for pkMs
   list_list_module_pkMs <- list_list_module_genes # just a template
@@ -2153,24 +2149,8 @@ if (resume == "checkpoint_4") {
   data <- rep(prefixData, times= length(pkMs))
   run <- rep(prefixRun, times= length(pkMs))    
   
-  # if (mapToEnsembl) {
-  #   fun = function(x) lapply(x, function(y) mapping$symbol[match(y, mapping$ensembl)])
-  #   args = list("X"=list_list_module_PPI_genes)
-  #   list_list_module_PPI_genes_hgnc = safeParallel(fun=fun,args=args, outfile=outfile, mapping=mapping)
-  # 
-  #   fun = function(x,y) name_for_vec(to_be_named = x, 
-  #                                given_names = y, 
-  #                                dimension = NULL)
-  #   args = list(x=list_list_module_PPI_genes_hgnc, 
-  #             y=list_module_PPI)
-  #   list_list_module_PPI_genes_hgnc = safeParallel(fun=fun, args=args, outfile=outfile)
-  #   hgnc <- unlist(list_list_module_PPI_genes_hgnc, recursive = T, use.names=F) 
-  #   df_cell_cluster_module_genes <- data.frame(data, run, cell_cluster, module, ensembl, hgnc, pkMs, row.names = NULL)
-  #   colnames(df_cell_cluster_module_genes) <- c("data", "run", "cell_cluster", "module", "ensembl", "hgnc", paste0("p", fuzzyModMembership))
-  # } else {
   df_cell_cluster_module_genes <- data.frame(data, run, cell_cluster, module, genes, pkMs, row.names = NULL)
-     # colnames(df_cell_cluster_module_genes) <- c("data", "run", "cell_cluster", "module", "hgnc", paste0("p", fuzzyModMembership))
-  #}
+
   if (fuzzyModMembership=="kME") df_cell_cluster_module_genes[["gene_loadings"]] <- gene_loadings
   
   ##########################################################################
@@ -2184,34 +2164,6 @@ if (resume == "checkpoint_4") {
   
   write.csv(df_cell_cluster_module_genes, file = gzfile(sprintf("%s%s_%s_cell_cluster_module_genes.csv.gz",dirTables, prefixData, prefixRun)), quote = F, row.names = F)
   
-  ####################### SAVE STRINGDB PPI OUTPUT #########################
-  ##########################################################################
-  
-  # if (filterOnPPI){
-  #   list_module_PPI_uniq <- mapply(FUN = function(module_PPI_uniq, cell_cluster) {
-  #     if (!is.null(nrow(module_PPI_uniq))) module_PPI_uniq[["cell_cluster"]] <- rep(cell_cluster, nrow(module_PPI_uniq))
-  #     return(module_PPI_uniq)
-  #   },module_PPI_uniq=list_module_PPI_uniq, cell_cluster=names(list_module_PPI_uniq), SIMPLIFY=F)
-  #   module_PPI_uniq_df <- Reduce(x=list_module_PPI_uniq, f = rbind)
-  #   colnames(module_PPI_uniq_df) <- c("colors","q.value","expected.interactions", "cell_cluster")
-  #   write.csv(module_PPI_uniq_df, file=gzfile(sprintf("%s%s_%s_STRINGdb_output_all.csv.gz", dirTables, prefixData, prefixRun)), row.names = F, quote = F)
-  # 
-  # # Now significantly PPI enriched modules
-  # # convert the module PPI dataframe columns from list to numeric 
-  # list_module_PPI_signif_uniq %>% Filter(f=nrow) -> list_module_PPI_signif_uniq_f
-  # 
-  # if (length(list_module_PPI_signif_uniq_f) > 0) {
-  #   list_module_PPI_signif_uniq_f <- mapply(FUN = function(module_PPI_signif_uniq_f, cell_cluster) {
-  #     if (!is.null(nrow(module_PPI_signif_uniq_f))) module_PPI_signif_uniq_f[["cell_cluster"]] <- rep(cell_cluster, nrow(module_PPI_signif_uniq_f))
-  #     return(module_PPI_signif_uniq_f)
-  #   },module_PPI_signif_uniq_f=list_module_PPI_signif_uniq_f, cell_cluster=names(list_module_PPI_signif_uniq_f), SIMPLIFY=F)
-  #   module_PPI_signif_uniq_df_f <- Reduce(x=list_module_PPI_signif_uniq_f, f = rbind)
-  #   colnames(module_PPI_signif_uniq_df_f) <- c("colors","q.value","expected.interactions","cell_cluster")
-  #   
-  #   write.csv(module_PPI_signif_uniq_df_f, file=gzfile(sprintf("%s%s_%s_STRINGdb_output_signif.csv.gz", dirTables, prefixData, prefixRun)), row.names=F, quote=F)
-  # 
-  #   }
-  # }
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
   
@@ -2230,49 +2182,12 @@ if (resume == "checkpoint_4") {
   write.csv(kMs_out, file=gzfile(sprintf("%s%s_%s_kMs_full_join.csv.gz", dirTables, prefixData, prefixRun)), 
             row.names=F, quote = F)
   
-  ######################## OUTPUT GSEA RESULTS ##############################
-  ###########################################################################
-  
-  # if (!is.null(list_genesets_path)) {
-  #   try({GSEA_df <- arrange(GSEA_df, desc(scaled.score))  
-  #   invisible(write.csv(GSEA_df, file=gzfile(sprintf("%s%s_%s_GSEA_df.csv.gz", dirTables, prefixData, prefixRun)), 
-  #                       row.names=F, quote = F))
-  #   })
-  # }
-  ######################## OUTPUT MAGMA RESULTS #############################
-  ###########################################################################
-  
-  # if (!is.null(magma_gwas_dir)) {
-  #   invisible(write.csv(magma.p.all, file=gzfile(sprintf("%s%s_%s_magma.p.csv.gz", dirTables, prefixData, prefixRun)), row.names=F, quote = F))
-  #   invisible(write.csv(magma.emp.p.all, file=gzfile(sprintf("%s%s_%s_magma.emp.p.csv.gz", dirTables, prefixData, prefixRun)), row.names=F, quote = F))
-  #   invisible(write.csv(magma.p.fdr.log, file=gzfile(sprintf("%s%s_%s_magma.fdr.log.csv.gz", dirTables, prefixData, prefixRun)), row.names=F, quote = F))
-  #   invisible(write.csv(magma.r.all, file=gzfile(sprintf("%s%s_%s_magma.r.csv.gz", dirTables, prefixData, prefixRun)), row.names=F, quote = F))
-  #   
-  #   if(!is.null(magma.p.fdr.log.sig)) invisible(write.csv(magma.p.fdr.log.sig, file=gzfile(sprintf("%s%s_%s_magma.fdr.log.sig.csv.gz", dirTables, prefixData, prefixRun)), 
-  #                                                         row.names=F, quote = F))
-  #   if(!is.null(magma.r.sig))invisible(write.csv(magma.r.sig, file=gzfile(sprintf("%s%s_%s_magma.r.sig.csv.gz", dirTables, prefixData, prefixRun)), 
-  #                                                row.names=F, quote = F))
-  # }
-  
-  ####################### OUTPUT METADATA CORRELATION RESULTS ###############
-  ###########################################################################
-  
-  # if (!is.null(metadata_corr_col) & !is.null(metadata)) {
-  #   invisible(write.csv(corr_fdr.log, file=gzfile(sprintf("%s%s_%s_all_metadata_corr_logfdr.csv.gz", dirTables, prefixData, prefixRun)), row.names=T, quote = F))
-  #   invisible(write.csv(corr_rho, file=gzfile(sprintf("%s%s_%s_all_metadata_rho.csv.gz", dirTables, prefixData, prefixRun)), row.names=T, quote = F))
-  #   
-  # }
-  
+
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
   invisible(write.csv(x=cellModEmbed_mat_annot, 
                       file=gzfile(sprintf("%s%s_%s_%s_cellModEmbed.csv.gz", dirTables, prefixData, prefixRun, fuzzyModMembership)), row.names=F, quote = F))
-  
-  ######## OUTPUT MODULE LEFT SINGULAR COMPONENTS (U) FOR EACH MODULE (U) ###
-  ########################################################################### 
-  
-  #saveRDS(object = list_u_meta, file=sprintf("%s%s_%s_list_list_module_u.RDS.gz", dirRObjects, prefixData, prefixRun), compress = "gzip")
   
   ##################### WRITE PARAMETERS AND STATS TO FILES ################
   ##########################################################################
@@ -2292,13 +2207,8 @@ if (resume == "checkpoint_4") {
                                      "n_genes_reassign", 
                                      "prop_genes_t.test_fail", 
                                      "prop_genes_assign",
-                                     #"prop_genes_assign_PPI",
                                      "n_modules")#,
-                                     #"n_modules_PPI_enriched")#,
-                                     # "prop_genes_mapped_to_ortholog",
-                                     # "n_modules_GSEA_enriched",
-                                     # "n_modules_gwas_enriched",
-                                     # "n_modules_meta_enriched")
+
   
   sumstats_celltype_df[["prefixRun"]] = rep(prefixRun, times=length(sNames_0))
   sumstats_celltype_df[["subset"]] = sNames_0
@@ -2312,13 +2222,7 @@ if (resume == "checkpoint_4") {
   if (kMReassign) sumstats_celltype_df[["n_genes_reassign"]][sNames_0 %in% sNames_4] = sapply(list_reassign_log, function(rlog) if(!is.null(rlog)) nrow(rlog) else 0, simplify=T)
   if (kMSignifFilter) sumstats_celltype_df[["prop_genes_t.test_fail"]][sNames_0 %in% sNames_4] = sapply(list_geneMod_t.test, function(x) {if (!is.null(x)) {sum(as.numeric(!x$signif))/length(x$signif)} else {NA_real_}}, simplify =T)
   sumstats_celltype_df[["prop_genes_assign"]][sNames_0 %in% sNames_4] = sapply(list_colors_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
-  #sumstats_celltype_df[["prop_genes_assign_PPI"]][sNames_0 %in% sNames_4] = sapply(list_colors_PPI_uniq, function(x) round(sum(x!="grey")/length(x),2), simplify=T)
   sumstats_celltype_df[["n_modules"]][sNames_0 %in% sNames_4] = sapply(list_colors_uniq, function(x) length(unique(as.character(x)))-1, simplify=T)
- # sumstats_celltype_df[["n_modules_PPI_enriched"]][sNames_0 %in% sNames_4] = sapply(list_colors_PPI_uniq, function(x) length(unique(as.character(x)))-1, simplify=T)
-  # if (!is.null(magma_gwas_dir)) sumstats_celltype_df[["prop_genes_mapped_to_ortholog"]][sNames_0 %in% sNames_4] = vec_MMtoHsmapping_prop.mapped
-  # if (!is.null(list_genesets_path)) sumstats_celltype_df[["n_modules_GSEA_enriched"]] = n_modules_GSEA_enriched
-  # if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sumstats_celltype_df[["n_modules_gwas_enriched"]] = n_modules_gwas_enriched
-  # if (!is.null(metadata) & !is.null(metadata_corr_col))  sumstats_celltype_df[["n_modules_meta_enriched"]] =n_modules_meta_enriched
 
   
   sumstats_run <- c(prefixRun = prefixRun,
@@ -2328,43 +2232,40 @@ if (resume == "checkpoint_4") {
                     mean_percent_ribo =  if (!is.null(riboMitoMeta)) mean(riboMitoMeta$percent.ribo, na.rm=T) else NA,
                     n_celltypes = length(sNames_0),
                     n_celltypes_used = length(sNames_4),
-                    #prop_genes_mapped_to_ensembl = if (mapToEnsembl) round(sum(!is.na(mapping$ensembl))/nrow(mapping),2) else NA_real_,
                     prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign, na.rm=T),2),
-                    #prop_genes_assign_PPI_mean = round(mean(sumstats_celltype_df$prop_genes_assign_PPI, na.rm=T),2),
                     prop_genes_t.test_fail_mean = if (kMSignifFilter) tryCatch({sum((sapply(list_geneMod_t.test, function(x)  {if (!is.null(x)) {sum(as.numeric(!x$signif))/length(x$signif)} else {NA_real_}}, simplify=T)))/ sum(sapply(list_geneMod_t.test, function(x) length(x$signif), simplify =T))}, error = function(err) {NA_real_}) else NA,
                     n_modules_total = sum(sumstats_celltype_df$n_modules))#,
-                    #n_modules_PPI_enriched_total = sum(sumstats_celltype_df$n_modules_PPI_enriched))#, 
-                    # prop_genes_mapped_to_ortholog = if (!is.null(magma_gwas_dir)) if (dataOrganism=="mmusculus") round(mean(sumstats_celltype_df$prop_genes_mapped_to_ortholog, na.rm=T),2) else NA else NA,
-                    # n_modules_GSEA_enriched = if(!is.null(list_genesets_path)) sum(sumstats_celltype_df$n_modules_GSEA_enriched, na.rm=T) else NA_real_,
-                    # n_modules_magma_enriched = if (!is.null(magma_gwas_dir) & !is.null(gwas_filter_traits)) sum(n_modules_gwas_enriched, na.rm = T) else NA,
-                    # n_modules_meta_enriched = if (!is.null(metadata) & !is.null(metadata_corr_col)) sum(sumstats_celltype_df$n_modules_meta_enriched, na.rm = T) else NA) 
-                    
-  params_run <- opt[-length(opt)] # all the user options/defaults
+
+  #params_run <- opt[-length(opt)] # all the user options/defaults
   
   # Convert sumstats and params from list to one-row data.frame
   matrix(unlist(sumstats_run), nrow=1, dimnames=list(NULL, c(names(sumstats_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> sumstats_run_df
  
-  for (idx_null in which(sapply(params_run, is.null))) {
-    params_run[idx_null] <- "NULL"
-  }
+  # for (idx_null in which(sapply(params_run, is.null))) {
+  #   params_run[idx_null] <- "NULL"
+  # }
   
-  matrix(unlist(params_run,recursive = F), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
+  #matrix(unlist(params_run,recursive = F), nrow=1, dimnames=list(NULL, c(names(params_run)))) %>% as.data.frame(row.names=NULL, stringsAsFactors=F) -> params_run_df
   
   # make path strings
   sumstats_celltype_path = sprintf("%s%s_%s_%s_sumstats_celltype.tab", dirLog, prefixData, prefixRun, flagDate)
   sumstats_run_path = sprintf("%s%s_%s_%s_sumstats_run.tab", dirLog, prefixData, prefixRun, flagDate)
-  params_run_path = sprintf("%s%s_%s_%s_params_run.tab", dirLog, prefixData, prefixRun, flagDate)
+  #params_run_path = sprintf("%s%s_%s_%s_params_run.tab", dirLog, prefixData, prefixRun, flagDate)
   
   # set append param values
   append_sumstats_celltype = F
   append_sumstats_run = F
-  append_params_run = F
+  #append_params_run = F
   
   # write to file
   write.table(sumstats_celltype_df, file=sumstats_celltype_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_celltype, col.names = !append_sumstats_celltype)
   write.table(sumstats_run_df, file=sumstats_run_path, quote = F, sep = "\t", row.names=F, append = append_sumstats_run, col.names = !append_sumstats_run)
-  write.table(params_run_df, file=params_run_path, quote = F, sep = "\t", row.names=F, append = append_params_run, col.names = !append_params_run)
+  #write.table(params_run_df, file=params_run_path, quote = F, sep = "\t", row.names=F, append = append_params_run, col.names = !append_params_run)
 
+  # save environment and parameters
+  setwd(dirLog)
+  saveMeta(doPrint=T)
+  
   ######################################################################
   ################# SAVE SESSION IMAGE AND FINISH ######################
   ######################################################################
