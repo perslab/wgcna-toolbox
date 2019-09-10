@@ -40,9 +40,9 @@ option_list <- list(
   make_option("--vec_colAnnot", type="character", default=NULL,
               help="Provide column names for higher levels of sample hierarchy above colIdents, e.g. tissue, to add to output. Cannot cross-cut colIdents. Does not affect the analysis. [default %default]"),
   make_option("--assayUse", type="character", default="RNA",
-              help="If datExpr is a Seurat object, indicate whether to use 'RNA' or 'integrated' assay, [default %default]"),
+              help="If datExpr is a Seurat object, indicate whether to use 'RNA', 'SCT' or 'integrated' assay, [default %default]"),
   make_option("--slotUse", type="character", default="scale.data",
-              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? scale.data is unavoidable if we wish to regress out confounders [default %default]"),
+              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? The script carries out the scaling. scale.data is unavoidable if we wish to regress out confounders [default %default]"),
   make_option("--varsToRegress", type="character", default='c("nCount_RNA", "percent.mito", "percent.ribo")',
               help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') [default %default]"),
   make_option("--minGeneCells", type="integer", default=20L,
@@ -449,8 +449,9 @@ if (is.null(resume)) {
   ######################################################################
   
   # Normalise
-  if (all(dim(GetAssayData(seurat_obj, slot="data")))==0) seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
-   
+  if (assayUse == "RNA")  {
+    if (all(dim(GetAssayData(seurat_obj, slot="data")))==0) seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
+  }
   # Scale and regress out confounders
   #if (!is.null(varsToRegress)) varsToRegress <- varsToRegress[varsToRegress %in% names(seurat_obj@meta.data)]
   
@@ -472,7 +473,13 @@ if (is.null(resume)) {
   #ident <- seurat_obj@ident
   #}
   
-  datExprNormFull <- GetAssayData(object=seurat_obj, slot="data") %>% as.matrix
+  datExprNormFull <- if (assayUse=="RNA") {
+    GetAssayData(object=seurat_obj, slot="data") %>% as.matrix 
+  } else if (assayUse = "integrated") {
+    GetAssayData(object=seurat_obj) %>% as.matrix
+  }  else if (assayUse =="SCT") {
+    GetAssayData(object=seurat_obj, slot="counts") %>% as.matrix
+  }
   # Save scale and regressed whole expression matrix with ensembl rownames for later use
   message("Saving full expression matrix")
   
@@ -490,11 +497,14 @@ if (is.null(resume)) {
   
   message("Subsetting the dataset")
   subsets <- lapply(sNames_0, function(name) {
-    # using createSeuratObject instead of subset allows us to filter on min.features
-    CreateSeuratObject(counts = GetAssayData(object=seurat_obj, assay=assayUse, slot="counts")[,Idents(seurat_obj)==name], 
+    # using createSeuratObject instead of subset allows us to filter on min.cells and min.features
+    CreateSeuratObject(counts = GetAssayData(object=seurat_obj, 
+                                             assay=assayUse, 
+                                             slot="counts")[,Idents(seurat_obj)==name], 
                        project = prefixData,
                        assay = assayUse,
                        min.cells = minGeneCells,
+                       #min.features = 1000,
                        meta.data = seurat_obj@meta.data[Idents(seurat_obj)==name,]
                        )})
   
@@ -613,7 +623,9 @@ if (is.null(resume)) {
                           outfile=outfile)
   
   # Scale and regress
-  if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | slotUse =="scale.data") {
+  if (assayUse %in% c("RNA","integrated")  &
+      (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | 
+      slotUse =="scale.data")) {
    
     message("Scaling data subsets")
     
@@ -699,11 +711,11 @@ if (is.null(resume)) {
     
     subsets <- safeParallel(fun=fun, 
                             list_iterable=list_iterable, 
-                            outfile=outfile, 
-                            nPC=nPC,
-                            randomSeed=randomSeed,
-                            maxit=maxit,
-                            fastpath=fastpath)
+                            outfile=outfile)#, 
+                            #nPC=nPC,
+                            #randomSeed=randomSeed,
+                            #maxit=maxit,
+                            #fastpath=fastpath)
     
     end_time <- Sys.time()
     
@@ -781,10 +793,17 @@ if (resume == "checkpoint_1") {
   
   # Free up DLLs
   invisible(R.utils::gcDLLs())
+  suppressPackageStartupMessages(library("dplyr"))
+  suppressPackageStartupMessages(library("Biobase"))
+  suppressPackageStartupMessages(library("Matrix"))
+  suppressPackageStartupMessages(library("parallel"))
+  suppressPackageStartupMessages(library("reshape"))
+  suppressPackageStartupMessages(library("reshape2"))
+  suppressPackageStartupMessages(library("WGCNA"))
   
-  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
+  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
   
-  ipak(pkgs)
+  #ipak(pkgs)
   
   disableWGCNAThreads()
   
@@ -848,14 +867,14 @@ if (resume == "checkpoint_1") {
   
   list_sft = safeParallel(fun=fun, 
                           list_iterable=list_iterable, 
-                          outfile=outfile, 
-                          maxBlockSize=maxBlockSize, 
-                          corFnc=corFnc, 
-                          corOptions=corOptions, 
-                          networkType=networkType,
-                          dirPlots=dirPlots, 
-                          prefixData=prefixData, 
-                          prefixRun=prefixRun)
+                          outfile=outfile)#, 
+                          #maxBlockSize=maxBlockSize, 
+                          #corFnc=corFnc, 
+                          #corOptions=corOptions, 
+                          #networkType=networkType,
+                          #dirPlots=dirPlots, 
+                          #prefixData=prefixData, 
+                          #prefixRun=prefixRun)
   
   names(list_sft) <- sNames_1
   
@@ -1098,10 +1117,17 @@ if (resume == "checkpoint_2") {
   
   # Free up DLLs
   invisible(R.utils::gcDLLs())
+  suppressPackageStartupMessages(library("dplyr"))
+  suppressPackageStartupMessages(library("Biobase"))
+  suppressPackageStartupMessages(library("Matrix"))
+  suppressPackageStartupMessages(library("parallel"))
+  suppressPackageStartupMessages(library("reshape"))
+  suppressPackageStartupMessages(library("reshape2"))
+  suppressPackageStartupMessages(library("WGCNA"))
   
-  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
+  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
   
-  ipak(pkgs)
+  #ipak(pkgs)
   
   ######################################################################
   ##################### LOAD AND FILTER DISSTOMS #######################
@@ -1801,9 +1827,16 @@ if (resume == "checkpoint_3") {
   ######################### LOAD PACKAGES ##############################
   ######################################################################
   
-  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA", "liger", "boot")
-  ipak(pkgs)
-  
+  suppressPackageStartupMessages(library("dplyr"))
+  suppressPackageStartupMessages(library("Biobase"))
+  suppressPackageStartupMessages(library("Matrix"))
+  suppressPackageStartupMessages(library("parallel"))
+  suppressPackageStartupMessages(library("reshape"))
+  suppressPackageStartupMessages(library("reshape2"))
+  suppressPackageStartupMessages(library("WGCNA"))
+  suppressPackageStartupMessages(library("liger"))
+  suppressPackageStartupMessages(library("boot"))
+
   ######################################################################
   ################ ORDER PARAMETER SETS BY NUMBER OF MODS ##############
   ######################################################################
@@ -2048,7 +2081,11 @@ if (resume == "checkpoint_3") {
               name = names(list_colors_uniq),
               kMs = list_kMs)#,
 
-  list_cellModEmbed_mat <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile, datExpr = datExpr, latentGeneType = latentGeneType)
+  list_cellModEmbed_mat <- safeParallel(fun=fun, 
+                                        list_iterable=list_iterable, 
+                                        outfile=outfile)#, 
+                                        #datExpr = datExpr, 
+                                        #latentGeneType = latentGeneType)
   
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
@@ -2098,9 +2135,17 @@ if (resume == "checkpoint_4") {
   
   invisible(R.utils::gcDLLs())
   
-  pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "readr")
+  suppressPackageStartupMessages(library("dplyr"))
+  suppressPackageStartupMessages(library("Biobase"))
+  suppressPackageStartupMessages(library("Matrix"))
+  suppressPackageStartupMessages(library("parallel"))
+  suppressPackageStartupMessages(library("reshape"))
+  suppressPackageStartupMessages(library("reshape2"))
+  suppressPackageStartupMessages(library("readr"))
   
-  ipak(pkgs)
+  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "readr")
+  
+  #ipak(pkgs)
   
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
