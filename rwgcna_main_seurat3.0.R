@@ -886,11 +886,11 @@ if (resume == "checkpoint_1") {
     ############### RESAMPLE THE DATA FOR ROBUSTNESS #####################
     ######################################################################
     
-    message(sprintf("Resampling the expression data with fraction %s with replace = %s and %s replicates", fraction, replace, nRepTOM))
-    message(sprintf("Computing the consensus Topological Overlap Matrix with %s permutations", nRepTOM))
+    message(sprintf("Resampling the expression data and computing the consensus Topological Overlap Matrix with fraction %s with replace = %s and %s replicates", fraction, replace, nRepTOM))
+    #message(sprintf("Computing the consensus Topological Overlap Matrix with %s permutations", nRepTOM))
     
     fun <- function(datExpr,name) {
-      tryCatch({
+      #tryCatch({
           
         multiExpr <- bootstrap(datExpr=datExpr, 
                       nPermutations = nRepTOM,
@@ -929,22 +929,22 @@ if (resume == "checkpoint_1") {
                                verbose = verbose,
                                indent = indent)
 
-      }, error = function(err) {
-        message(paste0(name, ": consensusTOM failed, computing normal TOM"))
-        adjacency = adjacency(datExpr=list_datExpr[[name]], 
-                              type=type, 
-                              power = list_sft[[name]]$Power, 
-                              corFnc = corFnc, 
-                              corOptions = corOptions)
-                              
-        consTomDS = TOMsimilarity(adjMat=adjacency,
-                                  TOMType=TOMType,
-                                  TOMDenom=TOMDenom,
-                                  verbose=verbose,
-                                  indent = indent)
-        colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
-        save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
-      })
+      #}, error = function(err) {
+        # message(paste0(name, ": consensusTOM failed, computing normal TOM"))
+        # adjacency = adjacency(datExpr=list_datExpr[[name]], 
+        #                       type=type, 
+        #                       power = list_sft[[name]]$Power, 
+        #                       corFnc = corFnc, 
+        #                       corOptions = corOptions)
+        #                       
+        # consTomDS = TOMsimilarity(adjMat=adjacency,
+        #                           TOMType=TOMType,
+        #                           TOMDenom=TOMDenom,
+        #                           verbose=verbose,
+        #                           indent = indent)
+        # colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
+        # save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
+     # })
     }
     
     list_iterable <- list("datExpr"=list_datExpr, "name"=sNames_1)
@@ -956,7 +956,7 @@ if (resume == "checkpoint_1") {
     
     list_consensus <- safeParallel(fun=fun, 
                                    list_iterable=list_iterable,
-                                   outfile=outfile,
+                                   outfile=outfile#,
                                    #n_cores=n_cores,
                                    #nPermutations=nRepTOM,
                                    #replace=replace,
@@ -1026,7 +1026,7 @@ if (resume == "checkpoint_1") {
     list_iterable = list("datExpr"=list_datExpr, "name"=sNames_1)
     invisible(safeParallel(fun=fun, 
                            list_iterable=list_iterable, 
-               outfile=outfile, 
+               outfile=outfile#, 
                #type=type, 
                #list_sft=list_sft,
                #corFnc=corFnc, 
@@ -1053,7 +1053,7 @@ if (resume == "checkpoint_1") {
   }
   list_iterable = list("name"=sNames_1)
   list_consTOM = safeParallel(fun=fun, 
-                              list_iterable=list_iterable, 
+                              list_iterable=list_iterable 
                               #dirTmp=dirTmp, 
                               #prefixData=prefixData, 
                               #prefixRun=prefixRun, 
