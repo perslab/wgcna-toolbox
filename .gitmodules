@@ -1,0 +1,4 @@
+[submodule "perslab-sc-library"]
+	path = perslab-sc-library
+	url = https://github.com/perslab/perslab-sc-library
+	branch = jonatan
