@@ -1,15 +1,7 @@
-# Title: Script to find robust WGCNA modules
+#' @title robust Weighted Gene Co-expression Network Analysis
 
-######################################################################
-############################## USAGE #################################
-#######################o###############################################
-
-# e.g.
-# use R OpenBLAS for faster linear algebra. The following command achieves this on yggdrasil (Pers lab).
-# see https://stackoverflow.com/questions/26897335/how-can-i-load-a-specific-version-of-r-in-linux and https://gist.github.com/cheuerde/8fb9fd0dc8c0eca17c16#file-r_openblas-L64
-# export PATH="/usr/local/R-3.5.1/bin/:$PATH"  
 # export R_MAX_NUM_DLLS=999
-# 
+
 ######################################################################
 ########################### OptParse #################################
 ######################################################################
@@ -118,7 +110,8 @@ current.dir = paste0(LocationOfThisScript(), "/")
 ######################################################################
 
 source(file = paste0(current.dir, "rwgcna_functions_seurat3.0.R"))
-
+source(paste0(current.dir, "/perslab-sc-library/utility_functions.R"))
+       
 ######################################################################
 ############################## PACKAGES ##############################
 ######################################################################
@@ -203,7 +196,10 @@ RAMGbMax <- opt$RAMGbMax
 ########################## FUNCTIONS (AGAIN) #########################
 ######################################################################
 
-if (!is.null(resume)) source(file = paste0(current.dir, "rwgcna_functions_seurat3.0.R"))
+if (!is.null(resume)) {
+  source(file = paste0(current.dir, "rwgcna_functions_seurat3.0.R"))
+  source(paste0(current.dir, "/perslab-sc-library/utility_functions.R"))
+}
 
 ######################################################################
 ############################## CONSTANTS #############################
@@ -475,7 +471,7 @@ if (is.null(resume)) {
   
   datExprNormFull <- if (assayUse=="RNA") {
     GetAssayData(object=seurat_obj, slot="data") %>% as.matrix 
-  } else if (assayUse = "integrated") {
+  } else if (assayUse == "integrated") {
     GetAssayData(object=seurat_obj) %>% as.matrix
   }  else if (assayUse =="SCT") {
     GetAssayData(object=seurat_obj, slot="counts") %>% as.matrix
