@@ -1868,8 +1868,7 @@ if (resume == "checkpoint_3") {
   suppressPackageStartupMessages(library("reshape"))
   suppressPackageStartupMessages(library("reshape2"))
   suppressPackageStartupMessages(library("WGCNA"))
-  suppressPackageStartupMessages(library("liger"))
-  suppressPackageStartupMessages(library("boot"))
+  #suppressPackageStartupMessages(library("boot"))
 
   ######################################################################
   ################ ORDER PARAMETER SETS BY NUMBER OF MODS ##############
