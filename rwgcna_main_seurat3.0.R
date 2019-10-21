@@ -1129,10 +1129,6 @@ if (resume == "checkpoint_2") {
   suppressPackageStartupMessages(library("reshape2"))
   suppressPackageStartupMessages(library("WGCNA"))
   
-  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
-  
-  #ipak(pkgs)
-  
   ######################################################################
   ##################### LOAD AND FILTER DISSTOMS #######################
   ######################################################################
@@ -1164,7 +1160,7 @@ if (resume == "checkpoint_2") {
   
   list_geneTree <- safeParallel(fun=fun, 
                                 list_iterable=list_iterable, 
-                                outfile = outfile, 
+                                outfile = outfile
                                 #hclustMethod=hclustMethod
                                 )
   names(list_geneTree) = sNames_2 # used for PlotDendro
@@ -1585,13 +1581,9 @@ if (resume == "checkpoint_2") {
             if (length(unique(colors))>1){
               vec_t <- ifelse(colors!="grey", (pkMs*sqrt(length(pkMs)-2))/sqrt(1-pkMs^2), 0) # compute t.stats, for a vector of rho
               vec_p.val <- ifelse(colors!="grey", 
-                                  stats::pt(q=abs(vec_t),  
+                                  stats::pt(q=vec_t,  
                                             lower.tail = F, 
-                                            df = length(pkMs)-2) + 
-                                    pt(q=-abs(vec_t),  
-                                       lower.tail = T, 
-                                       df = length(pkMs)-2), 
-                                  1) # compute p.values. We are genuinely only interested in upper tail 
+                                            df = length(pkMs)-2) , 1) # compute p.values. We are genuinely only interested in upper tail 
               vec_q.val <- p.adjust(p = vec_p.val, method = "fdr")
               vec_idx_signif <- vec_q.val < pvalThreshold # compute boolean significance vector. Set "grey" to TRUE so we don't count them
               vec_idx_signif[colors=="grey"] <- TRUE
@@ -1671,7 +1663,7 @@ if (resume == "checkpoint_2") {
               
               for (color in names(table(colors))[!grepl("^grey$",names(table(colors)))]) {
                 vec_p.val[colors==color] <- apply(X = datExpr[,colors==color], MARGIN = 2, FUN = function(datExpr_col) cor.test(datExpr_col, embed_mat[, color,drop=F], 
-                                                                                                                                alternative = "two.sided", 
+                                                                                                                                alternative = "greater", 
                                                                                                                                 method = "pearson", 
                                                                                                                                 conf.level = 1-pvalThreshold)$p.value)
               }
