@@ -534,6 +534,7 @@ if (is.null(resume)) {
   }
   
   sNames_1 <- sNames_0[vec_logicalCellClustOK]
+  subsets <- subsets[vec_logicalCellClustOK] 
   names(subsets) <- sNames_1 
   
   # # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
@@ -1396,7 +1397,8 @@ if (resume == "checkpoint_2") {
     list_iterable = list("X"=list_list_cutree)
     list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
-    fun =  function(list_colors,datExpr) lapply(list_colors, function(colors) name_for_vec(to_be_named=colors, given_names = colnames(datExpr), dimension=NULL))
+    fun =  function(list_colors,datExpr) lapply(list_colors, function(colors) name_for_vec(to_be_named=colors, 
+                                                                                           given_names = colnames(datExpr), dimension=NULL))
     list_iterable = list("list_colors"=list_list_colors, "datExpr"=list_datExpr_gg)
     list_list_colors <- safeParallel(fun=fun, list_iterable=list_iterable)
 
