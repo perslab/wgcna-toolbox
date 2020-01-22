@@ -34,8 +34,8 @@ option_list <- list(
   make_option("--assayUse", type="character", default="RNA",
               help="If datExpr is a Seurat object, indicate whether to use 'RNA', 'SCT' or 'integrated' assay, [default %default]"),
   make_option("--slotUse", type="character", default="scale.data",
-              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? The script carries out the scaling. scale.data is unavoidable if we wish to regress out confounders [default %default]"),
-  make_option("--varsToRegress", type="character", default='c("nCount_RNA", "percent.mito", "percent.ribo")',
+              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? scale.data is unavoidable if we wish to regress out confounders. The script carries out the scaling. [default %default]"),
+  make_option("--varsToRegress", type="character", default=NULL,
               help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') [default %default]"),
   make_option("--minGeneCells", type="integer", default=20L,
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, [default %default]."),
@@ -51,7 +51,7 @@ option_list <- list(
               help = "Number of times to re-run PCA after permuting a small proportion of genes to perform empirical significance tests, i.e. the `JackStraw` procedure (see `featuresUse` above), [default %default]."),
   make_option("--corFnc", type="character", default="cor",
               help="Use 'cor' for Pearson or 'bicor' for midweighted bicorrelation function (https://en.wikipedia.org/wiki/Biweight_midcorrelation). [default %default]"), 
-  make_option("--networkType", type="character", default = "signed hybrid",
+  make_option("--networkType", type="character", default = "c('signed hybrid')",
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); ''c('signed hybrid')'' (quoted vector) sets negative correlations to zero. [default %default]"),
   make_option("--nRepTOM", type="integer", default=100L,
               help = "Number of times to resample the dataset when finding the consensus TOM [default %default]"),
@@ -296,9 +296,11 @@ if (is.null(resume)) {
   
   if (grepl(pattern = "\\.loom", pathDatExpr)) {
     tmp <-  connect(filename = pathDatExpr, mode = "r+")
-  } else {
+  } else if (grepl(pattern = "\\.rds|\\.rda", pathDatExpr, ignore.case = T)) {
     tmp <- load_obj(pathDatExpr)
-  } 
+  } else {
+    tmp <- data.table::fread(pathDatExpr)
+  }
   
   ######################################################################
   ########################### LOAD METADATA ############################
@@ -312,24 +314,9 @@ if (is.null(resume)) {
   } else {
     metadata <- NULL
   }
-  
-  # Convert to suitable new Seurat format
+
   if (any(c("seurat", "Seurat") %in% class(tmp))) {
     seurat_obj <- tmp#if (tmp@version!='3.0.0.9000') {
-    #   tryCatch({
-    #     Seurat::UpdateSeuratObject(object = tmp)}, error=function(err) {
-    #       counts <- tmp@raw.data
-    #       if (any(duplicated(rownames(counts)))) rownames(counts) <- make.unique(rownames(counts)) # should not be possible
-    #       CreateSeuratObject(counts=counts, 
-    #                          project = prefixData,
-    #                          assay="RNA", 
-    #                          min.cells=0,
-    #                          min.features=0, 
-    #                          meta.data = tmp@meta.data)
-    #   })
-    # }  else  {
-    #   tmp
-    # }
   } else if ("loom" %in% class(tmp)) {
     seurat_obj <- Seurat::Convert(from=tmp, to="seurat")
     if (!is.null(metadata)) seurat_obj <- AddMetaData(seurat_obj, metadata = metadata)
@@ -342,7 +329,7 @@ if (is.null(resume)) {
     seurat_obj <- CreateSeuratObject(counts= tmp, 
                                      project= paste0(prefixData, "_", prefixRun),
                                      assay = "RNA",
-                                     meta.data = metadata) #todo is this
+                                     meta.data = metadata)
   }
   
   rm(tmp)
@@ -444,65 +431,65 @@ if (is.null(resume)) {
   ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
   ######################################################################
   
-  # Normalise
-  if (assayUse == "RNA")  {
-    if (all(dim(GetAssayData(seurat_obj, slot="data")))==0) seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
-  }
-  # Scale and regress out confounders
-  #if (!is.null(varsToRegress)) varsToRegress <- varsToRegress[varsToRegress %in% names(seurat_obj@meta.data)]
-  
-  # if (is.null(seurat_obj@assays[[assayUse]]@scale.data)) {
-  #   seurat_obj <- ScaleData(object = seurat_obj,
-  #                         vars.to.regress = vars.to.regress,
-  #                         model.use="linear",
-  #                         do.par=T,
-  #                         num.cores = min(10, detectCores_plus(Gb_max = RAMGbMax, 
-  #                                                              additional_Gb = as.numeric(object.size(seurat_obj@data))/1024^3)-1),
-  #                         do.scale=T,
-  #                         do.center=T,
-  #                         display.progress = T)
-   
-  # # Make sure we close socket workers
-  # invisible(gc()); invisible(R.utils::gcDLLs())
-  # 
-  # scale_data <- seurat_obj@scale.data
-  #ident <- seurat_obj@ident
-  #}
-  
-  datExprNormFull <- if (assayUse=="RNA") {
-    GetAssayData(object=seurat_obj, slot="data") %>% as.matrix 
-  } else if (assayUse == "integrated") {
-    GetAssayData(object=seurat_obj) %>% as.matrix
-  }  else if (assayUse =="SCT") {
-    GetAssayData(object=seurat_obj, slot="counts") %>% as.matrix
-  }
-  # Save scale and regressed whole expression matrix with ensembl rownames for later use
-  message("Saving full expression matrix")
-  
-  saveRDS(datExprNormFull, file = sprintf("%s%s_%s_datExprNormFull.RDS.gz", 
-                                  dirTmp, 
-                                  prefixData, 
-                                  prefixRun), 
-          compress = "gzip")
-  #save(ident, file = sprintf("%s%s_%s_ident.RData", dirTmp, prefixData, prefixRun))
-  rm(datExprNormFull)
+  # We need this full, processed matrix to compute module embeddings later on.
 
+  # datExprNormFull <- if (assayUse=="RNA") {
+  #   GetAssayData(object=seurat_obj, slot="data") %>% as.matrix 
+  # } else{
+  #   GetAssayData(object=seurat_obj, slot = slotUse) %>% as.matrix
+  # } 
+  try({
+    datExprFull <- GetAssayData(object=seurat_obj, slot = slotUse) %>% as.matrix
+    
+    # Save scale and regressed whole expression matrix with ensembl rownames for later use
+    message("Saving full expression matrix")
+    
+    saveRDS(datExprFull, file = sprintf("%s%s_%s_datExprNormFull.RDS.gz", 
+                                    dirTmp, 
+                                    prefixData, 
+                                    prefixRun), 
+            compress = "gzip")
+    #save(ident, file = sprintf("%s%s_%s_ident.RData", dirTmp, prefixData, prefixRun))
+    rm(datExprFull)
+  })
+  ######################################################################
+  ###################### NORMALIZE DATA? ###############################
+  ######################################################################
+  
+  # if data slot empty, run Seurat::NormalizeData prior to ScaleData and RunPCA
+  
+  if (assayUse == "RNA" & all(dim(GetAssayData(seurat_obj, slot="data")))==0)  {
+  
+    seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
+  }
+  
+  
   ######################################################################
   ######## DO SEURAT PROCESSING ON SUBSETTED EXPRESSION MATRICES #######
   ######################################################################
   
   message("Subsetting the dataset")
+
+  
   subsets <- lapply(sNames_0, function(name) {
+    
+    seurat_obj_sub <- subset(x= seurat_obj,idents=name)
     # using createSeuratObject instead of subset allows us to filter on min.cells and min.features
-    CreateSeuratObject(counts = GetAssayData(object=seurat_obj, 
-                                             assay=assayUse, 
-                                             slot="counts")[,Idents(seurat_obj)==name], 
-                       project = prefixData,
-                       assay = assayUse,
-                       min.cells = minGeneCells,
-                       #min.features = 1000,
-                       meta.data = seurat_obj@meta.data[Idents(seurat_obj)==name,]
-                       )})
+    # CreateSeuratObject(counts = GetAssayData(object=seurat_obj, 
+    #                                          assay=assayUse, 
+    #                                          slot=slotUse)[,Idents(seurat_obj)==name], 
+    #                    project = prefixData,
+    #                    assay = assayUse,
+    #                    min.cells = minGeneCells,
+    #                    #min.features = 1000,
+    #                    meta.data = seurat_obj@meta.data[Idents(seurat_obj)==name,]
+    
+    # filter out genes not expressed in a sufficient number of cells
+    
+    vec_featuresKeep <- rownames(seurat_obj_sub)[apply(X = GetAssayData(seurat_obj_sub, slot=slotUse), MARGIN=1, FUN = function(eachRow) sum(eachRow>0) >= minGeneCells)]
+    seurat_obj_sub <- subset(x=seurat_obj_sub, features=vec_featuresKeep)
+    return(seurat_obj_sub)
+    })
   
   # Save stats for outputting at the end
   #n_cells_subsets = table(Idents(seurat_obj)) #warning: this is in the wrong order because Idents is a factor..
@@ -514,17 +501,7 @@ if (is.null(resume)) {
   # Free up space 
   rm(seurat_obj)
   
-  ### Filter out cell types that have too few cells
-  # We do this do avoid downstream problems with Seurat or WGCNA. 
-  # E.g. Seurat will ScaleData will fail if regressing out variables when there are only 2 cells in the data.
-  
-  # if (dataType=="sc") {
-  #   message(paste0("Filtering out cell clusters with fewer than ", minCellClusterSize, " cells"))
-  #   vec_logicalCellClustOK <- n_cells_subsets>=minCellClusterSize
-  # } else if (dataType=="bulk") { # no need to filter out any subsets
-  #   vec_logicalCellClustOK = !logical(length = length(subsets))
-  # }
-  
+
   if (!all(vec_logicalCellClustOK)) {
     log_entry <- paste0(sNames_0[!vec_logicalCellClustOK], ": had <", minCellClusterSize," cells and was therefore dropped")
     warning(log_entry)
@@ -537,61 +514,8 @@ if (is.null(resume)) {
   subsets <- subsets[vec_logicalCellClustOK] 
   names(subsets) <- sNames_1 
   
-  # # Filter genes expressed in fewer than min.cells in a subset as these will also lead to spurious associations and computational difficulties
-  # if (dataType=="sc") {
-  #   
-  #   message(paste0("Filtering out genes expressed in fewer than ", minGeneCells, " cells"))
-  #   # see https://github.com/satijalab/seurat/issues/147
-  #   # The authors prefer that you do it before creating a seurat object
-  #   
-  #   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "FilterGenes.txt")
-  #   list_iterable = list("X"=subsets)
-  #   fun = function(seurat_obj) {
-  #     num.cells <- rowSums(GetAssayData(seurat_obj, assay= assayUse, slot="counts") > 0)
-  #     vec_logicalfeaturesUse <- which(x = num.cells >= minGeneCells)
-  #     if (sum(genes.use)>0) {
-  #       SetAssayData(object= seurat_obj, assay=assayUse, slot="counts", new.data = GetAssayData(seurat_obj, assay=assayUse, slot="counts")[vec_logicalfeaturesUse, ]) # will this work?
-  #       SetAssayData(object= seurat_obj, assay=assayUse, slot="data", new.data = GetAssayData(seurat_obj, assay=assayUse, slot="data")[vec_logicalfeaturesUse, ]) # will this work?
-  #       seurat_obj@assays$RNA@meta.features <- seurat_obj@assays$RNA@meta.features[vec_logicalfeaturesUse,]
-  #       return(seurat_obj)
-  #     } else {
-  #       return(NULL)
-  #     }
-  #   }
-  #   subsets <- safeParallel(fun=fun, 
-  #                           list_iterable=list_iterable, 
-  #                           outfile=outfile, 
-  #                           minGeneCells=minGeneCells)
-  # }
-  # 
-  # # Filter
-  # vec_logicalCellClustOK <- sapply(subsets, function(subset) {!is.null(rownames(subset))}, simplify=T)
-  # 
-  # if (!all(vec_logicalCellClustOK)) {
-  #   log_entry <-paste0(sNames_1[!vec_logicalCellClustOK], ": had no genes left after filtering out genes expressed in fewer than ", minGeneCells, " cells, therefore dropped")
-  #   warning(log_entry)
-  #   cat(log_entry, file = pathLogCellClustersDropped, append=T, sep = "\n")
-  #   # filter
-  #   subsets <- subsets[vec_logicalCellClustOK]
-  # }
-  # 
-  # sNames_1 <- sNames_1[vec_logicalCellClustOK]
-  # 
-  # subsets <- lapply(subsets, function(seuSubset) { 
-  #   idx <- rownames(GetAssayData(object=seuSubset, assay=assayUse, slot="scale.data")) %in% rownames(seuSubset)
-  #   SetAssayData(object=seuSubset, assay=assayUse, slot="scale.data", 
-  #                new.data=GetAssayData(object=seuSubset, assay=assayUse, slot="scale.data")[idx,])
-  #   seuSubset@assays$RNA@meta.features <- seuSubset@assays$RNA@meta.features[idx,]
-  # })
-  # Need to renormalise after removing genes
-  # if (dataType=="sc") {
-  #   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "NormalizeData.txt")
-  #   list_iterable = list("X"=subsets)
-  #   subsets <- safeParallel(fun=NormalizeData,
-  #                           list_iterable=list_iterable,
-  #                           outfile=outfile)
-  # }
-
+  # Determine which genes to include in WGCNA analysis by running PCA
+  
   message("Finding variable features")
   fun <- function(seurat_obj, seuName) {
     tryCatch({
@@ -718,52 +642,53 @@ if (is.null(resume)) {
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
     
   }
+    
+    if (featuresUse=='PCLoading') {
+      
+      list_datExpr <- lapply(subsets, function(seurat_obj) {
+        seurat_obj <- ProjectDim(object=seurat_obj, 
+                                 reduction = "pca", 
+                                 verbose=F,
+                                 overwrite=F)
+        loadingsAbs <- seurat_obj@reductions$pca@feature.loadings.projected %>% abs 
+        apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
+          '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
+        GetAssayData(object=seurat_obj,slot = slotUse, assay = assayUse)[namesFeaturesUse,] %>% t
+        })
+      
+      } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
+      
+      # Select significant PCs using empirical p-value based on JackStraw resampling
+      # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
+      # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs 
+      # based on the p-values of gene loadings. Use these to select genes
+      
+      message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
+      fun = function(seurat_obj, name) {
+        # seurat_obj <- ProjectDim(object=seurat_obj, 
+        #                          reduction = "pca", 
+        #                          verbose=F,
+        #                          overwrite=T)
+        wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                      nRepJackStraw = nRepJackStraw, 
+                      pvalThreshold = pvalThreshold,
+                      featuresUse=featuresUse,
+                      nFeatures = nFeatures,
+                      nPC = nPC)
   
-  if (featuresUse=='PCLoading') {
+      }
+      
+      list_iterable = list(seurat_obj = subsets, name = names(subsets))
+      outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_JackStraw.txt")
+      list_datExpr<- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
+      
+    } else if (featuresUse == "var.features") {
+      list_datExpr <- lapply(subsets, 
+                             function(seurat_obj) GetAssayData(seurat_obj, assay=assayUse, slot=slotUse)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
+    } 
     
-    list_datExpr <- lapply(subsets, function(seurat_obj) {
-      seurat_obj <- ProjectDim(object=seurat_obj, 
-                               reduction = "pca", 
-                               verbose=F,
-                               overwrite=F)
-      loadingsAbs <- seurat_obj@reductions$pca@feature.loadings.projected %>% abs 
-      apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
-        '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
-      GetAssayData(object=seurat_obj,slot = slotUse, assay = assayUse)[namesFeaturesUse,] %>% t
-      })
+    n_genes_subsets_used <- sapply(list_datExpr, ncol) 
     
-    } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
-    
-    # Select significant PCs using empirical p-value based on JackStraw resampling
-    # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
-    # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs 
-    # based on the p-values of gene loadings. Use these to select genes
-    
-    message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
-    fun = function(seurat_obj, name) {
-      # seurat_obj <- ProjectDim(object=seurat_obj, 
-      #                          reduction = "pca", 
-      #                          verbose=F,
-      #                          overwrite=T)
-      wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                    nRepJackStraw = nRepJackStraw, 
-                    pvalThreshold = pvalThreshold,
-                    featuresUse=featuresUse,
-                    nFeatures = nFeatures,
-                    nPC = nPC)
-
-    }
-    
-    list_iterable = list(seurat_obj = subsets, name = names(subsets))
-    outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_JackStraw.txt")
-    list_datExpr<- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
-    
-  } else if (featuresUse == "var.features") {
-    list_datExpr <- lapply(subsets, function(seurat_obj) GetAssayData(seurat_obj, assay=assayUse, slot=slotUse)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
-  } 
-  
-  n_genes_subsets_used <- sapply(list_datExpr, ncol) 
-  
   # Clear up
   rm(subsets) 
   invisible(gc())
