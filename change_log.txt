@@ -1,5 +1,23 @@
 # Change log
 
+v2.9 - 24-01-2020
+
+### Added
+
+### Changed
+* Updated safeParallel argument name to list_iterable
+* Commented out many deprecated functions in rwgcna_functions
+* made FindVariableFeatures default to 1000 and added warning if 'vst' fails
+* changed nRepJackStraw default from 300 to 250
+* set varsToRegress default NULL
+* input has to be normalized matrix in delimited text format, metadata no longer optional, also removed assayUse and slotUse arguments (always perform analysis on normalized data)
+* always read and write large files using data.table fread and fwrite
+
+### removed
+* removed vec_colAnnot, which added additional annotaiton columns to output but did not change analysis
+* removed automatic replacement of nonacceptable characters in annotations: this should be done manually in preprocessing
+* detection (for remapping) of gene names - this should be done beforehand
+
 v2.8 - 08-02-2019
 
 ### Added 
