@@ -45,13 +45,18 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * final session image with all of the above (in \RObjects subdir)
 
 ### Usage
-export PATH="/usr/local/R-3.5.1/bin/:$PATH" 
 
 time Rscript ./rwgcna_main_seurat3.0.R --pathDatExpr ./expressionData.csv.gz --pathMetadata ./metadata.csv --dirProject /projects/jonatan/mousebrain_8/ --prefixData mb_neurons --prefixRun 81 --dataType sc --colIdents ClusterName--minGeneCells 20 --minCellClusterSize 50 --featuresUse PCLoading --nFeatures 5000 --nRepJackStraw 0 --corFnc cor --networkType "c('signed hybrid')" --nRepTOM 100  --hclustMethod average --minClusterSize 15 --deepSplit "c(2)" --moduleMergeCutHeight 'c(0.15)' --pamStage 'c(T)' --kMReassign F --kMSignifFilter T --fuzzyModMembership kME  
 
-### Help
+### Help on parameters
 Rscript /projects/jonatan/tools/wgcna-src/wgcna-toolbox/rwgcna_main_seurat3.0.R --help
 
-## post-WGCNA scripts
+### Issues / bugs
 
-* Various scripts for post-WGCNA analysis for post-WGCNA pipeline analysis of module embeddings, correlations, gene set enrichment etc. More information at the top of each script. 
+Submit an issue with
+* Descriptive title summarising the issue
+* What you did
+* Expected behaviour
+* Actual behaviour
+* R version and, if relevant, package versions
+* Relevant output
