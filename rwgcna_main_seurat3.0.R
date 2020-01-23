@@ -10,9 +10,9 @@ suppressPackageStartupMessages(library(optparse))
 
 option_list <- list(
   make_option("--pathDatExpr", type="character",
-              help = "Provide full path to raw counts expression data in delimited (with gene names in the first row), seurat or seurat loom object format, saved as .RData, .RDS or .loom file, optionally gzip compressed"),
-  make_option("--pathMetadata", type="character", default = NULL,
-              help = "If datExpr is not provided as a Seurat object, provide path to metadata containing celltype identities under the colIdents. File should be in one of the standard (compressed) character separated formats. First column should have cellnames matching column names in datExpr [default %default]"),  
+              help = "Character, path to normalized expression data in delimited text form (readable by data.table::fread) with gene names in the first column"),
+  make_option("--pathMetadata", type="character", 
+              help = "path to metadata containing celltype identities under the colIdents. File should be in one of the standard (compressed) character separated formats. First column should have barcode/cell names matching column names in datExpr [default %default]"),  
   make_option("--dirProject", type="character", default=NULL,
               help = "Optional. Provide project directory. Must have subdirs RObjects, plots, tables. If not provided, assumed to be dir one level up from input data dir. [default %default]"),
   make_option("--dirTmp", type="character", default=NULL,
@@ -29,14 +29,6 @@ option_list <- list(
               help = "Resume from a checkpoint? Must have same path and prefixData as provided. Options are 'checkpoint_1' - '5' [default %default]"),
   make_option("--colIdents", type="character", default=NULL,
               help = "Specify a metadata column to use for subsetting the data by cell cluster. If NULL uses the @ident slot. [default %default]"),
-  make_option("--vec_colAnnot", type="character", default=NULL,
-              help="Provide column names for higher levels of sample hierarchy above colIdents, e.g. tissue, to add to output. Cannot cross-cut colIdents. Does not affect the analysis. [default %default]"),
-  make_option("--assayUse", type="character", default="RNA",
-              help="If datExpr is a Seurat object, indicate whether to use 'RNA', 'SCT' or 'integrated' assay, [default %default]"),
-  make_option("--slotUse", type="character", default="scale.data",
-              help="Use 'counts', logNormalized ('data') or Z-scored ('scale.data') for the analysis? scale.data is unavoidable if we wish to regress out confounders. The script carries out the scaling. [default %default]"),
-  make_option("--varsToRegress", type="character", default=NULL,
-              help="Provide arguments to Seurat's ScaleData function in the form of a vector in quotes, defaults to c('nUMI', 'percent.mito', 'percent.ribo') [default %default]"),
   make_option("--minGeneCells", type="integer", default=20L,
               help="What is the minimum number of cells in each subset in the data in which a gene should be detected to not be filtered out? Integer, [default %default]."),
   make_option("--minCellClusterSize", type="integer", default=50L,
@@ -125,13 +117,9 @@ suppressPackageStartupMessages(library("parallel"))
 suppressPackageStartupMessages(library("reshape"))
 suppressPackageStartupMessages(library("reshape2"))
 suppressPackageStartupMessages(library("WGCNA"))
-
-#ipak(c("dplyr", "Biobase", "Matrix", "Seurat", "parallel", "reshape", "reshape2", "WGCNA"))
+suppressPackageStartupMessages(library("data.table"))
 
 message("Packages loaded")
-
-# verify Seurat version
-#stopifnot(as.character(packageVersion("Seurat"))=='3.0.0.9000')
 
 ######################################################################
 ################### GET COMMAND LINE OPTIONS #########################
@@ -164,13 +152,7 @@ dirProject <- opt$dirProject
 dirTmp <- opt$dirTmp
 dataType = opt$dataType
 autosave <- opt$autosave
-assayUse <- opt$assayUse
-slotUse <- opt$slotUse
 colIdents <- opt$colIdents
-vec_colAnnot <- opt$vec_colAnnot
-if (!is.null(vec_colAnnot)) vec_colAnnot <- eval(parse(text=vec_colAnnot))
-varsToRegress <- opt$varsToRegress
-if (!is.null(varsToRegress)) varsToRegress <- eval(parse(text=varsToRegress))
 minGeneCells <- opt$minGeneCells
 minCellClusterSize <- opt$minCellClusterSize
 featuresUse <- opt$featuresUse
@@ -292,177 +274,31 @@ if (is.null(resume)) {
   ################# LOAD AND SUBSET EXPRESSSION DATA ###################
   ######################################################################
   
-  message("Loading expression data..")
+  message("Loading data..")
   
-  if (grepl(pattern = "\\.loom", pathDatExpr)) {
-    tmp <-  connect(filename = pathDatExpr, mode = "r+")
-  } else if (grepl(pattern = "\\.rds|\\.rda", pathDatExpr, ignore.case = T)) {
-    tmp <- load_obj(pathDatExpr)
-  } else {
-    tmp <- data.table::fread(pathDatExpr)
-  }
+  df_metadata <- fread(pathMetadata, data.table = F) 
+  rownames(df_metadata) <- df_metadata[[1]]
+  df_metadata <- df_metadata[,-1]
   
-  ######################################################################
-  ########################### LOAD METADATA ############################
-  ######################################################################
-    
-  if (!is.null(pathMetadata)) {
-    metadata <- load_obj(pathMetadata) 
-    if (any(duplicated(metadata[,1]))) metadata[,1] <- make.unique(metadata[,1]) 
-    rownames(metadata) <- metadata[,1]
-    metadata <- metadata[,-1]
-  } else {
-    metadata <- NULL
-  }
+  dt_datExpr <- fread(pathDatExpr)
 
-  if (any(c("seurat", "Seurat") %in% class(tmp))) {
-    seurat_obj <- tmp#if (tmp@version!='3.0.0.9000') {
-  } else if ("loom" %in% class(tmp)) {
-    seurat_obj <- Seurat::Convert(from=tmp, to="seurat")
-    if (!is.null(metadata)) seurat_obj <- AddMetaData(seurat_obj, metadata = metadata)
-  } else { # not a loom object, nor a seurat object
-    # Get genes, make them unique, make them into rownames
-    if (any(duplicated(tmp[,1]))) tmp[,1] <- make.unique(tmp[,1]) 
-    rownames(tmp) <- tmp[,1]
-    tmp <- tmp[,-1]
-    
-    seurat_obj <- CreateSeuratObject(counts= tmp, 
-                                     project= paste0(prefixData, "_", prefixRun),
-                                     assay = "RNA",
-                                     meta.data = metadata)
-  }
-  
-  rm(tmp)
+  spmat_datExpr <- as.sparse(dt_datExpr[,-1]) 
+  rownames(spmat_datExpr) <- dt_datExpr[[1]]
+  rm(dt_datExpr)  
+  seurat_obj <- CreateSeuratObject(counts = spmat_datExpr, 
+                                   project = paste0(prefixData, "_", prefixRun),
+                                   assay = "RNA",
+                                   meta.data = df_metadata)
+  rm(spmat_datExpr)
 
   ######################################################################
   ############################## ANNOTATION ############################
   ######################################################################
   
-  # replace inappropriate characters
-  for (colMetadata in c(colIdents, vec_colAnnot)) {
-    if (!colMetadata %in% colnames(seurat_obj@meta.data)) stop(paste0(colMetadata), " not found in metadata")
-    seurat_obj@meta.data[[colMetadata]] <- gsub("[^a-z|0-9|_]", "_", seurat_obj@meta.data[[colMetadata]], ignore.case = T)
-    seurat_obj@meta.data[[colMetadata]] <- gsub("__", "_", seurat_obj@meta.data[[colMetadata]], ignore.case=T)
-  }
+  Idents(seurat_obj) <- seurat_obj@meta.data[[colIdents]]
 
-  ######################################################################
-  ########################### SET DEFAULT ASSAY ########################
-  ######################################################################
-  
-  DefaultAssay(seurat_obj) <- assayUse
-  
-  ######################################################################
-  #################### SET SEURAT IDENT AND SUBSET NAMES ###############
-  ######################################################################
-  
-  # Set seurat object ident
-  if (!is.null(colIdents)) {
-    Idents(seurat_obj) <- seurat_obj@meta.data[[colIdents]]
-  }
-  
   vec_idents <- Idents(seurat_obj) %>% as.character
   sNames_0 <- vec_idents %>% unique %>% sort
-  
-  mat_addAnnot <- if (!is.null(vec_colAnnot)) seurat_obj@meta.data[,vec_colAnnot] else NULL
-
-  ######################################################################
-  ################ determine organism and gene names ###################
-  ######################################################################
-  
-  geneNames <- dataOrganism <- NULL
-  
-  if (sum(grepl("ENSMUSG",rownames(seurat_obj), ignore.case=F))/nrow(seurat_obj) > 0.9) {
-    geneNames <- "ensembl"
-    dataOrganism <- "mmusculus"
-  } else if (sum(grepl("ENSG",rownames(seurat_obj), ignore.case=F))/nrow(seurat_obj)>0.9) {
-    geneNames <- "ensembl"
-    dataOrganism <- "hsapiens"
-  } else if (sum(grepl("[a-z]", rownames(seurat_obj), ignore.case=F))/nrow(seurat_obj)>0.9) {
-    geneNames <- "symbol"
-    dataOrganism <- "mmusculus"
-  } else if (sum(grepl("[A-Z]", rownames(seurat_obj), ignore.case=F))/nrow(seurat_obj) > 0.9) {
-    geneNames <- "symbol"
-    dataOrganism <- "hsapiens"
-  }
-  
-  ######################################################################
-  ################# IF SYMBOL, REMAP TO ENSEMBL ID #####################
-  ######################################################################
-  
-  # mapTo <- if (geneNames == "ensembl") "symbol" else "ensembl"
-  # df_genes <- if (geneNames=="ensembl") data.frame("ensembl"=rownames(seurat_obj)) else data.frame("symbol"=rownames(seurat_obj))
-  # 
-  # if (!is.null(path_df_mapping)) {
-  # 
-  #   df_ensemblMapping <- load_obj(path_df_ensemblMapping[[dataOrganism]])
-  # 
-  #   df_genes <- gene_map(dataIn=df_genes,
-  #                            colGene = geneNames,
-  #                            mapping=df_ensemblMapping,
-  #                            from=geneNames,
-  #                            to=mapTo,
-  #                            replace = F,
-  #                            na.rm = T)
-  # 
-  # }
-  
-  ######################################################################
-  ################### COMPUTE PERCENT MITO, PERCENT RIBO ###############
-  ######################################################################
-  
-  riboMitoMeta <- NULL
-  
-  if (any(c("percent.ribo", "percent.mito") %in% varsToRegress) & geneNames=="symbol" & !all(c("percent.ribo", "percent.mito") %in% names(seurat_obj@meta.data))) {
-    if (dataType=="sc") {
-      
-      vec_logicalMito.genes <- grepl(pattern = "^mt-", x = df_genes[["symbol"]], ignore.case=T)
-      vec_logicalRibo.genes <- grepl(pattern = "^Rp[sl][[:digit:]]", x = df_genes[["symbol"]], ignore.case=T)
-      colSums_tmp <- GetAssayData(object=seurat_obj, slot = "counts") %>% colSums
-      
-      riboMitoMeta <- data.frame(percent.mito=colSums(x = GetAssayData(object=seurat_obj, slot = "counts")[vec_logicalMito.genes,])/colSums_tmp,
-                                 percent.ribo = colSums(x = GetAssayData(object=seurat_obj, slot = "counts")[vec_logicalRibo.genes,])/colSums_tmp,
-                                 row.names=colnames(seurat_obj))
-      seurat_obj <- AddMetaData(seurat_obj, metadata =riboMitoMeta)
-    }
-  } else { 
-    if (any(c("percent.ribo", "percent.mito") %in% varsToRegress)) varsToRegress <- varsToRegress[!varsToRegress %in% c("percent.ribo", "percent.mito")]
-  }
-  ######################################################################
-  ######## DO SEURAT PROCESSING ON FULL EXPRESSION MATRIX ##############
-  ######################################################################
-  
-  # We need this full, processed matrix to compute module embeddings later on.
-
-  # datExprNormFull <- if (assayUse=="RNA") {
-  #   GetAssayData(object=seurat_obj, slot="data") %>% as.matrix 
-  # } else{
-  #   GetAssayData(object=seurat_obj, slot = slotUse) %>% as.matrix
-  # } 
-  try({
-    datExprFull <- GetAssayData(object=seurat_obj, slot = slotUse) %>% as.matrix
-    
-    # Save scale and regressed whole expression matrix with ensembl rownames for later use
-    message("Saving full expression matrix")
-    
-    saveRDS(datExprFull, file = sprintf("%s%s_%s_datExprNormFull.RDS.gz", 
-                                    dirTmp, 
-                                    prefixData, 
-                                    prefixRun), 
-            compress = "gzip")
-    #save(ident, file = sprintf("%s%s_%s_ident.RData", dirTmp, prefixData, prefixRun))
-    rm(datExprFull)
-  })
-  ######################################################################
-  ###################### NORMALIZE DATA? ###############################
-  ######################################################################
-  
-  # if data slot empty, run Seurat::NormalizeData prior to ScaleData and RunPCA
-  
-  if (assayUse == "RNA" & all(dim(GetAssayData(seurat_obj, slot="data")))==0)  {
-  
-    seurat_obj <- NormalizeData(object = seurat_obj)#, display.progress = T)
-  }
-  
   
   ######################################################################
   ######## DO SEURAT PROCESSING ON SUBSETTED EXPRESSION MATRICES #######
@@ -470,52 +306,40 @@ if (is.null(resume)) {
   
   message("Subsetting the dataset")
 
-  
   subsets <- lapply(sNames_0, function(name) {
     
     seurat_obj_sub <- subset(x= seurat_obj,idents=name)
-    # using createSeuratObject instead of subset allows us to filter on min.cells and min.features
-    # CreateSeuratObject(counts = GetAssayData(object=seurat_obj, 
-    #                                          assay=assayUse, 
-    #                                          slot=slotUse)[,Idents(seurat_obj)==name], 
-    #                    project = prefixData,
-    #                    assay = assayUse,
-    #                    min.cells = minGeneCells,
-    #                    #min.features = 1000,
-    #                    meta.data = seurat_obj@meta.data[Idents(seurat_obj)==name,]
-    
     # filter out genes not expressed in a sufficient number of cells
     
-    vec_featuresKeep <- rownames(seurat_obj_sub)[apply(X = GetAssayData(seurat_obj_sub, slot=slotUse), MARGIN=1, FUN = function(eachRow) sum(eachRow>0) >= minGeneCells)]
+    vec_featuresKeep <- rownames(seurat_obj_sub)[apply(X = GetAssayData(seurat_obj_sub), 
+                                                       MARGIN=1, 
+                                                       FUN = function(eachRow) sum(eachRow>0) >= minGeneCells)]
     seurat_obj_sub <- subset(x=seurat_obj_sub, features=vec_featuresKeep)
     return(seurat_obj_sub)
-    })
+  })
   
   # Save stats for outputting at the end
-  #n_cells_subsets = table(Idents(seurat_obj)) #warning: this is in the wrong order because Idents is a factor..
   n_cells_subsets = sapply(subsets, ncol)
   vec_logicalCellClustOK <- if (dataType=="sc") n_cells_subsets > minCellClusterSize else !logical(length = length(subsets))
-  #sapply(subsets, function(seuratObj) ncol(seuratObj), simplify = T)
   n_genes_subsets = sapply(subsets, nrow, simplify=T)
   
   # Free up space 
   rm(seurat_obj)
-  
 
   if (!all(vec_logicalCellClustOK)) {
     log_entry <- paste0(sNames_0[!vec_logicalCellClustOK], ": had <", minCellClusterSize," cells and was therefore dropped")
     warning(log_entry)
     cat(text = log_entry, file =  pathLogCellClustersDropped, append=T, sep = "\n")
     # Filter
-    #subsets <- subsets[vec_logicalCellClustOK]
   }
   
   sNames_1 <- sNames_0[vec_logicalCellClustOK]
   subsets <- subsets[vec_logicalCellClustOK] 
   names(subsets) <- sNames_1 
   
-  # Determine which genes to include in WGCNA analysis by running PCA
+  # NO NEED TO NORMALIZE - DATA SLOT IS AUTOMATICALLY POPULATED (DOES SEURAT DETECT THAT COUNTS ARE NORMALIZED??)
   
+  # Determine which genes to include in WGCNA analysis by running PCA
   message("Finding variable features")
   fun <- function(seurat_obj, seuName) {
     tryCatch({
@@ -543,27 +367,20 @@ if (is.null(resume)) {
                           list_iterable=list_iterable,
                           outfile=outfile)
   
-  # Scale and regress
-  if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif') | 
-      slotUse =="scale.data") {
+  # Scale data
+  if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif')) {
    
     message("Scaling data subsets")
     
-    if (!is.null(varsToRegress)) varsToRegress = varsToRegress[varsToRegress %in% colnames(subsets[[1]]@meta.data)] 
-    
-    # Scale data and regress out confounders
+    # Scale data
     fun<- function(seurat_obj, name) {
       tryCatch({
         ScaleData(object = seurat_obj,
                   # choice of features to scale constrains the genes for which we can get PCA loadings downstream
-                  features = if (featuresUse=="var.features") VariableFeatures(object=seurat_obj, assay = assayUse) else rownames(seurat_obj), # 
-                  vars.to.regress = if (dataType=="sc" & length(varsToRegress)>0) varsToRegress else NULL,
-                  #model.use="linear",
+                  features = if (featuresUse=="var.features") VariableFeatures(object=seurat_obj) else rownames(seurat_obj), # 
                   do.scale=T,
-                  #model.use = "negbinom",
                   do.center=do.center,
                   block.size=15000,
-                  assay=assayUse,
                   min.cells.to.block=5000)},
         error = function(err) {
           stop(paste0(name,": ScaleData failed with the error: ", err))
@@ -572,11 +389,6 @@ if (is.null(resume)) {
     list_iterable = list(seurat_obj = subsets, name = names(subsets))
     outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_ScaleData_log.txt") 
     subsets <- mapply(FUN = fun,seurat_obj=subsets, name=names(subsets))
-    #subsets <- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
-  }
-
-  # PCA 
-  if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif')) {
     
     message("Performing Principal Component Analysis")
     
@@ -585,11 +397,8 @@ if (is.null(resume)) {
     fun = function(seurat_obj, name) {
       seurat_tmp <- tryCatch({ 
         out <- RunPCA(object = seurat_obj,
-               assay = assayUse,
                features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
-               #npcs = nPC,
                npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2)),
-               #rev.pca = F,
                weight.by.var = T, # weighs cell embeddings 
                do.print = F,
                seed.use = randomSeed,
@@ -602,9 +411,7 @@ if (is.null(resume)) {
           message("Trying RunPCA with var.features, fewer components, double max iterations and fastpath == F")
           tryCatch({
             out <- RunPCA(object = seurat_obj,
-                   assay = assayUse,
                    features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
-                   #npcs = nPC %/% 1.5,#min(nPC, length(seurat_obj@assays[[assayUse]] %>% '@'('var.features')) %/% 3),
                    npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3)),
                    weight.by.var = T,
                    seed.use = randomSeed,
@@ -619,9 +426,7 @@ if (is.null(resume)) {
             return(seurat_obj)
             }) 
         })
-      # if (genesPCA == "all") {
-      #   seurat_tmp@reductions$pca@feature.loadings.full <- seurat_tmp@dr$pca@gene.loadings
-      # }
+
       return(seurat_tmp)
     }
     
@@ -631,64 +436,57 @@ if (is.null(resume)) {
     
     subsets <- safeParallel(fun=fun, 
                             list_iterable=list_iterable, 
-                            outfile=outfile)#, 
-                            #nPC=nPC,
-                            #randomSeed=randomSeed,
-                            #maxit=maxit,
-                            #fastpath=fastpath)
+                            outfile=outfile)
     
     end_time <- Sys.time()
     
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
     
   }
-    
-    if (featuresUse=='PCLoading') {
-      
-      list_datExpr <- lapply(subsets, function(seurat_obj) {
-        seurat_obj <- ProjectDim(object=seurat_obj, 
-                                 reduction = "pca", 
-                                 verbose=F,
-                                 overwrite=F)
-        loadingsAbs <- seurat_obj@reductions$pca@feature.loadings.projected %>% abs 
-        apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
-          '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
-        GetAssayData(object=seurat_obj,slot = slotUse, assay = assayUse)[namesFeaturesUse,] %>% t
-        })
-      
-      } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
-      
-      # Select significant PCs using empirical p-value based on JackStraw resampling
-      # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
-      # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs 
-      # based on the p-values of gene loadings. Use these to select genes
-      
-      message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
-      fun = function(seurat_obj, name) {
-        # seurat_obj <- ProjectDim(object=seurat_obj, 
-        #                          reduction = "pca", 
-        #                          verbose=F,
-        #                          overwrite=T)
-        wrapJackStraw(seurat_obj_sub = seurat_obj, 
-                      nRepJackStraw = nRepJackStraw, 
-                      pvalThreshold = pvalThreshold,
-                      featuresUse=featuresUse,
-                      nFeatures = nFeatures,
-                      nPC = nPC)
   
-      }
-      
-      list_iterable = list(seurat_obj = subsets, name = names(subsets))
-      outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_JackStraw.txt")
-      list_datExpr<- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
-      
-    } else if (featuresUse == "var.features") {
-      list_datExpr <- lapply(subsets, 
-                             function(seurat_obj) GetAssayData(seurat_obj, assay=assayUse, slot=slotUse)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
-    } 
+  if (featuresUse=='PCLoading') {
     
-    n_genes_subsets_used <- sapply(list_datExpr, ncol) 
+    list_datExpr <- lapply(subsets, function(seurat_obj) {
+      seurat_obj <- ProjectDim(object=seurat_obj, 
+                               reduction = "pca", 
+                               verbose=F,
+                               overwrite=F)
+      loadingsAbs <- seurat_obj@reductions$pca@feature.loadings.projected %>% abs 
+      apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
+        '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
+      GetAssayData(object=seurat_obj,slot = "data")[namesFeaturesUse,] %>% t
+      })
     
+    } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
+    
+    # Select significant PCs using empirical p-value based on JackStraw resampling
+    # Source: https://rdrr.io/cran/Seurat/src/R/plotting.R
+    # score the PCs using JackStraw resampling to get an empirical null distribution to get p-values for the PCs 
+    # based on the p-values of gene loadings. Use these to select genes
+    
+    message(sprintf("Performing JackStraw with %s replications to select genes that load on significant PCs", nRepJackStraw))
+    fun = function(seurat_obj, name) {
+
+      wrapJackStraw(seurat_obj_sub = seurat_obj, 
+                    nRepJackStraw = nRepJackStraw, 
+                    pvalThreshold = pvalThreshold,
+                    featuresUse=featuresUse,
+                    nFeatures = nFeatures,
+                    nPC = nPC)
+
+    }
+    
+    list_iterable = list(seurat_obj = subsets, name = names(subsets))
+    outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_JackStraw.txt")
+    list_datExpr<- safeParallel(fun=fun, list_iterable=list_iterable, outfile=outfile)
+    
+  } else if (featuresUse == "var.features") {
+    list_datExpr <- lapply(subsets, 
+                           function(seurat_obj) GetAssayData(seurat_obj)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
+  } 
+  
+  n_genes_subsets_used <- sapply(list_datExpr, ncol) 
+  
   # Clear up
   rm(subsets) 
   invisible(gc())
@@ -721,10 +519,6 @@ if (resume == "checkpoint_1") {
   suppressPackageStartupMessages(library("reshape"))
   suppressPackageStartupMessages(library("reshape2"))
   suppressPackageStartupMessages(library("WGCNA"))
-  
-  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "WGCNA")
-  
-  #ipak(pkgs)
   
   disableWGCNAThreads()
   
@@ -851,22 +645,6 @@ if (resume == "checkpoint_1") {
                                verbose = verbose,
                                indent = indent)
 
-      #}, error = function(err) {
-        # message(paste0(name, ": consensusTOM failed, computing normal TOM"))
-        # adjacency = adjacency(datExpr=list_datExpr[[name]], 
-        #                       type=type, 
-        #                       power = list_sft[[name]]$Power, 
-        #                       corFnc = corFnc, 
-        #                       corOptions = corOptions)
-        #                       
-        # consTomDS = TOMsimilarity(adjMat=adjacency,
-        #                           TOMType=TOMType,
-        #                           TOMDenom=TOMDenom,
-        #                           verbose=verbose,
-        #                           indent = indent)
-        # colnames(consTomDS) <- rownames(consTomDS) <- colnames(list_datExpr[[name]])
-        # save(consTomDS, file=sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name)) # Save TOM the way consensusTOM would have done
-     # })
     }
     
     list_iterable <- list("datExpr"=list_datExpr, "name"=sNames_1)
@@ -2020,15 +1798,21 @@ if (resume == "checkpoint_3") {
 
   message("Computing all cell embeddings on all modules, across celltypes")
   
-  path_datExpr <- dir(path = dirTmp, pattern = paste0(prefixData, "_", prefixRun, "_datExprNormFull.RDS.gz"), full.names = T)
-  load_obj(path_datExpr[1]) %>% t -> datExpr 
+  #path_datExpr <- dir(path = dirTmp, pattern = paste0(prefixData, "_", prefixRun, "_datExprNormFull.RDS.gz"), full.names = T)
+  #load_obj(path_datExpr[1]) %>% t -> datExpr 
+  
+  dt_datExpr <- fread(pathDatExpr)
+  mat_datExpr  <- as.matrix(dt_datExpr[,-1])  
+  rownames(mat_datExpr) <- dt_datExpr[[1]]
+  rm(dt_datExpr)  
+  mat_datExpr <- t(mat_datExpr)
   
   invisible(gc())
   
   latentGeneType <- if (fuzzyModMembership == "kME") "ME" else if (fuzzyModMembership=="kIM") "IM"
   
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "make_cell_embed_mat.txt")
-  fun = function(vec_colors,name,kMs) cellModEmbed(datExpr = datExpr, 
+  fun = function(vec_colors,name,kMs) cellModEmbed(datExpr = mat_datExpr, 
                                          modcolors = vec_colors,
                                          latentGeneType = latentGeneType,
                                          cellType = name,
@@ -2040,21 +1824,11 @@ if (resume == "checkpoint_3") {
 
   list_cellModEmbed_mat <- safeParallel(fun=fun, 
                                         list_iterable=list_iterable, 
-                                        outfile=outfile)#, 
-                                        #datExpr = datExpr, 
-                                        #latentGeneType = latentGeneType)
-  
+                                        outfile=outfile)
+                            
+
   
   list_cellModEmbed_mat %>% Reduce(function(mat1, mat2) cbind(mat1, mat2), .) -> cellModEmbed_mat
-  
-  ### Z-score the embedding matrix 
-  # cellModEmbed_mat <- apply(X=cellModEmbed_mat, 
-  #                           MARGIN = 2, 
-  #                           FUN = function(module_vec) { 
-  #                             module_vec %>% '-'(mean(.)) %>% '/'(stats::sd(.)) 
-  #                             })
-  
-  # TODO: does it make sense to Z-score it? Probably not..
   
   rownames(cellModEmbed_mat) <- NULL
   
@@ -2063,17 +1837,17 @@ if (resume == "checkpoint_3") {
                           times=nrow(cellModEmbed_mat)), 
                  mat_addAnnot,
                 "cell_cluster"= vec_idents, 
-                "cell_id" = rownames(datExpr), row.names = NULL) 
+                "cell_id" = rownames(mat_datExpr), row.names = NULL) 
   } else {
     data.frame("data"=rep(x = prefixData,  
                           times=nrow(cellModEmbed_mat)), 
                "cell_cluster"= vec_idents, 
-               "cell_id" = rownames(datExpr), row.names = NULL) 
+               "cell_id" = rownames(mat_datExpr), row.names = NULL) 
   }
   
   cellModEmbed_mat_annot <- cbind(df_annot, cellModEmbed_mat)
                                  
-  rm(datExpr)
+  rm(mat_datExpr)
   
   ######################################################################
   ############################# CHECKPOINT #############################
@@ -2099,10 +1873,6 @@ if (resume == "checkpoint_4") {
   suppressPackageStartupMessages(library("reshape"))
   suppressPackageStartupMessages(library("reshape2"))
   suppressPackageStartupMessages(library("readr"))
-  
-  #pkgs <- c("dplyr", "Biobase", "Matrix", "parallel", "reshape", "reshape2", "readr")
-  
-  #ipak(pkgs)
   
   ##########################################################################
   ######### PREPARE GENES LISTS AND DATAFRAME WITH MODULES, GENES ##########
@@ -2144,7 +1914,6 @@ if (resume == "checkpoint_4") {
   
   cell_cluster <- rep(sNames_4, times=unlist(lapply(list_list_module_genes, FUN=function(x) sum(sapply(x, function(y) length(y), simplify=T)))))
   module <- unlist(lapply(list_list_module_genes, function(x) rep(names(x), sapply(x, function(y) length(y), simplify = T))), use.names = F)
-  #ensembl <- if (mapToEnsembl) unlist(list_list_module_genes, recursive = T, use.names = F) else NULL 
   genes <- unlist(list_list_module_genes, recursive = T, use.names = F) 
   pkMs <- unlist(list_list_module_pkMs, recursive = T, use.names = F)
   if (fuzzyModMembership == "kME") gene_loadings <- unlist(list_list_module_gene_loadings, recursive = T, use.names = F)
@@ -2164,7 +1933,9 @@ if (resume == "checkpoint_4") {
   ##################### WRITE OUT TABLES OF MODULE GENES ####################
   ###########################################################################
   
-  write.csv(df_cell_cluster_module_genes, file = gzfile(sprintf("%s%s_%s_cell_cluster_module_genes.csv.gz",dirTables, prefixData, prefixRun)), quote = F, row.names = F)
+  fwrite(df_cell_cluster_module_genes, 
+         compress="gzip",
+         file = sprintf("%s%s_%s_cell_cluster_module_genes.csv.gz",dirTables, prefixData, prefixRun), row.names = F)
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
@@ -2181,15 +1952,15 @@ if (resume == "checkpoint_4") {
     dplyr::full_join(df1, df2, by="genes")}, 
     x=list_kMs_out)
   
-  write.csv(kMs_out, file=gzfile(sprintf("%s%s_%s_kMs_full_join.csv.gz", dirTables, prefixData, prefixRun)), 
-            row.names=F, quote = F)
+  fwrite(x=kMs_out, compress="gzip", file=sprintf("%s%s_%s_kMs_full_join.csv.gz", dirTables, prefixData, prefixRun), row.names=F)
   
-
   ################## OUTPUT CELL MODULE EMBEDDINGS MATRIX ###################
   ###########################################################################
   
-  invisible(write.csv(x=cellModEmbed_mat_annot, 
-                      file=gzfile(sprintf("%s%s_%s_%s_cellModEmbed.csv.gz", dirTables, prefixData, prefixRun, fuzzyModMembership)), row.names=F, quote = F))
+  fwrite(x=cellModEmbed_mat_annot, 
+         compress = "gzip", 
+         file=sprintf("%s%s_%s_%s_cellModEmbed.csv.gz", dirTables, prefixData, prefixRun, fuzzyModMembership), 
+         row.names = F)
   
   ##################### WRITE PARAMETERS AND STATS TO FILES ################
   ##########################################################################
