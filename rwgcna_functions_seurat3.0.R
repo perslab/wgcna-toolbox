@@ -1682,10 +1682,13 @@ cellModEmbed <- function(datExpr,
       
       list_kMs <- lapply(colnames(kMs), function(module) kMs[match(names(modcolors)[modcolors==module], rownames(kMs)),module])
       
-      embed_mat <- mapply(function(x,y) x %*% as.matrix(y),
-                                    x = list_datExpr,
-                                    y = list_kMs,
-                                    SIMPLIFY=F) %>% Reduce(x=., f = cbind) %>% as.matrix
+      embed_mat <- mapply(function(datExpr,vec_kMs) {
+        vec_kMs_norm <- vec_kMs/sum(vec_kMs)
+        datExpr %*% as.matrix(vec_kMs_norm)
+        },
+      datExpr = list_datExpr,
+      vec_kMs = list_kMs,
+      SIMPLIFY=F) %>% Reduce(x=., f = cbind) %>% as.matrix
       # datExpr_1 = datExpr[, match(rownames(kMs), colnames(datExpr), nomatch=0) [match(rownames(kMs), colnames(datExpr),  nomatch=0)>0]]
       # embed_mat <- as.matrix(datExpr_1) %*% as.matrix(kMs)
       colnames(embed_mat) <- paste0(cellType_prefix, colnames(kMs)) 
