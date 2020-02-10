@@ -281,7 +281,7 @@ if (is.null(resume)) {
   df_metadata <- df_metadata[,-1]
   
   dt_datExpr <- fread(pathDatExpr)
-
+  if (any(duplicated(dt_datExpr[[1]]))) stop("datExpr has duplicate feature names, please ensure they are unique")
   spmat_datExpr <- as.sparse(dt_datExpr[,-1]) 
   rownames(spmat_datExpr) <- dt_datExpr[[1]]
   rm(dt_datExpr)  
@@ -339,37 +339,41 @@ if (is.null(resume)) {
   
   # NO NEED TO NORMALIZE - DATA SLOT IS AUTOMATICALLY POPULATED (DOES SEURAT DETECT THAT COUNTS ARE NORMALIZED??)
   
-  # Determine which genes to include in WGCNA analysis by running PCA
-  message("Finding variable features")
-  fun <- function(seurat_obj, seuName) {
-    tryCatch({
-      
-      FindVariableFeatures(object = seurat_obj,
-                        selection.method = "vst",
-                        do.plot=F,
-                        nfeatures = if (featuresUse=="var.features") {
-                          min(nFeatures, nrow(seurat_obj))
-                          } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
-                            nrow(seurat_obj)
-                          } else 1000)
-
-      }, error = function(err) {
-        warning(paste0(seuName, ": FindVariableFeatures failed with selection.method = 'vst'. Trying selection.method = 'mean.var.plot' instead."))
+  # Find variable features
+  if (dataType=="sc") {
+    message("Finding variable features")
+    fun <- function(seurat_obj, seuName) {
+      tryCatch({
+        
         FindVariableFeatures(object = seurat_obj,
-                           selection.method = "mean.var.plot",
-                           do.plot=F)
-      })
+                          selection.method = "vst",
+                          do.plot=F,
+                          nfeatures = if (featuresUse=="var.features") {
+                            min(nFeatures, nrow(seurat_obj))
+                            } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
+                              nrow(seurat_obj)
+                            } else 1000)
+  
+        }, error = function(err) {
+          warning(paste0(seuName, ": FindVariableFeatures failed with selection.method = 'vst'. Trying selection.method = 'mean.var.plot' instead."))
+          FindVariableFeatures(object = seurat_obj,
+                             selection.method = "mean.var.plot",
+                             do.plot=F)
+        })
+    }
+    
+    list_iterable = list("seurat_obj"=subsets, "seuName" = names(subsets))
+    outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_FindVariableFeatures_log.txt") 
+    subsets <- safeParallel(fun=fun,
+                            list_iterable=list_iterable,
+                            outfile=outfile)
   }
   
-  list_iterable = list("seurat_obj"=subsets, "seuName" = names(subsets))
-  outfile <- paste0(dirLog, prefixData, "_", prefixRun, "_FindVariableFeatures_log.txt") 
-  subsets <- safeParallel(fun=fun,
-                          list_iterable=list_iterable,
-                          outfile=outfile)
   
-  # Scale data
   if (featuresUse %in% c('PCLoading', 'JackStrawPCLoading', 'JackStrawPCSignif')) {
    
+    # Scale data
+    
     message("Scaling data subsets")
     
     # Scale data
@@ -393,41 +397,89 @@ if (is.null(resume)) {
     message("Performing Principal Component Analysis")
     
     start_time <- Sys.time()
-    
-    fun = function(seurat_obj, name) {
-      seurat_tmp <- tryCatch({ 
-        out <- RunPCA(object = seurat_obj,
-               features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
-               npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2)),
-               weight.by.var = T, # weighs cell embeddings 
-               do.print = F,
-               seed.use = randomSeed,
-               maxit = maxit, # set to 500 as default
-               fastpath = fastpath, 
-               verbose=T) 
+
+  
+    if (dataType =="sc") {
+
+      fun = function(seurat_obj, name) {
+        seurat_tmp <- tryCatch({ 
+          out <- RunPCA(object = seurat_obj,
+                 features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif') | length(VariableFeatures(seurat_obj)==0)) {
+                   rownames(seurat_obj) } else {VariableFeatures(seurat_obj)},
+                 npcs = if (length(VariableFeatures(seurat_obj))>0) {
+                   min(nPC, min(length(VariableFeatures(seurat_obj))%/% 2, ncol(seurat_obj) %/% 2))
+                 } else {
+                   min(nPC, ncol(seurat_obj) %/% 2)
+                  },
+                 weight.by.var = T, # weighs cell embeddings 
+                 do.print = F,
+                 seed.use = randomSeed,
+                 maxit = maxit, # set to 500 as default
+                 fastpath = fastpath, 
+                 verbose=T) 
+          }, 
+          error = function(err) {
+            message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
+            message("Trying RunPCA with var.features, fewer components, double max iterations and fastpath == F")
+            tryCatch({
+              out <- RunPCA(object = seurat_obj,
+                     features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif') | length(VariableFeatures(seurat_obj)==0)) {
+                       rownames(seurat_obj) } else { VariableFeatures(seurat_obj)},
+                     npcs = if (length(VariableFeatures(seurat_obj))>0) {
+                       min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3))} else {
+                         min(nPC,ncol(seurat_obj) %/% 3)
+                       },
+                     weight.by.var = T,
+                     seed.use = randomSeed,
+                     maxit = maxit*2, # set to 500 as default
+                     fastpath = F,
+                     verbose=T)
+              
+              
+            }, error = function(err1) {
+              message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
+              message("Returning the original Seurat object with empty dr$pca slot")
+              return(seurat_obj)
+              }) 
+          })
+  
+        return(seurat_tmp)
+      }
+      
+    } else if (datatype=="bulk") {
+      fun = function(seurat_obj, name) {
+        seurat_tmp <- tryCatch({ 
+          svd_out <- svd(x=GetAssayData(seurat_obj, slot = "scale.data"),
+                         nu = min(nPC, ncol(seurat_obj) %/% 2),
+                         nv = min(nPC, ncol(seurat_obj) %/% 2)) 
         }, 
         error = function(err) {
-          message(paste0(name, ": RunPCA's IRLBA algorithm failed with the error: ", err))
-          message("Trying RunPCA with var.features, fewer components, double max iterations and fastpath == F")
+          message(paste0(name, ": svd algorithm failed with the error: ", err))
+          message("Trying svd with fewer components")
           tryCatch({
             out <- RunPCA(object = seurat_obj,
-                   features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) rownames(seurat_obj) else VariableFeatures(seurat_obj),
-                   npcs = min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3)),
-                   weight.by.var = T,
-                   seed.use = randomSeed,
-                   maxit = maxit*2, # set to 500 as default
-                   fastpath = F,
-                   verbose=T)
+                          features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif') | length(VariableFeatures(seurat_obj)==0)) {
+                            rownames(seurat_obj) } else { VariableFeatures(seurat_obj)},
+                          npcs = if (length(VariableFeatures(seurat_obj))>0) {
+                            min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3))} else {
+                              min(nPC,ncol(seurat_obj) %/% 3)
+                            },
+                          weight.by.var = T,
+                          seed.use = randomSeed,
+                          maxit = maxit*2, # set to 500 as default
+                          fastpath = F,
+                          verbose=T)
             
             
           }, error = function(err1) {
             message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
             message("Returning the original Seurat object with empty dr$pca slot")
             return(seurat_obj)
-            }) 
+          }) 
         })
-
-      return(seurat_tmp)
+        
+        return(seurat_tmp)
+      }
     }
     
     list_iterable <- list("seurat_obj" = subsets, "name" = names(subsets))
@@ -441,7 +493,7 @@ if (is.null(resume)) {
     end_time <- Sys.time()
     
     message(sprintf("PCA done, time elapsed: %s seconds", round(end_time - start_time,2)))
-    
+
   }
   
   if (featuresUse=='PCLoading') {
@@ -1832,18 +1884,11 @@ if (resume == "checkpoint_3") {
   
   rownames(cellModEmbed_mat) <- NULL
   
-  df_annot <- if (!is.null(mat_addAnnot)) { 
-    data.frame("data"=rep(x = prefixData,  
+  df_annot <- data.frame("data"=rep(x = prefixData,  
                           times=nrow(cellModEmbed_mat)), 
-                 mat_addAnnot,
-                "cell_cluster"= vec_idents, 
-                "cell_id" = rownames(mat_datExpr), row.names = NULL) 
-  } else {
-    data.frame("data"=rep(x = prefixData,  
-                          times=nrow(cellModEmbed_mat)), 
-               "cell_cluster"= vec_idents, 
-               "cell_id" = rownames(mat_datExpr), row.names = NULL) 
-  }
+                         "cell_cluster"= vec_idents, 
+                         "cell_id" = rownames(mat_datExpr), row.names = NULL) 
+  
   
   cellModEmbed_mat_annot <- cbind(df_annot, cellModEmbed_mat)
                                  
@@ -1935,7 +1980,7 @@ if (resume == "checkpoint_4") {
   
   fwrite(df_cell_cluster_module_genes, 
          compress="gzip",
-         file = sprintf("%s%s_%s_cell_cluster_module_genes.csv.gz",dirTables, prefixData, prefixRun), row.names = F)
+         file = sprintf("%s%s_%s_geneMod.csv.gz",dirTables, prefixData, prefixRun), row.names = F)
   
   ################## SAVE KMs FOR ENRICHED MODULES #########################
   ##########################################################################
@@ -2001,8 +2046,6 @@ if (resume == "checkpoint_4") {
   sumstats_run <- c(prefixRun = prefixRun,
                     tStart = tStart,
                     t_finish = t_finish,
-                    mean_percent_mito = if (!is.null(riboMitoMeta)) mean(riboMitoMeta$percent.mito, na.rm=T) else NA,
-                    mean_percent_ribo =  if (!is.null(riboMitoMeta)) mean(riboMitoMeta$percent.ribo, na.rm=T) else NA,
                     n_celltypes = length(sNames_0),
                     n_celltypes_used = length(sNames_4),
                     prop_genes_assign_mean = round(mean(sumstats_celltype_df$prop_genes_assign, na.rm=T),2),
