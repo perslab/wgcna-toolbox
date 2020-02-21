@@ -318,6 +318,7 @@ if (is.null(resume)) {
     return(seurat_obj_sub)
   })
   
+  
   # Save stats for outputting at the end
   n_cells_subsets = sapply(subsets, ncol)
   vec_logicalCellClustOK <- if (dataType=="sc") n_cells_subsets > minCellClusterSize else !logical(length = length(subsets))
@@ -367,6 +368,11 @@ if (is.null(resume)) {
     subsets <- safeParallel(fun=fun,
                             list_iterable=list_iterable,
                             outfile=outfile)
+  } else if (dataType=="bulk") {
+    # filter out non-variable features
+    subsets <- lapply(subsets, function(seurat_obj_sub) {
+      vec_featuresKeep <- rownames(seurat_obj_sub)[WGCNA::goodGenes(datExpr = t(GetAssayData(seurat_obj_sub, slot="counts")))]
+      seurat_obj_sub <- subset(x=seurat_obj_sub, features=vec_featuresKeep)})
   }
   
   
@@ -446,33 +452,25 @@ if (is.null(resume)) {
         return(seurat_tmp)
       }
       
-    } else if (datatype=="bulk") {
+    } else if (dataType=="bulk") {
       fun = function(seurat_obj, name) {
         seurat_tmp <- tryCatch({ 
-          svd_out <- svd(x=GetAssayData(seurat_obj, slot = "scale.data"),
-                         nu = min(nPC, ncol(seurat_obj) %/% 2),
-                         nv = min(nPC, ncol(seurat_obj) %/% 2)) 
+          seurat_obj@reductions$pca <- svd(x=GetAssayData(seurat_obj, slot = "scale.data"),
+                                             nu = min(nPC, ncol(seurat_obj) %/% 2),
+                                             nv = min(nPC, ncol(seurat_obj) %/% 2))
+          return(seurat_obj)
+                              
         }, 
         error = function(err) {
           message(paste0(name, ": svd algorithm failed with the error: ", err))
           message("Trying svd with fewer components")
           tryCatch({
-            out <- RunPCA(object = seurat_obj,
-                          features = if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif') | length(VariableFeatures(seurat_obj)==0)) {
-                            rownames(seurat_obj) } else { VariableFeatures(seurat_obj)},
-                          npcs = if (length(VariableFeatures(seurat_obj))>0) {
-                            min(nPC, min(length(VariableFeatures(seurat_obj))%/% 3, ncol(seurat_obj) %/% 3))} else {
-                              min(nPC,ncol(seurat_obj) %/% 3)
-                            },
-                          weight.by.var = T,
-                          seed.use = randomSeed,
-                          maxit = maxit*2, # set to 500 as default
-                          fastpath = F,
-                          verbose=T)
-            
-            
+            seurat_obj@reductions$pca <-  svd(x=GetAssayData(seurat_obj, slot = "scale.data"),
+                           nu = min(nPC, ncol(seurat_obj) %/% 3),
+                           nv = min(nPC, ncol(seurat_obj) %/% 3))
+            return(seurat_obj)
           }, error = function(err1) {
-            message(paste0(name, ": RunPCA's IRLBA algorithm failed again with error: ", err1))
+            message(paste0(name, ": svd failed with error: ", err1))
             message("Returning the original Seurat object with empty dr$pca slot")
             return(seurat_obj)
           }) 
@@ -498,6 +496,10 @@ if (is.null(resume)) {
   
   if (featuresUse=='PCLoading') {
     
+     # get cell * gene expression matrix with highest PC loading genes
+    
+    if (dataType=="sc") {
+    
     list_datExpr <- lapply(subsets, function(seurat_obj) {
       seurat_obj <- ProjectDim(object=seurat_obj, 
                                reduction = "pca", 
@@ -509,6 +511,15 @@ if (is.null(resume)) {
       GetAssayData(object=seurat_obj,slot = "data")[namesFeaturesUse,] %>% t
       })
     
+    } else if (dataType=="bulk") {
+        list_datExpr <- lapply(subsets, function(seurat_obj){ 
+          loadingsAbs <- seurat_obj@reductions$pca$u %>% abs # this returns a gene * singular vector matrix
+          rownames(loadingsAbs) <- rownames(seurat_obj)
+          apply(loadingsAbs, MARGIN=1, FUN=max) %>% sort(., decreasing=T) %>% 
+            '['(1:(min(nFeatures, nrow(loadingsAbs)))) %>% names -> namesFeaturesUse
+          GetAssayData(object=seurat_obj,slot = "data")[namesFeaturesUse,] %>% t
+          })
+      }
     } else if (featuresUse %in% c('JackStrawPCLoading', 'JackStrawPCSignif')) {
     
     # Select significant PCs using empirical p-value based on JackStraw resampling
@@ -1687,18 +1698,20 @@ if (resume == "checkpoint_3") {
   mods <- unlist(list_mods)
   names(mods) <- NULL
   
-  all_cols_nogrey_uniq <- unique(gsub("\\d+", "", colors()[-grep("grey|gray", colors())]))
-  all_cols_nogrey <- colors()[-grep("grey|gray", colors())]
+  all_cols_nogrey_uniq <- unique(gsub("\\d+", "", colors()[-grep("grey|gray|gold", colors())]))
+  all_cols_nogrey <- colors()[-grep("grey|gray|gold", colors())]
   
   # Replace colors with new unique colors
   if (length(mods) <= length(all_cols_nogrey_uniq) ) { # if there are enough unique colors without adding numbers
     mods_uniq <- all_cols_nogrey_uniq[sample(x=1:length(all_cols_nogrey_uniq), size=length(mods), replace=F)]
-  } else if (length(mods) > length(all_cols_nogrey_uniq) & length(mods) < length(all_cols_nogrey) ) { # if there aren't enough unique colors unless they have numbers added
+  } else if (length(mods) > length(all_cols_nogrey_uniq) & length(mods) < length(all_cols_nogrey) ) { 
+    # if there aren't enough unique colors unless they have numbers added
     mods_uniq <- all_cols_nogrey[sample(x=1:length(all_cols_nogrey), size=length(mods), replace=F)]
   } else if (length(mods) > length(all_cols_nogrey)) { # if there aren't enough unique colors in R
     mods_uniq <- paste0(all_cols_nogrey_uniq, "_", 1:(length(mods)))
   }
   
+
   list_mods_uniq <- vector(mode="list", length=length(list_mods))
   
   k=1
