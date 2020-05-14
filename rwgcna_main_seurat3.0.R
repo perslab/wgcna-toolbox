@@ -47,6 +47,8 @@ option_list <- list(
               help="'signed' scales correlations to [0:1]; 'unsigned' takes the absolute value (but the TOM can still be 'signed'); ''c('signed hybrid')'' (quoted vector) sets negative correlations to zero. [default %default]"),
   make_option("--nRepTOM", type="integer", default=100L,
               help = "Number of times to resample the dataset when finding the consensus TOM [default %default]"),
+  make_option("--consensusQuantile", type="numeric", default=0.2,
+              help = "Gene-gene adjacency quantile to use when computing consensus TOM [default %default]"),
   make_option("--hclustMethod", type="character", default="average",
               help = "Hierarchical clustering agglomeration method. One of 'ward.D', 'ward.D2', 'single', 'complete', 'average' (= UPGMA), 'mcquitty' (= WPGMA), 'median' (= WPGMC) or 'centroid' (= UPGMC). See hclust() documentation for further information. [default %default]"),
   make_option("--minClusterSize", type="character", default="15L",
@@ -162,6 +164,7 @@ corFnc <- opt$corFnc
 networkType <- opt$networkType
 if (grepl("hybrid", networkType)) networkType <- eval(parse(text=opt$networkType))
 nRepTOM <- opt$nRepTOM
+consensusQuantile <- opt$consensusQuantile
 hclustMethod <- opt$hclustMethod
 minClusterSize <- eval(parse(text=opt$minClusterSize))
 deepSplit <- eval(parse(text=opt$deepSplit))

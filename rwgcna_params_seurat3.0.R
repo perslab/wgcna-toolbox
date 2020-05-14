@@ -148,7 +148,7 @@ getNetworkCalibrationSamples = FALSE # logical: should samples used for TOM cali
 
 # Consensus definition
 
-consensusQuantile = 0.5 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
+#consensusQuantile = 0.5 # The desired quantile to use in the consensus similarity calculation. Lower is conservative. Gandal,..,Geschwind use 0.2, but this seems really low!  We use the median value.
 # Set to quartile recommended for different datasets in http://www.genetics.ucla.edu/courses/statgene/networks/files/Langfelder-Thursday-ConsensusModules.pdf.
 useMean = FALSE # should the consensus be determined from a (possibly weighted) mean across the data sets rather than a quantile?
 #setWeights = NULL # Optional vector (one component per input set) of weights to be used for weighted mean consensus. Only used when useMean above is TRUE.
@@ -175,7 +175,7 @@ checkMinModuleSize = TRUE # should sanity checks be performed on minModuleSize?
 # Gene reassignment and trimming from a module, and module "significance" criteria
 
 reassignThresholdPS = 1e-4 # per-set p-value ratio threshold for reassigning genes between modules.
-trimmingConsensusQuantile = consensusQuantile # a number between 0 and 1 specifying the consensus quantile used for kME calculation that determines module trimming according to the arguments below.
+#trimmingConsensusQuantile = consensusQuantile # a number between 0 and 1 specifying the consensus quantile used for kME calculation that determines module trimming according to the arguments below.
 
 equalizeQuantilesForModuleMerging = FALSE # specific to blockwiseConsensusModules
 quantileSummaryForModuleMerging = "mean"  # specific to blockwiseConsensusModules
