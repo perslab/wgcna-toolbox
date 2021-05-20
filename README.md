@@ -12,8 +12,25 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * magrittr
 * Matrix
 * data.table
+* Biobase
+* reshape
+* reshape2
 
-### Overview
+### Quickstart
+
+Make sure you have log-normalized expression data and metadata with cell names in the first column. Then call
+
+```
+time Rscript ./rwgcna_main_seurat3.0.R --pathDatExpr ./expressionData.csv.gz --pathMetadata ./metadata.csv --dirProject /my/project/dir/ --prefixData mousebrain_neurons --prefixRun 1 --dataType sc --colIdents ClusterName 
+```
+
+### Parameter hints
+
+```
+Rscript ./rwgcna_main_seurat3.0.R --help
+```
+
+### Workflow details
 
 #### Subset the data and select variable genes for WGCNA
 * Split cells into subsets by annotation (i.e. celltype for single-cell, tissue-type for bulk RNA-seq)
@@ -33,22 +50,17 @@ Perslab toolbox for Weighted Gene Co-Expression Network Analysis
 * Make module names unique across all celltypes/tissues
 
 #### Outputs
+
 ##### Results:
 * table with columns cell type, module, gene and gene weight/centrality (kME or kIM)
 * module gene weights for all genes with respect to all modules (kME / kIM)
 * matrix of original expression data embedded into module space
+
 ##### Metadata:
 * table of parameters
 * table with run summary statistics
 * table with per celltype subset summary statistics
 * final session image with all of the above (in \RObjects subdir)
-
-### Usage
-
-time Rscript ./rwgcna_main_seurat3.0.R --pathDatExpr ./expressionData.csv.gz --pathMetadata ./metadata.csv --dirProject /projects/jonatan/mousebrain_8/ --prefixData mb_neurons --prefixRun 81 --dataType sc --colIdents ClusterName--minGeneCells 20 --minCellClusterSize 50 --featuresUse PCLoading --nFeatures 5000 --nRepJackStraw 0 --corFnc cor --networkType "c('signed hybrid')" --nRepTOM 100  --consensusQuantile 0.2 --hclustMethod average --minClusterSize 15 --deepSplit "c(2)" --moduleMergeCutHeight 'c(0.15)' --pamStage 'c(T)' --kMReassign F --kMSignifFilter T --fuzzyModMembership kME  
-
-### Help on parameters
-Rscript ./rwgcna_main_seurat3.0.R --help
 
 ### Issues / bugs
 
