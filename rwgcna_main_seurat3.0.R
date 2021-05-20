@@ -10,7 +10,7 @@ suppressPackageStartupMessages(library(optparse))
 
 option_list <- list(
   make_option("--pathDatExpr", type="character",
-              help = "Character, path to normalized expression data in delimited text form (readable by data.table::fread) with gene names in the first column"),
+              help = "Character, path to log-normalized expression data in delimited text form (readable by data.table::fread) with gene names in the first column"),
   make_option("--pathMetadata", type="character", 
               help = "path to metadata containing celltype identities under the colIdents. File should be in one of the standard (compressed) character separated formats. First column should have barcode/cell names matching column names in datExpr [default %default]"),  
   make_option("--dirProject", type="character", default=NULL,
@@ -97,7 +97,6 @@ LocationOfThisScript = function() # Function LocationOfThisScript returns the lo
   return(NULL)
 }
 current.dir = paste0(LocationOfThisScript(), "/")
-#current.dir = "/projects/jonatan/tools/wgcna-src/wgcna-toolbox/"
 
 ######################################################################
 ############################## FUNCTIONS #############################
@@ -110,7 +109,7 @@ source(paste0(current.dir, "/perslab-sc-library/utility_functions.R"))
 ############################## PACKAGES ##############################
 ######################################################################
 
-# install and require packages
+# load packages
 suppressPackageStartupMessages(library("dplyr"))
 suppressPackageStartupMessages(library("Biobase"))
 suppressPackageStartupMessages(library("Matrix"))
@@ -284,14 +283,28 @@ if (is.null(resume)) {
   df_metadata <- df_metadata[,-1]
   
   dt_datExpr <- fread(pathDatExpr)
+  
   if (any(duplicated(dt_datExpr[[1]]))) stop("datExpr has duplicate feature names, please ensure they are unique")
+  
   spmat_datExpr <- as.sparse(dt_datExpr[,-1]) 
+  
+  # check that data is log-normalized
+  if (!any(apply(X = spmat_datExpr[,0:100], MARGIN=2, FUN=function(vec) any(as.logical(vec%%1))))) {
+    stop("Data does not appear to be log-normalized!")
+  }
+      
   rownames(spmat_datExpr) <- dt_datExpr[[1]]
   rm(dt_datExpr)  
   seurat_obj <- CreateSeuratObject(counts = spmat_datExpr, 
                                    project = paste0(prefixData, "_", prefixRun),
                                    assay = "RNA",
                                    meta.data = df_metadata)
+  
+  
+  # normally CreateSeuratObject detects that the data is lognormalised and adds it to the data slot
+  # but make sure
+  seurat_obj@assays$RNA@data <- seurat_obj@assays$RNA@counts
+  
   rm(spmat_datExpr)
 
   ######################################################################
@@ -341,14 +354,11 @@ if (is.null(resume)) {
   subsets <- subsets[vec_logicalCellClustOK] 
   names(subsets) <- sNames_1 
   
-  # NO NEED TO NORMALIZE - DATA SLOT IS AUTOMATICALLY POPULATED (DOES SEURAT DETECT THAT COUNTS ARE NORMALIZED??)
-  
   # Find variable features
   if (dataType=="sc") {
     message("Finding variable features")
     fun <- function(seurat_obj, seuName) {
       tryCatch({
-        
         FindVariableFeatures(object = seurat_obj,
                           selection.method = "vst",
                           do.plot=F,
@@ -551,7 +561,9 @@ if (is.null(resume)) {
                            function(seurat_obj) GetAssayData(seurat_obj)[rownames(seurat_obj) %in% VariableFeatures(seurat_obj),] %>% t)
   } 
   
-  n_genes_subsets_used <- sapply(list_datExpr, ncol) 
+  n_genes_subsets_used <- sapply(sNames_0, function(sName) {
+    if (sName %in% sNames_1) ncol(list_datExpr[[sName]]) else 0
+  }) 
   
   # Clear up
   rm(subsets) 
@@ -573,11 +585,6 @@ if (resume == "checkpoint_1") {
   ###################### (UN) LOAD PACKAGES ############################
   ######################################################################
   
-  # Unload packages
-  try(detach("package:Seurat", unload=TRUE))
-  
-  # Free up DLLs
-  invisible(R.utils::gcDLLs())
   suppressPackageStartupMessages(library("dplyr"))
   suppressPackageStartupMessages(library("Biobase"))
   suppressPackageStartupMessages(library("Matrix"))
@@ -592,7 +599,6 @@ if (resume == "checkpoint_1") {
   ####### PICK SOFT THRESHOLD POWER FOR ADJACENCY MATRIX ###############
   ######################################################################
   message("Computing soft threshold powers to maximise the fit of a scale free topology to the adjacency matrix")
-  invisible(gc()); invisible(R.utils::gcDLLs())
   
   softPower <- 8 # Set a default value as fall back
   
@@ -648,14 +654,7 @@ if (resume == "checkpoint_1") {
   
   list_sft = safeParallel(fun=fun, 
                           list_iterable=list_iterable, 
-                          outfile=outfile)#, 
-                          #maxBlockSize=maxBlockSize, 
-                          #corFnc=corFnc, 
-                          #corOptions=corOptions, 
-                          #networkType=networkType,
-                          #dirPlots=dirPlots, 
-                          #prefixData=prefixData, 
-                          #prefixRun=prefixRun)
+                          outfile=outfile)
   
   names(list_sft) <- sNames_1
   
@@ -716,53 +715,13 @@ if (resume == "checkpoint_1") {
     list_iterable <- list("datExpr"=list_datExpr, "name"=sNames_1)
     outfile = outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_consensusTOM.txt")
 
-    additional_Gb = max(as.numeric(sapply(list_iterable, FUN = function(x) {object.size(x)*nRepTOM}, simplify = T)))/1024^3 
+    additional_Gb = max(as.numeric(sapply(list_iterable[[1]], FUN = function(datExpr) {object.size(datExpr)*nRepTOM}, simplify = T)))/1024^3 
     obj_size_Gb <- as.numeric(sum(sapply(ls(envir = .GlobalEnv), function(x) object.size(x=eval(parse(text=x)))))) / 1024^3
     n_cores <- min(max(sapply(list_iterable, length)), min(detectCores()%/%3, RAMGbMax %/% (obj_size_Gb + additional_Gb))-1)
     
     list_consensus <- safeParallel(fun=fun, 
                                    list_iterable=list_iterable,
-                                   outfile=outfile#,
-                                   #n_cores=n_cores,
-                                   #nPermutations=nRepTOM,
-                                   #replace=replace,
-                                   #fraction=fraction,
-                                   #randomSeed=randomSeed,
-                                   #checkMissingData = checkMissingData,
-                                   #maxBlockSize = maxBlockSize, 
-                                   #blockSizePenaltyPower = blockSizePenaltyPower, 
-                                   #randomSeed = randomSeed,
-                                   #corType = corType,
-                                   #corFnc = corFnc, 
-                                   #corOptions = corOptions,
-                                   #maxPOutliers = maxPOutliers,
-                                   #quickCor = quickCor,
-                                   #pearsonFallback = pearsonFallback,
-                                   #cosineCorrelation = cosineCorrelation,
-                                   #replaceMissingAdjacencies = replaceMissingAdjacencies,
-                                   #list_sft = list_sft,
-                                   #networkType = networkType,
-                                   #type = networkType,
-                                   #TOMType=TOMType,
-                                   #TOMDenom = TOMDenom,
-                                   #saveIndividualTOMs = saveIndividualTOMs,
-                                   #prefixData=prefixData, 
-                                   #prefixRun=prefixRun,
-                                   #networkCalibration = networkCalibration,
-                                   #sampleForCalibration = sampleForCalibration,
-                                   #sampleForCalibrationFactor = sampleForCalibrationFactor,
-                                   #getNetworkCalibrationSamples = getNetworkCalibrationSamples,
-                                   #consensusQuantile = consensusQuantile,
-                                   #useMean = useMean,
-                                   #saveConsensusTOMs = saveConsensusTOMs,
-                                   #returnTOMs = F,
-                                   #useDiskCache = T,
-                                   #cacheDir = dirTmp,
-                                   #cacheBase = ".blockConsModsCache",
-                                   #verbose = verbose,
-                                   #indent = indent,
-                                   #list_datExpr=list_datExpr,
-                                   #dirTmp = dirTmp
+                                   outfile=outfile
                                    )
 
   } else if (nRepTOM==0) {
@@ -792,45 +751,21 @@ if (resume == "checkpoint_1") {
     list_iterable = list("datExpr"=list_datExpr, "name"=sNames_1)
     invisible(safeParallel(fun=fun, 
                            list_iterable=list_iterable, 
-               outfile=outfile#, 
-               #type=type, 
-               #list_sft=list_sft,
-               #corFnc=corFnc, 
-               #corOptions=corOptions, 
-               #TOMType=TOMType, 
-               #TOMDenom=TOMDenom, 
-               #verbose=verbose, 
-               #indent=indent, 
-               #prefixData=prefixData, 
-               #prefixRun=prefixRun, 
-               #dirTmp=dirTmp
+               outfile=outfile
                ))
     list_consensus <- lapply(list_datExpr, function(datExpr)list("goodSamplesAndGenes"=list("goodGenes"=rep(TRUE,ncol(datExpr)))))
   }
   
-  #rm(list_datExpr)
-  
-  #if (nRepTOM > 0) rm(list_multiExpr) #TODO: we'll need it for plotting permuted
   
   # Load TOMs into memory and convert to distance matrices
   fun = function(name) {
     load_obj(sprintf("%s%s_%s_%s_consensusTOM-block.1.RData", dirTmp, prefixData, prefixRun, name))
 
   }
-  list_iterable = list("name"=sNames_1)
-  list_consTOM = safeParallel(fun=fun, 
-                              list_iterable=list_iterable 
-                              #dirTmp=dirTmp, 
-                              #prefixData=prefixData, 
-                              #prefixRun=prefixRun, 
-                              #load_obj=load_obj
-                              )
   
+  list_consTOM = lapply(X=sNames_1, FUN = fun)
+                     
   # Filter datExpr to retain genes that were kept by goodSamplesGenesMS, called by consensusTOM 
-  # Check whether this step works
-  # fun = function(datExpr, consTOM) {
-  #   datExpr[,match(colnames(consTOM), colnames(datExpr))]
-  # }
   fun = function(datExpr, consensus, consTOM) {
     if (!is.null(consTOM)) {
       if (ncol(as.matrix(consTOM))==ncol(datExpr)) datExpr else datExpr[,consensus$goodSamplesAndGenes$goodGenes]
@@ -890,7 +825,6 @@ if (resume == "checkpoint_2") {
   ######################################################################
   
   # Free up DLLs
-  invisible(R.utils::gcDLLs())
   suppressPackageStartupMessages(library("dplyr"))
   suppressPackageStartupMessages(library("Biobase"))
   suppressPackageStartupMessages(library("Matrix"))
@@ -961,9 +895,7 @@ if (resume == "checkpoint_2") {
   list_list_comb <- lapply(1:length(sNames_2), function(i) return(list_comb)) # just multiply..
   
   attr(x=list_list_comb, which = "names") <- sNames_2 # for some reason, just setting names(list_list_comb) <- sNames_2 filled the list with NULLs...
-  
-  invisible(gc()); invisible(R.utils::gcDLLs())
-  
+
   outfile = paste0(dirLog, prefixData, "_", prefixRun, "_", "log_cutreeHybrid_for_vec.txt")
   
   fun <- function(geneTree,dissTOM) {
@@ -1290,7 +1222,6 @@ if (resume == "checkpoint_2") {
     list_list_kMs_reassign <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$kMs))
     list_list_reassign_log <- lapply(list_list_reassign, function(x) lapply(x, function(y) y$log))
     
-    #invisible(gc()); invisible(R.utils::gcDLLs())
   } else {
     list_list_colors_reassign <- list_list_colors
     list_list_kMs_reassign <- list_list_kMs
@@ -1924,8 +1855,6 @@ if (resume == "checkpoint_4") {
   ##########################################################################
   ############################ (UN)LOAD PACKAGES ############################
   ##########################################################################
-  
-  invisible(R.utils::gcDLLs())
   
   suppressPackageStartupMessages(library("dplyr"))
   suppressPackageStartupMessages(library("Biobase"))
